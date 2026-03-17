@@ -1645,9 +1645,19 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                  <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Service Line</label>
-                    <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                       value={projectFormData.serviceLine || ''} onChange={(e) => setProjectFormData({...projectFormData, serviceLine: e.target.value})} placeholder="e.g., Digital Activation" />
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
+                      Service Line
+                    </label>
+                    <select 
+                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                      value={projectFormData.serviceLine || ''} 
+                      onChange={(e) => setProjectFormData({...projectFormData, serviceLine: e.target.value})}
+                    >
+                      <option value="">-- Pilih Service Line --</option>
+                      {(initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Other']).map(sl => (
+                        <option key={sl} value={sl}>{sl}</option>
+                      ))}
+                    </select>
                  </div>
                  <div className="form-group">
                     <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Stage</label>
@@ -1659,20 +1669,44 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                  <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Value (IDR)</label>
-                    <input type="number" style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                       value={projectFormData.projectValue || 0} onChange={(e) => setProjectFormData({...projectFormData, projectValue: Number(e.target.value)})} />
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
+                      Project Value (IDR)
+                      <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Otomatis format titik)</span>
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}>Rp</span>
+                      <input 
+                        type="text" 
+                        style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px 10px 10px 35px', color: 'white', borderRadius: '8px' }} 
+                        value={projectFormData.projectValue ? new Intl.NumberFormat('id-ID').format(projectFormData.projectValue) : ''} 
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, '');
+                          setProjectFormData({...projectFormData, projectValue: rawValue ? Number(rawValue) : 0});
+                        }} 
+                        placeholder="Contoh: 100000" 
+                      />
+                    </div>
                  </div>
                  <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Event Date</label>
-                    <input type="text" style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                       value={projectFormData.eventDate || ''} onChange={(e) => setProjectFormData({...projectFormData, eventDate: e.target.value})} placeholder="e.g., July 2026" />
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
+                      Event Date
+                      <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Bulan / Hari / Tahun)</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                      value={projectFormData.eventDate || ''} 
+                      onChange={(e) => setProjectFormData({...projectFormData, eventDate: e.target.value})} 
+                    />
                  </div>
               </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>PIC / Owners (comma separated)</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
+                  PIC / Owners
+                  <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px', display: 'block', marginTop: '2px' }}>(Person In Charge: Tim Internal/Karyawan yang bertanggung jawab memegang project ini. Pisahkan nama dengan koma)</span>
+                </label>
                 <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : []})} placeholder="Yudi, Anto..." />
+                   value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : []})} placeholder="Contoh: Yudi, Anto..." />
               </div>
               <div className="form-group">
                 <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Remark</label>

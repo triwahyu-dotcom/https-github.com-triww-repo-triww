@@ -1654,7 +1654,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                       onChange={(e) => setProjectFormData({...projectFormData, serviceLine: e.target.value})}
                     >
                       <option value="">-- Pilih Service Line --</option>
-                      {(initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Other']).map(sl => (
+                      {Array.from(new Set((initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Other']).map(sl => sl.trim()))).map(sl => (
                         <option key={sl} value={sl}>{sl}</option>
                       ))}
                     </select>

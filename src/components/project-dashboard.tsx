@@ -255,19 +255,21 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     }
   };
 
-  const handleDeleteProject = async () => {
-    if (!projectFormData.id) return;
+  const handleDeleteProject = async (projectToDelete?: Partial<ProjectRecord>) => {
+    const target = projectToDelete || projectFormData;
+    if (!target.id) return;
     
-    if (!confirm(`Apakah Anda yakin ingin menghapus proyek "${projectFormData.projectName}"? Tindakan ini tidak dapat dibatalkan.`)) {
+    if (!confirm(`Apakah Anda yakin ingin menghapus proyek "${target.projectName}"? Tindakan ini tidak dapat dibatalkan.`)) {
       return;
     }
 
     try {
-      const res = await fetch(`/api/projects/${projectFormData.id}`, {
+      const res = await fetch(`/api/projects/${target.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
         setIsProjectModalOpen(false);
+        setDetailOpen(false);
         window.location.reload();
       } else {
         alert("Gagal menghapus proyek.");
@@ -1108,6 +1110,14 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <div className={`status-pill ${toneClass(selectedProject.health || "on_track")}`}>
                   {toneLabel(selectedProject.health || "on_track")}
                 </div>
+                <button 
+                  type="button" 
+                  className="ghost-button" 
+                  style={{ color: '#ef4444', fontWeight: 600 }} 
+                  onClick={() => handleDeleteProject(selectedProject)}
+                >
+                  Delete Project
+                </button>
                 <button type="button" className="ghost-button" onClick={() => setDetailOpen(false)}>
                   Close
                 </button>
@@ -1601,7 +1611,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <button 
                   className="primary-button" 
                   style={{ background: '#450a0a', border: '1px solid #7f1d1d', color: '#f87171', marginRight: 'auto' }} 
-                  onClick={handleDeleteProject}
+                  onClick={() => handleDeleteProject()}
                 >
                   Delete Project
                 </button>

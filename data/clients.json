@@ -811,5 +811,15 @@
     "category": "BRAND",
     "industry": "Telecommunication",
     "status": "lead"
+  },
+  {
+    "id": "mirella",
+    "name": "MIRELLA",
+    "aliases": [
+      "MIRELA"
+    ],
+    "type": "BRAND",
+    "category": "Client",
+    "projects": []
   }
 ]

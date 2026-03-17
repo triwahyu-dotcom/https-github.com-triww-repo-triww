@@ -1,0 +1,815 @@
+[
+  {
+    "id": "btn",
+    "name": "PT. BANK TABUNGAN NEGARA (BTN)",
+    "aliases": [
+      "BTN",
+      "Bank BTN"
+    ],
+    "type": "brand",
+    "category": "BRAND",
+    "industry": "Banking & Finance",
+    "address": "Menara BTN, Jl. Gajah Mada No.1, Jakarta Pusat",
+    "website": "https://www.btn.co.id",
+    "status": "active"
+  },
+  {
+    "id": "pemda-tangsel",
+    "name": "PEMERINTAH KOTA TANGERANG SELATAN",
+    "aliases": [
+      "PEMDA TANGSEL",
+      "Pemkot Tangsel"
+    ],
+    "type": "government",
+    "category": "GOVERNMENT",
+    "industry": "Government",
+    "address": "Jl. Maruga No.1, Ciputat, Tangerang Selatan",
+    "status": "active",
+    "health": "on_track",
+    "totalProjectValue": 1312523040,
+    "totalProjectValueLabel": "Rp 1.312.523.040",
+    "projectCount": 1,
+    "activeProjectCount": 0,
+    "contacts": [
+      {
+        "name": ".... - 08...",
+        "projects": [
+          "pemda-tangsel-bimtek-ldk-karang-taruna-0cebc7e9"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "id": "pemda-tangsel-bimtek-ldk-karang-taruna-0cebc7e9",
+        "numberLabel": "1",
+        "client": "PEMDA TANGSEL",
+        "projectName": "Bimtek LDK Karang Taruna",
+        "contactPerson": ".... - 08...",
+        "relation": "Eka Marutha",
+        "category": "GOVERNMENT",
+        "owners": [
+          "Sindy"
+        ],
+        "eventDate": "1/4/26",
+        "projectValue": 1312523040,
+        "projectValueLabel": "Rp 1.312.523.040",
+        "serviceLine": "EM",
+        "status": "LEADS",
+        "progress": "IN PROGRESS",
+        "credentials": "",
+        "remark": "",
+        "section": "leads",
+        "sectionLabel": "Leads Projects",
+        "health": "watch",
+        "currentStage": "lead",
+        "currentStageLabel": "Lead",
+        "financeStatus": "-",
+        "resultLabel": "In progress",
+        "phaseLabel": "Discovery",
+        "phases": [
+          {
+            "key": "brief",
+            "label": "Project Brief",
+            "status": "",
+            "items": [
+              {
+                "label": "Brief Status",
+                "value": ""
+              },
+              {
+                "label": "TOR / Brief Deck",
+                "value": ""
+              },
+              {
+                "label": "Document A",
+                "value": ""
+              }
+            ],
+            "completion": 0
+          },
+          {
+            "key": "pitching",
+            "label": "Pitching Process",
+            "status": "",
+            "items": [
+              {
+                "label": "Pitching Status",
+                "value": ""
+              },
+              {
+                "label": "Pitching Deadline",
+                "value": ""
+              },
+              {
+                "label": "Proposal",
+                "value": ""
+              },
+              {
+                "label": "Quotation",
+                "value": ""
+              },
+              {
+                "label": "Presentation",
+                "value": ""
+              }
+            ],
+            "completion": 0
+          },
+          {
+            "key": "revision",
+            "label": "Revision / Negotiation",
+            "status": "",
+            "items": [
+              {
+                "label": "Revision Status",
+                "value": ""
+              },
+              {
+                "label": "Revision Deadline",
+                "value": ""
+              },
+              {
+                "label": "Revision Proposal",
+                "value": ""
+              },
+              {
+                "label": "Revision Quotation",
+                "value": ""
+              }
+            ],
+            "completion": 0
+          },
+          {
+            "key": "execution",
+            "label": "Execution",
+            "status": "",
+            "items": [
+              {
+                "label": "Execution Status",
+                "value": ""
+              },
+              {
+                "label": "Contract / SPK Client",
+                "value": ""
+              },
+              {
+                "label": "PO to Vendor",
+                "value": ""
+              },
+              {
+                "label": "Manpower Contract",
+                "value": ""
+              },
+              {
+                "label": "Checklist",
+                "value": ""
+              },
+              {
+                "label": "Manual Book",
+                "value": ""
+              }
+            ],
+            "completion": 0
+          },
+          {
+            "key": "reporting",
+            "label": "Reporting",
+            "status": "",
+            "items": [
+              {
+                "label": "Reporting Status",
+                "value": ""
+              },
+              {
+                "label": "BAST",
+                "value": ""
+              },
+              {
+                "label": "Report Documentation",
+                "value": ""
+              }
+            ],
+            "completion": 0
+          },
+          {
+            "key": "finance",
+            "label": "Finance",
+            "status": "",
+            "items": [
+              {
+                "label": "Finance Status",
+                "value": ""
+              },
+              {
+                "label": "COGS",
+                "value": ""
+              },
+              {
+                "label": "PPN",
+                "value": ""
+              },
+              {
+                "label": "Amount at Contract",
+                "value": ""
+              },
+              {
+                "label": "Invoice",
+                "value": ""
+              },
+              {
+                "label": "P & L Document",
+                "value": ""
+              }
+            ],
+            "completion": 0
+          }
+        ],
+        "tasks": [
+          {
+            "id": "brief-task-0",
+            "title": "Brief Status",
+            "stage": "qualified",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "brief-task-1",
+            "title": "TOR / Brief Deck",
+            "stage": "qualified",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "brief-task-2",
+            "title": "Document A",
+            "stage": "qualified",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-0",
+            "title": "Pitching Status",
+            "stage": "pitching",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-1",
+            "title": "Pitching Deadline",
+            "stage": "pitching",
+            "status": "pending",
+            "required": false
+          },
+          {
+            "id": "pitching-task-2",
+            "title": "Proposal",
+            "stage": "pitching",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-3",
+            "title": "Quotation",
+            "stage": "pitching",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-4",
+            "title": "Presentation",
+            "stage": "pitching",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "revision-task-0",
+            "title": "Revision Status",
+            "stage": "negotiation",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "revision-task-1",
+            "title": "Revision Deadline",
+            "stage": "negotiation",
+            "status": "pending",
+            "required": false
+          },
+          {
+            "id": "revision-task-2",
+            "title": "Revision Proposal",
+            "stage": "negotiation",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "revision-task-3",
+            "title": "Revision Quotation",
+            "stage": "negotiation",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-0",
+            "title": "Execution Status",
+            "stage": "execution",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-1",
+            "title": "Contract / SPK Client",
+            "stage": "execution",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-2",
+            "title": "PO to Vendor",
+            "stage": "execution",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-3",
+            "title": "Manpower Contract",
+            "stage": "execution",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-4",
+            "title": "Checklist",
+            "stage": "execution",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-5",
+            "title": "Manual Book",
+            "stage": "execution",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "reporting-task-0",
+            "title": "Reporting Status",
+            "stage": "reporting",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "reporting-task-1",
+            "title": "BAST",
+            "stage": "reporting",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "reporting-task-2",
+            "title": "Report Documentation",
+            "stage": "reporting",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "finance-task-0",
+            "title": "Finance Status",
+            "stage": "finance",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "finance-task-1",
+            "title": "COGS",
+            "stage": "finance",
+            "status": "pending",
+            "required": false
+          },
+          {
+            "id": "finance-task-2",
+            "title": "PPN",
+            "stage": "finance",
+            "status": "pending",
+            "required": false
+          },
+          {
+            "id": "finance-task-3",
+            "title": "Amount at Contract",
+            "stage": "finance",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "finance-task-4",
+            "title": "Invoice",
+            "stage": "finance",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "finance-task-5",
+            "title": "P & L Document",
+            "stage": "finance",
+            "status": "pending",
+            "required": true
+          }
+        ],
+        "documents": [
+          {
+            "id": "brief-brief-status-0",
+            "title": "Brief Status",
+            "stage": "qualified",
+            "phaseKey": "brief",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "brief-tor-brief-deck-1",
+            "title": "TOR / Brief Deck",
+            "stage": "qualified",
+            "phaseKey": "brief",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "brief-document-a-2",
+            "title": "Document A",
+            "stage": "qualified",
+            "phaseKey": "brief",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "pitching-pitching-status-0",
+            "title": "Pitching Status",
+            "stage": "pitching",
+            "phaseKey": "pitching",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "pitching-pitching-deadline-1",
+            "title": "Pitching Deadline",
+            "stage": "pitching",
+            "phaseKey": "pitching",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "pitching-proposal-2",
+            "title": "Proposal",
+            "stage": "pitching",
+            "phaseKey": "pitching",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "pitching-quotation-3",
+            "title": "Quotation",
+            "stage": "pitching",
+            "phaseKey": "pitching",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "pitching-presentation-4",
+            "title": "Presentation",
+            "stage": "pitching",
+            "phaseKey": "pitching",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "revision-revision-status-0",
+            "title": "Revision Status",
+            "stage": "negotiation",
+            "phaseKey": "revision",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "revision-revision-deadline-1",
+            "title": "Revision Deadline",
+            "stage": "negotiation",
+            "phaseKey": "revision",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "revision-revision-proposal-2",
+            "title": "Revision Proposal",
+            "stage": "negotiation",
+            "phaseKey": "revision",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "revision-revision-quotation-3",
+            "title": "Revision Quotation",
+            "stage": "negotiation",
+            "phaseKey": "revision",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "execution-execution-status-0",
+            "title": "Execution Status",
+            "stage": "execution",
+            "phaseKey": "execution",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "execution-contract-spk-client-1",
+            "title": "Contract / SPK Client",
+            "stage": "execution",
+            "phaseKey": "execution",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "execution-po-to-vendor-2",
+            "title": "PO to Vendor",
+            "stage": "execution",
+            "phaseKey": "execution",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "execution-manpower-contract-3",
+            "title": "Manpower Contract",
+            "stage": "execution",
+            "phaseKey": "execution",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "execution-checklist-4",
+            "title": "Checklist",
+            "stage": "execution",
+            "phaseKey": "execution",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "execution-manual-book-5",
+            "title": "Manual Book",
+            "stage": "execution",
+            "phaseKey": "execution",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "reporting-reporting-status-0",
+            "title": "Reporting Status",
+            "stage": "reporting",
+            "phaseKey": "reporting",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "reporting-bast-1",
+            "title": "BAST",
+            "stage": "reporting",
+            "phaseKey": "reporting",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "reporting-report-documentation-2",
+            "title": "Report Documentation",
+            "stage": "reporting",
+            "phaseKey": "reporting",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "finance-finance-status-0",
+            "title": "Finance Status",
+            "stage": "finance",
+            "phaseKey": "finance",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "finance-cogs-1",
+            "title": "COGS",
+            "stage": "finance",
+            "phaseKey": "finance",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "finance-ppn-2",
+            "title": "PPN",
+            "stage": "finance",
+            "phaseKey": "finance",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "finance-amount-at-contract-3",
+            "title": "Amount at Contract",
+            "stage": "finance",
+            "phaseKey": "finance",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "finance-invoice-4",
+            "title": "Invoice",
+            "stage": "finance",
+            "phaseKey": "finance",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          },
+          {
+            "id": "finance-p-l-document-5",
+            "title": "P & L Document",
+            "stage": "finance",
+            "phaseKey": "finance",
+            "value": "",
+            "url": "",
+            "status": "missing"
+          }
+        ],
+        "milestones": [
+          {
+            "id": "brief-received",
+            "label": "Brief Received",
+            "value": "",
+            "done": false
+          },
+          {
+            "id": "proposal-sent",
+            "label": "Proposal Sent",
+            "value": "",
+            "done": false
+          },
+          {
+            "id": "quotation-sent",
+            "label": "Quotation Sent",
+            "value": "",
+            "done": false
+          },
+          {
+            "id": "contract-signed",
+            "label": "Contract Signed",
+            "value": "",
+            "done": false
+          },
+          {
+            "id": "event-day",
+            "label": "Event Day",
+            "value": "1/4/26",
+            "done": false
+          },
+          {
+            "id": "report-delivered",
+            "label": "Report Delivered",
+            "value": "",
+            "done": false
+          },
+          {
+            "id": "invoice-sent",
+            "label": "Invoice Sent",
+            "value": "",
+            "done": false
+          },
+          {
+            "id": "payment-received",
+            "label": "Payment Received",
+            "value": "",
+            "done": false
+          }
+        ],
+        "activity": [
+          {
+            "id": "imported",
+            "type": "imported",
+            "message": "Project diimpor dari tracker CSV 2026.",
+            "timestampLabel": "Imported"
+          },
+          {
+            "id": "status",
+            "type": "note",
+            "message": "Status terakhir: LEADS.",
+            "timestampLabel": "Current status"
+          },
+          {
+            "id": "progress",
+            "type": "note",
+            "message": "Progress monitoring: IN PROGRESS.",
+            "timestampLabel": "Current progress"
+          },
+          {
+            "id": "stage",
+            "type": "stage_change",
+            "message": "Project saat ini berada di stage Lead.",
+            "timestampLabel": "Workflow"
+          }
+        ],
+        "searchableText": "pemda tangsel bimtek ldk karang taruna .... - 08... eka marutha government sindy em leads in progress lead"
+      }
+    ],
+    "relation": "Brand"
+  },
+  {
+    "id": "daikin",
+    "name": "PT DAIKIN AIRCONDITIONING INDONESIA",
+    "aliases": [
+      "DAIKIN"
+    ],
+    "type": "brand",
+    "category": "BRAND",
+    "industry": "Electronic & HVAC",
+    "website": "https://www.daikin.co.id",
+    "status": "active"
+  },
+  {
+    "id": "tugu-insurance",
+    "name": "PT ASURANSI TUGU PRATAMA INDONESIA TBK",
+    "aliases": [
+      "WE DO (Tugu Insurance)",
+      "Tugu Insurance"
+    ],
+    "type": "brand",
+    "category": "BRAND",
+    "industry": "Insurance",
+    "status": "active"
+  },
+  {
+    "id": "djarum",
+    "name": "PT DJARUM",
+    "aliases": [
+      "DJARUM SUPER",
+      "DJARUM BLACK",
+      "Djarum"
+    ],
+    "type": "brand",
+    "category": "BRAND",
+    "industry": "Tobacco / FMCG",
+    "status": "active"
+  },
+  {
+    "id": "we-do",
+    "name": "WE DO",
+    "aliases": [
+      "WE DO"
+    ],
+    "type": "agency",
+    "category": "BRAND",
+    "industry": "Event Agency / Partner",
+    "status": "active"
+  },
+  {
+    "id": "satoe",
+    "name": "SATOE",
+    "aliases": [
+      "SATOE",
+      "SATOE KOMUNIKA"
+    ],
+    "type": "agency",
+    "category": "BRAND",
+    "industry": "Event Agency / Partner",
+    "status": "active"
+  },
+  {
+    "id": "telkom-indonesia",
+    "name": "PT TELKOM INDONESIA",
+    "aliases": [
+      "TELKOM"
+    ],
+    "type": "brand",
+    "category": "BRAND",
+    "industry": "Telecommunication",
+    "status": "lead"
+  }
+]

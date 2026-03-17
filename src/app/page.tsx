@@ -1,66 +1,44 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <main className="hub-shell">
+      <section className="hub-hero">
+        <p className="hub-kicker">JUARA Workspace</p>
+        <h1>Projects and vendors in one workspace</h1>
+        <p>
+          Manage event pipeline, vendor onboarding, and vendor assignment from one app. Choose the module
+          you want to open.
+        </p>
+      </section>
+
+      <section className="hub-grid">
+        <Link className="hub-card" href="/crm">
+          <span style={{ color: "#5b8cff" }}>Customers</span>
+          <strong>CRM Dashboard</strong>
+          <p>Manage client relationships, portfolio value, and key contacts across your workspace.</p>
+        </Link>
+        <Link className="hub-card" href="/projects">
+          <span>Projects</span>
+          <strong>Project Tracker</strong>
+          <p>Track client pipeline, stages, deliverables, and assign vendors to active projects.</p>
+        </Link>
+        <Link className="hub-card" href="/vendors">
+          <span>Vendors</span>
+          <strong>Vendor Management</strong>
+          <p>Review vendor submissions, social links, WhatsApp contact, and see where each vendor is used.</p>
+        </Link>
+        <Link className="hub-card" href="/vendor/register">
+          <span>Portal</span>
+          <strong>Vendor Self Registration</strong>
+          <p>Share this page with vendors so they can submit their profile and documents independently.</p>
+        </Link>
+        <Link className="hub-card" href="/vendor/status">
+          <span>Status</span>
+          <strong>Vendor Submission Status</strong>
+          <p>Vendors can check registration progress, review status, and missing documents with their code.</p>
+        </Link>
+      </section>
+    </main>
   );
 }

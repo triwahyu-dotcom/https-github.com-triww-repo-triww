@@ -1032,34 +1032,34 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   <span>Docs</span>
                 </div>
                 {filteredProjects.map((project) => (
-                  <div key={project.id} className={project.id === selectedProject?.id ? "table-row active-table-row" : "table-row"}>
-                    <input
-                      value={project.projectName}
-                      onFocus={() => setSelectedProjectId(project.id)}
-                      onChange={(event) => updateProjectField(project.id, "projectName", event.target.value)}
-                    />
-                    <input value={project.client} onChange={(event) => updateProjectField(project.id, "client", event.target.value)} />
-                    <select
-                      value={project.currentStage}
-                      onChange={(event) => {
-                        setSelectedProjectId(project.id);
-                        setMoveTargetStage(event.target.value as WorkflowStage);
-                        setMoveNote("Updated from table");
-                        setMoveModalOpen(true);
-                      }}
-                    >
-                      {STAGE_OPTIONS.map((stage) => (
-                        <option key={stage.key} value={stage.key}>
-                          {stage.label}
-                        </option>
-                      ))}
-                    </select>
-                    <input value={project.owners[0] || ""} onChange={(event) => updateProjectMeta(project.id, "owners", event.target.value)} />
-                    <input value={project.eventDate} onChange={(event) => updateProjectField(project.id, "eventDate", event.target.value)} />
-                    <input
-                      value={project.projectValue ? String(project.projectValue) : ""}
-                      onChange={(event) => updateProjectMeta(project.id, "projectValue", event.target.value)}
-                    />
+                  <div 
+                    key={project.id} 
+                    className={project.id === selectedProject?.id ? "table-row active-table-row clickable-row" : "table-row clickable-row"}
+                    onClick={() => openEditProjectModal(project)}
+                    title="Klik untuk edit data proyek"
+                  >
+                    <span className="table-text" style={{ fontWeight: 500 }}>{project.projectName}</span>
+                    <span className="table-text">{project.client}</span>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={project.currentStage}
+                        onChange={(event) => {
+                          setSelectedProjectId(project.id);
+                          setMoveTargetStage(event.target.value as WorkflowStage);
+                          setMoveNote("Updated from table");
+                          setMoveModalOpen(true);
+                        }}
+                      >
+                        {STAGE_OPTIONS.map((stage) => (
+                          <option key={stage.key} value={stage.key}>
+                            {stage.label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <span className="table-text">{(project.owners && project.owners[0]) || "-"}</span>
+                    <span className="table-text">{project.eventDate || "-"}</span>
+                    <span className="table-text" style={{ fontFamily: 'monospace' }}>{project.projectValueLabel}</span>
                     <span className="table-doc-count">{project.documents.filter((item) => item.status === "available").length}</span>
                   </div>
                 ))}
@@ -1201,10 +1201,10 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               <div className="action-row">
                 <button
                   type="button"
-                  className={editMode ? "ghost-button active-ghost" : "ghost-button"}
-                  onClick={() => setEditMode((current) => !current)}
+                  className="ghost-button"
+                  onClick={() => openEditProjectModal(selectedProject)}
                 >
-                  {editMode ? "Done editing" : "Edit data"}
+                  Edit Data Proyek
                 </button>
                 <button type="button" className="primary-button" onClick={() => openMoveModal(selectedProject)}>
                   Move stage
@@ -1215,72 +1215,14 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             <div className="properties-panel">
               <div className="detail-block">
                 <h3>Properties</h3>
-                {editMode ? (
-                  <div className="editor-grid">
-                    <label>
-                      <span>Project</span>
-                      <input
-                        value={selectedProject.projectName || ""}
-                        onChange={(event) => updateProjectField(selectedProject.id, "projectName", event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      <span>Client</span>
-                      <input
-                        value={selectedProject.client}
-                        onChange={(event) => updateProjectField(selectedProject.id, "client", event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      <span>Stage</span>
-                      <select
-                        value={selectedProject.currentStage}
-                        onChange={(event) => {
-                          setMoveTargetStage(event.target.value as WorkflowStage);
-                          setSelectedProjectId(selectedProject.id);
-                          setMoveNote("Updated from properties");
-                          setMoveModalOpen(true);
-                        }}
-                      >
-                        {STAGE_OPTIONS.map((stage) => (
-                          <option key={stage.key} value={stage.key}>
-                            {stage.label}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                    <label>
-                      <span>PIC Internal</span>
-                      <input
-                        value={(selectedProject.owners || []).join(", ")}
-                        onChange={(event) => updateProjectMeta(selectedProject.id, "owners", event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      <span>Event Date</span>
-                      <input
-                        value={selectedProject.eventDate}
-                        onChange={(event) => updateProjectField(selectedProject.id, "eventDate", event.target.value)}
-                      />
-                    </label>
-                    <label>
-                      <span>Project Value</span>
-                      <input
-                        value={selectedProject.projectValue ? String(selectedProject.projectValue) : ""}
-                        onChange={(event) => updateProjectMeta(selectedProject.id, "projectValue", event.target.value)}
-                      />
-                    </label>
-                  </div>
-                ) : (
-                  <div className="property-list">
-                    <PropertyRow label="Client" value={selectedProject.client || "-"} />
-                    <PropertyRow label="Project" value={selectedProject.projectName || "-"} />
-                    <PropertyRow label="Stage" value={selectedProject.currentStageLabel || "-"} />
-                    <PropertyRow label="Event Date" value={selectedProject.eventDate || "-"} />
-                    <PropertyRow label="Project Value" value={selectedProject.projectValueLabel || "-"} />
-                    <PropertyRow label="PIC Internal" value={(selectedProject.owners || []).join(", ") || "-"} />
-                  </div>
-                )}
+                <div className="property-list">
+                  <PropertyRow label="Client" value={selectedProject.client || "-"} />
+                  <PropertyRow label="Project" value={selectedProject.projectName || "-"} />
+                  <PropertyRow label="Stage" value={selectedProject.currentStageLabel || "-"} />
+                  <PropertyRow label="Event Date" value={selectedProject.eventDate || "-"} />
+                  <PropertyRow label="Project Value" value={selectedProject.projectValueLabel || "-"} />
+                  <PropertyRow label="PIC Internal" value={(selectedProject.owners || []).join(", ") || "-"} />
+                </div>
               </div>
             </div>
 

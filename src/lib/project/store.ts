@@ -51,16 +51,15 @@ async function readJsonProjects(): Promise<ProjectRecord[]> {
 }
 
 async function saveJsonProjects(projects: ProjectRecord[]) {
+  // Always update local storage as a fallback
+  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(projects, null, 2));
+
+  // If Supabase is connected, sync there too
   if (isSupabaseConfigured()) {
-    // For simplicity, we upsert each project
-    // In a real app, we'd probably have a more efficient way or mapped schema
     for (const project of projects) {
       await supabase!.from('projects').upsert({ id: project.id, data: project });
     }
-    return;
   }
-
-  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(projects, null, 2));
 }
 
 function sectionFromStage(stage: WorkflowStage): ProjectSection {
@@ -181,23 +180,25 @@ export function normalizeProject(project: Partial<ProjectRecord>): ProjectRecord
 export async function updateJsonProject(project: ProjectRecord) {
   const normalized = normalizeProject(project);
 
+  const existing = await readJsonProjects();
+  const index = existing.findIndex((p: ProjectRecord) => p.id === normalized.id);
+  if (index !== -1) {
+    existing[index] = normalized;
+  } else {
+    existing.push(normalized);
+  }
+  
+  // Write local
+  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(existing, null, 2));
+
+  // Write Supabase
   if (isSupabaseConfigured()) {
     const { error } = await supabase!.from('projects').upsert({ id: normalized.id, data: normalized });
     if (error) {
       console.error("Supabase project update error:", error.message);
       throw new Error(`Supabase update failed: ${error.message}`);
     }
-    return;
   }
-
-  const existing = await readJsonProjects();
-  const index = existing.findIndex(p => p.id === normalized.id);
-  if (index !== -1) {
-    existing[index] = normalized;
-  } else {
-    existing.push(normalized);
-  }
-  await saveJsonProjects(existing);
 }
 
 export async function getJsonProjects(): Promise<ProjectRecord[]> {
@@ -205,18 +206,19 @@ export async function getJsonProjects(): Promise<ProjectRecord[]> {
 }
 
 export async function deleteJsonProject(id: string) {
+  // 1. Delete locally to ensure sync
+  const existing = await readJsonProjects();
+  const filtered = existing.filter((p: ProjectRecord) => p.id !== id);
+  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(filtered, null, 2));
+
+  // 2. Delete from Supabase
   if (isSupabaseConfigured()) {
     const { error } = await supabase!.from('projects').delete().eq('id', id);
     if (error) {
       console.error("Supabase project deletion error:", error.message);
       throw new Error(`Supabase deletion failed: ${error.message}`);
     }
-    return;
   }
-
-  const existing = await readJsonProjects();
-  const filtered = existing.filter(p => p.id !== id);
-  await saveJsonProjects(filtered);
 }
 
 async function readJsonClients(): Promise<CRMClient[]> {
@@ -238,14 +240,15 @@ async function readJsonClients(): Promise<CRMClient[]> {
 }
 
 async function saveJsonClients(clients: CRMClient[]) {
+  // Always update local storage
+  writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(clients, null, 2));
+
+  // Sync to Supabase if connected
   if (isSupabaseConfigured()) {
     for (const client of clients) {
       await supabase!.from('clients').upsert({ id: client.id, data: client });
     }
-    return;
   }
-
-  writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(clients, null, 2));
 }
 
 export async function getJsonClients(): Promise<CRMClient[]> {
@@ -253,23 +256,25 @@ export async function getJsonClients(): Promise<CRMClient[]> {
 }
 
 export async function updateJsonClient(client: CRMClient) {
+  const existing = await readJsonClients();
+  const index = existing.findIndex((c: CRMClient) => c.id === client.id);
+  if (index !== -1) {
+    existing[index] = client;
+  } else {
+    existing.push(client);
+  }
+  
+  // Write local
+  writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(existing, null, 2));
+
+  // Write Supabase
   if (isSupabaseConfigured()) {
     const { error } = await supabase!.from('clients').upsert({ id: client.id, data: client });
     if (error) {
       console.error("Supabase client update error:", error.message);
       throw new Error(`Supabase update failed: ${error.message}`);
     }
-    return;
   }
-
-  const existing = await readJsonClients();
-  const index = existing.findIndex(c => c.id === client.id);
-  if (index !== -1) {
-    existing[index] = client;
-  } else {
-    existing.push(client);
-  }
-  await saveJsonClients(existing);
 }
 
 const SECTION_LABELS: Record<ProjectSection, string> = {
@@ -765,15 +770,16 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
     };
   }
 
-  const csvProjects = workbookRows() ? parseProjectsFromRows(workbookRows()) : [];
   const jsonProjects = await readJsonProjects();
+  let projects: ProjectRecord[] = [];
 
-  // Merge: JSON overrides CSV and adds new ones
-  const projectMap = new Map<string, ProjectRecord>();
-  csvProjects.forEach(p => projectMap.set(p.id, p));
-  jsonProjects.forEach(p => projectMap.set(p.id, p));
+  if (jsonProjects.length > 0) {
+    projects = jsonProjects.map((p: ProjectRecord) => normalizeProject(p));
+  } else {
+    const csvProjects = workbookRows() ? parseProjectsFromRows(workbookRows()) : [];
+    projects = csvProjects.map((p: ProjectRecord) => normalizeProject(p));
+  }
 
-  const projects = Array.from(projectMap.values()).map(p => normalizeProject(p));
   const totalPipelineValue = projects.reduce((sum, project) => sum + project.projectValue, 0);
   const allDocuments = projects.flatMap((project) => project.documents);
   const sectionOrder: ProjectSection[] = ["leads", "ongoing", "billed", "failed"];

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getJsonClients, updateJsonClient } from "@/lib/project/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const clients = await getJsonClients();
   return NextResponse.json(clients);

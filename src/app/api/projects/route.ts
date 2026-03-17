@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getJsonProjects, updateJsonProject } from "@/lib/project/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const projects = await getJsonProjects();
   return NextResponse.json(projects);

@@ -11,6 +11,7 @@ import {
   ProjectRecord,
   ProjectTask,
   WorkflowStage,
+  CRMClient,
 } from "@/lib/project/types";
 import { WorkspaceShell } from "./layout/workspace-shell";
 import { SummaryCard } from "./ui/summary-card";
@@ -227,6 +228,59 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [projectModalMode, setProjectModalMode] = useState<"add" | "edit">("add");
   const [projectFormData, setProjectFormData] = useState<Partial<ProjectRecord>>({});
+  const [clients, setClients] = useState<CRMClient[]>([]);
+  const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+  const [clientFormData, setClientFormData] = useState<Partial<CRMClient>>({
+    status: "active",
+    type: "brand",
+    category: "BRAND",
+    contacts: [],
+    projects: []
+  });
+
+  const fetchClients = async () => {
+    try {
+      const res = await fetch("/api/clients");
+      if (res.ok) {
+        const data = await res.json();
+        setClients(data);
+      }
+    } catch (err) {
+      console.error("Fetch clients error", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchClients();
+  }, []);
+
+  const handleSaveNewClient = async () => {
+    if (!clientFormData.name) {
+      alert("Nama Perusahaan wajib diisi.");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(clientFormData),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        await fetchClients();
+        setIsAddClientModalOpen(false);
+        if (result.client) {
+          setProjectFormData(prev => ({ ...prev, client: result.client.name }));
+        }
+      } else {
+        alert("Gagal menyimpan klien.");
+      }
+    } catch (err) {
+      console.error("Save client error", err);
+      alert("Terjadi kesalahan teknis saat menyimpan klien.");
+    }
+  };
 
   const handleSaveProject = async () => {
     if (!projectFormData.projectName || !projectFormData.client) {
@@ -1565,9 +1619,29 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                    value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({...projectFormData, projectName: e.target.value})} placeholder="Project title..." />
               </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Client Name</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={projectFormData.client || ''} onChange={(e) => setProjectFormData({...projectFormData, client: e.target.value})} placeholder="e.g., Tugu Insurance" />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '0.8rem', color: '#888' }}>Client Name</label>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      setClientFormData({ status: "active", type: "brand", category: "BRAND", contacts: [], projects: [] });
+                      setIsAddClientModalOpen(true);
+                    }}
+                    style={{ background: 'none', border: 'none', color: '#5b8cff', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
+                  >
+                    + Add New Client
+                  </button>
+                </div>
+                <select 
+                  style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                  value={projectFormData.client || ''} 
+                  onChange={(e) => setProjectFormData({...projectFormData, client: e.target.value})}
+                >
+                  <option value="">-- Select Client --</option>
+                  {clients.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
+                    <option key={c.id} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                  <div className="form-group">
@@ -1618,6 +1692,35 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               )}
               <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsProjectModalOpen(false)}>Cancel</button>
               <button className="primary-button" onClick={handleSaveProject}>Save Project</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isAddClientModalOpen && (
+        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="modal-content" style={{ backgroundColor: '#111', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '500px', border: '1px solid #333' }}>
+            <h2 style={{ marginBottom: '24px' }}>Add New Client</h2>
+            <div className="form-stack" style={{ display: 'grid', gap: '20px' }}>
+              <div className="form-group">
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Company Name</label>
+                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                   value={clientFormData.name || ''} onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})} placeholder="e.g., PT Djarum" />
+              </div>
+              <div className="form-group">
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Type</label>
+                <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                   value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({...clientFormData, type: e.target.value as any})}>
+                   <option value="brand">Brand</option>
+                   <option value="agency">Agency</option>
+                   <option value="government">Government</option>
+                   <option value="partner">Partner</option>
+                </select>
+              </div>
+            </div>
+            <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
+              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsAddClientModalOpen(false)}>Cancel</button>
+              <button className="primary-button" onClick={handleSaveNewClient}>Create Client</button>
             </div>
           </div>
         </div>

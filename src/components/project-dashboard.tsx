@@ -29,23 +29,23 @@ type EditableField =
   | "remark";
 
 const VIEW_OPTIONS: { id: ViewMode; label: string }[] = [
-  { id: "overview", label: "Overview" },
-  { id: "list", label: "List" },
-  { id: "table", label: "Table" },
-  { id: "board", label: "Board" },
-  { id: "documents", label: "Documents" },
+  { id: "overview", label: "Ringkasan (Overview)" },
+  { id: "list", label: "Daftar" },
+  { id: "table", label: "Tabel" },
+  { id: "board", label: "Papan Kerja (Board)" },
+  { id: "documents", label: "Dokumen" },
 ];
 
 const STAGE_OPTIONS: { key: WorkflowStage; label: string }[] = [
-  { key: "lead", label: "Lead" },
-  { key: "qualified", label: "Qualified" },
-  { key: "pitching", label: "Pitching" },
-  { key: "negotiation", label: "Negotiation" },
-  { key: "execution", label: "Execution" },
-  { key: "reporting", label: "Reporting" },
-  { key: "finance", label: "Finance" },
-  { key: "completed", label: "Completed" },
-  { key: "lost", label: "Lost" },
+  { key: "lead", label: "Lead / Prospek" },
+  { key: "qualified", label: "Qualified / Terpilih" },
+  { key: "pitching", label: "Pitching / Persiapan" },
+  { key: "negotiation", label: "Negotiation / Negosiasi" },
+  { key: "execution", label: "Execution / Pelaksanaan" },
+  { key: "reporting", label: "Reporting / Pelaporan" },
+  { key: "finance", label: "Finance / Penagihan" },
+  { key: "completed", label: "Selesai" },
+  { key: "lost", label: "Dibatalkan" },
 ];
 
 const STORAGE_KEY = "juara-project-tracker-projects-v2";
@@ -164,22 +164,25 @@ function PropertyRow({
   );
 }
 
-function mergeProjectsWithInitial(source: ProjectRecord[], fallback: ProjectRecord[]) {
-  return source.map((project) => {
-    const initialMatch = fallback.find((item) => item.id === project.id);
-    if (!initialMatch) return project;
+function mergeProjectsWithInitial(local: ProjectRecord[], server: ProjectRecord[]) {
+  // Source of truth is the SERVER. 
+  // We only use local data to supplement existing projects (e.g. local unsaved edits if any).
+  // Projects that are NOT in the server list should NOT be shown.
+  return server.map((srv) => {
+    const localMatch = local.find((l) => l.id === srv.id);
+    if (!localMatch) return srv;
 
     return {
-      ...initialMatch,
-      ...project,
-      milestones: project.milestones ?? initialMatch.milestones,
-      tasks: project.tasks ?? initialMatch.tasks,
-      documents: project.documents ?? initialMatch.documents,
-      activity: project.activity ?? initialMatch.activity,
-      phases: project.phases ?? initialMatch.phases,
-      assignedVendors: initialMatch.assignedVendors ?? project.assignedVendors,
-      vendorShortlist: initialMatch.vendorShortlist ?? project.vendorShortlist,
-      vendorRequirements: initialMatch.vendorRequirements ?? project.vendorRequirements,
+      ...srv,
+      ...localMatch,
+      milestones: localMatch.milestones ?? srv.milestones,
+      tasks: localMatch.tasks ?? srv.tasks,
+      documents: localMatch.documents ?? srv.documents,
+      activity: localMatch.activity ?? srv.activity,
+      phases: localMatch.phases ?? srv.phases,
+      assignedVendors: localMatch.assignedVendors ?? srv.assignedVendors,
+      vendorShortlist: localMatch.vendorShortlist ?? srv.vendorShortlist,
+      vendorRequirements: localMatch.vendorRequirements ?? srv.vendorRequirements,
     };
   });
 }
@@ -237,6 +240,8 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     contacts: [],
     projects: []
   });
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [deletingProject, setDeletingProject] = useState<Partial<ProjectRecord> | null>(null);
 
   const fetchClients = async () => {
     try {
@@ -309,27 +314,36 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     }
   };
 
-  const handleDeleteProject = async (projectToDelete?: Partial<ProjectRecord>) => {
+  const handleDeleteProject = (projectToDelete?: Partial<ProjectRecord>) => {
     const target = projectToDelete || projectFormData;
     if (!target.id) return;
-    
-    if (!confirm(`Apakah Anda yakin ingin menghapus proyek "${target.projectName}"? Tindakan ini tidak dapat dibatalkan.`)) {
-      return;
-    }
+    setDeletingProject(target);
+    setIsDeleteConfirmOpen(true);
+  };
+
+  const executeDeleteProject = async () => {
+    if (!deletingProject || !deletingProject.id) return;
 
     try {
-      const res = await fetch(`/api/projects/${target.id}`, {
+      const res = await fetch(`/api/projects/${deletingProject.id}`, {
         method: "DELETE",
       });
       if (res.ok) {
+        // Update local state and storage to ensure immediate consistency
+        const nextProjects = projects.filter(p => p.id !== deletingProject.id);
+        setProjects(nextProjects);
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextProjects));
+        
+        setIsDeleteConfirmOpen(false);
         setIsProjectModalOpen(false);
         setDetailOpen(false);
         window.location.reload();
       } else {
-        alert("Gagal menghapus proyek.");
+        const errData = await res.json().catch(() => ({}));
+        alert(`Gagal menghapus proyek: ${errData.error || res.statusText}`);
       }
     } catch (err) {
-      console.error("Delete error", err);
+      console.error("Delete error caught", err);
       alert("Terjadi kesalahan teknis saat menghapus.");
     }
   };
@@ -1170,7 +1184,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   style={{ color: '#ef4444', fontWeight: 600 }} 
                   onClick={() => handleDeleteProject(selectedProject)}
                 >
-                  Delete Project
+                  Hapus Proyek
                 </button>
                 <button type="button" className="ghost-button" onClick={() => setDetailOpen(false)}>
                   Close
@@ -1611,16 +1625,16 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       {isProjectModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="modal-content" style={{ backgroundColor: '#1a1a1a', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '600px', border: '1px solid #333', maxHeight: '90vh', overflowY: 'auto' }}>
-            <h2 style={{ marginBottom: '24px' }}>{projectModalMode === 'add' ? 'Add New Project' : 'Edit Project'}</h2>
+            <h2 style={{ marginBottom: '24px' }}>{projectModalMode === 'add' ? 'Tambah Proyek Baru' : 'Edit Proyek'}</h2>
             <div className="form-stack" style={{ display: 'grid', gap: '20px' }}>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Name</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Nama Proyek</label>
                 <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({...projectFormData, projectName: e.target.value})} placeholder="Project title..." />
+                   value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({...projectFormData, projectName: e.target.value})} placeholder="Judul proyek..." />
               </div>
               <div className="form-group">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#888' }}>Client Name</label>
+                  <label style={{ fontSize: '0.8rem', color: '#888' }}>Nama Klien</label>
                   <button 
                     type="button" 
                     onClick={() => {
@@ -1629,7 +1643,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     }}
                     style={{ background: 'none', border: 'none', color: '#5b8cff', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
                   >
-                    + Add New Client
+                    Tambahkan Klien Baru
                   </button>
                 </div>
                 <select 
@@ -1637,7 +1651,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   value={projectFormData.client || ''} 
                   onChange={(e) => setProjectFormData({...projectFormData, client: e.target.value})}
                 >
-                  <option value="">-- Select Client --</option>
+                  <option value="">-- Pilih Klien --</option>
                   {clients.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
                     <option key={c.id} value={c.name}>{c.name}</option>
                   ))}
@@ -1654,7 +1668,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                       onChange={(e) => setProjectFormData({...projectFormData, serviceLine: e.target.value})}
                     >
                       <option value="">-- Pilih Service Line --</option>
-                      {Array.from(new Set((initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Other']).map(sl => sl.trim()))).map(sl => (
+                      {Array.from(new Set((initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Lainnya']).map(sl => sl.trim()))).map(sl => (
                         <option key={sl} value={sl}>{sl}</option>
                       ))}
                     </select>
@@ -1670,7 +1684,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                  <div className="form-group">
                     <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
-                      Project Value (IDR)
+                      Nilai Proyek (IDR)
                       <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Otomatis format titik)</span>
                     </label>
                     <div style={{ position: 'relative' }}>
@@ -1689,8 +1703,8 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                  </div>
                  <div className="form-group">
                     <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
-                      Event Date
-                      <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Bulan / Hari / Tahun)</span>
+                      Tanggal Event
+                      <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Pilih dari kalender)</span>
                     </label>
                     <input 
                       type="date" 
@@ -1709,9 +1723,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                    value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : []})} placeholder="Contoh: Yudi, Anto..." />
               </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Remark</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Catatan (Remark)</label>
                 <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px', height: '80px' }} 
-                   value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({...projectFormData, remark: e.target.value})} placeholder="Notes..." />
+                   value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({...projectFormData, remark: e.target.value})} placeholder="Catatan..." />
               </div>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1721,11 +1735,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   style={{ background: '#450a0a', border: '1px solid #7f1d1d', color: '#f87171', marginRight: 'auto' }} 
                   onClick={() => handleDeleteProject()}
                 >
-                  Delete Project
+                  Hapus Proyek
                 </button>
               )}
-              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsProjectModalOpen(false)}>Cancel</button>
-              <button className="primary-button" onClick={handleSaveProject}>Save Project</button>
+              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsProjectModalOpen(false)}>Batal</button>
+              <button className="primary-button" onClick={handleSaveProject}>Simpan Proyek</button>
             </div>
           </div>
         </div>
@@ -1734,15 +1748,15 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       {isAddClientModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div className="modal-content" style={{ backgroundColor: '#111', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '500px', border: '1px solid #333' }}>
-            <h2 style={{ marginBottom: '24px' }}>Add New Client</h2>
+            <h2 style={{ marginBottom: '24px' }}>Tambah Klien Baru</h2>
             <div className="form-stack" style={{ display: 'grid', gap: '20px' }}>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Company Name</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Nama Perusahaan</label>
                 <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={clientFormData.name || ''} onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})} placeholder="e.g., PT Djarum" />
+                   value={clientFormData.name || ''} onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})} placeholder="misal: PT Djarum" />
               </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Type</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Jenis Klien</label>
                 <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
                    value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({...clientFormData, type: e.target.value as any})}>
                    <option value="brand">Brand</option>
@@ -1753,8 +1767,43 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
-              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsAddClientModalOpen(false)}>Cancel</button>
-              <button className="primary-button" onClick={handleSaveNewClient}>Create Client</button>
+              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsAddClientModalOpen(false)}>Batal</button>
+              <button className="primary-button" onClick={handleSaveNewClient}>Daftarkan Klien</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isDeleteConfirmOpen && (
+        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 4000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="modal-content" style={{ backgroundColor: '#111', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '450px', border: '1px solid #450a0a', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', backgroundColor: '#450a0a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 9l4-4m0 4l-4-4" />
+              </svg>
+            </div>
+            <h2 style={{ marginBottom: '16px', color: 'white' }}>Hapus Proyek?</h2>
+            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              Apakah Anda yakin ingin menghapus proyek <strong style={{ color: 'white' }}>"{deletingProject?.projectName}"</strong>? 
+              <br/>Tindakan ini permanen dan tidak dapat dibatalkan.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <button 
+                className="primary-button" 
+                style={{ background: 'none', border: '1px solid #333', color: 'white' }} 
+                onClick={() => {
+                  setIsDeleteConfirmOpen(false);
+                  setDeletingProject(null);
+                }}
+              >
+                Batal
+              </button>
+              <button 
+                className="primary-button" 
+                style={{ background: '#7f1d1d', border: '1px solid #991b1b', color: 'white' }} 
+                onClick={executeDeleteProject}
+              >
+                Ya, Hapus Proyek
+              </button>
             </div>
           </div>
         </div>

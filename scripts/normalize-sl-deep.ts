@@ -14,7 +14,12 @@ const PROJECTS_DB_PATH = path.join(process.cwd(), "data/projects.json");
 const SERVICE_LINE_MAPPING: Record<string, string> = {
   "em": "Event Management",
   "event managament": "Event Management",
+  "event management": "Event Management",
   "sem": "Sport Event Management",
+  "afm": "AFM",
+  "test": "Other",
+  "tba": "Other",
+  "-": "Other"
 };
 
 async function normalizeServiceLines() {
@@ -34,10 +39,8 @@ async function normalizeServiceLines() {
       if (SERVICE_LINE_MAPPING[currentSlLower]) {
         newSl = SERVICE_LINE_MAPPING[currentSlLower];
       } else {
-         // Default capitalization for others if they are just lowercase
-         if (newSl && newSl === newSl.toLowerCase()) {
-             newSl = newSl.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-         }
+         // Default capitalization for others
+         newSl = newSl.split(' ').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
       }
 
       if (p.serviceLine !== newSl) {

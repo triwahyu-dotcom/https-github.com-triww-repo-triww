@@ -32,7 +32,7 @@ const JSON_CLIENTS_PATH = path.join(process.cwd(), "data", "clients.json");
 const SOURCE_PATH =
   process.env.PROJECT_TRACKER_SOURCE_PATH ?? DEFAULT_SOURCE_PATHS.find((path) => existsSync(path)) ?? DEFAULT_SOURCE_PATHS[0];
 
-async function readJsonProjects(): Promise<ProjectRecord[]> {
+export async function readJsonProjects(): Promise<ProjectRecord[]> {
   if (isSupabaseConfigured()) {
     const { data, error } = await supabase!.from('projects').select('data');
     if (!error && data) {

@@ -3,10 +3,10 @@ import { deleteJsonProject } from "@/lib/project/store";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     if (!id) {
       return NextResponse.json({ success: false, error: "Missing project ID" }, { status: 400 });
     }

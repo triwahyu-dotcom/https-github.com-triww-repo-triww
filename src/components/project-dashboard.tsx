@@ -1566,50 +1566,52 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       ) : null}
       {isProjectModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content" style={{ backgroundColor: '#1a1a1a', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '600px', border: '1px solid #333', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="modal-content wide-modal" style={{ backgroundColor: '#1a1a1a', padding: '40px', borderRadius: '24px', width: '100%', border: '1px solid #333', maxHeight: '92vh', overflowY: 'auto' }}>
             <h2 style={{ marginBottom: '24px' }}>{projectModalMode === 'add' ? 'Add New Project' : 'Edit Project'}</h2>
-            <div className="form-stack" style={{ display: 'grid', gap: '20px' }}>
-              <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Name</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({...projectFormData, projectName: e.target.value})} placeholder="Project title..." />
-              </div>
-              <div className="form-group">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '0.8rem', color: '#888' }}>Client Name</label>
-                  <button 
-                    type="button" 
-                    onClick={() => {
-                      setClientFormData({ status: "active", type: "brand", category: "BRAND", contacts: [], projects: [] });
-                      setIsAddClientModalOpen(true);
-                    }}
-                    style={{ background: 'none', border: 'none', color: '#5b8cff', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
-                  >
-                    Add New Client
-                  </button>
+            <div className="form-stack">
+              <div className="form-section-title">Core Information</div>
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Name</label>
+                  <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
+                     value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({...projectFormData, projectName: e.target.value})} placeholder="Project title..." />
                 </div>
-                <select 
-                  style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                  value={projectFormData.client || ''} 
-                  onChange={(e) => setProjectFormData({...projectFormData, client: e.target.value})}
-                >
-                  <option value="">-- Select Client --</option>
-                  {clients.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
-                    <option key={c.id} value={c.name}>{c.name}</option>
-                  ))}
-                </select>
+                <div className="form-group">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Client Name</label>
+                    <button 
+                      type="button" 
+                      onClick={() => {
+                        setClientFormData({ status: "active", type: "brand", category: "BRAND", contacts: [], projects: [] });
+                        setIsAddClientModalOpen(true);
+                      }}
+                      style={{ background: 'none', border: 'none', color: '#5b8cff', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
+                    >
+                      + Add New Client
+                    </button>
+                  </div>
+                  <select 
+                    style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
+                    value={projectFormData.client || ''} 
+                    onChange={(e) => setProjectFormData({...projectFormData, client: e.target.value})}
+                  >
+                    <option value="">-- Select Client --</option>
+                    {clients.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
+                      <option key={c.id} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+
+              <div className="form-grid-3" style={{ marginTop: '20px' }}>
                  <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
-                      Service Line
-                    </label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Service Line</label>
                     <select 
-                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
                       value={projectFormData.serviceLine || ''} 
                       onChange={(e) => setProjectFormData({...projectFormData, serviceLine: e.target.value})}
                     >
-                      <option value="">-- Select Service Line --</option>
+                      <option value="">-- Select Service --</option>
                       {Array.from(new Set((initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Lainnya']).map(sl => sl.trim()))).map(sl => (
                         <option key={sl} value={sl}>{sl}</option>
                       ))}
@@ -1617,57 +1619,52 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                  </div>
                  <div className="form-group">
                     <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Stage</label>
-                    <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                    <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
                        value={projectFormData.currentStage || 'lead'} onChange={(e) => setProjectFormData({...projectFormData, currentStage: e.target.value as any})}>
                        {STAGE_OPTIONS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
                     </select>
                  </div>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
                  <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
-                       Project Value (IDR)
-                       <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Auto-formatted)</span>
-                    </label>
-                    <div style={{ position: 'relative' }}>
-                      <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }}>Rp</span>
-                      <input 
-                        type="text" 
-                        style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px 10px 10px 35px', color: 'white', borderRadius: '8px' }} 
-                        value={projectFormData.projectValue ? new Intl.NumberFormat('id-ID').format(projectFormData.projectValue) : ''} 
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/\D/g, '');
-                          setProjectFormData({...projectFormData, projectValue: rawValue ? Number(rawValue) : 0});
-                        }} 
-                        placeholder="e.g., 100000" 
-                      />
-                    </div>
-                 </div>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
-                       Event Date
-                       <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px' }}>(Select from calendar)</span>
-                    </label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Event Date</label>
                     <input 
                       type="date" 
-                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
                       value={projectFormData.eventDate || ''} 
                       onChange={(e) => setProjectFormData({...projectFormData, eventDate: e.target.value})} 
                     />
                  </div>
               </div>
-              <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>
-                  PIC / Owners
-                  <span style={{ fontSize: '0.7rem', color: '#666', marginLeft: '8px', display: 'block', marginTop: '2px' }}>(Person In Charge: Internal team/employees responsible for this project. Separate names with commas)</span>
-                </label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : []})} placeholder="e.g., John, Jane..." />
+
+              <div className="form-section-title">Financials & Assignment</div>
+              <div className="form-grid-2">
+                 <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Value (IDR)</label>
+                    <div style={{ position: 'relative' }}>
+                      <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666', fontSize: '0.9rem' }}>Rp</span>
+                      <input 
+                        type="text" 
+                        style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px 12px 12px 40px', color: 'white', borderRadius: '10px' }} 
+                        value={projectFormData.projectValue ? new Intl.NumberFormat('id-ID').format(projectFormData.projectValue) : ''} 
+                        onChange={(e) => {
+                          const rawValue = e.target.value.replace(/\D/g, '');
+                          setProjectFormData({...projectFormData, projectValue: rawValue ? Number(rawValue) : 0});
+                        }} 
+                        placeholder="e.g., 500.000.000" 
+                      />
+                    </div>
+                 </div>
+                 <div className="form-group">
+                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>PIC / Owners</label>
+                    <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
+                       value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : []})} placeholder="e.g., John, Jane (separate with commas)" />
+                 </div>
               </div>
+
+              <div className="form-section-title">Additional Context</div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Remark</label>
-                <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px', height: '80px' }} 
-                   value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({...projectFormData, remark: e.target.value})} placeholder="Notes..." />
+                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Remark / Notes</label>
+                <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px', height: '100px', resize: 'vertical' }} 
+                   value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({...projectFormData, remark: e.target.value})} placeholder="Strategic notes, constraints, or key objectives..." />
               </div>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -1689,23 +1686,25 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
       {isAddClientModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content" style={{ backgroundColor: '#111', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '500px', border: '1px solid #333' }}>
+          <div className="modal-content wide-modal" style={{ backgroundColor: '#111', padding: '40px', borderRadius: '24px', width: '100%', maxWidth: '800px', border: '1px solid #333' }}>
             <h2 style={{ marginBottom: '24px' }}>Add New Client</h2>
-            <div className="form-stack" style={{ display: 'grid', gap: '20px' }}>
-              <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Company Name</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={clientFormData.name || ''} onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})} placeholder="e.g., Acme Corp" />
-              </div>
-              <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Client Type</label>
-                <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({...clientFormData, type: e.target.value as any})}>
-                   <option value="brand">Brand</option>
-                   <option value="agency">Agency</option>
-                   <option value="government">Government</option>
-                   <option value="partner">Partner</option>
-                </select>
+            <div className="form-stack">
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Company Name</label>
+                  <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
+                     value={clientFormData.name || ''} onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})} placeholder="e.g., Acme Corp" />
+                </div>
+                <div className="form-group">
+                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Client Type</label>
+                  <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
+                     value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({...clientFormData, type: e.target.value as any})}>
+                     <option value="brand">Brand</option>
+                     <option value="agency">Agency</option>
+                     <option value="government">Government</option>
+                     <option value="partner">Partner</option>
+                  </select>
+                </div>
               </div>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>

@@ -41,11 +41,11 @@ type RevisionItem = {
 };
 
 const SECTION_LABELS: Record<RevisionItem["section"], string> = {
-  identity: "Identitas",
-  contact: "Kontak",
-  documents: "Dokumen",
-  finance: "Keuangan",
-  services: "Layanan",
+  identity: "Identity",
+  contact: "Contact",
+  documents: "Documents",
+  finance: "Finance",
+  services: "Services",
 };
 
 const FIELD_LABELS: Record<keyof typeof INITIAL_FORM, string> = {
@@ -134,14 +134,14 @@ export function VendorIntakeForm({
 
   function validateBeforeSubmit() {
     const errors: string[] = [];
-    if (!form.vendorName.trim()) errors.push("Vendor name wajib diisi.");
-    if (!form.services.trim()) errors.push("Services wajib diisi.");
-    if (!form.picName.trim()) errors.push("PIC name wajib diisi.");
-    if (!form.picPhone.trim()) errors.push("PIC phone wajib diisi.");
+    if (!form.vendorName.trim()) errors.push("Vendor name is required.");
+    if (!form.services.trim()) errors.push("Services are required.");
+    if (!form.picName.trim()) errors.push("PIC name is required.");
+    if (!form.picPhone.trim()) errors.push("PIC phone is required.");
 
     const normalizedPhone = normalizePhoneToWhatsApp(form.picPhone);
     if (!/^62\d{8,14}$/.test(normalizedPhone)) {
-      errors.push("Format PIC phone/WhatsApp tidak valid.");
+      errors.push("Invalid PIC phone/WhatsApp format.");
     }
 
     const urlKeys: (keyof typeof INITIAL_FORM)[] = [
@@ -161,7 +161,7 @@ export function VendorIntakeForm({
     ];
     for (const key of urlKeys) {
       if (form[key].trim() && !isValidHttpUrl(form[key].trim())) {
-        errors.push(`${FIELD_LABELS[key]} harus URL valid (http/https).`);
+        errors.push(`${FIELD_LABELS[key]} must be a valid URL (http/https).`);
       }
     }
 
@@ -173,7 +173,7 @@ export function VendorIntakeForm({
 
     for (const key of requiredDocsByLegalStatus[form.legalStatus] ?? []) {
       if (!form[key].trim()) {
-        errors.push(`${FIELD_LABELS[key]} wajib diisi untuk ${form.legalStatus}.`);
+        errors.push(`${FIELD_LABELS[key]} is required for ${form.legalStatus}.`);
       }
     }
 
@@ -269,8 +269,8 @@ export function VendorIntakeForm({
             </div>
           </section>
         ) : null}
-        <section className="vendor-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-          <h2 className="full" style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 8px', borderBottom: '1px solid var(--line)', paddingBottom: '8px' }}>Business Identity</h2>
+        <div className="form-section-title">Business Identity</div>
+        <section className="form-grid-2" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             Vendor Name
             <input required value={form.vendorName} onChange={(event) => updateField("vendorName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
@@ -295,16 +295,16 @@ export function VendorIntakeForm({
               ))}
             </datalist>
           </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Coverage Area
-            <input value={form.coverageArea} onChange={(event) => updateField("coverageArea", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
+        </section>
+
+        <div className="form-section-title">Legal & Operations</div>
+        <section className="form-grid-3" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             Legal Status
             <select value={form.legalStatus} onChange={(event) => updateField("legalStatus", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
-              <option value="Freelance/Perorangan">Freelance/Perorangan</option>
-              <option value="PT/CV">PT/CV</option>
-              <option value="Lainnya">Lainnya</option>
+              <option value="Freelance/Perorangan">Freelance / Individual</option>
+              <option value="PT/CV">PT / CV (Company)</option>
+              <option value="Lainnya">Other</option>
             </select>
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
@@ -314,6 +314,14 @@ export function VendorIntakeForm({
               <option value="PKP">PKP</option>
             </select>
           </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            Coverage Area
+            <input value={form.coverageArea} onChange={(event) => updateField("coverageArea", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+        </section>
+
+        <div className="form-section-title">Financial Information</div>
+        <section className="form-grid-2" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             Bank Name
             <input value={form.bankName} onChange={(event) => updateField("bankName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
@@ -330,6 +338,10 @@ export function VendorIntakeForm({
             NPWP Number
             <input value={form.npwpNumber} onChange={(event) => updateField("npwpNumber", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
+        </section>
+
+        <div className="form-section-title">Online Presence</div>
+        <section className="form-grid-3" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             Website
             <input value={form.websiteUrl} onChange={(event) => updateField("websiteUrl", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
@@ -338,10 +350,14 @@ export function VendorIntakeForm({
             Instagram
             <input value={form.instagramUrl} onChange={(event) => updateField("instagramUrl", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            TikTok
+            <input value={form.tiktokUrl} onChange={(event) => updateField("tiktokUrl", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
         </section>
 
-        <section className="vendor-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-          <h2 className="full" style={{ fontSize: '1.2rem', fontWeight: 700, margin: '0 0 8px', borderBottom: '1px solid var(--line)', paddingBottom: '8px' }}>Primary Contact</h2>
+        <div className="form-section-title">Primary Contact</div>
+        <section className="form-grid-2" style={{ marginBottom: '40px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             PIC Name
             <input required value={form.picName} onChange={(event) => updateField("picName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
@@ -360,11 +376,9 @@ export function VendorIntakeForm({
           </label>
         </section>
 
-        <section className="vendor-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', marginBottom: '40px' }}>
-          <header className="full" style={{ borderBottom: '1px solid var(--line)', paddingBottom: '8px', marginBottom: '8px' }}>
-            <h2 style={{ fontSize: '1.2rem', fontWeight: 700, margin: 0 }}>Documents & Links</h2>
-            <p className="mini-meta" style={{ marginTop: '4px' }}>Provide accessible links (Google Drive, Dropbox, etc.)</p>
-          </header>
+        <div className="form-section-title">Documents & Links</div>
+        <p className="mini-meta" style={{ marginBottom: '16px', marginTop: '-16px' }}>Provide accessible links (Google Drive, Dropbox, etc.)</p>
+        <section className="form-grid-3" style={{ marginBottom: '40px' }}>
           {[
             { key: "companyProfileUrl", label: "Company Profile" },
             { key: "catalogUrl", label: "Catalog / Pricelist" },

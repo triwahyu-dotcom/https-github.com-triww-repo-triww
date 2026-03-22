@@ -70,33 +70,33 @@ const REVISION_TEMPLATES: {
 }[] = [
   {
     id: "docs_basic",
-    label: "Dokumen dasar",
-    generalNote: "Mohon lengkapi dokumen legalitas utama sebelum kami lanjutkan proses review.",
+    label: "Basic documents",
+    generalNote: "Please complete the primary legality documents before we proceed with the review process.",
     items: [
-      { fieldKey: "companyProfileUrl", note: "Upload company profile terbaru (link aktif)." },
-      { fieldKey: "npwpScanUrl", note: "Upload scan NPWP yang terbaca jelas." },
-      { fieldKey: "ownerKtpUrl", note: "Upload KTP pemilik/PIC yang masih berlaku." },
-      { fieldKey: "nibUrl", note: "Upload NIB terbaru sesuai legalitas usaha." },
+      { fieldKey: "companyProfileUrl", note: "Upload latest company profile (active link)." },
+      { fieldKey: "npwpScanUrl", note: "Upload clear NPWP scan." },
+      { fieldKey: "ownerKtpUrl", note: "Upload valid Owner/PIC KTP." },
+      { fieldKey: "nibUrl", note: "Upload latest NIB according to business legality." },
     ],
   },
   {
     id: "contact_identity",
-    label: "Kontak & identitas",
-    generalNote: "Mohon update informasi identitas dan PIC agar tim procurement bisa menghubungi dengan benar.",
+    label: "Contact & identity",
+    generalNote: "Please update identity information and PIC so our procurement team can contact you correctly.",
     items: [
-      { fieldKey: "vendorName", note: "Samakan nama vendor dengan dokumen legal." },
-      { fieldKey: "email", note: "Gunakan email bisnis aktif untuk komunikasi resmi." },
-      { fieldKey: "picName", note: "Isi nama PIC utama yang bertanggung jawab." },
-      { fieldKey: "picPhone", note: "Pastikan nomor WhatsApp PIC aktif dan bisa dihubungi." },
+      { fieldKey: "vendorName", note: "Match vendor name with legal documents." },
+      { fieldKey: "email", note: "Use an active business email for official communication." },
+      { fieldKey: "picName", note: "Fill in the name of the main PIC in charge." },
+      { fieldKey: "picPhone", note: "Ensure the PIC's WhatsApp number is active." },
     ],
   },
   {
     id: "service_scope",
-    label: "Layanan & area",
-    generalNote: "Mohon update klasifikasi layanan agar penempatan project tidak salah.",
+    label: "Services & area",
+    generalNote: "Please update service classification so project placement is not incorrect.",
     items: [
-      { fieldKey: "services", note: "Pilih layanan utama yang benar-benar tersedia." },
-      { fieldKey: "coverageArea", note: "Isi area operasional sesuai kapasitas tim/vendor." },
+      { fieldKey: "services", note: "Select primary services that are truly available." },
+      { fieldKey: "coverageArea", note: "Fill in operational areas according to team/vendor capacity." },
     ],
   },
 ];
@@ -280,8 +280,8 @@ function clampPaneWidth(value: number) {
 
 
 function classificationLabel(classification: VendorClassification | string) {
-  if (classification === "Penyedia Barang") return "Barang / Equipment";
-  if (classification === "Penyedia Jasa") return "Jasa / Specialist";
+  if (classification === "Penyedia Barang") return "Goods / Equipment";
+  if (classification === "Penyedia Jasa") return "Services / Specialist";
   return classification;
 }
 
@@ -971,10 +971,10 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
             <div className={`notion-list ${isVendorListView ? "vendor-list-view" : ""}`}>
               <div className="panel-section-header">
                 <div>
-                  <p className="panel-label">Daftar Vendor</p>
+                  <p className="panel-label">Vendor Directory</p>
                   <h3>{VIEW_TITLES[view]}</h3>
                 </div>
-                <span className="panel-count">{activeListCount} item</span>
+                <span className="panel-count">{activeListCount} item(s)</span>
               </div>
               
               {view === "all_vendors" ? (
@@ -1092,12 +1092,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
             <aside className="notion-detail">
               <div className="panel-section-header detail-panel-header">
                 <div>
-                  <p className="panel-label">Detail Vendor</p>
-                  <h3>{view === "outbox" ? "Ringkasan Outbox" : selectedVendor ? formatVendorName(selectedVendor.name) : "Belum ada vendor dipilih"}</h3>
+                  <p className="panel-label">Vendor Profile</p>
+                  <h3>{view === "outbox" ? "Outbox Summary" : selectedVendor ? formatVendorName(selectedVendor.name) : "No vendor selected"}</h3>
                 </div>
               </div>
               {view === "outbox" ? (
-                <p className="empty-state">Outbox menampilkan jejak notifikasi email/WhatsApp untuk admin dan vendor.</p>
+                <p className="empty-state">Outbox displays email/WhatsApp notification logs for admins and vendors.</p>
               ) : null}
             {view !== "outbox" && selectedVendor ? (
               <>
@@ -1134,10 +1134,10 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                 </div>
                 <div className="detail-mode-switch">
                   <button className={detailMode === "summary" ? "active" : ""} onClick={() => setDetailMode("summary")} type="button">
-                    Ringkas
+                    Summary
                   </button>
                   <button className={detailMode === "operations" ? "active" : ""} onClick={() => setDetailMode("operations")} type="button">
-                    Operasional
+                    Operations
                   </button>
                 </div>
                 {detailMode === "summary" ? (
@@ -1227,25 +1227,44 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                 ) : (
                   <>
                     <div className="detail-block">
-                      <h3>Lifecycle & ops</h3>
+                      <h3>Lifecycle & Operations</h3>
                       <div className="review-form review-dark">
-                        <select value={lifecycleStatus} onChange={(event) => setLifecycleStatus(event.target.value as VendorLifecycleStatus)}>
-                          {LIFECYCLE_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {lifecycleLabel(status)}
-                            </option>
-                          ))}
-                        </select>
-                        <input value={accountManager} onChange={(event) => setAccountManager(event.target.value)} placeholder="Account manager / owner" />
-                        <input value={cities} onChange={(event) => setCities(event.target.value)} placeholder="Cities, comma separated" />
-                        <textarea rows={3} value={rateCardNotes} onChange={(event) => setRateCardNotes(event.target.value)} placeholder="Rate card / price notes" />
-                        <textarea rows={3} value={availabilityNotes} onChange={(event) => setAvailabilityNotes(event.target.value)} placeholder="Availability / blackout dates / operational notes" />
-                        <div className="action-row">
+                        <div className="form-grid-2">
+                          <div className="form-group">
+                            <label className="mini-meta">Lifecycle Status</label>
+                            <select style={{ width: '100%' }} value={lifecycleStatus} onChange={(event) => setLifecycleStatus(event.target.value as VendorLifecycleStatus)}>
+                              {LIFECYCLE_STATUSES.map((status) => (
+                                <option key={status} value={status}>
+                                  {lifecycleLabel(status)}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="form-group">
+                            <label className="mini-meta">Account Manager</label>
+                            <input style={{ width: '100%' }} value={accountManager} onChange={(event) => setAccountManager(event.target.value)} placeholder="AM / Owner" />
+                          </div>
+                        </div>
+                        <div className="form-group" style={{ marginTop: '12px' }}>
+                          <label className="mini-meta">Operational Cities</label>
+                          <input style={{ width: '100%' }} value={cities} onChange={(event) => setCities(event.target.value)} placeholder="e.g., Jakarta, Surabaya (comma separated)" />
+                        </div>
+                        <div className="form-grid-2" style={{ marginTop: '12px' }}>
+                          <div className="form-group">
+                            <label className="mini-meta">Rate Card / Pricing Notes</label>
+                            <textarea style={{ width: '100%', height: '80px' }} value={rateCardNotes} onChange={(event) => setRateCardNotes(event.target.value)} placeholder="..." />
+                          </div>
+                          <div className="form-group">
+                            <label className="mini-meta">Availability / Blackout Dates</label>
+                            <textarea style={{ width: '100%', height: '80px' }} value={availabilityNotes} onChange={(event) => setAvailabilityNotes(event.target.value)} placeholder="..." />
+                          </div>
+                        </div>
+                        <div className="action-row" style={{ marginTop: '16px' }}>
                           <button className="ghost-button" onClick={handleLifecycleSave} type="button">
-                            {opsPending ? "..." : "Save lifecycle"}
+                            {opsPending ? "..." : "Save Lifecycle"}
                           </button>
                           <button className="ghost-button" onClick={handleOpsProfileSave} type="button">
-                            {opsPending ? "..." : "Save ops profile"}
+                            {opsPending ? "..." : "Save Profile"}
                           </button>
                         </div>
                       </div>

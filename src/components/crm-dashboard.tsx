@@ -14,6 +14,7 @@ interface Props {
 export function CRMDashboard({ initialData }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
   const [selectedClient, setSelectedClient] = useState<CRMClient | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
@@ -40,7 +41,7 @@ export function CRMDashboard({ initialData }: Props) {
 
   const openAddModal = () => {
     setModalMode("add");
-    setFormData({ status: "lead", type: "brand", category: "BRAND", contacts: [], projects: [] });
+    setFormData({ status: "lead", category: "BRAND", contacts: [], projects: [] });
     setIsModalOpen(true);
   };
 
@@ -56,9 +57,10 @@ export function CRMDashboard({ initialData }: Props) {
         client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         client.contacts.some((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesStatus = filterStatus === "all" || client.status === filterStatus;
-      return matchesSearch && matchesStatus;
+      const matchesCategory = filterCategory === "all" || (client.category || "").toUpperCase() === filterCategory;
+      return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [initialData.clients, searchQuery, filterStatus]);
+  }, [initialData.clients, searchQuery, filterStatus, filterCategory]);
 
   const headerActions = (
     <>
@@ -123,6 +125,13 @@ export function CRMDashboard({ initialData }: Props) {
             <option value="active">Active Clients</option>
             <option value="lead">Pipeline Leads</option>
           </select>
+          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
+            <option value="all">All Categories</option>
+            <option value="BRAND">Brand</option>
+            <option value="GOVERNMENT">Government</option>
+            <option value="CO. PARTNER">Co. Partner</option>
+            <option value="EVENT ORGANIZER">Event Organizer</option>
+          </select>
           <button className="primary-button" onClick={openAddModal}>+ Add New Lead</button>
         </div>
       </div>
@@ -149,7 +158,7 @@ export function CRMDashboard({ initialData }: Props) {
                   style={{ background: "none", borderLeft: "none", borderRight: "none", width: "100%", padding: "13px 14px", textAlign: "left" }}
                 >
                   <div style={{ fontWeight: 600 }}>{client.name}</div>
-                  <div className="mini-meta">{client.type?.toUpperCase() || client.category}</div>
+                  <div className="mini-meta">{client.category || client.type?.toUpperCase()}</div>
                   <div className="mini-meta">{client.contacts.length} persons</div>
                   <div className="mini-meta">{client.projectCount} total</div>
                   <div>
@@ -175,7 +184,7 @@ export function CRMDashboard({ initialData }: Props) {
               <div className="detail-head">
                 <div>
                   <div className="eyebrow" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    <span className="status-pill tone-slate" style={{ fontSize: "0.6rem" }}>{selectedClient.type?.toUpperCase()}</span>
+                    <span className="status-pill tone-slate" style={{ fontSize: "0.6rem" }}>{selectedClient.category?.toUpperCase() || selectedClient.type?.toUpperCase()}</span>
                     {selectedClient.industry && <span>• {selectedClient.industry}</span>}
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
@@ -252,41 +261,54 @@ export function CRMDashboard({ initialData }: Props) {
       </div>
       {isModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content" style={{ backgroundColor: '#1a1a1a', padding: '24px', borderRadius: '16px', width: '100%', maxWidth: '500px', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
-            <h2 style={{ marginBottom: '20px' }}>{modalMode === 'add' ? 'Add New Lead' : 'Edit Client Profile'}</h2>
-            <div className="form-stack" style={{ display: 'grid', gap: '16px' }}>
+          <div className="modal-content wide-modal" style={{ backgroundColor: '#1a1a1a', padding: '32px', borderRadius: '16px', width: '100%', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
+            <h2 style={{ marginBottom: '24px' }}>{modalMode === 'add' ? 'Add New Lead' : 'Edit Client Profile'}</h2>
+            
+            <div className="form-section-title">Company Identity</div>
+            <div className="form-grid-2">
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: '#888' }}>Company Name</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '8px', color: 'white', borderRadius: '8px' }} 
+                <label className="mini-meta" style={{ marginBottom: '4px' }}>Company Name</label>
+                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
                    value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g., PT Telkom Indonesia" />
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: '#888' }}>Type</label>
-                    <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '8px', color: 'white', borderRadius: '8px' }} 
-                       value={formData.type || 'brand'} onChange={(e) => setFormData({...formData, type: e.target.value as any})}>
-                       <option value="brand">Brand</option>
-                       <option value="agency">Agency</option>
-                       <option value="government">Government</option>
-                    </select>
-                 </div>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: '#888' }}>Status</label>
-                    <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '8px', color: 'white', borderRadius: '8px' }} 
-                       value={formData.status || 'lead'} onChange={(e) => setFormData({...formData, status: e.target.value as any})}>
-                       <option value="active">Active Client</option>
-                       <option value="lead">Pipeline Lead</option>
-                    </select>
-                 </div>
-              </div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: '#888' }}>Industry</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '8px', color: 'white', borderRadius: '8px' }} 
+                <label className="mini-meta" style={{ marginBottom: '4px' }}>Industry</label>
+                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
                    value={formData.industry || ''} onChange={(e) => setFormData({...formData, industry: e.target.value})} placeholder="e.g., Telecom, Banking" />
               </div>
+            </div>
+
+            <div className="form-grid-2" style={{ marginTop: '16px' }}>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '4px', color: '#888' }}>Address</label>
-                <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '8px', color: 'white', borderRadius: '8px', height: '60px' }} 
+                <label className="mini-meta" style={{ marginBottom: '4px' }}>Category</label>
+                <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                   value={formData.category || 'BRAND'} onChange={(e) => setFormData({...formData, category: e.target.value})}>
+                   <option value="BRAND">Brand</option>
+                   <option value="GOVERNMENT">Government</option>
+                   <option value="CO. PARTNER">Co. Partner</option>
+                   <option value="EVENT ORGANIZER">Event Organizer</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="mini-meta" style={{ marginBottom: '4px' }}>Status</label>
+                <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                   value={formData.status || 'lead'} onChange={(e) => setFormData({...formData, status: e.target.value as any})}>
+                   <option value="active">Active Client</option>
+                   <option value="lead">Pipeline Lead</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-section-title" style={{ marginTop: '24px' }}>Location & Reach</div>
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label className="mini-meta" style={{ marginBottom: '4px' }}>Website</label>
+                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
+                   value={formData.website || ''} onChange={(e) => setFormData({...formData, website: e.target.value})} placeholder="https://..." />
+              </div>
+              <div className="form-group">
+                <label className="mini-meta" style={{ marginBottom: '4px' }}>Address</label>
+                <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px', height: '42px' }} 
                    value={formData.address || ''} onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="Office address..." />
               </div>
             </div>

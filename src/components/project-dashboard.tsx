@@ -295,7 +295,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
     const endpoint = "/api/projects";
     const method = projectModalMode === "add" ? "POST" : "PUT";
-    
+
     try {
       const res = await fetch(endpoint, {
         method,
@@ -304,7 +304,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       });
       if (res.ok) {
         setIsProjectModalOpen(false);
-        window.location.reload(); 
+        window.location.reload();
       } else {
         alert("Gagal menyimpan proyek. Silakan coba lagi.");
       }
@@ -333,7 +333,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         const nextProjects = projects.filter(p => p.id !== deletingProject.id);
         setProjects(nextProjects);
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextProjects));
-        
+
         setIsDeleteConfirmOpen(false);
         setIsProjectModalOpen(false);
         setDetailOpen(false);
@@ -350,15 +350,15 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
   const openAddProjectModal = () => {
     setProjectModalMode("add");
-    setProjectFormData({ 
-      currentStage: "lead", 
-      status: "lead", 
-      projectValue: 0, 
-      owners: [], 
-      tasks: [], 
-      documents: [], 
-      activity: [], 
-      milestones: [] 
+    setProjectFormData({
+      currentStage: "lead",
+      status: "lead",
+      projectValue: 0,
+      owners: [],
+      tasks: [],
+      documents: [],
+      activity: [],
+      milestones: []
     });
     setIsProjectModalOpen(true);
   };
@@ -386,6 +386,39 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   }, [theme]);
 
   const filteredProjects = projects.filter((project) => matchesProject(project, query, stageFilter));
+
+  const [sortKey, setSortKey] = useState<string>("projectName");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+
+  const handleSort = (key: string) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    let aVal: string | number = "";
+    let bVal: string | number = "";
+    if (sortKey === "projectName") { aVal = a.projectName || ""; bVal = b.projectName || ""; }
+    else if (sortKey === "client") { aVal = a.client || ""; bVal = b.client || ""; }
+    else if (sortKey === "currentStage") { aVal = a.currentStage || ""; bVal = b.currentStage || ""; }
+    else if (sortKey === "owners") { aVal = (a.owners && a.owners[0]) || ""; bVal = (b.owners && b.owners[0]) || ""; }
+    else if (sortKey === "eventDate") { aVal = a.eventDate || ""; bVal = b.eventDate || ""; }
+    else if (sortKey === "projectValue") { aVal = a.projectValue || 0; bVal = b.projectValue || 0; }
+    else if (sortKey === "docs") {
+      aVal = a.documents.filter((d) => d.status === "available").length;
+      bVal = b.documents.filter((d) => d.status === "available").length;
+    }
+    if (typeof aVal === "number" && typeof bVal === "number") {
+      return sortDir === "asc" ? aVal - bVal : bVal - aVal;
+    }
+    return sortDir === "asc"
+      ? String(aVal).localeCompare(String(bVal))
+      : String(bVal).localeCompare(String(aVal));
+  });
   const selectedProject =
     projects.find((project) => project.id === selectedProjectId) ??
     filteredProjects[0] ??
@@ -462,11 +495,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         project.id !== projectId
           ? project
           : {
-              ...project,
-              tasks: project.tasks.map((task) =>
-                task.id === taskId ? { ...task, status: task.status === "done" ? "pending" : "done" } : task,
-              ),
-            },
+            ...project,
+            tasks: project.tasks.map((task) =>
+              task.id === taskId ? { ...task, status: task.status === "done" ? "pending" : "done" } : task,
+            ),
+          },
       ),
     );
   }
@@ -474,7 +507,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   function updateProjectField(projectId: string, field: EditableField, value: string) {
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
-    
+
     const updated = {
       ...project,
       [field]: value
@@ -482,7 +515,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
     // Update local state and storage
     setProjects((current) => current.map((p) => p.id === projectId ? updated : p));
-    
+
     // Persist to API
     fetch("/api/projects", {
       method: "PUT",
@@ -519,18 +552,18 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         project.id !== projectId
           ? project
           : {
-              ...project,
-              documents: project.documents.map((document) =>
-                document.id !== documentId
-                  ? document
-                  : {
-                      ...document,
-                      value,
-                      url: /^https?:\/\//i.test(value) ? value : "",
-                      status: value ? (/^https?:\/\//i.test(value) ? "available" : "reference") : "missing",
-                    }
-              ),
-            },
+            ...project,
+            documents: project.documents.map((document) =>
+              document.id !== documentId
+                ? document
+                : {
+                  ...document,
+                  value,
+                  url: /^https?:\/\//i.test(value) ? value : "",
+                  status: value ? (/^https?:\/\//i.test(value) ? "available" : "reference") : "missing",
+                }
+            ),
+          },
       ),
     );
   }
@@ -541,11 +574,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         project.id !== projectId
           ? project
           : {
-              ...project,
-              milestones: (project.milestones ?? []).map((milestone) =>
-                milestone.id !== milestoneId ? milestone : { ...milestone, [field]: value },
-              ),
-            },
+            ...project,
+            milestones: (project.milestones ?? []).map((milestone) =>
+              milestone.id !== milestoneId ? milestone : { ...milestone, [field]: value },
+            ),
+          },
       ),
     );
   }
@@ -667,23 +700,23 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           project.id !== projectId
             ? project
             : {
-                ...project,
-                assignedVendors: [
-                  ...(project.assignedVendors ?? []).map((vendor) => ({
-                    ...vendor,
-                    averageScore: vendor.averageScore ?? 0,
-                  })),
-                  {
-                    linkId: payload.link.id,
-                    vendorId: selectedOption.id,
-                    vendorName: selectedOption.name,
-                    vendorType: selectedOption.serviceNames[0] || "-",
-                    coverageArea: selectedOption.coverageArea,
-                    whatsappPhone: selectedOption.whatsappPhone,
-                    averageScore: selectedOption.averageScore,
-                  },
-                ],
-              },
+              ...project,
+              assignedVendors: [
+                ...(project.assignedVendors ?? []).map((vendor) => ({
+                  ...vendor,
+                  averageScore: vendor.averageScore ?? 0,
+                })),
+                {
+                  linkId: payload.link.id,
+                  vendorId: selectedOption.id,
+                  vendorName: selectedOption.name,
+                  vendorType: selectedOption.serviceNames[0] || "-",
+                  coverageArea: selectedOption.coverageArea,
+                  whatsappPhone: selectedOption.whatsappPhone,
+                  averageScore: selectedOption.averageScore,
+                },
+              ],
+            },
         ),
       );
     });
@@ -702,9 +735,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           project.id !== projectId
             ? project
             : {
-                ...project,
-                assignedVendors: (project.assignedVendors ?? []).filter((vendor) => vendor.linkId !== linkId),
-              },
+              ...project,
+              assignedVendors: (project.assignedVendors ?? []).filter((vendor) => vendor.linkId !== linkId),
+            },
         ),
       );
     });
@@ -742,27 +775,27 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           project.id !== projectId
             ? project
             : {
-                ...project,
-                vendorShortlist: [
-                  ...(project.vendorShortlist ?? []).map((vendor) => ({
-                    ...vendor,
-                    averageScore: vendor.averageScore ?? 0,
-                  })),
-                  {
-                    linkId: payload.shortlist.id,
-                    vendorId: selectedOption.id,
-                    vendorName: selectedOption.name,
-                    vendorType: selectedOption.serviceNames[0] || "-",
-                    coverageArea: selectedOption.coverageArea,
-                    whatsappPhone: selectedOption.whatsappPhone,
-                    averageScore: selectedOption.averageScore,
-                    serviceLine: selectedProject.serviceLine,
-                    status: "shortlisted",
-                    note: shortlistNote,
-                    quotedPrice: parseCurrency(shortlistQuotedPrice),
-                  },
-                ],
-              },
+              ...project,
+              vendorShortlist: [
+                ...(project.vendorShortlist ?? []).map((vendor) => ({
+                  ...vendor,
+                  averageScore: vendor.averageScore ?? 0,
+                })),
+                {
+                  linkId: payload.shortlist.id,
+                  vendorId: selectedOption.id,
+                  vendorName: selectedOption.name,
+                  vendorType: selectedOption.serviceNames[0] || "-",
+                  coverageArea: selectedOption.coverageArea,
+                  whatsappPhone: selectedOption.whatsappPhone,
+                  averageScore: selectedOption.averageScore,
+                  serviceLine: selectedProject.serviceLine,
+                  status: "shortlisted",
+                  note: shortlistNote,
+                  quotedPrice: parseCurrency(shortlistQuotedPrice),
+                },
+              ],
+            },
         ),
       );
       setShortlistNote("");
@@ -836,29 +869,29 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       actions={headerActions}
     >
       <div className="summary-deck" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <SummaryCard 
-          label="Total Projects" 
-          value={String(summary.totalProjects)} 
+        <SummaryCard
+          label="Total Projects"
+          value={String(summary.totalProjects)}
           description="Projects in workspace"
-          icon="📊" 
+          icon="📊"
         />
-        <SummaryCard 
-          label="Active Projects" 
-          value={String(summary.activeProjects)} 
+        <SummaryCard
+          label="Active Projects"
+          value={String(summary.activeProjects)}
           description="In execution/finance"
-          icon="⚡" 
+          icon="⚡"
         />
-        <SummaryCard 
-          label="Leads" 
-          value={String(summary.leadsProjects)} 
+        <SummaryCard
+          label="Leads"
+          value={String(summary.leadsProjects)}
           description="New opportunities"
-          icon="🎯" 
+          icon="🎯"
         />
-        <SummaryCard 
-          label="Total Value" 
-          value={summary.totalValueLabel} 
+        <SummaryCard
+          label="Total Value"
+          value={summary.totalValueLabel}
           description="Account worth"
-          icon="💰" 
+          icon="💰"
         />
       </div>
 
@@ -914,253 +947,264 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
         <section className="pm-content">
           <div className="panel main-panel">
-          {view === "overview" ? (
-            <div className="view-stack">
-              <div className="summary-grid">
-                <article className="summary-card">
-                  <span>Total Projects</span>
-                  <strong>{summary.totalProjects}</strong>
-                  <small>Active projects in workspace</small>
+            {view === "overview" ? (
+              <div className="view-stack">
+                <div className="summary-grid">
+                  <article className="summary-card">
+                    <span>Total Projects</span>
+                    <strong>{summary.totalProjects}</strong>
+                    <small>Active projects in workspace</small>
+                  </article>
+                  <article className="summary-card">
+                    <span>Needs Attention</span>
+                    <strong>{projects.filter((project) => project.health !== "on_track").length}</strong>
+                    <small>Needs follow up or quick decision</small>
+                  </article>
+                  <article className="summary-card">
+                    <span>Pipeline Value</span>
+                    <strong>{summary.totalValueLabel}</strong>
+                    <small>Estimated value of entire pipeline</small>
+                  </article>
+                  <article className="summary-card">
+                    <span>Linked Docs</span>
+                    <strong>{summary.documentsAvailable}</strong>
+                    <small>Ready to open directly</small>
+                  </article>
+                </div>
+
+                <article className="feature-panel">
+                  <p className="panel-kicker">Focus Projects</p>
+                  <div className="project-list compact-list">
+                    {filteredProjects.slice(0, 8).map((project) => (
+                      <button
+                        key={project.id}
+                        type="button"
+                        className={project.id === selectedProject?.id ? "project-card active-card" : "project-card"}
+                        onClick={() => selectProject(project.id, true)}
+                      >
+                        <div className="project-card-top">
+                          <span className="section-pill">{project.currentStageLabel}</span>
+                          <span className={`status-pill ${toneClass(project.health)}`}>{toneLabel(project.health)}</span>
+                        </div>
+                        <h3>{project.projectName}</h3>
+                        <p className="client-line">{project.client}</p>
+                        <div className="mini-meta">
+                          <span>{project.eventDate || "No date yet"}</span>
+                          <span>{project.projectValueLabel}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </article>
-                <article className="summary-card">
-                  <span>Needs Attention</span>
-                  <strong>{projects.filter((project) => project.health !== "on_track").length}</strong>
-                  <small>Needs follow up or quick decision</small>
-                </article>
-                <article className="summary-card">
-                  <span>Pipeline Value</span>
-                  <strong>{summary.totalValueLabel}</strong>
-                  <small>Estimated value of entire pipeline</small>
-                </article>
-                <article className="summary-card">
-                  <span>Linked Docs</span>
-                  <strong>{summary.documentsAvailable}</strong>
-                  <small>Ready to open directly</small>
+
+                <article className="feature-panel">
+                  <p className="panel-kicker">Upcoming Milestones</p>
+                  <div className="timeline-list">
+                    {timelineMilestones.map((milestone) => (
+                      <article key={`${milestone.projectId}-${milestone.id}`} className="timeline-item">
+                        <span>{milestone.label}</span>
+                        <strong>{milestone.value}</strong>
+                        <small>
+                          {milestone.projectName} • {milestone.client}
+                        </small>
+                      </article>
+                    ))}
+                  </div>
                 </article>
               </div>
+            ) : null}
 
-              <article className="feature-panel">
-                <p className="panel-kicker">Focus Projects</p>
-                <div className="project-list compact-list">
-                  {filteredProjects.slice(0, 8).map((project) => (
-                    <button
-                      key={project.id}
-                      type="button"
-                      className={project.id === selectedProject?.id ? "project-card active-card" : "project-card"}
-                      onClick={() => selectProject(project.id, true)}
-                    >
-                      <div className="project-card-top">
-                        <span className="section-pill">{project.currentStageLabel}</span>
-                        <span className={`status-pill ${toneClass(project.health)}`}>{toneLabel(project.health)}</span>
-                      </div>
-                      <h3>{project.projectName}</h3>
-                      <p className="client-line">{project.client}</p>
-                      <div className="mini-meta">
-                        <span>{project.eventDate || "No date yet"}</span>
-                        <span>{project.projectValueLabel}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </article>
-
-              <article className="feature-panel">
-                <p className="panel-kicker">Upcoming Milestones</p>
-                <div className="timeline-list">
-                  {timelineMilestones.map((milestone) => (
-                    <article key={`${milestone.projectId}-${milestone.id}`} className="timeline-item">
-                      <span>{milestone.label}</span>
-                      <strong>{milestone.value}</strong>
-                      <small>
-                        {milestone.projectName} • {milestone.client}
-                      </small>
-                    </article>
-                  ))}
-                </div>
-              </article>
-            </div>
-          ) : null}
-
-          {view === "list" ? (
-            <div className="project-list">
-              {filteredProjects.map((project) => (
-                <button
-                  key={project.id}
-                  type="button"
-                  className={project.id === selectedProject?.id ? "project-card active-card" : "project-card"}
-                  onClick={() => selectProject(project.id, true)}
-                >
-                  <div className="project-card-top">
-                    <span className="section-pill">{project.currentStageLabel}</span>
-                    <span className={`status-pill ${toneClass(project.health)}`}>{toneLabel(project.health)}</span>
-                  </div>
-                  <h3>{project.projectName}</h3>
-                  <p className="client-line">{project.client}</p>
-                  <dl className="meta-grid">
-                    <div>
-                      <dt>PIC</dt>
-                      <dd>{project.owners[0] || "-"}</dd>
-                    </div>
-                    <div>
-                      <dt>Stage</dt>
-                      <dd>{project.currentStageLabel}</dd>
-                    </div>
-                    <div>
-                      <dt>Event</dt>
-                      <dd>{project.eventDate || "-"}</dd>
-                    </div>
-                    <div>
-                      <dt>Value</dt>
-                      <dd>{project.projectValueLabel}</dd>
-                    </div>
-                  </dl>
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {view === "table" ? (
-            <div className="table-shell">
-              <div className="project-table">
-                <div className="table-row table-head">
-                  <span>Project</span>
-                  <span>Client</span>
-                  <span>Stage</span>
-                  <span>PIC</span>
-                  <span>Event</span>
-                  <span>Value</span>
-                  <span>Docs</span>
-                </div>
+            {view === "list" ? (
+              <div className="project-list">
                 {filteredProjects.map((project) => (
-                  <div 
-                    key={project.id} 
-                    className={project.id === selectedProject?.id ? "table-row active-table-row clickable-row" : "table-row clickable-row"}
-                    onClick={() => openEditProjectModal(project)}
-                    title="Click to edit project data"
+                  <button
+                    key={project.id}
+                    type="button"
+                    className={project.id === selectedProject?.id ? "project-card active-card" : "project-card"}
+                    onClick={() => selectProject(project.id, true)}
                   >
-                    <span className="table-text" style={{ fontWeight: 500 }}>{project.projectName}</span>
-                    <span className="table-text">{project.client}</span>
-                    <div onClick={(e) => e.stopPropagation()}>
-                      <select
-                        value={project.currentStage}
-                        onChange={(event) => {
-                          setSelectedProjectId(project.id);
-                          setMoveTargetStage(event.target.value as WorkflowStage);
-                          setMoveNote("Updated from table");
-                          setMoveModalOpen(true);
-                        }}
-                      >
-                        {STAGE_OPTIONS.map((stage) => (
-                          <option key={stage.key} value={stage.key}>
-                            {stage.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="project-card-top">
+                      <span className="section-pill">{project.currentStageLabel}</span>
+                      <span className={`status-pill ${toneClass(project.health)}`}>{toneLabel(project.health)}</span>
                     </div>
-                    <span className="table-text">{(project.owners && project.owners[0]) || "-"}</span>
-                    <span className="table-text">{project.eventDate || "-"}</span>
-                    <span className="table-text" style={{ fontFamily: 'monospace' }}>{project.projectValueLabel}</span>
-                    <span className="table-doc-count">{project.documents.filter((item) => item.status === "available").length}</span>
-                  </div>
+                    <h3>{project.projectName}</h3>
+                    <p className="client-line">{project.client}</p>
+                    <dl className="meta-grid">
+                      <div>
+                        <dt>PIC</dt>
+                        <dd>{project.owners[0] || "-"}</dd>
+                      </div>
+                      <div>
+                        <dt>Stage</dt>
+                        <dd>{project.currentStageLabel}</dd>
+                      </div>
+                      <div>
+                        <dt>Event</dt>
+                        <dd>{project.eventDate || "-"}</dd>
+                      </div>
+                      <div>
+                        <dt>Value</dt>
+                        <dd>{project.projectValueLabel}</dd>
+                      </div>
+                    </dl>
+                  </button>
                 ))}
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          {view === "board" ? (
-            <div className="board-view-wrap">
-              <div className="board-zoom-toolbar">
-                <span>Board zoom</span>
-                <button type="button" className="ghost-button" onClick={() => setBoardZoom((current) => Math.max(0.75, current - 0.1))}>
-                  -
-                </button>
-                <strong>{Math.round(boardZoom * 100)}%</strong>
-                <button type="button" className="ghost-button" onClick={() => setBoardZoom((current) => Math.min(1.4, current + 0.1))}>
-                  +
-                </button>
-                <button type="button" className="ghost-button" onClick={() => setBoardZoom(1)}>
-                  Reset
-                </button>
-                <small>Pinch trackpad to zoom in/out</small>
-              </div>
-              <button
-                type="button"
-                className={boardDense ? "ghost-button active-ghost" : "ghost-button"}
-                onClick={() => setBoardDense((current) => !current)}
-              >
-                {boardDense ? "Dense on" : "Dense off"}
-              </button>
-              <div className="board-zoom-shell" onWheel={handleBoardWheel}>
-                <div
-                  className={boardDense ? "board-grid board-grid-dense" : "board-grid"}
-                  style={{ "--board-scale": boardZoom } as CSSProperties}
-                >
-                  {STAGE_OPTIONS.map((stage) => {
-                    const stageProjects = filteredProjects.filter((project) => project.currentStage === stage.key);
-
-                    return (
-                      <section
-                        key={stage.key}
-                        className={`board-column stage-${stage.key}`}
-                        onDragOver={(event) => event.preventDefault()}
-                        onDrop={() => handleBoardDrop(stage.key)}
+            {view === "table" ? (
+              <div className="table-shell">
+                <div className="project-table">
+                  <div className="table-row table-head">
+                    {([
+                      { label: "Project", key: "projectName" },
+                      { label: "Client", key: "client" },
+                      { label: "Stage", key: "currentStage" },
+                      { label: "PIC", key: "owners" },
+                      { label: "Event", key: "eventDate" },
+                      { label: "Value", key: "projectValue" },
+                      { label: "Docs", key: "docs" },
+                    ] as const).map(({ label, key }) => (
+                      <span
+                        key={key}
+                        onClick={() => handleSort(key)}
+                        style={{ cursor: "pointer", userSelect: "none", display: "flex", alignItems: "center", gap: "4px" }}
                       >
-                        <div className="board-column-head">
-                          <strong>{stage.label}</strong>
-                          <span>{stageProjects.length}</span>
-                        </div>
-                        <div className="board-column-body">
-                          {stageProjects.map((project) => (
-                            <div
-                              key={project.id}
-                              draggable
-                              className={draggingProjectId === project.id ? "board-draggable is-dragging" : "board-draggable"}
-                              onDragStart={() => setDraggingProjectId(project.id)}
-                              onDragEnd={() => setDraggingProjectId(null)}
-                            >
-                              <BoardCard
-                                project={project}
-                                active={project.id === selectedProject?.id}
-                                onSelect={() => selectProject(project.id, true)}
-                              />
-                            </div>
+                        {label}
+                        {sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : " ↕"}
+                      </span>
+                    ))}
+                  </div>
+                  {sortedProjects.map((project) => (
+                    <div
+                      key={project.id}
+                      className={project.id === selectedProject?.id ? "table-row active-table-row clickable-row" : "table-row clickable-row"}
+                      onClick={() => openEditProjectModal(project)}
+                      title="Click to edit project data"
+                    >
+                      <span className="table-text" style={{ fontWeight: 500 }}>{project.projectName}</span>
+                      <span className="table-text">{project.client}</span>
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <select
+                          value={project.currentStage}
+                          onChange={(event) => {
+                            setSelectedProjectId(project.id);
+                            setMoveTargetStage(event.target.value as WorkflowStage);
+                            setMoveNote("Updated from table");
+                            setMoveModalOpen(true);
+                          }}
+                        >
+                          {STAGE_OPTIONS.map((stage) => (
+                            <option key={stage.key} value={stage.key}>
+                              {stage.label}
+                            </option>
                           ))}
-                        </div>
-                      </section>
-                    );
-                  })}
+                        </select>
+                      </div>
+                      <span className="table-text">{(project.owners && project.owners[0]) || "-"}</span>
+                      <span className="table-text">{project.eventDate || "-"}</span>
+                      <span className="table-text" style={{ fontFamily: 'monospace' }}>{project.projectValueLabel}</span>
+                      <span className="table-doc-count">{project.documents.filter((item) => item.status === "available").length}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
 
-          {view === "documents" ? (
-            <div className="documents-grid">
-              {documents.map((document) => (
-                <article key={`${document.projectId}-${document.id}`} className="document-card">
-                  <div className="project-card-top">
-                    <span className={`status-pill ${docTone(document.status)}`}>{docLabel(document.status)}</span>
-                    <span className="section-pill">{document.stage}</span>
+            {view === "board" ? (
+              <div className="board-view-wrap">
+                <div className="board-zoom-toolbar">
+                  <span>Board zoom</span>
+                  <button type="button" className="ghost-button" onClick={() => setBoardZoom((current) => Math.max(0.75, current - 0.1))}>
+                    -
+                  </button>
+                  <strong>{Math.round(boardZoom * 100)}%</strong>
+                  <button type="button" className="ghost-button" onClick={() => setBoardZoom((current) => Math.min(1.4, current + 0.1))}>
+                    +
+                  </button>
+                  <button type="button" className="ghost-button" onClick={() => setBoardZoom(1)}>
+                    Reset
+                  </button>
+                  <small>Pinch trackpad to zoom in/out</small>
+                </div>
+                <button
+                  type="button"
+                  className={boardDense ? "ghost-button active-ghost" : "ghost-button"}
+                  onClick={() => setBoardDense((current) => !current)}
+                >
+                  {boardDense ? "Dense on" : "Dense off"}
+                </button>
+                <div className="board-zoom-shell" onWheel={handleBoardWheel}>
+                  <div
+                    className={boardDense ? "board-grid board-grid-dense" : "board-grid"}
+                    style={{ "--board-scale": boardZoom } as CSSProperties}
+                  >
+                    {STAGE_OPTIONS.map((stage) => {
+                      const stageProjects = filteredProjects.filter((project) => project.currentStage === stage.key);
+
+                      return (
+                        <section
+                          key={stage.key}
+                          className={`board-column stage-${stage.key}`}
+                          onDragOver={(event) => event.preventDefault()}
+                          onDrop={() => handleBoardDrop(stage.key)}
+                        >
+                          <div className="board-column-head">
+                            <strong>{stage.label}</strong>
+                            <span>{stageProjects.length}</span>
+                          </div>
+                          <div className="board-column-body">
+                            {stageProjects.map((project) => (
+                              <div
+                                key={project.id}
+                                draggable
+                                className={draggingProjectId === project.id ? "board-draggable is-dragging" : "board-draggable"}
+                                onDragStart={() => setDraggingProjectId(project.id)}
+                                onDragEnd={() => setDraggingProjectId(null)}
+                              >
+                                <BoardCard
+                                  project={project}
+                                  active={project.id === selectedProject?.id}
+                                  onSelect={() => selectProject(project.id, true)}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </section>
+                      );
+                    })}
                   </div>
-                  <h3>{document.title}</h3>
-                  <p className="client-line">
-                    {document.client} • {document.projectName}
-                  </p>
-                  <p className="document-value">{document.value || "No link or reference yet."}</p>
-                  <div className="document-actions">
-                    {document.url ? (
-                      <Link href={document.url} target="_blank" rel="noreferrer" className="doc-link">
-                        Open link
-                      </Link>
-                    ) : (
-                      <span className="doc-muted">No active URL yet</span>
-                    )}
-                  </div>
-                </article>
-              ))}
-            </div>
-          ) : null}
-        </div>
+                </div>
+              </div>
+            ) : null}
+
+            {view === "documents" ? (
+              <div className="documents-grid">
+                {documents.map((document) => (
+                  <article key={`${document.projectId}-${document.id}`} className="document-card">
+                    <div className="project-card-top">
+                      <span className={`status-pill ${docTone(document.status)}`}>{docLabel(document.status)}</span>
+                      <span className="section-pill">{document.stage}</span>
+                    </div>
+                    <h3>{document.title}</h3>
+                    <p className="client-line">
+                      {document.client} • {document.projectName}
+                    </p>
+                    <p className="document-value">{document.value || "No link or reference yet."}</p>
+                    <div className="document-actions">
+                      {document.url ? (
+                        <Link href={document.url} target="_blank" rel="noreferrer" className="doc-link">
+                          Open link
+                        </Link>
+                      ) : (
+                        <span className="doc-muted">No active URL yet</span>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
+            ) : null}
+          </div>
 
         </section>
       </section>
@@ -1178,10 +1222,10 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <div className={`status-pill ${toneClass(selectedProject.health || "on_track")}`}>
                   {toneLabel(selectedProject.health || "on_track")}
                 </div>
-                <button 
-                  type="button" 
-                  className="ghost-button" 
-                  style={{ color: '#ef4444', fontWeight: 600 }} 
+                <button
+                  type="button"
+                  className="ghost-button"
+                  style={{ color: '#ef4444', fontWeight: 600 }}
                   onClick={() => handleDeleteProject(selectedProject)}
                 >
                   Delete Project
@@ -1336,17 +1380,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 </div>
               </div>
 
-              <div className="detail-block">
-                <h3>Vendor requirements</h3>
-                <div className="timeline-list">
-                  {(selectedProject.vendorRequirements ?? []).map((item) => (
-                    <article key={item.label} className="timeline-item">
-                      <span>{item.label}</span>
-                      <strong>{item.summary}</strong>
-                    </article>
-                  ))}
-                </div>
-              </div>
+
 
               <div className="detail-block">
                 <h3>Stage Checklist</h3>
@@ -1366,34 +1400,109 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
 
               <div className="detail-block">
-                <h3>Linked Documents</h3>
-                <div className="document-stack">
-                  {(selectedProject.documents || [])
-                    .filter((document) => editMode || document.status !== "missing")
-                    .map((document) => (
-                      <article key={document.id} className="linked-doc-card">
-                        <div className="project-card-top">
-                          <strong>{document.title}</strong>
-                          <span className={`status-pill ${docTone(document.status)}`}>{docLabel(document.status)}</span>
-                        </div>
-                        {editMode ? (
-                          <input
-                            className="document-input"
-                            value={document.value}
-                            onChange={(event) => updateDocument(selectedProject.id, document.id, event.target.value)}
-                            placeholder="Paste link or document notes"
-                          />
-                        ) : (
-                          <p className="document-value">{document.value || "Not available yet."}</p>
-                        )}
-                        {document.url ? (
-                          <Link href={document.url} target="_blank" rel="noreferrer" className="doc-link">
-                            Open document
-                          </Link>
-                        ) : null}
-                      </article>
-                    ))}
+                <div className="resource-summary">
+                  <div className="resource-progress-label">
+                    <span>Resource Completion</span>
+                    <span>{
+                      selectedProject.documents.length > 0
+                        ? Math.round((selectedProject.documents.filter(d => d.status === 'available').length / selectedProject.documents.length) * 100)
+                        : 0
+                    }%</span>
+                  </div>
+                  <div className="resource-progress-bg">
+                    <div
+                      className="resource-progress-fill"
+                      style={{
+                        width: `${selectedProject.documents.length > 0
+                          ? (selectedProject.documents.filter(d => d.status === 'available').length / selectedProject.documents.length) * 100
+                          : 0}%`
+                      }}
+                    />
+                  </div>
                 </div>
+
+                <h3>Project Resources</h3>
+
+                {(() => {
+                  const groupedDocs = (selectedProject.documents || []).reduce((acc, doc) => {
+                    const stage = doc.stage || 'General';
+                    if (!acc[stage]) acc[stage] = [];
+                    acc[stage].push(doc);
+                    return acc;
+                  }, {} as Record<string, ProjectDocument[]>);
+
+                  return Object.entries(groupedDocs).map(([stage, docs]) => (
+                    <div key={stage} className="resource-group">
+                      <div className="resource-group-title">{stage}</div>
+                      <div className="resource-stack">
+                        {docs
+                          .filter((doc) => editMode || doc.status !== "missing")
+                          .map((doc) => (
+                            <div key={doc.id} className="resource-card">
+                              <div style={{ flex: 1 }}>
+                                <div className="resource-info">
+                                  <span className="resource-icon">
+                                    {doc.title.toLowerCase().includes('folder') ? '📂' :
+                                      doc.title.toLowerCase().includes('proposal') ? '📝' :
+                                        doc.title.toLowerCase().includes('contract') ? '📋' : '📄'}
+                                  </span>
+                                  <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                      <span className="resource-name">{doc.title}</span>
+                                      <span className={`resource-status-tag ${doc.status === 'available' ? 'ready' : 'missing'}`}>
+                                        {doc.status === 'available' ? 'READY' : 'MISSING'}
+                                      </span>
+                                    </div>
+                                    {!editMode && doc.value && (
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--muted-soft)', marginTop: '2px' }}>
+                                        {doc.value}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {editMode && (
+                                  <div className="resource-input-wrapper">
+                                    <input
+                                      className="resource-input"
+                                      value={doc.value}
+                                      onChange={(event) => updateDocument(selectedProject.id, doc.id, event.target.value)}
+                                      placeholder="Paste link or notes..."
+                                    />
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="resource-actions">
+                                {doc.url && (
+                                  <Link
+                                    href={doc.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="resource-action-btn"
+                                    title="Open in new tab"
+                                  >
+                                    ↗
+                                  </Link>
+                                )}
+                                {doc.value && (
+                                  <button
+                                    className="resource-action-btn"
+                                    title="Copy content"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(doc.value);
+                                    }}
+                                  >
+                                    ✂
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  ));
+                })()}
               </div>
             </div>
 
@@ -1565,35 +1674,37 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         </div>
       ) : null}
       {isProjectModalOpen && (
-        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content wide-modal" style={{ backgroundColor: '#1a1a1a', padding: '40px', borderRadius: '24px', width: '100%', border: '1px solid #333', maxHeight: '92vh', overflowY: 'auto' }}>
+        <div className="modal-overlay modal-backdrop">
+          <div className="modal-content wide-modal modal-card">
             <h2 style={{ marginBottom: '24px' }}>{projectModalMode === 'add' ? 'Add New Project' : 'Edit Project'}</h2>
             <div className="form-stack">
               <div className="form-section-title">Core Information</div>
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Name</label>
-                  <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                     value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({...projectFormData, projectName: e.target.value})} placeholder="Project title..." />
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Project Name</label>
+                  <input className="control-bar-input" style={{ width: '100%' }}
+                    value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({ ...projectFormData, projectName: e.target.value })} placeholder="Project title..." />
                 </div>
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                    <label style={{ fontSize: '0.8rem', color: '#888' }}>Client Name</label>
-                    <button 
-                      type="button" 
+                    <label className="eyebrow" style={{ margin: 0 }}>Client Name</label>
+                    <button
+                      type="button"
                       onClick={() => {
                         setClientFormData({ status: "active", type: "brand", category: "BRAND", contacts: [], projects: [] });
                         setIsAddClientModalOpen(true);
                       }}
-                      style={{ background: 'none', border: 'none', color: '#5b8cff', fontSize: '0.75rem', cursor: 'pointer', padding: 0 }}
+                      className="ghost-button"
+                      style={{ padding: '0 8px', minHeight: '24px', fontSize: '0.75rem' }}
                     >
                       + Add New Client
                     </button>
                   </div>
-                  <select 
-                    style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                    value={projectFormData.client || ''} 
-                    onChange={(e) => setProjectFormData({...projectFormData, client: e.target.value})}
+                  <select
+                    className="control-bar-select"
+                    style={{ width: '100%' }}
+                    value={projectFormData.client || ''}
+                    onChange={(e) => setProjectFormData({ ...projectFormData, client: e.target.value })}
                   >
                     <option value="">-- Select Client --</option>
                     {clients.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
@@ -1604,80 +1715,83 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
 
               <div className="form-grid-3" style={{ marginTop: '20px' }}>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Service Line</label>
-                    <select 
-                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                      value={projectFormData.serviceLine || ''} 
-                      onChange={(e) => setProjectFormData({...projectFormData, serviceLine: e.target.value})}
-                    >
-                      <option value="">-- Select Service --</option>
-                      {Array.from(new Set((initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Lainnya']).map(sl => sl.trim()))).map(sl => (
-                        <option key={sl} value={sl}>{sl}</option>
-                      ))}
-                    </select>
-                 </div>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Stage</label>
-                    <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                       value={projectFormData.currentStage || 'lead'} onChange={(e) => setProjectFormData({...projectFormData, currentStage: e.target.value as any})}>
-                       {STAGE_OPTIONS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
-                    </select>
-                 </div>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Event Date</label>
-                    <input 
-                      type="date" 
-                      style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                      value={projectFormData.eventDate || ''} 
-                      onChange={(e) => setProjectFormData({...projectFormData, eventDate: e.target.value})} 
-                    />
-                 </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Service Line</label>
+                  <select
+                    className="control-bar-select"
+                    style={{ width: '100%' }}
+                    value={projectFormData.serviceLine || ''}
+                    onChange={(e) => setProjectFormData({ ...projectFormData, serviceLine: e.target.value })}
+                  >
+                    <option value="">-- Select Service --</option>
+                    {Array.from(new Set((initialData.serviceLines.length > 0 ? initialData.serviceLines : ['Event Management', 'Digital Activation', 'Creative & Design', 'Video Production', 'KOL Management', 'PR & Media', 'Lainnya']).map(sl => sl.trim()))).map(sl => (
+                      <option key={sl} value={sl}>{sl}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Stage</label>
+                  <select className="control-bar-select" style={{ width: '100%' }}
+                    value={projectFormData.currentStage || 'lead'} onChange={(e) => setProjectFormData({ ...projectFormData, currentStage: e.target.value as any })}>
+                    {STAGE_OPTIONS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Event Date</label>
+                  <input
+                    type="date"
+                    className="control-bar-input"
+                    style={{ width: '100%' }}
+                    value={projectFormData.eventDate || ''}
+                    onChange={(e) => setProjectFormData({ ...projectFormData, eventDate: e.target.value })}
+                  />
+                </div>
               </div>
 
               <div className="form-section-title">Financials & Assignment</div>
               <div className="form-grid-2">
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Project Value (IDR)</label>
-                    <div style={{ position: 'relative' }}>
-                      <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666', fontSize: '0.9rem' }}>Rp</span>
-                      <input 
-                        type="text" 
-                        style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px 12px 12px 40px', color: 'white', borderRadius: '10px' }} 
-                        value={projectFormData.projectValue ? new Intl.NumberFormat('id-ID').format(projectFormData.projectValue) : ''} 
-                        onChange={(e) => {
-                          const rawValue = e.target.value.replace(/\D/g, '');
-                          setProjectFormData({...projectFormData, projectValue: rawValue ? Number(rawValue) : 0});
-                        }} 
-                        placeholder="e.g., 500.000.000" 
-                      />
-                    </div>
-                 </div>
-                 <div className="form-group">
-                    <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>PIC / Owners</label>
-                    <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                       value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : []})} placeholder="e.g., John, Jane (separate with commas)" />
-                 </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Project Value (IDR)</label>
+                  <div style={{ position: 'relative' }}>
+                    <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--muted)', fontSize: '0.9rem' }}>Rp</span>
+                    <input
+                      type="text"
+                      className="control-bar-input"
+                      style={{ width: '100%', paddingLeft: '40px' }}
+                      value={projectFormData.projectValue ? new Intl.NumberFormat('id-ID').format(projectFormData.projectValue) : ''}
+                      onChange={(e) => {
+                        const rawValue = e.target.value.replace(/\D/g, '');
+                        setProjectFormData({ ...projectFormData, projectValue: rawValue ? Number(rawValue) : 0 });
+                      }}
+                      placeholder="e.g., 500.000.000"
+                    />
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>PIC / Owners</label>
+                  <input className="control-bar-input" style={{ width: '100%' }}
+                    value={(projectFormData.owners || []).join(', ')} onChange={(e) => setProjectFormData({ ...projectFormData, owners: e.target.value ? e.target.value.split(',').map(s => s.trim()).filter(Boolean) : [] })} placeholder="e.g., John, Jane (separate with commas)" />
+                </div>
               </div>
 
               <div className="form-section-title">Additional Context</div>
               <div className="form-group">
-                <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Remark / Notes</label>
-                <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px', height: '100px', resize: 'vertical' }} 
-                   value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({...projectFormData, remark: e.target.value})} placeholder="Strategic notes, constraints, or key objectives..." />
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Remark / Notes</label>
+                <textarea className="control-bar-input" style={{ width: '100%', height: '100px', resize: 'vertical' }}
+                  value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({ ...projectFormData, remark: e.target.value })} placeholder="Strategic notes, constraints, or key objectives..." />
               </div>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end', alignItems: 'center' }}>
               {projectModalMode === "edit" && (
-                <button 
-                  className="primary-button" 
-                  style={{ background: '#450a0a', border: '1px solid #7f1d1d', color: '#f87171', marginRight: 'auto' }} 
+                <button
+                  className="primary-button"
+                  style={{ background: 'var(--red)', marginRight: 'auto' }}
                   onClick={() => handleDeleteProject()}
                 >
                   Delete Project
                 </button>
               )}
-              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsProjectModalOpen(false)}>Cancel</button>
+              <button className="ghost-button" onClick={() => setIsProjectModalOpen(false)}>Cancel</button>
               <button className="primary-button" onClick={handleSaveProject}>Save Project</button>
             </div>
           </div>
@@ -1685,52 +1799,51 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       )}
 
       {isAddClientModalOpen && (
-        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content wide-modal" style={{ backgroundColor: '#111', padding: '40px', borderRadius: '24px', width: '100%', maxWidth: '800px', border: '1px solid #333' }}>
+        <div className="modal-overlay modal-backdrop">
+          <div className="modal-content wide-modal modal-card">
             <h2 style={{ marginBottom: '24px' }}>Add New Client</h2>
             <div className="form-stack">
               <div className="form-grid-2">
                 <div className="form-group">
-                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Company Name</label>
-                  <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                     value={clientFormData.name || ''} onChange={(e) => setClientFormData({...clientFormData, name: e.target.value})} placeholder="e.g., Acme Corp" />
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Company Name</label>
+                  <input className="control-bar-input" style={{ width: '100%' }}
+                    value={clientFormData.name || ''} onChange={(e) => setClientFormData({ ...clientFormData, name: e.target.value })} placeholder="e.g., Acme Corp" />
                 </div>
                 <div className="form-group">
-                  <label style={{ display: 'block', fontSize: '0.8rem', marginBottom: '6px', color: '#888' }}>Client Type</label>
-                  <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '12px', color: 'white', borderRadius: '10px' }} 
-                     value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({...clientFormData, type: e.target.value as any})}>
-                     <option value="brand">Brand</option>
-                     <option value="agency">Agency</option>
-                     <option value="government">Government</option>
-                     <option value="partner">Partner</option>
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Client Type</label>
+                  <select className="control-bar-select" style={{ width: '100%' }}
+                    value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({ ...clientFormData, type: e.target.value as any })}>
+                    <option value="brand">Brand</option>
+                    <option value="agency">Agency</option>
+                    <option value="government">Government</option>
+                    <option value="partner">Partner</option>
                   </select>
                 </div>
               </div>
             </div>
             <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end' }}>
-              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsAddClientModalOpen(false)}>Cancel</button>
+              <button className="ghost-button" onClick={() => setIsAddClientModalOpen(false)}>Cancel</button>
               <button className="primary-button" onClick={handleSaveNewClient}>Register Client</button>
             </div>
           </div>
         </div>
       )}
       {isDeleteConfirmOpen && (
-        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(15px)', zIndex: 4000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content" style={{ backgroundColor: '#111', padding: '32px', borderRadius: '20px', width: '100%', maxWidth: '450px', border: '1px solid #450a0a', textAlign: 'center' }}>
-            <div style={{ width: '64px', height: '64px', backgroundColor: '#450a0a', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f87171" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div className="modal-overlay modal-backdrop">
+          <div className="modal-content modal-card" style={{ maxWidth: '450px', textAlign: 'center' }}>
+            <div style={{ width: '64px', height: '64px', backgroundColor: 'var(--red)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 9l4-4m0 4l-4-4" />
               </svg>
             </div>
-            <h2 style={{ marginBottom: '16px', color: 'white' }}>Delete Project?</h2>
-            <p style={{ color: '#aaa', marginBottom: '32px', fontSize: '0.95rem', lineHeight: '1.5' }}>
-              Are you sure you want to delete project <strong style={{ color: 'white' }}>"{deletingProject?.projectName}"</strong>? 
-              <br/>This action is permanent and cannot be undone.
+            <h2 style={{ marginBottom: '16px' }}>Delete Project?</h2>
+            <p className="detail-client" style={{ marginBottom: '32px' }}>
+              Are you sure you want to delete project <strong>"{deletingProject?.projectName}"</strong>?
+              <br />This action is permanent and cannot be undone.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-              <button 
-                className="primary-button" 
-                style={{ background: 'none', border: '1px solid #333', color: 'white' }} 
+              <button
+                className="ghost-button"
                 onClick={() => {
                   setIsDeleteConfirmOpen(false);
                   setDeletingProject(null);
@@ -1738,9 +1851,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               >
                 Cancel
               </button>
-              <button 
-                className="primary-button" 
-                style={{ background: '#7f1d1d', border: '1px solid #991b1b', color: 'white' }} 
+              <button
+                className="primary-button"
+                style={{ background: 'var(--red)', color: 'white' }}
                 onClick={executeDeleteProject}
               >
                 Yes, Delete Project

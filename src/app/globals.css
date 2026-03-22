@@ -34,6 +34,24 @@
   --shadow: 0 12px 30px rgba(79, 57, 30, 0.08);
 }
 
+:root[data-theme="monday"] {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --panel-soft: #f9f9fa;
+  --panel-hover: #e0e4ea;
+  --line: #d0d4e4;
+  --line-strong: #b5b9c9;
+  --text: #323338;
+  --muted: #676879;
+  --muted-soft: #9f9fae;
+  --blue: #0073ea;
+  --green: #00c875;
+  --amber: #fdab3d;
+  --red: #e2445c;
+  --slate: #c4c4c4;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
 html,
 body {
   max-width: 100vw;
@@ -756,6 +774,11 @@ button {
   color: #d1d1de;
 }
 
+.tone-stone {
+  background: rgba(168, 162, 158, 0.18);
+  color: #e7e5e4;
+}
+
 .meta-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1268,7 +1291,7 @@ button {
 .pm-app {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: auto 1fr;
   background: var(--bg);
   color: var(--text);
   font-family: "Plus Jakarta Sans", "Nunito Sans", "Avenir Next", "Segoe UI", sans-serif;
@@ -1281,6 +1304,14 @@ button {
   display: grid;
   gap: 18px;
   align-content: start;
+  width: 248px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.pm-sidebar.collapsed {
+  width: 68px;
 }
 
 .pm-logo {
@@ -1292,6 +1323,21 @@ button {
   font-weight: 700;
   background: linear-gradient(135deg, #ffcb47 0%, #ff9a3f 100%);
   color: #1d1400;
+}
+
+.resource-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--blue), #8caeff);
+  transition: width 0.5s ease-out;
+}
+
+.resource-stack {
+  display: grid;
+  gap: 8px;
+}
+
+.resource-group {
+  margin-bottom: 24px;
 }
 
 .pm-sidebar-group {
@@ -1306,6 +1352,14 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   font-weight: 700;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+
+.pm-sidebar.collapsed .pm-sidebar-label {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
 }
 
 .pm-sidebar-item {
@@ -1316,6 +1370,43 @@ button {
   text-align: left;
   padding: 8px 10px;
   font-size: 13px;
+  display: flex;
+  align-items: center;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.pm-sidebar-item span.label {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.pm-sidebar.collapsed .pm-sidebar-item span.label {
+  opacity: 0;
+  transform: translateX(-10px);
+  pointer-events: none;
+}
+
+.pm-sidebar-toggle {
+  position: absolute;
+  top: 16px;
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  background: var(--panel-soft);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.3s ease;
+}
+
+.pm-sidebar.collapsed .pm-sidebar-toggle {
+  right: 22px;
+  transform: rotate(180deg);
 }
 
 .pm-sidebar-item.active {
@@ -2768,7 +2859,7 @@ button {
 
 .vms-list-grid {
   display: grid !important;
-  grid-template-columns: 48px 2.2fr 1fr 1fr 1.5fr !important; /* Adjusted slightly for name space */
+  grid-template-columns: 48px 2.2fr 1fr 1fr 1.5fr !important;
   gap: 16px !important;
   align-items: center !important;
   padding: 12px 20px !important;
@@ -2778,10 +2869,15 @@ button {
   border-bottom: 1px solid var(--line);
   transition: all 0.2s ease;
   min-width: min-content;
+  color: var(--text) !important;
 }
 
 .vms-list-grid:hover {
   background: var(--panel-hover) !important;
+}
+
+:root:not([data-theme="light"]):not([data-theme="monday"]) .vms-list-grid:hover {
+  background: transparent !important;
 }
 
 .vms-list-grid.active {
@@ -3493,6 +3589,164 @@ button {
 
 :root:not([data-theme="light"]) .notion-shell .directory-card:hover {
   border-color: rgba(255, 255, 255, 0.24);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Monday.com Theme Overrides
+/* -------------------------------------------------------------------------- */
+
+:root[data-theme="monday"] {
+  --bg: #f0f3f6;
+  --panel: #ffffff;
+  --panel-soft: #f8f9fa;
+  --panel-hover: rgba(0, 0, 0, 0.04);
+  --line: rgba(0, 0, 0, 0.08);
+  --text: #323338;
+  --muted: #676879;
+  --muted-soft: #C5C7D0;
+  --blue: #0073ea;
+  --green: #00c875;
+  --amber: #fdab3d;
+  --red: #e2445c;
+  --slate: #c4c4c4;
+}
+
+:root[data-theme="monday"] .workspace-topbar,
+:root[data-theme="monday"] .toolbar-panel,
+:root[data-theme="monday"] .panel,
+:root[data-theme="monday"] .section-card,
+:root[data-theme="monday"] .summary-card,
+:root[data-theme="monday"] .feature-panel,
+:root[data-theme="monday"] .workflow-card,
+:root[data-theme="monday"] .metric-card,
+:root[data-theme="monday"] .warning-card,
+:root[data-theme="monday"] .project-card,
+:root[data-theme="monday"] .board-card,
+:root[data-theme="monday"] .phase-card,
+:root[data-theme="monday"] .detail-block,
+:root[data-theme="monday"] .detail-summary article,
+:root[data-theme="monday"] .document-card,
+:root[data-theme="monday"] .linked-doc-card,
+:root[data-theme="monday"] .activity-card,
+:root[data-theme="monday"] .board-column {
+  border-radius: 8px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+:root[data-theme="monday"] .chip,
+:root[data-theme="monday"] .ghost-button,
+:root[data-theme="monday"] .primary-button {
+  border-radius: 4px;
+}
+
+:root[data-theme="monday"] .status-pill,
+:root[data-theme="monday"] .section-pill,
+:root[data-theme="monday"] .category-pill {
+  border-radius: 4px;
+  color: #ffffff;
+}
+
+:root[data-theme="monday"] .status-pill.tone-green,
+:root[data-theme="monday"] .category-pill.tone-green {
+  background: var(--green);
+}
+:root[data-theme="monday"] .status-pill.tone-amber,
+:root[data-theme="monday"] .category-pill.tone-amber {
+  background: var(--amber);
+}
+:root[data-theme="monday"] .status-pill.tone-red,
+:root[data-theme="monday"] .category-pill.tone-red {
+  background: var(--red);
+}
+:root[data-theme="monday"] .status-pill.tone-slate,
+:root[data-theme="monday"] .category-pill.tone-slate {
+  background: var(--slate);
+  color: #323338;
+}
+:root[data-theme="monday"] .status-pill.tone-blue,
+:root[data-theme="monday"] .category-pill.tone-blue,
+:root[data-theme="monday"] .section-pill {
+  background: var(--blue);
+}
+
+:root[data-theme="monday"] .status-pill.tone-stone,
+:root[data-theme="monday"] .category-pill.tone-stone {
+  background: #a8a29e;
+  color: #ffffff;
+}
+
+:root[data-theme="monday"] .project-table .table-row {
+  border-radius: 4px;
+  border-bottom: 1px solid var(--line);
+  background: #ffffff;
+  margin-bottom: 2px;
+}
+:root[data-theme="monday"] .project-table .table-row:hover {
+  background: #f4f5f7;
+}
+
+:root[data-theme="monday"] .table-row.active {
+  background: #e5f4ff !important;
+  color: var(--text) !important;
+  border-left: 4px solid var(--blue);
+}
+
+:root[data-theme="monday"] .client-line,
+:root[data-theme="monday"] .meta-grid dd,
+:root[data-theme="monday"] .task-row span,
+:root[data-theme="monday"] .project-card h3,
+:root[data-theme="monday"] .board-card h3,
+:root[data-theme="monday"] .detail-block h3,
+:root[data-theme="monday"] .document-card h3,
+:root[data-theme="monday"] .board-column-head strong {
+  color: #323338;
+}
+
+:root[data-theme="monday"] .mini-meta,
+:root[data-theme="monday"] .bullet-list li,
+:root[data-theme="monday"] .plain-list li,
+:root[data-theme="monday"] .phase-list li,
+:root[data-theme="monday"] .detail-client,
+:root[data-theme="monday"] .document-value,
+:root[data-theme="monday"] .task-row small,
+:root[data-theme="monday"] .doc-muted,
+:root[data-theme="monday"] .database-tools,
+:root[data-theme="monday"] .workspace-topbar,
+:root[data-theme="monday"] .editor-grid span,
+:root[data-theme="monday"] .board-column-head span {
+  color: #676879;
+}
+
+:root[data-theme="monday"] .section-card span,
+:root[data-theme="monday"] .summary-card span,
+:root[data-theme="monday"] .detail-summary span,
+:root[data-theme="monday"] .meta-grid dt,
+:root[data-theme="monday"] .metric-card span,
+:root[data-theme="monday"] .editor-grid span,
+:root[data-theme="monday"] .workspace-actions span,
+:root[data-theme="monday"] .workspace-breadcrumbs span,
+:root[data-theme="monday"] .panel-kicker,
+:root[data-theme="monday"] .eyebrow {
+  color: #676879;
+}
+
+:root[data-theme="monday"] .editor-grid input,
+:root[data-theme="monday"] .editor-grid textarea,
+:root[data-theme="monday"] .document-input,
+:root[data-theme="monday"] .editor-grid select,
+:root[data-theme="monday"] .table-row input,
+:root[data-theme="monday"] .table-row select,
+:root[data-theme="monday"] .milestone-row input:not([type="checkbox"]),
+:root[data-theme="monday"] .control-bar input,
+:root[data-theme="monday"] .control-bar select,
+:root[data-theme="monday"] .modal-controls select,
+:root[data-theme="monday"] .modal-controls textarea {
+  background: #ffffff;
+  color: #323338;
+  border-color: #d0d4e4;
+  border-radius: 4px;
 }
 
 @media (max-width: 1100px) {

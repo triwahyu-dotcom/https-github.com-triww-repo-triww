@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
-import { ProjectRecord, CRMClient, CRMDashboardData, CRMContact } from "@/lib/project/types";
+import { ProjectRecord, CRMClient, CRMDashboardData } from "@/lib/project/types";
 
 const CLIENTS_DB_PATH = path.join(process.cwd(), "data/clients.json");
 

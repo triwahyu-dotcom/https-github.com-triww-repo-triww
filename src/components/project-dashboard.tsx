@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CSSProperties, WheelEvent, useEffect, useState, useTransition } from "react";
+import { CSSProperties, WheelEvent, useEffect, useState, useTransition, useCallback } from "react";
 
 import {
   ProjectDashboardData,
@@ -15,18 +15,8 @@ import {
 } from "@/lib/project/types";
 import { WorkspaceShell } from "./layout/workspace-shell";
 import { SummaryCard } from "./ui/summary-card";
-import { StatusPill } from "./ui/status-pill";
 
 type ViewMode = "overview" | "list" | "table" | "board" | "documents";
-type EditableField =
-  | "projectName"
-  | "client"
-  | "eventDate"
-  | "contactPerson"
-  | "progress"
-  | "status"
-  | "serviceLine"
-  | "remark";
 
 const VIEW_OPTIONS: { id: ViewMode; label: string }[] = [
   { id: "overview", label: "Overview" },
@@ -188,26 +178,22 @@ function mergeProjectsWithInitial(local: ProjectRecord[], server: ProjectRecord[
 }
 
 export function ProjectDashboard({ initialData }: { initialData: ProjectDashboardData }) {
-  const [projects, setProjects] = useState(() => {
-    if (typeof window === "undefined") {
-      return initialData.projects;
-    }
+  const [projects, setProjects] = useState<ProjectRecord[]>(initialData.projects);
 
+  useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      return initialData.projects;
-    }
+    if (!saved) return;
 
     try {
       const parsed = JSON.parse(saved) as ProjectRecord[];
-      return Array.isArray(parsed) && parsed.length > 0
-        ? mergeProjectsWithInitial(parsed, initialData.projects)
-        : initialData.projects;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setProjects(mergeProjectsWithInitial(parsed, initialData.projects));
+      }
     } catch {
       window.localStorage.removeItem(STORAGE_KEY);
-      return initialData.projects;
     }
-  });
+  }, [initialData.projects]);
   const [view, setView] = useState<ViewMode>("overview");
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<WorkflowStage | "all">("all");
@@ -219,6 +205,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [dragMoveTargetStage, setDragMoveTargetStage] = useState<WorkflowStage>("lead");
   const [dragMoveOpen, setDragMoveOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [editMode, setEditMode] = useState(false);
   const [draggingProjectId, setDraggingProjectId] = useState<string | null>(null);
   const [boardZoom, setBoardZoom] = useState(1);
@@ -256,6 +243,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchClients();
   }, []);
 
@@ -504,48 +492,6 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     );
   }
 
-  function updateProjectField(projectId: string, field: EditableField, value: string) {
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return;
-
-    const updated = {
-      ...project,
-      [field]: value
-    };
-
-    // Update local state and storage
-    setProjects((current) => current.map((p) => p.id === projectId ? updated : p));
-
-    // Persist to API
-    fetch("/api/projects", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated),
-    });
-  }
-
-  function updateProjectMeta(projectId: string, key: "owners" | "projectValue", value: string) {
-    const project = projects.find(p => p.id === projectId);
-    if (!project) return;
-
-    let updated: ProjectRecord;
-    if (key === "owners") {
-      const owners = value.split(",").map((item) => item.trim()).filter(Boolean);
-      updated = { ...project, owners };
-    } else {
-      const projectValue = parseCurrency(value);
-      updated = { ...project, projectValue, projectValueLabel: projectValue ? formatCurrency(projectValue) : "-" };
-    }
-
-    setProjects((current) => current.map((p) => p.id === projectId ? updated : p));
-
-    fetch("/api/projects", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated),
-    });
-  }
-
   function updateDocument(projectId: string, documentId: string, value: string) {
     setProjects((current) =>
       current.map((project) =>
@@ -595,7 +541,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     if (openDetail) setDetailOpen(true);
   }
 
-  function applyStageMove(projectId: string, targetStage: WorkflowStage, note?: string) {
+  const applyStageMove = useCallback((projectId: string, targetStage: WorkflowStage, note?: string) => {
     const project = projects.find(p => p.id === projectId);
     if (!project) return;
 
@@ -632,7 +578,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
     });
-  }
+  }, [projects]);
 
   function handleBoardDrop(targetStage: WorkflowStage) {
     if (!draggingProjectId) return;
@@ -1732,7 +1678,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <div className="form-group">
                   <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Stage</label>
                   <select className="control-bar-select" style={{ width: '100%' }}
-                    value={projectFormData.currentStage || 'lead'} onChange={(e) => setProjectFormData({ ...projectFormData, currentStage: e.target.value as any })}>
+                    value={projectFormData.currentStage || 'lead'} onChange={(e) => setProjectFormData({ ...projectFormData, currentStage: e.target.value as WorkflowStage })}>
                     {STAGE_OPTIONS.map(s => <option key={s.key} value={s.key}>{s.label}</option>)}
                   </select>
                 </div>
@@ -1812,7 +1758,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <div className="form-group">
                   <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Client Type</label>
                   <select className="control-bar-select" style={{ width: '100%' }}
-                    value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({ ...clientFormData, type: e.target.value as any })}>
+                    value={clientFormData.type || 'brand'} onChange={(e) => setClientFormData({ ...clientFormData, type: e.target.value as "brand" | "agency" | "government" | "partner" })}>
                     <option value="brand">Brand</option>
                     <option value="agency">Agency</option>
                     <option value="government">Government</option>
@@ -1838,7 +1784,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             </div>
             <h2 style={{ marginBottom: '16px' }}>Delete Project?</h2>
             <p className="detail-client" style={{ marginBottom: '32px' }}>
-              Are you sure you want to delete project <strong>"{deletingProject?.projectName}"</strong>?
+              Are you sure you want to delete project <strong>&quot;{deletingProject?.projectName}&quot;</strong>?
               <br />This action is permanent and cannot be undone.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>

@@ -15,6 +15,7 @@ async function cleanup() {
 
   // Remove the bad 'we-do-generali' entry with newline in name
   const before = clients.length;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clients = clients.filter((c: any) => {
     if (c.id === "we-do-generali") {
       console.log(`Removing from local: ${c.id} (name: ${JSON.stringify(c.name)})`);

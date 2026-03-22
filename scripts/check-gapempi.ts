@@ -16,13 +16,16 @@ async function investigate() {
   console.log("=== LOCAL DATA ===");
   if (existsSync(CLIENTS_PATH)) {
       const clients = JSON.parse(readFileSync(CLIENTS_PATH, "utf8"));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gapempiClients = (clients as any[]).filter((c: any) => c.name.toLowerCase().includes("gapempi") || (c.id && c.id.toLowerCase().includes("gapempi")));
       console.log(`Local Clients containing 'Gapempi': ${JSON.stringify(gapempiClients, null, 2)}`);
   }
   
   if (existsSync(PROJECTS_PATH)) {
       const projects = JSON.parse(readFileSync(PROJECTS_PATH, "utf8"));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gapempiProjects = (projects as any[]).filter((p: any) => p.client && p.client.toLowerCase().includes("gapempi"));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       console.log(`Local Projects containing 'Gapempi': ${gapempiProjects.length} found. IDs: ${gapempiProjects.map((p: any) => p.id).join(', ')}`);
   }
 

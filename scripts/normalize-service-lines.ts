@@ -22,6 +22,7 @@ async function normalizeServiceLines() {
   const projectsData = JSON.parse(readFileSync(PROJECTS_DB_PATH, "utf-8"));
 
   let updatedCount = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const projectsToUpdate: any[] = [];
 
   for (const p of projectsData) {

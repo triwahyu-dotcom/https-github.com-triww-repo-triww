@@ -1,14 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { CSSProperties, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Locale, reviewStatusLabel, t } from "@/lib/vendor/i18n";
 import { DashboardData, ReviewStatus, VendorClassification, VendorDetail, VendorLifecycleStatus, VendorSummary } from "@/lib/vendor/types";
 import { WorkspaceShell } from "./layout/workspace-shell";
 import { SplitPane } from "./ui/split-pane";
 import { SummaryCard } from "./ui/summary-card";
-import { StatusPill } from "./ui/status-pill";
 
 type ViewId =
   | "by_status"
@@ -374,7 +373,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     return savedFilters[currentView] ?? { search: "", service: "", location: "", reviewStatus: "", classification: "" };
   });
 
-  const matchesFilters = (vendor: VendorSummary, currentFilters: Filters) => {
+const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filters) => {
     const keyword = currentFilters.search.trim().toLowerCase();
 
     if (keyword) {
@@ -404,11 +403,11 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     }
 
     return true;
-  };
+  }, [dashboard.vendorDetails]);
 
   const filteredVendors = useMemo(
     () => dashboard.vendors.filter((vendor) => matchesFilters(vendor, filters)),
-    [dashboard.vendors, filters],
+    [dashboard.vendors, filters, matchesFilters],
   );
   const selectedVendors = useMemo(
     () => filteredVendors.filter((vendor) => selectedVendorIds.includes(vendor.id)),
@@ -756,12 +755,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     const next = { ...savedFilters, [slot]: filters };
     setSavedFilters(next);
     localStorage.setItem("vendor_filters_v1", JSON.stringify(next));
-  }
-
-  function applySavedFilter(slot: "slot1" | "slot2" | "slot3") {
-    const saved = savedFilters[slot];
-    if (!saved) return;
-    setFilters(saved);
   }
 
   const whatsappNumber = normalizePhoneToWhatsApp(selectedVendor?.contacts[0]?.phone || "");

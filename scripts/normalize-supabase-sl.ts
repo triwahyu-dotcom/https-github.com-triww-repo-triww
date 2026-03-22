@@ -35,6 +35,7 @@ async function normalizeSupabaseServiceLines() {
 
   const projectsData = dbProjects.map(row => row.data);
   let updatedCount = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const projectsToUpdate: any[] = [];
 
   for (const p of projectsData) {

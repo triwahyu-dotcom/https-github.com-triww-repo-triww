@@ -25,6 +25,7 @@ async function fixMirella() {
   console.log("Adding MIRELLA to local clients.json...");
   if (existsSync(CLIENTS_PATH)) {
     const clients = JSON.parse(readFileSync(CLIENTS_PATH, "utf8"));
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const exists = clients.some((c: any) => c.id === "mirella");
     if (!exists) {
       clients.push(mirellaClient);

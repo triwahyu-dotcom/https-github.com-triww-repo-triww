@@ -20,6 +20,7 @@ async function checkSupabase() {
   const clients = new Set();
   const rawData = data || [];
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   for (const item of (rawData as any[])) {
     const p = item.data;
     if (p && p.client) {
@@ -36,6 +37,7 @@ async function checkSupabase() {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function sorted(iterable: Iterable<any>): any[] {
     return Array.from(iterable).sort();
 }

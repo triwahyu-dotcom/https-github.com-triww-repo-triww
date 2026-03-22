@@ -19,13 +19,16 @@ export function WorkspaceShell({
 }: WorkspaceShellProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [theme, setTheme] = useState("dark");
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("pm-theme") || "dark";
+    }
+    return "dark";
+  });
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("pm-theme") || "dark";
-    setTheme(savedTheme);
-    document.documentElement.setAttribute("data-theme", savedTheme);
-  }, []);
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);

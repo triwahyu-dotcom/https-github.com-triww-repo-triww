@@ -20,6 +20,7 @@ async function registerVirtualClients() {
   // Create a map of existing strict clients by lowercase name and aliases
   const officialNames = new Set<string>();
   
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clientsData.forEach((c: any) => {
     officialNames.add(c.name.toLowerCase().trim());
     if (c.aliases) {
@@ -27,6 +28,7 @@ async function registerVirtualClients() {
     }
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const newClientsToRegister = new Map<string, any>();
 
   // Find clients in projects that aren't official yet

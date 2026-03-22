@@ -5,7 +5,6 @@ import Link from "next/link";
 import { CRMDashboardData, CRMClient } from "@/lib/project/types";
 import { WorkspaceShell } from "./layout/workspace-shell";
 import { SummaryCard } from "./ui/summary-card";
-import { StatusPill } from "./ui/status-pill";
 
 interface Props {
   initialData: CRMDashboardData;
@@ -292,7 +291,7 @@ export function CRMDashboard({ initialData }: Props) {
               <div className="form-group">
                 <label className="mini-meta" style={{ marginBottom: '4px' }}>Status</label>
                 <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={formData.status || 'lead'} onChange={(e) => setFormData({...formData, status: e.target.value as any})}>
+                   value={formData.status || 'lead'} onChange={(e) => setFormData({...formData, status: e.target.value as 'active' | 'lead'})}>
                    <option value="active">Active Client</option>
                    <option value="lead">Pipeline Lead</option>
                 </select>

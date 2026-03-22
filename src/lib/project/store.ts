@@ -50,18 +50,6 @@ export async function readJsonProjects(): Promise<ProjectRecord[]> {
   return [];
 }
 
-async function saveJsonProjects(projects: ProjectRecord[]) {
-  // Always update local storage as a fallback
-  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(projects, null, 2));
-
-  // If Supabase is connected, sync there too
-  if (isSupabaseConfigured()) {
-    for (const project of projects) {
-      await supabase!.from('projects').upsert({ id: project.id, data: project });
-    }
-  }
-}
-
 function sectionFromStage(stage: WorkflowStage): ProjectSection {
   if (stage === "lost") return "failed";
   if (stage === "completed") return "billed";
@@ -237,18 +225,6 @@ async function readJsonClients(): Promise<CRMClient[]> {
     }
   }
   return [];
-}
-
-async function saveJsonClients(clients: CRMClient[]) {
-  // Always update local storage
-  writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(clients, null, 2));
-
-  // Sync to Supabase if connected
-  if (isSupabaseConfigured()) {
-    for (const client of clients) {
-      await supabase!.from('clients').upsert({ id: client.id, data: client });
-    }
-  }
 }
 
 export async function getJsonClients(): Promise<CRMClient[]> {

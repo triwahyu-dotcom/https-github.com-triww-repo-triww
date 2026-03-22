@@ -18,9 +18,10 @@ export async function POST(req: Request) {
     
     await updateJsonClient(newClient);
     return NextResponse.json({ success: true, client: newClient });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("API POST clients error:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -29,8 +30,9 @@ export async function PUT(req: Request) {
     const updatedClient = await req.json();
     await updateJsonClient(updatedClient);
     return NextResponse.json({ success: true, client: updatedClient });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("API PUT clients error:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

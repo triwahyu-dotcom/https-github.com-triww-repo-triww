@@ -18,9 +18,10 @@ export async function POST(req: Request) {
     
     await updateJsonProject(newProject);
     return NextResponse.json({ success: true, project: newProject });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("API POST projects error:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }
 
@@ -29,8 +30,9 @@ export async function PUT(req: Request) {
     const updatedProject = await req.json();
     await updateJsonProject(updatedProject);
     return NextResponse.json({ success: true, project: updatedProject });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("API PUT projects error:", err);
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const message = err instanceof Error ? err.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message }, { status: 500 });
   }
 }

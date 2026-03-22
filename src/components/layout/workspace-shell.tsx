@@ -19,16 +19,14 @@ export function WorkspaceShell({
 }: WorkspaceShellProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("pm-theme") || "dark";
-    }
-    return "dark";
-  });
+  const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [theme]);
+    const savedTheme = localStorage.getItem("pm-theme") || "dark";
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setTheme(savedTheme);
+    document.documentElement.setAttribute("data-theme", savedTheme);
+  }, []);
 
   const handleThemeChange = (newTheme: string) => {
     setTheme(newTheme);

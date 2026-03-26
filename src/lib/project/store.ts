@@ -144,7 +144,8 @@ export function normalizeProject(project: Partial<ProjectRecord>): ProjectRecord
     searchableText: "",
     assignedVendors: project.assignedVendors || [],
     vendorShortlist: project.vendorShortlist || [],
-    vendorRequirements: project.vendorRequirements || []
+    vendorRequirements: project.vendorRequirements || [],
+    mainFolder: project.mainFolder || ""
   };
 
   normalized.searchableText = [
@@ -272,7 +273,6 @@ const PHASE_LABELS: Record<ProjectPhaseKey, string> = {
 
 const STAGE_LABELS: Record<WorkflowStage, string> = {
   lead: "Lead",
-  qualified: "Qualified",
   pitching: "Pitching",
   negotiation: "Negotiation",
   execution: "Execution",
@@ -284,7 +284,6 @@ const STAGE_LABELS: Record<WorkflowStage, string> = {
 
 const STAGE_ORDER: WorkflowStage[] = [
   "lead",
-  "qualified",
   "pitching",
   "negotiation",
   "execution",
@@ -299,13 +298,7 @@ const WORKFLOW_SUGGESTIONS: WorkflowSuggestion[] = [
     stage: "lead",
     label: "Lead",
     summary: "Masuk dari hasil networking, repeat client, atau import tracker.",
-    rules: ["Isi client, nama project, service line, dan owner", "Tambahkan estimasi tanggal event bila sudah ada"],
-  },
-  {
-    stage: "qualified",
-    label: "Qualified",
-    summary: "Validasi kebutuhan client dan kumpulkan brief dasar sebelum pitching.",
-    rules: ["Masukkan brief status", "Pastikan PIC internal dan CP client sudah jelas"],
+    rules: ["Isi client, nama project, service line, dan owner", "Tambahkan estimasi tanggal event bila sudah ada", "Masukkan brief status bila sudah ada"],
   },
   {
     stage: "pitching",
@@ -425,7 +418,6 @@ function deriveStage(section: ProjectSection, phases: ProjectPhase[], status: st
   if (executionReady || text.includes("order")) return "execution";
   if (revisionReady) return "negotiation";
   if (pitchingReady) return "pitching";
-  if (briefReady || text.includes("proposed")) return "qualified";
   return "lead";
 }
 
@@ -446,7 +438,7 @@ function deriveHealth(section: ProjectSection, status: string, progress: string,
 
 function deriveDocuments(phases: ProjectPhase[]) {
   const stageByPhase: Record<ProjectPhaseKey, WorkflowStage> = {
-    brief: "qualified",
+    brief: "lead",
     pitching: "pitching",
     revision: "negotiation",
     execution: "execution",
@@ -483,7 +475,7 @@ function deriveTasks(phases: ProjectPhase[]) {
       title: item.label,
       stage:
         phase.key === "brief"
-          ? "qualified"
+          ? "lead"
           : phase.key === "pitching"
             ? "pitching"
             : phase.key === "revision"
@@ -769,7 +761,7 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
       activeProjects: projects.filter((project) =>
         ["execution", "reporting", "finance"].includes(project.currentStage),
       ).length,
-      leadsProjects: projects.filter((project) => ["lead", "qualified", "pitching"].includes(project.currentStage))
+      leadsProjects: projects.filter((project) => ["lead", "pitching"].includes(project.currentStage))
         .length,
       totalPipelineValue,
       totalPipelineValueLabel: formatCurrency(totalPipelineValue),

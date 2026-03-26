@@ -138,6 +138,36 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+const SERVICE_NAME_MAP: Record<string, string> = {
+  "Advertisting": "Advertising",
+  "Ringging": "Rigging & Booth Construction",
+  "& Booth": "Booth Construction",
+  "Talent Managemenr Service": "Talent Management",
+  "Talent Management Services": "Talent Management",
+  "Stage Show Management Services": "Show Management",
+  "Stage Show Management System": "Show Management",
+  "Stage Show Management": "Show Management",
+  "Show Management": "Show Management",
+  "Dancer & Choreograpers": "Dancers & Choreographers",
+  "Designer 3D Motion Graphic": "Designer 3D Motion Graphics",
+  "Designer 3D Motion Graphics & Animation": "Designer 3D Motion Graphics",
+  "Floor Team": "Production Floor Team",
+  "Lain Lain": "Others",
+  "Option 18": "General Service",
+};
+
+function normalizeServiceName(service: string) {
+  const trimmed = service.trim().replace(/\s+/g, " ");
+  // Apply specific mapping if exists
+  const mapped = SERVICE_NAME_MAP[trimmed];
+  if (mapped) return mapped;
+  
+  // Default normalization for booth if not explicitly mapped
+  if (/^&\s*booth$/i.test(trimmed)) return "Booth Construction";
+  
+  return trimmed;
+}
+
 function hashRow(rawSource: Record<string, string>) {
   return createHash("sha256").update(JSON.stringify(rawSource)).digest("hex");
 }
@@ -192,12 +222,6 @@ function createDocument(
 }
 
 function splitServices(value: string) {
-  const normalizeServiceName = (service: string) => {
-    const normalized = service.trim().replace(/\s+/g, " ");
-    if (/^&\s*booth$/i.test(normalized)) return "Booth";
-    return normalized;
-  };
-
   return value
     .split(",")
     .map((item) => normalizeServiceName(item))
@@ -722,7 +746,7 @@ function buildVendorSummary(
       new Set(
         state.vendorServices
           .filter((service) => service.vendorId === vendor.id)
-          .map((service) => service.name.trim().replace(/^&\s*Booth$/i, "Booth")),
+          .map((service) => normalizeServiceName(service.name)),
       ),
     ).sort(),
     reviewStatus: latestReview?.status ?? "new",
@@ -840,7 +864,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     })),
     importRuns: state.importRuns.slice(0, 10),
     services: Array.from(
-      new Set(state.vendorServices.map((service) => service.name.trim().replace(/^&\s*Booth$/i, "Booth"))),
+      new Set(state.vendorServices.map((service) => normalizeServiceName(service.name))),
     ).sort(),
     locations: Array.from(new Set(state.vendors.map((vendor) => vendor.coverageArea).filter(Boolean))).sort(),
     sourcePath: SOURCE_PATH,
@@ -1067,6 +1091,54 @@ export async function updateVendorReview(vendorId: string, status: ReviewStatus,
   const opsState = await ensureVendorOpsState(state.vendors);
 
   return buildVendorDetail(state, state.vendors.find((vendor) => vendor.id === vendorId)!, opsState);
+}
+
+export async function updateVendorIdentity(
+  vendorId: string,
+  updates: {
+    name?: string;
+    email?: string;
+    classification?: VendorClassification;
+    coverageArea?: string;
+    websiteUrl?: string;
+    serviceNames?: string[];
+  },
+) {
+  const state = await ensureSeededState();
+  const vendor = state.vendors.find((item) => item.id === vendorId);
+  if (!vendor) {
+    throw new Error("Vendor not found");
+  }
+
+  const timestamp = nowIso();
+
+  if (updates.name !== undefined) vendor.name = updates.name;
+  if (updates.email !== undefined) vendor.email = updates.email;
+  if (updates.classification !== undefined) vendor.classification = updates.classification;
+  if (updates.coverageArea !== undefined) vendor.coverageArea = updates.coverageArea;
+  if (updates.websiteUrl !== undefined) vendor.websiteUrl = updates.websiteUrl;
+
+  if (updates.serviceNames !== undefined) {
+    // Replace services
+    state.vendorServices = state.vendorServices.filter((item) => item.vendorId !== vendorId);
+    state.vendorServices.push(
+      ...updates.serviceNames.map((serviceName) => ({
+        id: randomUUID(),
+        vendorId,
+        name: normalizeServiceName(serviceName),
+      })),
+    );
+    // Update displayType summary
+    vendor.displayType = updates.serviceNames.join(", ");
+  }
+
+  vendor.updatedAt = timestamp;
+  await writeState(state);
+  
+  const opsState = await ensureVendorOpsState(state.vendors);
+  await appendVendorAuditEntry(vendorId, "identity_updated", "Vendor identity manually adjusted by admin.");
+  
+  return buildVendorDetail(state, vendor, opsState);
 }
 
 export async function submitVendorIntake(payload: VendorIntakePayload) {

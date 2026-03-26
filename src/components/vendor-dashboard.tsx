@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 import { Locale, reviewStatusLabel, t } from "@/lib/vendor/i18n";
 import { DashboardData, ReviewStatus, VendorClassification, VendorDetail, VendorLifecycleStatus, VendorSummary } from "@/lib/vendor/types";
 import { WorkspaceShell } from "./layout/workspace-shell";
-import { SplitPane } from "./ui/split-pane";
+import { Drawer } from "./ui/drawer";
 import { SummaryCard } from "./ui/summary-card";
 
 type ViewId =
@@ -125,7 +125,7 @@ const VIEW_TITLES: Record<ViewId, string> = {
   outbox: "Outbox",
 };
 
-const THEME_STORAGE_KEY = "juara-project-tracker-theme";
+const STORAGE_KEY = "juara-vendor-management-dashboard-v1";
 
 function formatDate(value: string, locale: Locale) {
   if (!value) {
@@ -307,16 +307,9 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [locale, setLocale] = useState<Locale>("id");
   const [view, setView] = useState<ViewId>("all_vendors");
   const [detailMode, setDetailMode] = useState<DetailMode>("summary");
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") {
-      return "dark";
-    }
-    return window.localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
-  });
-  const [listPaneWidth, setListPaneWidth] = useState(54);
-  const [isResizing, setIsResizing] = useState(false);
   const [dashboard, setDashboard] = useState(initialData);
   const [selectedVendorId, setSelectedVendorId] = useState(initialData.vendors[0]?.id ?? "");
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [reviewStatus, setReviewStatus] = useState<ReviewStatus>(initialVendor?.reviewStatus ?? "new");
   const [reviewNote, setReviewNote] = useState(initialVendor?.latestReviewNote ?? "");
   const [lifecycleStatus, setLifecycleStatus] = useState<VendorLifecycleStatus>(initialVendor?.lifecycleStatus ?? "submitted");
@@ -354,6 +347,8 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [bulkNote, setBulkNote] = useState("");
   const [bulkRevisionTemplateId, setBulkRevisionTemplateId] = useState("docs_basic");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isEditVendorModalOpen, setIsEditVendorModalOpen] = useState(false);
+  const [editVendorFormData, setEditVendorFormData] = useState<Partial<VendorDetail>>({});
   const [savedFilters, setSavedFilters] = useState<Record<string, Filters>>(() => {
     if (typeof window === "undefined") {
       return {};
@@ -517,6 +512,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
   }
 
   function openVendor(vendor: VendorSummary) {
+    setIsDrawerOpen(true);
     setSelectedVendorId(vendor.id);
     setReviewStatus(vendor.reviewStatus);
     setReviewNote(vendor.latestReviewNote);
@@ -767,34 +763,12 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
       ].filter((item) => item.url)
     : [];
 
+  // Theme handled by WorkspaceShell
   useEffect(() => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dashboard));
+  }, [dashboard]);
 
-  useEffect(() => {
-    if (!isResizing) {
-      return;
-    }
 
-    function handlePointerMove(event: PointerEvent) {
-      const layout = layoutRef.current;
-      if (!layout) return;
-
-      const rect = layout.getBoundingClientRect();
-      const nextWidth = ((event.clientX - rect.left) / rect.width) * 100;
-      setListPaneWidth(clampPaneWidth(nextWidth));
-    }
-
-    function stopResize() {
-      setIsResizing(false);
-    }
-
-    return () => {
-      window.removeEventListener("pointermove", handlePointerMove);
-      window.removeEventListener("pointerup", stopResize);
-    };
-  }, [isResizing]);
 
   const headerActions = (
     <>
@@ -814,9 +788,6 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
       </button>
       <button className="primary-button" style={{ borderRadius: '8px', padding: '0 16px', height: '36px' }} onClick={handleSync} type="button">
         {syncPending ? "..." : t(locale, "syncNow")}
-      </button>
-      <button className="ghost-button" onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))} type="button">
-        {theme === "dark" ? "Light" : "Dark"}
       </button>
       <button className="ghost-button" onClick={handleLogout} type="button">
         Logout
@@ -958,598 +929,452 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
       </div>
 
       {(view === "all_vendors" || view === "sync_log" || view === "outbox") && (
-        <SplitPane
-          initialWidth={listPaneWidth}
-          left={
-            <div className={`notion-list ${isVendorListView ? "vendor-list-view" : ""}`}>
-              <div className="panel-section-header">
-                <div>
-                  <p className="panel-label">Vendor Directory</p>
-                  <h3>{VIEW_TITLES[view]}</h3>
-                </div>
-                <span className="panel-count">{activeListCount} item(s)</span>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+          <div className={`notion-list ${isVendorListView ? "vendor-list-view" : ""}`} style={{ width: '100%', flex: 1, overflow: 'auto' }}>
+            <div className="panel-section-header">
+              <div>
+                <p className="panel-label">Vendor Directory</p>
+                <h3>{VIEW_TITLES[view]}</h3>
               </div>
-              
-              {view === "all_vendors" ? (
-                <div className="bulk-actions-panel">
-                  <div className="bulk-actions-row">
-                    <button className="ghost-button" onClick={toggleSelectAllFiltered} type="button">
-                      {selectedVendors.length === filteredVendors.length && filteredVendors.length > 0 ? "Unselect all" : "Select all"}
-                    </button>
-                    <span>{selectedVendors.length} selected</span>
-                  </div>
-                  <div className="bulk-actions-row">
-                    <select value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value as ReviewStatus)}>
-                      {REVIEW_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {reviewStatusLabel(locale, status)}
-                        </option>
-                      ))}
-                    </select>
-                    <input value={bulkNote} onChange={(event) => setBulkNote(event.target.value)} placeholder="Bulk review note" />
-                    <button className="ghost-button" onClick={handleBulkReviewSave} type="button" disabled={selectedVendors.length === 0}>
-                      {opsPending ? "..." : "Apply status"}
-                    </button>
-                  </div>
-                  <div className="bulk-actions-row">
-                    <select value={bulkRevisionTemplateId} onChange={(event) => setBulkRevisionTemplateId(event.target.value)}>
-                      {REVISION_TEMPLATES.map((template) => (
-                        <option key={template.id} value={template.id}>
-                          {template.label}
-                        </option>
-                      ))}
-                    </select>
-                    <button className="ghost-button" onClick={handleBulkRequestRevision} type="button" disabled={selectedVendors.length === 0}>
-                      {opsPending ? "..." : "Request revision (bulk)"}
-                    </button>
-                  </div>
+              <span className="panel-count">{activeListCount} item(s)</span>
+            </div>
+            
+            {view === "all_vendors" ? (
+              <div className="bulk-actions-panel">
+                <div className="bulk-actions-row">
+                  <button className="ghost-button" onClick={toggleSelectAllFiltered} type="button">
+                    {selectedVendors.length === filteredVendors.length && filteredVendors.length > 0 ? "Unselect all" : "Select all"}
+                  </button>
+                  <span>{selectedVendors.length} selected</span>
                 </div>
-              ) : null}
+                <div className="bulk-actions-row">
+                  <select value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value as ReviewStatus)}>
+                    {REVIEW_STATUSES.map((status) => (
+                      <option key={status} value={status}>
+                        {reviewStatusLabel(locale, status)}
+                      </option>
+                    ))}
+                  </select>
+                  <input value={bulkNote} onChange={(event) => setBulkNote(event.target.value)} placeholder="Bulk review note" />
+                  <button className="ghost-button" onClick={handleBulkReviewSave} type="button" disabled={selectedVendors.length === 0}>
+                    {opsPending ? "..." : "Apply status"}
+                  </button>
+                </div>
+                <div className="bulk-actions-row">
+                  <select value={bulkRevisionTemplateId} onChange={(event) => setBulkRevisionTemplateId(event.target.value)}>
+                    {REVISION_TEMPLATES.map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button className="ghost-button" onClick={handleBulkRequestRevision} type="button" disabled={selectedVendors.length === 0}>
+                    {opsPending ? "..." : "Request revision (bulk)"}
+                  </button>
+                </div>
+              </div>
+            ) : null}
 
-                <div className="vms-list-stack vendor-stack">
-                  <div className="vms-list-grid vms-list-header">
-                    <div />
-                    <span>Vendor Name</span>
-                    <span>Type</span>
-                    <span>Location</span>
-                    <span>Primary Service</span>
-                  </div>
-                  {view === "all_vendors" &&
-                    filteredVendors.map((vendor) => (
+            <div className="notion-items">
+              {view === "all_vendors" &&
+                filteredVendors.map((vendor) => (
                   <button
-                    className={`vms-list-grid ${selectedVendorId === vendor.id ? "active" : ""}`}
+                    className={`notion-item project-card ${selectedVendorId === vendor.id ? "active" : ""}`}
                     key={vendor.id}
                     onClick={() => openVendor(vendor)}
                     type="button"
+                    style={{ textAlign: 'left', width: '100%' }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <input
-                        checked={selectedVendorIds.includes(vendor.id)}
-                        onChange={(event) => {
-                          event.stopPropagation();
-                          toggleVendorSelection(vendor.id);
-                        }}
-                        onClick={(event) => event.stopPropagation()}
-                        type="checkbox"
-                      />
+                    <div className="notion-item-checkbox" onClick={(e) => { e.stopPropagation(); toggleVendorSelection(vendor.id); }}>
+                      <input type="checkbox" checked={selectedVendorIds.includes(vendor.id)} readOnly />
                     </div>
-                    <div className="vendor-main-info" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <span style={{ fontWeight: 600, color: 'inherit' }}>{formatVendorName(vendor.name)}</span>
-                      <small className="mini-meta" style={{ color: 'inherit', opacity: 0.7 }}>{vendor.email}</small>
-                    </div>
-                    
-                    <div>
-                      <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>{classificationLabel(vendor.classification)}</em>
-                    </div>
- 
-                    <div className="text-muted" style={{ fontSize: 'var(--text-small)' }}>
-                      {vendor.coverageArea || "-"}
-                    </div>
- 
-                    <div>
-                      <em className={`category-pill tone-${categoryTone(primaryType(vendor))}`}>{primaryType(vendor)}</em>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div>
+                          <em className="eyebrow">{primaryType(vendor)}</em>
+                          <h3>{formatVendorName(vendor.name)}</h3>
+                        </div>
+                        <strong className="text-main">{vendorScore(vendor)}</strong>
+                      </div>
+                      <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                        <span className={`status-dot tone-${statusTone(vendor.reviewStatus)}`}>
+                          {reviewStatusLabel(locale, vendor.reviewStatus)}
+                        </span>
+                        <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>
+                          {classificationLabel(vendor.classification)}
+                        </em>
+                        {vendor.coverageArea && <span className="text-dim">· {vendor.coverageArea}</span>}
+                      </div>
+                      <div style={{ marginTop: "12px", display: "flex", gap: "12px", fontSize: "0.75rem" }}>
+                        <span>
+                          Docs: <strong>{vendor.documentCompletion.complete}/{vendor.documentCompletion.required}</strong>
+                        </span>
+                        <span>
+                          Compliance: <strong className={`tone-${complianceTone(vendor.compliance.status)}`}>{vendor.compliance.status.toUpperCase()}</strong>
+                        </span>
+                      </div>
                     </div>
                   </button>
                 ))}
 
-            {view === "sync_log" &&
-              dashboard.importRuns.map((run) => (
-                <article className="sync-card" key={run.id}>
-                  <strong>{formatDate(run.finishedAt, locale)}</strong>
-                  <span>{run.sourceLabel}</span>
-                  <span>+{run.createdVendors} · ~{run.updatedVendors} · ={run.skippedRows}</span>
-                  {run.errorMessages.map((message) => (
-                    <p key={message}>{message}</p>
-                  ))}
-                </article>
-              ))}
+              {view === "sync_log" &&
+                dashboard.importRuns.map((run) => (
+                  <article className="log-item" key={run.id}>
+                    <div className="log-header">
+                      <strong>{formatDate(run.finishedAt, locale)}</strong>
+                      <span className={`status-dot tone-${run.createdVendors > 0 ? "approved" : "rejected"}`}>
+                        {run.createdVendors > 0 ? "Success" : "Checked"}
+                      </span>
+                    </div>
+                    <p>Imported {run.createdVendors} new vendors, updated {run.updatedVendors}.</p>
+                    <small>Provider: {run.sourceLabel} · Skipped: {run.skippedRows}</small>
+                  </article>
+                ))}
 
-            {view === "outbox" &&
-              dashboard.notificationFeed.map((item) => (
-                <article className="sync-card notification-feed-card" key={item.id}>
-                  <strong>{item.vendorName}</strong>
-                  <span>{item.registrationCode}</span>
-                  <span>{item.audience} · {item.channel} · {formatDate(item.createdAt, locale)}</span>
-                  <p>{truncateText(item.subject, 90)}</p>
-                  <p>{truncateText(item.message, 160)}</p>
-                  <small>To: {item.recipient}</small>
-                </article>
-              ))}
+              {view === "outbox" &&
+                dashboard.notificationFeed.map((item) => (
+                  <article
+                    className={`notion-item outbox-item ${selectedVendorId === item.vendorId ? "active" : ""}`}
+                    key={item.id}
+                    onClick={() => {
+                      const v = dashboard.vendors.find((v) => v.id === item.vendorId);
+                      if (v) openVendor(v);
+                    }}
+                  >
+                    <span>{item.registrationCode}</span>
+                    <span>{item.audience} · {item.channel} · {formatDate(item.createdAt, locale)}</span>
+                    <p>{truncateText(item.subject, 90)}</p>
+                    <p>{truncateText(item.message, 160)}</p>
+                    <small>To: {item.recipient}</small>
+                  </article>
+                ))}
 
-            {view !== "sync_log" && view !== "outbox" && filteredVendors.length === 0 && <p className="empty-state">{t(locale, "noData")}</p>}
-                {view === "outbox" && dashboard.notificationFeed.length === 0 && <p className="empty-state">No notifications yet.</p>}
-              </div>
+              {view !== "sync_log" && view !== "outbox" && filteredVendors.length === 0 && (
+                <p className="empty-state">{t(locale, "noData")}</p>
+              )}
+              {view === "outbox" && dashboard.notificationFeed.length === 0 && (
+                <p className="empty-state">No notifications yet.</p>
+              )}
             </div>
-          }
-          right={
-            <aside className="notion-detail">
-              <div className="panel-section-header detail-panel-header">
-                <div>
-                  <p className="panel-label">Vendor Profile</p>
-                  <h3>{view === "outbox" ? "Outbox Summary" : selectedVendor ? formatVendorName(selectedVendor.name) : "No vendor selected"}</h3>
-                </div>
-              </div>
+          </div>
+          
+          <Drawer 
+            isOpen={isDrawerOpen} 
+            onClose={() => setIsDrawerOpen(false)} 
+            title={view === "outbox" ? "Outbox Summary" : (selectedVendor ? formatVendorName(selectedVendor.name) : "Vendor Detail")}
+            width="500px"
+          >
+            <aside className="notion-detail" style={{ border: 'none', height: '100%', padding: '0 24px 40px' }}>
               {view === "outbox" ? (
-                <p className="empty-state">Outbox displays email/WhatsApp notification logs for admins and vendors.</p>
+                <p className="empty-state" style={{ marginTop: '20px' }}>Outbox displays email/WhatsApp notification logs for admins and vendors.</p>
               ) : null}
-            {view !== "outbox" && selectedVendor ? (
-              <>
-                <div className="detail-hero">
-                  <div className="detail-title-row">
-                    <div className="detail-page-icon">◫</div>
-                    <div>
-                      <p className="detail-meta">{primaryType(selectedVendor)}</p>
-                      <h2>{formatVendorName(selectedVendor.name)}</h2>
-                    </div>
+              {view !== "outbox" && selectedVendor ? (
+                <>
+                  <div className="detail-tabs">
+                    <button className={`detail-tab ${detailMode === "summary" ? "active" : ""}`} onClick={() => setDetailMode("summary")}>
+                      Summary
+                    </button>
+                    <button className={`detail-tab ${detailMode === "operations" ? "active" : ""}`} onClick={() => setDetailMode("operations")}>
+                      Operations
+                    </button>
                   </div>
-                  <div className="detail-hero-badges">
-                    <span className={`status-dot tone-${statusTone(selectedVendor.reviewStatus)}`}>{reviewStatusLabel(locale, selectedVendor.reviewStatus)}</span>
-                    <span className={`status-dot tone-${lifecycleTone(selectedVendor.lifecycleStatus)}`}>{lifecycleLabel(selectedVendor.lifecycleStatus)}</span>
-                    <span className={`status-dot tone-${complianceTone(selectedVendor.compliance.status)}`}>{selectedVendor.compliance.status}</span>
-                  </div>
-                  <div className="detail-actions">
-                    {whatsappNumber ? (
-                      <a className="ghost-button" href={`https://wa.me/${whatsappNumber}`} rel="noreferrer" target="_blank">
-                        WhatsApp
-                      </a>
-                    ) : null}
-                    {selectedVendor.email ? (
-                      <a className="ghost-button" href={`mailto:${selectedVendor.email}`}>
-                        Email
-                      </a>
-                    ) : null}
-                    {socialLinks[0] ? (
-                      <a className="ghost-button" href={socialLinks[0].url} rel="noreferrer" target="_blank">
-                        Social
-                      </a>
-                    ) : null}
-                  </div>
-                </div>
-                <div className="detail-mode-switch">
-                  <button className={detailMode === "summary" ? "active" : ""} onClick={() => setDetailMode("summary")} type="button">
-                    Summary
-                  </button>
-                  <button className={detailMode === "operations" ? "active" : ""} onClick={() => setDetailMode("operations")} type="button">
-                    Operations
-                  </button>
-                </div>
-                {detailMode === "summary" ? (
-                  <>
-                    <div className="detail-block">
-                      <div className="summary-chip-grid">
-                        <article className="summary-chip-card">
-                          <span>Contact</span>
-                          <strong>{selectedVendor.contacts[0]?.name || "-"}</strong>
-                          <small>{selectedVendor.contacts[0]?.phone || selectedVendor.email || "-"}</small>
-                        </article>
-                        <article className="summary-chip-card">
-                          <span>Coverage</span>
-                          <strong>{selectedVendor.coverageArea || "-"}</strong>
-                          <small>{selectedVendor.cities.join(", ") || "No city mapping"}</small>
-                        </article>
-                        <article className="summary-chip-card">
-                          <span>Performance</span>
-                          <strong>{selectedVendor.performance.average || "-"}</strong>
-                          <small>{selectedVendor.performance.totalReviews} reviews</small>
-                        </article>
-                        <article className="summary-chip-card">
-                          <span>Documents</span>
-                          <strong>{selectedVendor.documentCompletion.complete}/{selectedVendor.documentCompletion.required}</strong>
-                          <small>{selectedVendor.documentCompletion.missingLabels.length} missing</small>
-                        </article>
-                        <article className="summary-chip-card">
-                          <span>Compliance</span>
-                          <strong className={`status-dot tone-${complianceTone(selectedVendor.compliance.status)}`}>{selectedVendor.compliance.status}</strong>
-                          <small>{selectedVendor.compliance.expiredCount} expired • {selectedVendor.compliance.expiringCount} expiring</small>
-                        </article>
-                        <article className="summary-chip-card">
-                          <span>Registration</span>
-                          <strong>{selectedVendor.registrationCode || "-"}</strong>
-                          <small>{formatDate(selectedVendor.sourceTimestamp, locale)}</small>
-                        </article>
-                      </div>
-                    </div>
 
-                    <details className="detail-disclosure" open>
-                      <summary>Overview</summary>
-                      <div className="property-list compact-property-list">
-                        <div><span>Vendor Type</span><strong className={`category-pill tone-${categoryTone(primaryType(selectedVendor))}`}>{primaryType(selectedVendor)}</strong></div>
-                        <div><span>Classification</span><strong className={`category-pill tone-${classificationTone(selectedVendor.classification)}`}>{classificationLabel(selectedVendor.classification)}</strong></div>
-                        <div><span>Category</span><strong>{selectedVendor.displayType || "-"}</strong></div>
-                        <div><span>Email</span><strong>{selectedVendor.contacts[0]?.email || selectedVendor.email || "-"}</strong></div>
-                        <div><span>Tax</span><strong>{selectedVendor.taxStatus}</strong></div>
-                        <div><span>Account Manager</span><strong>{selectedVendor.accountManager || "-"}</strong></div>
-                      </div>
-                    </details>
-
-                    <details className="detail-disclosure" open>
-                      <summary>Compliance checklist</summary>
-                      <div className="compact-compliance-list">
-                        {selectedVendor.compliance.items.map((item) => (
-                          <div className="compact-compliance-row" key={item.id}>
-                            <div>
-                              <strong>{documentTypeLabel(item.documentType)}</strong>
-                              <small>{item.expiresAt ? formatDate(item.expiresAt, locale) : "No expiry date"}</small>
-                            </div>
-                            <span className={`status-dot tone-${complianceItemTone(item.status)}`}>{item.status}</span>
+                  {detailMode === "operations" && (
+                    <div className="detail-scroll-area">
+                      <section className="detail-section">
+                        <div className="section-title-row">
+                          <h4>Performance Scorecard</h4>
+                          <button className="primary-button" onClick={handleScorecardSave} disabled={opsPending} style={{ fontSize: '0.75rem', padding: '4px 8px', height: 'auto' }}>
+                            Save Score
+                          </button>
+                        </div>
+                        <div className="scorecard-grid">
+                          <div className="score-input">
+                            <label>Quality</label>
+                            <input type="number" min="1" max="5" value={scorecard.quality} onChange={e => setScorecard(s => ({ ...s, quality: e.target.value }))} />
                           </div>
-                        ))}
-                      </div>
-                    </details>
+                          <div className="score-input">
+                            <label>Reliability</label>
+                            <input type="number" min="1" max="5" value={scorecard.reliability} onChange={e => setScorecard(s => ({ ...s, reliability: e.target.value }))} />
+                          </div>
+                          <div className="score-input">
+                            <label>Pricing</label>
+                            <input type="number" min="1" max="5" value={scorecard.pricing} onChange={e => setScorecard(s => ({ ...s, pricing: e.target.value }))} />
+                          </div>
+                          <div className="score-input">
+                            <label>Communication</label>
+                            <input type="number" min="1" max="5" value={scorecard.communication} onChange={e => setScorecard(s => ({ ...s, communication: e.target.value }))} />
+                          </div>
+                        </div>
+                      </section>
+                      
+                      <section className="detail-section">
+                        <h4>Internal Notes</h4>
+                        <div className="notes-group">
+                          <label>Availability & Capacity</label>
+                          <textarea value={availabilityNotes} onChange={e => setAvailabilityNotes(e.target.value)} placeholder="e.g. Busy until June, special rates for Bali..." />
+                          
+                          <label>Rate Card Details</label>
+                          <textarea value={rateCardNotes} onChange={e => setRateCardNotes(e.target.value)} placeholder="e.g. IDR 10jt/day, negotiable for long projects..." />
+                          
+                          <button className="ghost-button" onClick={handleOpsProfileSave} disabled={opsPending}>
+                            {opsPending ? "Saving..." : "Update internal notes"}
+                          </button>
+                        </div>
+                      </section>
+                    </div>
+                  )}
+                  
+                  {detailMode === "summary" && (
+                    <div className="detail-scroll-area">
+                      <section className="detail-section">
+                        <div className="section-title-row">
+                          <h4>Classification</h4>
+                          <button 
+                            className="ghost-button" 
+                            style={{ fontSize: '0.75rem', padding: '4px 8px', height: 'auto' }}
+                            onClick={() => {
+                              const detail = dashboard.vendorDetails.find(d => d.id === selectedVendor.id);
+                              setEditVendorFormData(detail ? { ...detail } : { ...selectedVendor });
+                              setIsEditVendorModalOpen(true);
+                            }}
+                          >
+                            Manual Adjust
+                          </button>
+                        </div>
+                        <div className="classification-row">
+                          <em className={`category-pill tone-${classificationTone(selectedVendor.classification)}`}>
+                            {classificationLabel(selectedVendor.classification)}
+                          </em>
+                          <span className="text-dim">since {formatDate(selectedVendor.sourceTimestamp, locale)}</span>
+                        </div>
+                      </section>
 
-                    {(selectedVendor.rateCardNotes || selectedVendor.availabilityNotes) ? (
+                      <section className="detail-section">
+                        <h4>Compliance overview</h4>
+                        <div className="compliance-summary">
+                          {selectedVendor.compliance.items.map((item) => (
+                            <div className="compliance-item" key={item.documentType}>
+                              <div className="compliance-item-left" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                                <strong>{documentTypeLabel(item.documentType)}</strong>
+                                <span className={`status-dot small tone-${complianceItemTone(item.status)}`}>{item.status.toUpperCase()}</span>
+                              </div>
+                              <p className="detail-client">{item.note}</p>
+                              {item.expiresAt && <small style={{ display: 'block', marginTop: '4px' }}>Expires: {formatDate(item.expiresAt, locale)}</small>}
+                            </div>
+                          ))}
+                        </div>
+
+                        <div className="compliance-management">
+                          <h5>Manage Compliance (Admin)</h5>
+                          <div className="compliance-editor">
+                            {selectedVendor.compliance.items.map((item) => (
+                              <div className="compliance-edit-row" key={item.documentType}>
+                                <label>{documentTypeLabel(item.documentType)}</label>
+                                <div className="edit-controls" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                                  <select
+                                    value={complianceDrafts[item.documentType]?.status || item.status}
+                                    onChange={(e) =>
+                                      setComplianceDrafts((prev) => ({
+                                        ...prev,
+                                        [item.documentType]: { ...prev[item.documentType], status: e.target.value },
+                                      }))
+                                    }
+                                  >
+                                    <option value="missing">Missing</option>
+                                    <option value="valid">Valid</option>
+                                    <option value="expiring">Expiring</option>
+                                    <option value="expired">Expired</option>
+                                  </select>
+                                  <input
+                                    type="date"
+                                    value={complianceDrafts[item.documentType]?.expiresAt?.split("T")[0] || item.expiresAt?.split("T")[0] || ""}
+                                    onChange={(e) =>
+                                      setComplianceDrafts((prev) => ({
+                                        ...prev,
+                                        [item.documentType]: { ...prev[item.documentType], expiresAt: e.target.value },
+                                      }))
+                                    }
+                                  />
+                                  <button
+                                    className="ghost-button"
+                                    onClick={() => {
+                                      const draft = complianceDrafts[item.documentType];
+                                      if (!draft) return;
+                                      startOpsTransition(async () => {
+                                        await fetch(`/api/vendors/${selectedVendor.id}/compliance`, {
+                                          method: "POST",
+                                          headers: { "Content-Type": "application/json" },
+                                          body: JSON.stringify({
+                                            documentType: item.documentType,
+                                            status: draft.status,
+                                            expiresAt: draft.expiresAt,
+                                            note: draft.note || item.note,
+                                          }),
+                                        });
+                                        refreshAfterMutation();
+                                      });
+                                    }}
+                                  >
+                                    Update
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </section>
+
+                      <section className="detail-section">
+                        <h4>Review & verification</h4>
+                        <div className="review-box" style={{ background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--line)' }}>
+                          <div className="review-status-row" style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                            <select value={reviewStatus} onChange={(event) => setReviewStatus(event.target.value as ReviewStatus)} style={{ flex: 1 }}>
+                              {REVIEW_STATUSES.map((status) => (
+                                <option key={status} value={status}>
+                                  {reviewStatusLabel(locale, status)}
+                                </option>
+                              ))}
+                            </select>
+                            <button className="primary-button" onClick={handleReviewSave} disabled={reviewPending}>
+                              {reviewPending ? "..." : "Save"}
+                            </button>
+                          </div>
+                          <textarea 
+                            value={reviewNote} 
+                            onChange={(event) => setReviewNote(event.target.value)} 
+                            placeholder="Internal review notes..." 
+                            style={{ width: '100%', minHeight: '60px', borderRadius: '4px', padding: '8px' }}
+                          />
+                        </div>
+
+                        <div className="revision-management">
+                          <h5>Request profile revision</h5>
+                          <p className="detail-client" style={{ marginBottom: "12px" }}>Select fields that need vendor attention:</p>
+                          <div className="revision-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            {REVISION_FIELD_OPTIONS.map((field) => (
+                              <label className="revision-checkbox-item" key={field.fieldKey} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <input
+                                  checked={!!revisionSelections[field.fieldKey]}
+                                  onChange={(e) =>
+                                    setRevisionSelections((prev) => {
+                                      const next = { ...prev };
+                                      if (e.target.checked) next[field.fieldKey] = "";
+                                      else delete next[field.fieldKey];
+                                      return next;
+                                    })
+                                  }
+                                  type="checkbox"
+                                />
+                                <span>{field.label}</span>
+                              </label>
+                            ))}
+                          </div>
+
+                          <div className="revision-notes-area" style={{ marginTop: '16px' }}>
+                            <label style={{ display: 'block', marginBottom: '4px' }}>Revision instructions</label>
+                            <textarea
+                              onChange={(e) => setRevisionGeneralNote(e.target.value)}
+                              placeholder="Provide clear instructions for the vendor..."
+                              value={revisionGeneralNote}
+                              style={{ width: '100%', minHeight: '80px', borderRadius: '4px', padding: '8px' }}
+                            />
+                            <div className="revision-templates" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                              {REVISION_TEMPLATES.map((tpl) => (
+                                <button
+                                  className="chip"
+                                  key={tpl.id}
+                                  onClick={() => {
+                                    setRevisionGeneralNote(tpl.generalNote);
+                                    const next: Record<string, string> = {};
+                                    tpl.items.forEach((it) => (next[it.fieldKey] = it.note));
+                                    setRevisionSelections(next);
+                                  }}
+                                  type="button"
+                                >
+                                  {tpl.label}
+                                </button>
+                              ))}
+                            </div>
+                            <button className="ghost-button" onClick={handleRequestRevision} type="button" style={{ marginTop: '12px', width: '100%' }}>
+                              {opsPending ? "..." : "Send revision request"}
+                            </button>
+                            {selectedVendor.activeRevisionRequest && (
+                              <div className="active-revision-card" style={{ marginTop: '12px', padding: '8px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '4px' }}>
+                                <p style={{ wordBreak: 'break-all' }}>
+                                  Active link: /vendor/revise/{selectedVendor.activeRevisionRequest.editToken}
+                                </p>
+                                <small>Expires: {formatDate(selectedVendor.activeRevisionRequest.editTokenExpiresAt, locale)}</small>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </section>
+
+                      {socialLinks.length > 0 && (
+                        <details className="detail-disclosure">
+                          <summary>Social media</summary>
+                          <div className="notion-links">
+                            {socialLinks.map((item) => (
+                              <a href={item.url} key={item.label} rel="noreferrer" target="_blank">
+                                <span>{item.label}</span>
+                                <strong>{shortLinkLabel(item.url)}</strong>
+                              </a>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+
                       <details className="detail-disclosure">
-                        <summary>Operational notes</summary>
-                        <div className="compact-note-stack">
-                          {selectedVendor.rateCardNotes ? (
-                            <article>
-                              <span>Rate card</span>
-                              <p>{selectedVendor.rateCardNotes}</p>
-                            </article>
+                        <summary>Communication templates</summary>
+                        <div className="notion-links">
+                          {whatsappNumber ? (
+                            <a
+                              href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Halo ${selectedVendor.contacts[0]?.name || "Tim Vendor"}, kami dari JUARA ingin follow up profil vendor ${formatVendorName(selectedVendor.name)}.`)}`}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              <span>WhatsApp follow-up</span>
+                              <strong>Open template</strong>
+                            </a>
                           ) : null}
-                          {selectedVendor.availabilityNotes ? (
-                            <article>
-                              <span>Availability</span>
-                              <p>{selectedVendor.availabilityNotes}</p>
-                            </article>
+                          {selectedVendor.email ? (
+                            <a href={`mailto:${selectedVendor.email}?subject=${encodeURIComponent(`Follow up vendor ${formatVendorName(selectedVendor.name)}`)}`}>
+                              <span>Email follow-up</span>
+                              <strong>{selectedVendor.email}</strong>
+                            </a>
                           ) : null}
                         </div>
                       </details>
-                    ) : null}
-                  </>
-                ) : (
-                  <>
-                    <div className="detail-block">
-                      <h3>Lifecycle & Operations</h3>
-                      <div className="review-form review-dark">
-                        <div className="form-grid-2">
-                          <div className="form-group">
-                            <label className="mini-meta">Lifecycle Status</label>
-                            <select style={{ width: '100%' }} value={lifecycleStatus} onChange={(event) => setLifecycleStatus(event.target.value as VendorLifecycleStatus)}>
-                              {LIFECYCLE_STATUSES.map((status) => (
-                                <option key={status} value={status}>
-                                  {lifecycleLabel(status)}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="form-group">
-                            <label className="mini-meta">Account Manager</label>
-                            <input style={{ width: '100%' }} value={accountManager} onChange={(event) => setAccountManager(event.target.value)} placeholder="AM / Owner" />
-                          </div>
+
+                      <details className="detail-disclosure">
+                        <summary>Audit log</summary>
+                        <div className="audit-list">
+                          {selectedVendor.auditLog.length > 0 ? (
+                            selectedVendor.auditLog.map((entry) => (
+                              <div className="audit-row" key={entry.id}>
+                                <strong>{entry.action}</strong>
+                                <span>{entry.message}</span>
+                                <small>
+                                  {entry.actor} • {formatDate(entry.createdAt, locale)}
+                                </small>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="empty-state">No audit entries yet.</p>
+                          )}
                         </div>
-                        <div className="form-group" style={{ marginTop: '12px' }}>
-                          <label className="mini-meta">Operational Cities</label>
-                          <input style={{ width: '100%' }} value={cities} onChange={(event) => setCities(event.target.value)} placeholder="e.g., Jakarta, Surabaya (comma separated)" />
-                        </div>
-                        <div className="form-grid-2" style={{ marginTop: '12px' }}>
-                          <div className="form-group">
-                            <label className="mini-meta">Rate Card / Pricing Notes</label>
-                            <textarea style={{ width: '100%', height: '80px' }} value={rateCardNotes} onChange={(event) => setRateCardNotes(event.target.value)} placeholder="..." />
-                          </div>
-                          <div className="form-group">
-                            <label className="mini-meta">Availability / Blackout Dates</label>
-                            <textarea style={{ width: '100%', height: '80px' }} value={availabilityNotes} onChange={(event) => setAvailabilityNotes(event.target.value)} placeholder="..." />
-                          </div>
-                        </div>
-                        <div className="action-row" style={{ marginTop: '16px' }}>
-                          <button className="ghost-button" onClick={handleLifecycleSave} type="button">
-                            {opsPending ? "..." : "Save Lifecycle"}
-                          </button>
-                          <button className="ghost-button" onClick={handleOpsProfileSave} type="button">
-                            {opsPending ? "..." : "Save Profile"}
-                          </button>
-                        </div>
-                      </div>
+                      </details>
                     </div>
-
-                    <div className="detail-block">
-                      <h3>Performance scoring</h3>
-                      <div className="property-list">
-                        <div><span>Quality</span><strong>{selectedVendor.performance.quality || "-"}</strong></div>
-                        <div><span>Reliability</span><strong>{selectedVendor.performance.reliability || "-"}</strong></div>
-                        <div><span>Pricing</span><strong>{selectedVendor.performance.pricing || "-"}</strong></div>
-                        <div><span>Communication</span><strong>{selectedVendor.performance.communication || "-"}</strong></div>
-                        <div><span>On-time</span><strong>{selectedVendor.performance.onTime || "-"}</strong></div>
-                        <div><span>Total reviews</span><strong>{selectedVendor.performance.totalReviews}</strong></div>
-                      </div>
-                      <div className="review-form review-dark">
-                        <input value={scorecard.projectId} onChange={(event) => setScorecard((current) => ({ ...current, projectId: event.target.value }))} placeholder="Project ID (optional)" />
-                        <div className="score-grid">
-                          {(["quality", "reliability", "pricing", "communication", "onTime"] as const).map((field) => (
-                            <label key={field}>
-                              <span>{field}</span>
-                              <select value={scorecard[field]} onChange={(event) => setScorecard((current) => ({ ...current, [field]: event.target.value }))}>
-                                {[1, 2, 3, 4, 5].map((value) => (
-                                  <option key={value} value={String(value)}>
-                                    {value}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                          ))}
-                        </div>
-                        <textarea rows={3} value={scorecard.note} onChange={(event) => setScorecard((current) => ({ ...current, note: event.target.value }))} placeholder="Performance note" />
-                        <button className="ghost-button" onClick={handleScorecardSave} type="button">
-                          {opsPending ? "..." : "Add scorecard"}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="detail-block">
-                      <h3>Compliance editor</h3>
-                      <div className="property-list">
-                        <div><span>Expired</span><strong>{selectedVendor.compliance.expiredCount}</strong></div>
-                        <div><span>Expiring soon</span><strong>{selectedVendor.compliance.expiringCount}</strong></div>
-                        <div><span>Missing</span><strong>{selectedVendor.compliance.missingCount}</strong></div>
-                        <div><span>Next expiry</span><strong>{selectedVendor.compliance.nextExpiry ? formatDate(selectedVendor.compliance.nextExpiry, locale) : "-"}</strong></div>
-                      </div>
-                      <div className="compliance-list">
-                        {selectedVendor.compliance.items.map((item) => (
-                          <div className="compliance-row" key={item.id}>
-                            <strong>{documentTypeLabel(item.documentType)}</strong>
-                            <select
-                              value={complianceDrafts[item.documentType]?.status ?? item.status}
-                              onChange={(event) =>
-                                setComplianceDrafts((current) => ({
-                                  ...current,
-                                  [item.documentType]: {
-                                    status: event.target.value,
-                                    expiresAt: current[item.documentType]?.expiresAt ?? item.expiresAt,
-                                    note: current[item.documentType]?.note ?? item.note,
-                                  },
-                                }))
-                              }
-                            >
-                              {["valid", "expiring", "expired", "missing"].map((status) => (
-                                <option key={status} value={status}>
-                                  {status}
-                                </option>
-                              ))}
-                            </select>
-                            <input
-                              type="date"
-                              value={(complianceDrafts[item.documentType]?.expiresAt ?? item.expiresAt).slice(0, 10)}
-                              onChange={(event) =>
-                                setComplianceDrafts((current) => ({
-                                  ...current,
-                                  [item.documentType]: {
-                                    status: current[item.documentType]?.status ?? item.status,
-                                    expiresAt: event.target.value,
-                                    note: current[item.documentType]?.note ?? item.note,
-                                  },
-                                }))
-                              }
-                            />
-                            <input
-                              value={complianceDrafts[item.documentType]?.note ?? item.note}
-                              onChange={(event) =>
-                                setComplianceDrafts((current) => ({
-                                  ...current,
-                                  [item.documentType]: {
-                                    status: current[item.documentType]?.status ?? item.status,
-                                    expiresAt: current[item.documentType]?.expiresAt ?? item.expiresAt,
-                                    note: event.target.value,
-                                  },
-                                }))
-                              }
-                              placeholder="Compliance note"
-                            />
-                            <button className="ghost-button" onClick={() => handleComplianceSave(item.documentType)} type="button">
-                              Save
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="detail-block">
-                      <h3>Request revision</h3>
-                      <div className="review-form review-dark">
-                        <div className="revision-template-row">
-                          <select
-                            value={revisionTemplateId}
-                            onChange={(event) => applyRevisionTemplate(event.target.value)}
-                          >
-                            <option value="">Pilih template revisi cepat</option>
-                            {REVISION_TEMPLATES.map((template) => (
-                              <option key={template.id} value={template.id}>
-                                {template.label}
-                              </option>
-                            ))}
-                          </select>
-                          <button className="ghost-button" onClick={clearRevisionDraft} type="button">
-                            Clear
-                          </button>
-                        </div>
-                        <textarea rows={3} value={revisionGeneralNote} onChange={(event) => setRevisionGeneralNote(event.target.value)} placeholder="General revision note for vendor" />
-                        <div className="revision-grid">
-                          {REVISION_FIELD_OPTIONS.map((item) => (
-                            <label key={item.fieldKey}>
-                              <span>{item.label}</span>
-                              <input
-                                value={revisionSelections[item.fieldKey] ?? ""}
-                                onChange={(event) =>
-                                  setRevisionSelections((current) => ({
-                                    ...current,
-                                    [item.fieldKey]: event.target.value,
-                                  }))
-                                }
-                                placeholder={`Note for ${item.label}`}
-                              />
-                            </label>
-                          ))}
-                        </div>
-                        <button className="ghost-button" onClick={handleRequestRevision} type="button">
-                          {opsPending ? "..." : "Send revision request"}
-                        </button>
-                        {selectedVendor.activeRevisionRequest && (
-                          <div className="active-revision-card">
-                            <p className="detail-client">
-                              Active revision link: /vendor/revise/{selectedVendor.activeRevisionRequest.editToken}
-                            </p>
-                            <small>Expired: {formatDate(selectedVendor.activeRevisionRequest.editTokenExpiresAt, locale)}</small>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {socialLinks.length > 0 && (
-                  <details className="detail-disclosure">
-                    <summary>Social media</summary>
-                    <div className="notion-links">
-                      {socialLinks.map((item) => (
-                        <a href={item.url} key={item.label} rel="noreferrer" target="_blank">
-                          <span>{item.label}</span>
-                          <strong>{shortLinkLabel(item.url)}</strong>
-                        </a>
-                      ))}
-                    </div>
-                  </details>
-                )}
-
-                {selectedVendor.linkedProjects && selectedVendor.linkedProjects.length > 0 && (
-                  <details className="detail-disclosure">
-                    <summary>Assigned projects</summary>
-                    <div className="notion-links">
-                      {selectedVendor.linkedProjects?.map((project) => (
-                        <Link href="/projects" key={project.linkId}>
-                          <span>
-                            {project.projectName} • {project.client}
-                          </span>
-                          <strong>{project.stageLabel}</strong>
-                        </Link>
-                      ))}
-                    </div>
-                  </details>
-                )}
-
-                <details className="detail-disclosure">
-                  <summary>Document links</summary>
-                  <div className="notion-links">
-                    {selectedVendor.documents.map((document) => (
-                      <a href={document.url} key={document.id} rel="noreferrer" target="_blank">
-                        <span>{document.label}</span>
-                        <strong>{shortLinkLabel(document.url)}</strong>
-                      </a>
-                    ))}
-                  </div>
-                </details>
-
-                <details className="detail-disclosure">
-                  <summary>Notification history</summary>
-                  <div className="notification-list">
-                    {selectedVendor.notifications.length > 0 ? (
-                      selectedVendor.notifications.map((item) => (
-                        <article className="notification-row" key={item.id}>
-                          <div className="notification-meta-row">
-                            <span className="status-dot tone-pending">{item.audience}</span>
-                            <span className="status-dot tone-review">{item.channel}</span>
-                            <small>{formatDate(item.createdAt, locale)}</small>
-                          </div>
-                          <strong>{item.subject}</strong>
-                          <p>{truncateText(item.message, 180)}</p>
-                          <small>To: {truncateText(item.recipient, 52)}</small>
-                        </article>
-                      ))
-                    ) : (
-                      <p className="empty-state">No notifications yet.</p>
-                    )}
-                  </div>
-                </details>
-
-                <details className="detail-disclosure">
-                  <summary>{t(locale, "reviewNotes")}</summary>
-                  <div className="review-form review-dark">
-                    <select value={reviewStatus} onChange={(event) => setReviewStatus(event.target.value as ReviewStatus)}>
-                      {REVIEW_STATUSES.map((status) => (
-                        <option key={status} value={status}>
-                          {reviewStatusLabel(locale, status)}
-                        </option>
-                      ))}
-                    </select>
-                    <textarea
-                      rows={4}
-                      value={reviewNote}
-                      onChange={(event) => setReviewNote(event.target.value)}
-                      placeholder={t(locale, "reviewNotes")}
-                    />
-                  <button className="ghost-button" onClick={handleReviewSave} type="button">
-                      {reviewPending ? "..." : t(locale, "saveReview")}
-                    </button>
-                  </div>
-                </details>
-
-                <details className="detail-disclosure">
-                  <summary>Communication templates</summary>
-                  <div className="notion-links">
-                    {whatsappNumber ? (
-                      <a
-                        href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Halo ${selectedVendor.contacts[0]?.name || "Tim Vendor"}, kami dari JUARA ingin follow up profil vendor ${formatVendorName(selectedVendor.name)}.`)}`}
-                        rel="noreferrer"
-                        target="_blank"
-                      >
-                        <span>WhatsApp follow-up</span>
-                        <strong>Open template</strong>
-                      </a>
-                    ) : null}
-                    {selectedVendor.email ? (
-                      <a href={`mailto:${selectedVendor.email}?subject=${encodeURIComponent(`Follow up vendor ${formatVendorName(selectedVendor.name)}`)}`}>
-                        <span>Email follow-up</span>
-                        <strong>{selectedVendor.email}</strong>
-                      </a>
-                    ) : null}
-                  </div>
-                </details>
-
-                <details className="detail-disclosure">
-                  <summary>Audit log</summary>
-                  <div className="audit-list">
-                    {selectedVendor.auditLog.length > 0 ? (
-                      selectedVendor.auditLog.map((entry) => (
-                        <div className="audit-row" key={entry.id}>
-                          <strong>{entry.action}</strong>
-                          <span>{entry.message}</span>
-                          <small>
-                            {entry.actor} • {formatDate(entry.createdAt, locale)}
-                          </small>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="empty-state">No audit entries yet.</p>
-                    )}
-                  </div>
-                </details>
-              </>
+                  )}
+                </>
               ) : (
-                <p className="empty-state">{view === "outbox" ? "Pilih vendor view lain untuk melihat detail." : t(locale, "selectVendor")}</p>
+                <p className="empty-state" style={{ marginTop: '40px' }}>{view === "outbox" ? "Pilih vendor view lain untuk melihat detail." : t(locale, "selectVendor")}</p>
               )}
-                </aside>
-            }
-          />
-        )}
+            </aside>
+          </Drawer>
+        </div>
+      )}
 
       {view === "by_type" && (
         <section className="type-board">
@@ -1652,6 +1477,115 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
             </div>
           ))}
         </section>
+      )}
+      {isEditVendorModalOpen && selectedVendor && (
+        <div className="modal-overlay modal-backdrop">
+          <div className="modal-content wide-modal modal-card">
+            <h2 style={{ marginBottom: '24px' }}>Adjust Vendor Information</h2>
+            <div className="form-stack">
+              <div className="form-section-title">Identity & Contact</div>
+              <div className="form-grid-2">
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Vendor Name</label>
+                  <input 
+                    className="control-bar-input" 
+                    style={{ width: '100%' }}
+                    value={editVendorFormData.name || ''} 
+                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, name: e.target.value })} 
+                    placeholder="Legal name..." 
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Business Email</label>
+                  <input 
+                    className="control-bar-input" 
+                    style={{ width: '100%' }}
+                    value={editVendorFormData.email || ''} 
+                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, email: e.target.value })} 
+                    placeholder="official@company.com" 
+                  />
+                </div>
+              </div>
+
+              <div className="form-grid-2" style={{ marginTop: '20px' }}>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Classification</label>
+                  <select 
+                    className="control-bar-select" 
+                    style={{ width: '100%' }}
+                    value={editVendorFormData.classification || ''} 
+                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, classification: e.target.value as VendorClassification })}
+                  >
+                    <option value="Penyedia Barang">Penyedia Barang (Goods/Equipment)</option>
+                    <option value="Penyedia Jasa">Penyedia Jasa (Services/Specialist)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Coverage Area</label>
+                  <input 
+                    className="control-bar-input" 
+                    style={{ width: '100%' }}
+                    value={editVendorFormData.coverageArea || ''} 
+                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, coverageArea: e.target.value })} 
+                    placeholder="e.g. Nasional, Jakarta, etc." 
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '20px' }}>
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Services (Comma-separated)</label>
+                <input 
+                  className="control-bar-input" 
+                  style={{ width: '100%' }}
+                  value={(editVendorFormData as { serviceNames?: string[] }).serviceNames?.join(', ') || ''} 
+                  onChange={(e) => {
+                    const serviceNames = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                    setEditVendorFormData({ ...editVendorFormData, serviceNames } as typeof editVendorFormData);
+                  }} 
+                  placeholder="e.g. Advertising, Stage Show Management..." 
+                />
+                <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '4px' }}>
+                  Typos like &quot;ADVERTISTING&quot; will be automatically corrected on save.
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '20px' }}>
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Website / Profile URL</label>
+                <input 
+                  className="control-bar-input" 
+                  style={{ width: '100%' }}
+                  value={editVendorFormData.websiteUrl || ''} 
+                  onChange={(e) => setEditVendorFormData({ ...editVendorFormData, websiteUrl: e.target.value })} 
+                  placeholder="https://..." 
+                />
+              </div>
+            </div>
+
+            <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end', alignItems: 'center' }}>
+              <button className="ghost-button" onClick={() => setIsEditVendorModalOpen(false)}>Cancel</button>
+              <button 
+                className="primary-button" 
+                onClick={async () => {
+                  startOpsTransition(async () => {
+                    const response = await fetch(`/api/vendors/${selectedVendor.id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(editVendorFormData),
+                    });
+                    if (response.ok) {
+                      setIsEditVendorModalOpen(false);
+                      window.location.reload();
+                    } else {
+                      alert("Gagal menyimpan perubahan.");
+                    }
+                  });
+                }}
+              >
+                {opsPending ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </WorkspaceShell>
   );

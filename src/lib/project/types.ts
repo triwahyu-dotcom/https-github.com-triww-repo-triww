@@ -2,7 +2,6 @@ export type ProjectSection = "leads" | "ongoing" | "billed" | "failed" | "uncate
 
 export type WorkflowStage =
   | "lead"
-  | "qualified"
   | "pitching"
   | "negotiation"
   | "execution"
@@ -128,6 +127,7 @@ export interface ProjectRecord {
   }[];
   partnerClient?: string; // e.g., "WE DO", "SATOE"
   billingClient?: string; // Who gets the invoice
+  mainFolder?: string; // Link to the root project folder
 }
 
 export type CRMClientType = "brand" | "agency" | "government" | "partner";

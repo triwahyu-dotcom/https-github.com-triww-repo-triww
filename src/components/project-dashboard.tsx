@@ -28,7 +28,6 @@ const VIEW_OPTIONS: { id: ViewMode; label: string }[] = [
 
 const STAGE_OPTIONS: { key: WorkflowStage; label: string }[] = [
   { key: "lead", label: "Lead / Prospect" },
-  { key: "qualified", label: "Qualified / Selected" },
   { key: "pitching", label: "Pitching / Preparation" },
   { key: "negotiation", label: "Negotiation" },
   { key: "execution", label: "Execution" },
@@ -39,7 +38,6 @@ const STAGE_OPTIONS: { key: WorkflowStage; label: string }[] = [
 ];
 
 const STORAGE_KEY = "juara-project-tracker-projects-v2";
-const THEME_STORAGE_KEY = "juara-project-tracker-theme";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -198,7 +196,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [query, setQuery] = useState("");
   const [stageFilter, setStageFilter] = useState<WorkflowStage | "all">("all");
   const [selectedProjectId, setSelectedProjectId] = useState(initialData.projects[0]?.id ?? "");
-  const [moveTargetStage, setMoveTargetStage] = useState<WorkflowStage>("qualified");
+  const [moveTargetStage, setMoveTargetStage] = useState<WorkflowStage>("pitching");
   const [moveNote, setMoveNote] = useState("");
   const [moveModalOpen, setMoveModalOpen] = useState(false);
   const [dragMoveProjectId, setDragMoveProjectId] = useState<string | null>(null);
@@ -356,22 +354,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     setProjectFormData(project);
     setIsProjectModalOpen(true);
   };
-  const [theme, setTheme] = useState<"dark" | "light">(() => {
-    if (typeof window === "undefined") {
-      return "dark";
-    }
-
-    return window.localStorage.getItem(THEME_STORAGE_KEY) === "light" ? "light" : "dark";
-  });
-
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
   }, [projects]);
-
-  useEffect(() => {
-    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
 
   const filteredProjects = projects.filter((project) => matchesProject(project, query, stageFilter));
 
@@ -443,7 +428,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     totalProjects: projects.length,
     activeProjects: projects.filter((project) => ["execution", "reporting", "finance"].includes(project.currentStage))
       .length,
-    leadsProjects: projects.filter((project) => ["lead", "qualified", "pitching"].includes(project.currentStage)).length,
+    leadsProjects: projects.filter((project) => ["lead", "pitching"].includes(project.currentStage)).length,
     totalValue: projects.reduce((sum, project) => sum + project.projectValue, 0),
     totalValueLabel: new Intl.NumberFormat("id-ID", {
       style: "currency",
@@ -794,13 +779,6 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       </button>
       <button type="button" className="primary-button" style={{ borderRadius: '8px', padding: '0 16px', height: '36px' }} onClick={openAddProjectModal}>
         + Add Project
-      </button>
-      <button
-        type="button"
-        className="ghost-button"
-        onClick={() => setTheme((current) => (current === "dark" ? "light" : "dark"))}
-      >
-        {theme === "dark" ? "Light" : "Dark"}
       </button>
       <button type="button" className="ghost-button" onClick={logout}>
         Logout
@@ -1367,22 +1345,52 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   </div>
                 </div>
 
-                <h3>Project Resources</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3>Project Resources</h3>
+                  <button
+                    type="button"
+                    className={editMode ? "primary-button" : "ghost-button"}
+                    style={{ fontSize: '0.75rem', padding: '4px 12px', minHeight: '32px' }}
+                    onClick={() => setEditMode(!editMode)}
+                  >
+                    {editMode ? "Save / Close" : "Edit Links"}
+                  </button>
+                </div>
 
                 {(() => {
+                  const STAGE_VALS: Record<WorkflowStage, number> = {
+                    lead: 0, pitching: 1, negotiation: 2,
+                    execution: 3, reporting: 4, finance: 5, completed: 6, lost: 7
+                  };
+                  const currentStageVal = STAGE_VALS[selectedProject.currentStage] || 0;
+
                   const groupedDocs = (selectedProject.documents || []).reduce((acc, doc) => {
-                    const stage = doc.stage || 'General';
-                    if (!acc[stage]) acc[stage] = [];
-                    acc[stage].push(doc);
+                    const docStage = doc.stage || 'General';
+                    const docStageVal = STAGE_VALS[doc.stage] ?? -1;
+
+                    // AUTO-LEGACY: If project is past this document's stage, it's implicitly 'available' (legacy)
+                    const isLegacy = docStageVal !== -1 && currentStageVal > docStageVal;
+                    const effectiveStatus = (isLegacy && doc.status === 'missing') ? 'available' : doc.status;
+                    const effectiveUrl = doc.url || (effectiveStatus === 'available' ? selectedProject.mainFolder : '') || '';
+
+                    // FILTERING: Show if it's the current stage, OR if it's available, OR if we are in Edit Mode
+                    const shouldShow = editMode || doc.stage === selectedProject.currentStage || effectiveStatus === 'available';
+
+                    if (!shouldShow) return acc;
+
+                    if (!acc[docStage]) acc[docStage] = [];
+                    acc[docStage].push({ ...doc, status: effectiveStatus, url: effectiveUrl, isLegacy });
                     return acc;
-                  }, {} as Record<string, ProjectDocument[]>);
+                  }, {} as Record<string, (ProjectDocument & { isLegacy: boolean })[]>);
 
                   return Object.entries(groupedDocs).map(([stage, docs]) => (
                     <div key={stage} className="resource-group">
-                      <div className="resource-group-title">{stage}</div>
+                      <div className="resource-group-title" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>{stage}</span>
+                        {stage === selectedProject.currentStage && <span className="tone-amber" style={{ fontSize: '0.65rem', fontWeight: 600 }}>CURRENT STAGE</span>}
+                      </div>
                       <div className="resource-stack">
                         {docs
-                          .filter((doc) => editMode || doc.status !== "missing")
                           .map((doc) => (
                             <div key={doc.id} className="resource-card">
                               <div style={{ flex: 1 }}>
@@ -1396,12 +1404,12 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                       <span className="resource-name">{doc.title}</span>
                                       <span className={`resource-status-tag ${doc.status === 'available' ? 'ready' : 'missing'}`}>
-                                        {doc.status === 'available' ? 'READY' : 'MISSING'}
+                                        {doc.status === 'available' ? (doc.isLegacy ? 'LEGACY' : 'READY') : 'MISSING'}
                                       </span>
                                     </div>
-                                    {!editMode && doc.value && (
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--muted-soft)', marginTop: '2px' }}>
-                                        {doc.value}
+                                    {!editMode && (doc.value || (doc.isLegacy && selectedProject.mainFolder)) && (
+                                      <div style={{ fontSize: '0.75rem', color: 'var(--muted-soft)', marginTop: '2px', wordBreak: 'break-all' }}>
+                                        {doc.value || "Inherited from Main Folder"}
                                       </div>
                                     )}
                                   </div>
@@ -1431,12 +1439,12 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                                     ↗
                                   </Link>
                                 )}
-                                {doc.value && (
+                                {(doc.value || (doc.isLegacy && selectedProject.mainFolder)) && (
                                   <button
                                     className="resource-action-btn"
                                     title="Copy content"
                                     onClick={() => {
-                                      navigator.clipboard.writeText(doc.value);
+                                      navigator.clipboard.writeText(doc.value || selectedProject.mainFolder || '');
                                     }}
                                   >
                                     ✂
@@ -1454,7 +1462,17 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
             <div className="detail-columns">
               <div className="detail-block">
-                <h3>Milestones</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3>Milestones</h3>
+                  <button
+                    type="button"
+                    className={editMode ? "primary-button" : "ghost-button"}
+                    style={{ fontSize: '0.75rem', padding: '4px 12px', minHeight: '32px' }}
+                    onClick={() => setEditMode(!editMode)}
+                  >
+                    {editMode ? "Save / Close" : "Edit Milestones"}
+                  </button>
+                </div>
                 <div className="milestone-list">
                   {(selectedProject.milestones || []).map((milestone: ProjectMilestone) => (
                     <label key={milestone.id} className="milestone-row">
@@ -1722,6 +1740,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
               <div className="form-section-title">Additional Context</div>
               <div className="form-group">
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Main Project Folder (Google Drive / Link)</label>
+                <input className="control-bar-input" style={{ width: '100%' }}
+                  value={projectFormData.mainFolder || ''} onChange={(e) => setProjectFormData({ ...projectFormData, mainFolder: e.target.value })} placeholder="https://drive.google.com/..." />
+              </div>
+              <div className="form-group" style={{ marginTop: '16px' }}>
                 <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Remark / Notes</label>
                 <textarea className="control-bar-input" style={{ width: '100%', height: '100px', resize: 'vertical' }}
                   value={projectFormData.remark || ''} onChange={(e) => setProjectFormData({ ...projectFormData, remark: e.target.value })} placeholder="Strategic notes, constraints, or key objectives..." />

@@ -83,13 +83,6 @@ export function WorkspaceShell({
               Dark
             </button>
             <button 
-              onClick={() => handleThemeChange("light")}
-              className={`chip ${theme === "light" ? "active" : ""}`}
-              style={{ padding: "4px 8px", fontSize: "11px", minHeight: "24px", flex: 1 }}
-            >
-              Light
-            </button>
-            <button 
               onClick={() => handleThemeChange("monday")}
               className={`chip ${theme === "monday" ? "active" : ""}`}
               style={{ padding: "4px 8px", fontSize: "11px", minHeight: "24px", flex: 1 }}

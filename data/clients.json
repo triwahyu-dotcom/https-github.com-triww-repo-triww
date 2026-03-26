@@ -1,20 +1,5 @@
 [
   {
-    "id": "mensesneg",
-    "name": "MENSESNEG",
-    "type": "brand",
-    "health": "on_track",
-    "status": "active",
-    "category": "GOVERNMENT",
-    "contacts": [],
-    "projects": [],
-    "relation": "Eka Marutha",
-    "projectCount": 0,
-    "totalProjectValue": 0,
-    "activeProjectCount": 0,
-    "totalProjectValueLabel": "Rp 0"
-  },
-  {
     "id": "international-legends-funmatch",
     "name": "International Legends Funmatch",
     "type": "brand",
@@ -24,43 +9,251 @@
     "projects": []
   },
   {
-    "id": "btn",
-    "name": "PT. BANK TABUNGAN NEGARA (BTN)",
+    "id": "djarum",
+    "name": "PT Djarum",
     "type": "brand",
     "status": "active",
-    "address": "Menara BTN, Jl. Gajah Mada No.1, Jakarta Pusat",
     "aliases": [
-      "BTN",
-      "Bank BTN"
+      "PT Djarum",
+      "DJARUM BLACK",
+      "PT Djarum"
     ],
-    "website": "https://www.btn.co.id",
     "category": "BRAND",
-    "industry": "Banking & Finance"
+    "industry": "Tobacco / FMCG"
   },
   {
-    "id": "pemda-tangsel",
-    "name": "PEMERINTAH KOTA TANGERANG SELATAN",
-    "type": "government",
+    "id": "we-do",
+    "name": "WE DO",
+    "type": "agency",
+    "status": "active",
+    "aliases": [
+      "WE DO"
+    ],
+    "category": "BRAND",
+    "industry": "Event Agency / Partner"
+  },
+  {
+    "id": "satoe",
+    "name": "SATOE",
+    "type": "agency",
+    "status": "active",
+    "aliases": [
+      "SATOE",
+      "SATOE KOMUNIKA"
+    ],
+    "category": "BRAND",
+    "industry": "Event Agency / Partner"
+  },
+  {
+    "id": "sarga",
+    "name": "SARGA",
+    "type": "partner",
+    "status": "active",
+    "category": "BRAND",
+    "contacts": [],
+    "projects": []
+  },
+  {
+    "id": "qappt",
+    "name": "TVD",
+    "type": "brand",
     "health": "on_track",
     "status": "active",
-    "address": "Jl. Maruga No.1, Ciputat, Tangerang Selatan",
-    "aliases": [
-      "PEMDA TANGSEL",
-      "Pemkot Tangsel"
-    ],
-    "category": "GOVERNMENT",
+    "category": "CO. PARTNER",
     "contacts": [
       {
         "name": ".... - 08...",
         "projects": [
-          "pemda-tangsel-bimtek-ldk-karang-taruna-0cebc7e9"
+          "qappt-qatar-airways-premier-padel-tour-fe7affea"
         ]
       }
     ],
-    "industry": "Government",
     "projects": [
       {
-        "id": "pemda-tangsel-bimtek-ldk-karang-taruna-0cebc7e9",
+        "id": "qappt-qatar-airways-premier-padel-tour-fe7affea",
+        "numberLabel": "3",
+        "client": "QAPPT",
+        "projectName": "Qatar Airways Premier Padel Tour",
+        "contactPerson": ".... - 08...",
+        "relation": "Ricky Wirjan",
+        "category": "CO. PARTNER",
+        "owners": [
+          "Sindy"
+        ],
+        "eventDate": "1/4/26",
+        "projectValue": 0,
+        "projectValueLabel": "Rp 0",
+        "serviceLine": "Sport Event Management",
+        "status": "PITCHING",
+        "progress": "IN PROGRESS",
+        "credentials": "",
+        "remark": "",
+        "section": "leads",
+        "sectionLabel": "Leads Projects",
+        "health": "watch",
+        "currentStage": "pitching",
+        "currentStageLabel": "Pitching",
+        "financeStatus": "-",
+        "resultLabel": "In progress",
+        "phaseLabel": "Discovery",
+        "phases": [
+          {
+            "key": "brief",
+            "items": [
+              {
+                "label": "Brief Status",
+                "value": ""
+              },
+              {
+                "label": "TOR / Brief Deck",
+                "value": ""
+              },
+              {
+                "label": "Document A",
+                "value": ""
+              }
+            ],
+            "label": "Project Brief",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "pitching",
+            "items": [
+              {
+                "label": "Pitching Status",
+                "value": ""
+              },
+              {
+                "label": "Pitching Deadline",
+                "value": ""
+              },
+              {
+                "label": "Proposal",
+                "value": ""
+              },
+              {
+                "label": "Quotation",
+                "value": ""
+              },
+              {
+                "label": "Presentation",
+                "value": ""
+              }
+            ],
+            "label": "Pitching Process",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "revision",
+            "items": [
+              {
+                "label": "Revision Status",
+                "value": ""
+              },
+              {
+                "label": "Revision Deadline",
+                "value": ""
+              },
+              {
+                "label": "Revision Proposal",
+                "value": ""
+              },
+              {
+                "label": "Revision Quotation",
+                "value": ""
+              }
+            ],
+            "label": "Revision / Negotiation",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "execution",
+            "items": [
+              {
+                "label": "Execution Status",
+                "value": ""
+              },
+              {
+                "label": "Contract / SPK Client",
+                "value": ""
+              },
+              {
+                "label": "PO to Vendor",
+                "value": ""
+              },
+              {
+                "label": "Manpower Contract",
+                "value": ""
+              },
+              {
+                "label": "Checklist",
+                "value": ""
+              },
+              {
+                "label": "Manual Book",
+                "value": ""
+              }
+            ],
+            "label": "Execution",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "reporting",
+            "items": [
+              {
+                "label": "Reporting Status",
+                "value": ""
+              },
+              {
+                "label": "BAST",
+                "value": ""
+              },
+              {
+                "label": "Report Documentation",
+                "value": ""
+              }
+            ],
+            "label": "Reporting",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "finance",
+            "items": [
+              {
+                "label": "Finance Status",
+                "value": ""
+              },
+              {
+                "label": "COGS",
+                "value": ""
+              },
+              {
+                "label": "PPN",
+                "value": ""
+              },
+              {
+                "label": "Amount at Contract",
+                "value": ""
+              },
+              {
+                "label": "Invoice",
+                "value": ""
+              },
+              {
+                "label": "P & L Document",
+                "value": ""
+              }
+            ],
+            "label": "Finance",
+            "status": "",
+            "completion": 0
+          }
+        ],
         "tasks": [
           {
             "id": "brief-task-0",
@@ -252,201 +445,6 @@
             "required": true
           }
         ],
-        "client": "PEMDA TANGSEL",
-        "health": "watch",
-        "owners": [
-          "Sindy"
-        ],
-        "phases": [
-          {
-            "key": "brief",
-            "items": [
-              {
-                "label": "Brief Status",
-                "value": ""
-              },
-              {
-                "label": "TOR / Brief Deck",
-                "value": ""
-              },
-              {
-                "label": "Document A",
-                "value": ""
-              }
-            ],
-            "label": "Project Brief",
-            "status": "",
-            "completion": 0
-          },
-          {
-            "key": "pitching",
-            "items": [
-              {
-                "label": "Pitching Status",
-                "value": ""
-              },
-              {
-                "label": "Pitching Deadline",
-                "value": ""
-              },
-              {
-                "label": "Proposal",
-                "value": ""
-              },
-              {
-                "label": "Quotation",
-                "value": ""
-              },
-              {
-                "label": "Presentation",
-                "value": ""
-              }
-            ],
-            "label": "Pitching Process",
-            "status": "",
-            "completion": 0
-          },
-          {
-            "key": "revision",
-            "items": [
-              {
-                "label": "Revision Status",
-                "value": ""
-              },
-              {
-                "label": "Revision Deadline",
-                "value": ""
-              },
-              {
-                "label": "Revision Proposal",
-                "value": ""
-              },
-              {
-                "label": "Revision Quotation",
-                "value": ""
-              }
-            ],
-            "label": "Revision / Negotiation",
-            "status": "",
-            "completion": 0
-          },
-          {
-            "key": "execution",
-            "items": [
-              {
-                "label": "Execution Status",
-                "value": ""
-              },
-              {
-                "label": "Contract / SPK Client",
-                "value": ""
-              },
-              {
-                "label": "PO to Vendor",
-                "value": ""
-              },
-              {
-                "label": "Manpower Contract",
-                "value": ""
-              },
-              {
-                "label": "Checklist",
-                "value": ""
-              },
-              {
-                "label": "Manual Book",
-                "value": ""
-              }
-            ],
-            "label": "Execution",
-            "status": "",
-            "completion": 0
-          },
-          {
-            "key": "reporting",
-            "items": [
-              {
-                "label": "Reporting Status",
-                "value": ""
-              },
-              {
-                "label": "BAST",
-                "value": ""
-              },
-              {
-                "label": "Report Documentation",
-                "value": ""
-              }
-            ],
-            "label": "Reporting",
-            "status": "",
-            "completion": 0
-          },
-          {
-            "key": "finance",
-            "items": [
-              {
-                "label": "Finance Status",
-                "value": ""
-              },
-              {
-                "label": "COGS",
-                "value": ""
-              },
-              {
-                "label": "PPN",
-                "value": ""
-              },
-              {
-                "label": "Amount at Contract",
-                "value": ""
-              },
-              {
-                "label": "Invoice",
-                "value": ""
-              },
-              {
-                "label": "P & L Document",
-                "value": ""
-              }
-            ],
-            "label": "Finance",
-            "status": "",
-            "completion": 0
-          }
-        ],
-        "remark": "",
-        "status": "LEADS",
-        "section": "leads",
-        "activity": [
-          {
-            "id": "imported",
-            "type": "imported",
-            "message": "Project diimpor dari tracker CSV 2026.",
-            "timestampLabel": "Imported"
-          },
-          {
-            "id": "status",
-            "type": "note",
-            "message": "Status terakhir: LEADS.",
-            "timestampLabel": "Current status"
-          },
-          {
-            "id": "progress",
-            "type": "note",
-            "message": "Progress monitoring: IN PROGRESS.",
-            "timestampLabel": "Current progress"
-          },
-          {
-            "id": "stage",
-            "type": "stage_change",
-            "message": "Project saat ini berada di stage Lead.",
-            "timestampLabel": "Workflow"
-          }
-        ],
-        "category": "GOVERNMENT",
-        "progress": "IN PROGRESS",
-        "relation": "Eka Marutha",
         "documents": [
           {
             "id": "brief-brief-status-0",
@@ -692,7 +690,6 @@
             "phaseKey": "finance"
           }
         ],
-        "eventDate": "1/4/26",
         "milestones": [
           {
             "id": "brief-received",
@@ -743,139 +740,63 @@
             "value": ""
           }
         ],
-        "phaseLabel": "Discovery",
-        "credentials": "",
-        "numberLabel": "1",
-        "projectName": "Bimtek LDK Karang Taruna",
-        "resultLabel": "In progress",
-        "serviceLine": "EM",
-        "currentStage": "lead",
-        "projectValue": 1312523040,
-        "sectionLabel": "Leads Projects",
-        "contactPerson": ".... - 08...",
-        "financeStatus": "-",
-        "searchableText": "pemda tangsel bimtek ldk karang taruna .... - 08... eka marutha government sindy em leads in progress lead",
-        "currentStageLabel": "Lead",
-        "projectValueLabel": "Rp 1.312.523.040"
+        "activity": [
+          {
+            "id": "move-1773265104251",
+            "type": "stage_change",
+            "message": "Manual move ke stage Pitching dengan catatan: Updated from table",
+            "timestampLabel": "Just now"
+          },
+          {
+            "id": "imported",
+            "type": "imported",
+            "message": "Project diimpor dari tracker CSV 2026.",
+            "timestampLabel": "Imported"
+          },
+          {
+            "id": "status",
+            "type": "note",
+            "message": "Status terakhir: PITCHING.",
+            "timestampLabel": "Current status"
+          },
+          {
+            "id": "progress",
+            "type": "note",
+            "message": "Progress monitoring: IN PROGRESS.",
+            "timestampLabel": "Current progress"
+          },
+          {
+            "id": "stage",
+            "type": "stage_change",
+            "message": "Project saat ini berada di stage Lead.",
+            "timestampLabel": "Workflow"
+          }
+        ],
+        "searchableText": "qappt qatar airways premier padel tour .... - 08... ricky wirjan co. partner sindy sport event management pitching in progress pitching",
+        "assignedVendors": [],
+        "vendorShortlist": [],
+        "vendorRequirements": [
+          {
+            "label": "Service Fit",
+            "summary": "Prioritaskan vendor dengan layanan SEM."
+          },
+          {
+            "label": "Coverage",
+            "summary": "Pastikan vendor available pada tanggal event dan area kerja relevan."
+          },
+          {
+            "label": "Compliance",
+            "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
+          }
+        ],
+        "mainFolder": ""
       }
     ],
-    "relation": "Brand",
+    "relation": "Ricky Wirjan",
     "projectCount": 1,
-    "totalProjectValue": 1312523040,
-    "activeProjectCount": 0,
-    "totalProjectValueLabel": "Rp 1.312.523.040"
-  },
-  {
-    "id": "daikin",
-    "name": "PT DAIKIN AIRCONDITIONING INDONESIA",
-    "type": "brand",
-    "status": "active",
-    "aliases": [
-      "DAIKIN"
-    ],
-    "website": "https://www.daikin.co.id",
-    "category": "BRAND",
-    "industry": "Electronic & HVAC"
-  },
-  {
-    "id": "tugu-insurance",
-    "name": "PT ASURANSI TUGU PRATAMA INDONESIA TBK",
-    "type": "brand",
-    "status": "active",
-    "aliases": [
-      "Tugu Insurance"
-    ],
-    "category": "BRAND",
-    "industry": "Insurance"
-  },
-  {
-    "id": "djarum",
-    "name": "PT Djarum",
-    "type": "brand",
-    "status": "active",
-    "aliases": [
-      "PT Djarum",
-      "DJARUM BLACK",
-      "PT Djarum"
-    ],
-    "category": "BRAND",
-    "industry": "Tobacco / FMCG"
-  },
-  {
-    "id": "we-do",
-    "name": "WE DO",
-    "type": "agency",
-    "status": "active",
-    "aliases": [
-      "WE DO"
-    ],
-    "category": "BRAND",
-    "industry": "Event Agency / Partner"
-  },
-  {
-    "id": "satoe",
-    "name": "SATOE",
-    "type": "agency",
-    "status": "active",
-    "aliases": [
-      "SATOE",
-      "SATOE KOMUNIKA"
-    ],
-    "category": "BRAND",
-    "industry": "Event Agency / Partner"
-  },
-  {
-    "id": "sarga",
-    "name": "SARGA",
-    "type": "partner",
-    "status": "active",
-    "category": "BRAND",
-    "contacts": [],
-    "projects": []
-  },
-  {
-    "id": "mirela",
-    "name": "MIRELA",
-    "type": "BRAND",
-    "aliases": [
-      "MIRELA"
-    ],
-    "category": "Client",
-    "projects": []
-  },
-  {
-    "id": "telkom-indonesia",
-    "name": "PT TELKOM INDONESIA",
-    "type": "brand",
-    "health": "on_track",
-    "status": "active",
-    "aliases": [
-      "TELKOM"
-    ],
-    "category": "BRAND",
-    "contacts": [],
-    "industry": "Telecommunication",
-    "projects": [],
-    "relation": "Brand",
-    "projectCount": 0,
     "totalProjectValue": 0,
     "activeProjectCount": 0,
     "totalProjectValueLabel": "Rp 0"
-  },
-  {
-    "id": "qappt",
-    "name": "QAPPT",
-    "type": "brand",
-    "health": "on_track",
-    "status": "active",
-    "category": "CO. PARTNER",
-    "contacts": [],
-    "projects": [],
-    "relation": "Ricky Wirjan",
-    "projectCount": 0,
-    "totalProjectValue": 0,
-    "activeProjectCount": 0,
-    "totalProjectValueLabel": "Rp 0"
   },
   {
     "id": "herbal-salam",
@@ -923,57 +844,228 @@
     "totalProjectValueLabel": "Rp 0"
   },
   {
-    "id": "access-ind",
-    "name": "ACCESS IND",
+    "id": "mata-air",
+    "name": "MATA AIR",
     "type": "agency",
     "health": "on_track",
     "status": "active",
-    "category": "CO. PARTNER",
+    "category": "GOVERNMENT",
     "contacts": [
       {
-        "name": "Mita (Access) - 08...",
+        "name": ".... - 08...",
         "projects": [
-          "access-ind-nu-mengawal-indonesia-merdeka-menuju-peradaban-mulia-b053c834"
+          "mui-gus-nw-doa-bersama-untuk-keselamatan-indonesia-dan-pengukuhan-dewan-pimpinan-mui-pusat-periode-2025-2030-22b17b58"
         ]
       }
     ],
     "projects": [
       {
-        "id": "access-ind-nu-mengawal-indonesia-merdeka-menuju-peradaban-mulia-b053c834",
-        "numberLabel": "2",
-        "client": "ACCESS IND",
-        "projectName": "Mengawal Indonesia Merdeka Menuju Peradaban Mulia",
-        "contactPerson": "Mita (Access) - 08...",
-        "relation": "Wasli Andril Fadjar",
-        "category": "CO. PARTNER",
-        "owners": [],
-        "eventDate": "31/01/2026",
-        "projectValue": 15000000,
-        "projectValueLabel": "Rp 15.000.000",
-        "serviceLine": "AFM",
-        "status": "ORDER",
-        "progress": "COMPLETED",
-        "credentials": "PAID 100%",
-        "remark": "Invoicing to Client",
-        "section": "billed",
-        "sectionLabel": "Billed Projects",
+        "id": "mui-gus-nw-doa-bersama-untuk-keselamatan-indonesia-dan-pengukuhan-dewan-pimpinan-mui-pusat-periode-2025-2030-22b17b58",
+        "tasks": [
+          {
+            "id": "brief-task-0",
+            "stage": "qualified",
+            "title": "Brief Status",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "brief-task-1",
+            "stage": "qualified",
+            "title": "TOR / Brief Deck",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "brief-task-2",
+            "stage": "qualified",
+            "title": "Document A",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-0",
+            "stage": "pitching",
+            "title": "Pitching Status",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-1",
+            "stage": "pitching",
+            "title": "Pitching Deadline",
+            "status": "pending",
+            "required": false
+          },
+          {
+            "id": "pitching-task-2",
+            "stage": "pitching",
+            "title": "Proposal",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "pitching-task-3",
+            "stage": "pitching",
+            "title": "Quotation",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "pitching-task-4",
+            "stage": "pitching",
+            "title": "Presentation",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "revision-task-0",
+            "stage": "negotiation",
+            "title": "Revision Status",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "revision-task-1",
+            "stage": "negotiation",
+            "title": "Revision Deadline",
+            "status": "done",
+            "required": false
+          },
+          {
+            "id": "revision-task-2",
+            "stage": "negotiation",
+            "title": "Revision Proposal",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "revision-task-3",
+            "stage": "negotiation",
+            "title": "Revision Quotation",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "execution-task-0",
+            "stage": "execution",
+            "title": "Execution Status",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "execution-task-1",
+            "stage": "execution",
+            "title": "Contract / SPK Client",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "execution-task-2",
+            "stage": "execution",
+            "title": "PO to Vendor",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "execution-task-3",
+            "stage": "execution",
+            "title": "Manpower Contract",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "execution-task-4",
+            "stage": "execution",
+            "title": "Checklist",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "execution-task-5",
+            "stage": "execution",
+            "title": "Manual Book",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "reporting-task-0",
+            "stage": "reporting",
+            "title": "Reporting Status",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "reporting-task-1",
+            "stage": "reporting",
+            "title": "BAST",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "reporting-task-2",
+            "stage": "reporting",
+            "title": "Report Documentation",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "finance-task-0",
+            "stage": "finance",
+            "title": "Finance Status",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "finance-task-1",
+            "stage": "finance",
+            "title": "COGS",
+            "status": "done",
+            "required": false
+          },
+          {
+            "id": "finance-task-2",
+            "stage": "finance",
+            "title": "PPN",
+            "status": "done",
+            "required": false
+          },
+          {
+            "id": "finance-task-3",
+            "stage": "finance",
+            "title": "Amount at Contract",
+            "status": "pending",
+            "required": true
+          },
+          {
+            "id": "finance-task-4",
+            "stage": "finance",
+            "title": "Invoice",
+            "status": "done",
+            "required": true
+          },
+          {
+            "id": "finance-task-5",
+            "stage": "finance",
+            "title": "P & L Document",
+            "status": "done",
+            "required": true
+          }
+        ],
+        "client": "MATA AIR",
         "health": "on_track",
-        "currentStage": "completed",
-        "currentStageLabel": "Completed",
-        "financeStatus": "-",
-        "resultLabel": "Completed",
-        "phaseLabel": "Finance",
+        "owners": [],
         "phases": [
           {
             "key": "brief",
             "items": [
               {
                 "label": "Brief Status",
-                "value": "DONE"
+                "value": ""
               },
               {
                 "label": "TOR / Brief Deck",
-                "value": "DONE"
+                "value": ""
               },
               {
                 "label": "Document A",
@@ -981,8 +1073,8 @@
               }
             ],
             "label": "Project Brief",
-            "status": "DONE",
-            "completion": 67
+            "status": "",
+            "completion": 0
           },
           {
             "key": "pitching",
@@ -1001,27 +1093,27 @@
               },
               {
                 "label": "Quotation",
-                "value": "DECK_HARLAH 100 TAHUN NU_ISTORA.pdf"
+                "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
               },
               {
                 "label": "Presentation",
-                "value": ""
+                "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf"
               }
             ],
             "label": "Pitching Process",
-            "status": "DECK_HARLAH 100 TAHUN NU_ISTORA.pdf",
-            "completion": 20
+            "status": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "completion": 40
           },
           {
             "key": "revision",
             "items": [
               {
                 "label": "Revision Status",
-                "value": ""
+                "value": "DONE"
               },
               {
                 "label": "Revision Deadline",
-                "value": ""
+                "value": "PROCEED"
               },
               {
                 "label": "Revision Proposal",
@@ -1029,23 +1121,23 @@
               },
               {
                 "label": "Revision Quotation",
-                "value": ""
+                "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
               }
             ],
             "label": "Revision / Negotiation",
-            "status": "",
-            "completion": 0
+            "status": "DONE",
+            "completion": 75
           },
           {
             "key": "execution",
             "items": [
               {
                 "label": "Execution Status",
-                "value": ""
+                "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf"
               },
               {
                 "label": "Contract / SPK Client",
-                "value": ""
+                "value": "DONE"
               },
               {
                 "label": "PO to Vendor",
@@ -1053,40 +1145,40 @@
               },
               {
                 "label": "Manpower Contract",
-                "value": ""
+                "value": "Invoice Vendor"
               },
               {
                 "label": "Checklist",
-                "value": ""
+                "value": "SPK MUI Signed"
               },
               {
                 "label": "Manual Book",
-                "value": ""
+                "value": "MASTER DATA MUI"
               }
             ],
             "label": "Execution",
-            "status": "",
-            "completion": 0
+            "status": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf",
+            "completion": 83
           },
           {
             "key": "reporting",
             "items": [
               {
                 "label": "Reporting Status",
-                "value": ""
+                "value": "MASTER DATA MUI"
               },
               {
                 "label": "BAST",
-                "value": ""
+                "value": "https://www.canva.com/design/DAG-MJ0YnKs/0h_hU9U1IffQ9kpPWZlrrQ/edit?utm_content=DAG-MJ0YnKs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
               },
               {
                 "label": "Report Documentation",
-                "value": ""
+                "value": "DONE"
               }
             ],
             "label": "Reporting",
-            "status": "",
-            "completion": 0
+            "status": "MASTER DATA MUI",
+            "completion": 100
           },
           {
             "key": "finance",
@@ -1097,7 +1189,7 @@
               },
               {
                 "label": "COGS",
-                "value": ""
+                "value": "REPORT MUI"
               },
               {
                 "label": "PPN",
@@ -1109,18 +1201,402 @@
               },
               {
                 "label": "Invoice",
-                "value": ""
+                "value": "-"
               },
               {
                 "label": "P & L Document",
-                "value": "Rp15,000,000"
+                "value": "Rp2,939,000,000"
               }
             ],
             "label": "Finance",
-            "status": "PAID",
-            "completion": 33
+            "status": "REPORT MUI",
+            "completion": 67
           }
         ],
+        "remark": "INVOICING MUI",
+        "status": "ORDER",
+        "section": "billed",
+        "activity": [
+          {
+            "id": "imported",
+            "type": "imported",
+            "message": "Project diimpor dari tracker CSV 2026.",
+            "timestampLabel": "Imported"
+          },
+          {
+            "id": "status",
+            "type": "note",
+            "message": "Status terakhir: ORDER.",
+            "timestampLabel": "Current status"
+          },
+          {
+            "id": "progress",
+            "type": "note",
+            "message": "Progress monitoring: COMPLETED.",
+            "timestampLabel": "Current progress"
+          },
+          {
+            "id": "stage",
+            "type": "stage_change",
+            "message": "Project saat ini berada di stage Completed.",
+            "timestampLabel": "Workflow"
+          }
+        ],
+        "category": "GOVERNMENT",
+        "progress": "COMPLETED",
+        "relation": "Bram Hady Sulton",
+        "documents": [
+          {
+            "id": "brief-brief-status-0",
+            "url": "",
+            "stage": "qualified",
+            "title": "Brief Status",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "brief"
+          },
+          {
+            "id": "brief-tor-brief-deck-1",
+            "url": "",
+            "stage": "qualified",
+            "title": "TOR / Brief Deck",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "brief"
+          },
+          {
+            "id": "brief-document-a-2",
+            "url": "",
+            "stage": "qualified",
+            "title": "Document A",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "brief"
+          },
+          {
+            "id": "pitching-pitching-status-0",
+            "url": "",
+            "stage": "pitching",
+            "title": "Pitching Status",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "pitching"
+          },
+          {
+            "id": "pitching-pitching-deadline-1",
+            "url": "",
+            "stage": "pitching",
+            "title": "Pitching Deadline",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "pitching"
+          },
+          {
+            "id": "pitching-proposal-2",
+            "url": "",
+            "stage": "pitching",
+            "title": "Proposal",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "pitching"
+          },
+          {
+            "id": "pitching-quotation-3",
+            "url": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "stage": "pitching",
+            "title": "Quotation",
+            "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "status": "available",
+            "phaseKey": "pitching"
+          },
+          {
+            "id": "pitching-presentation-4",
+            "url": "",
+            "stage": "pitching",
+            "title": "Presentation",
+            "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf",
+            "status": "reference",
+            "phaseKey": "pitching"
+          },
+          {
+            "id": "revision-revision-status-0",
+            "url": "",
+            "stage": "negotiation",
+            "title": "Revision Status",
+            "value": "DONE",
+            "status": "reference",
+            "phaseKey": "revision"
+          },
+          {
+            "id": "revision-revision-deadline-1",
+            "url": "",
+            "stage": "negotiation",
+            "title": "Revision Deadline",
+            "value": "PROCEED",
+            "status": "reference",
+            "phaseKey": "revision"
+          },
+          {
+            "id": "revision-revision-proposal-2",
+            "url": "",
+            "stage": "negotiation",
+            "title": "Revision Proposal",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "revision"
+          },
+          {
+            "id": "revision-revision-quotation-3",
+            "url": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "stage": "negotiation",
+            "title": "Revision Quotation",
+            "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "status": "available",
+            "phaseKey": "revision"
+          },
+          {
+            "id": "execution-execution-status-0",
+            "url": "",
+            "stage": "execution",
+            "title": "Execution Status",
+            "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf",
+            "status": "reference",
+            "phaseKey": "execution"
+          },
+          {
+            "id": "execution-contract-spk-client-1",
+            "url": "",
+            "stage": "execution",
+            "title": "Contract / SPK Client",
+            "value": "DONE",
+            "status": "reference",
+            "phaseKey": "execution"
+          },
+          {
+            "id": "execution-po-to-vendor-2",
+            "url": "",
+            "stage": "execution",
+            "title": "PO to Vendor",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "execution"
+          },
+          {
+            "id": "execution-manpower-contract-3",
+            "url": "",
+            "stage": "execution",
+            "title": "Manpower Contract",
+            "value": "Invoice Vendor",
+            "status": "reference",
+            "phaseKey": "execution"
+          },
+          {
+            "id": "execution-checklist-4",
+            "url": "",
+            "stage": "execution",
+            "title": "Checklist",
+            "value": "SPK MUI Signed",
+            "status": "reference",
+            "phaseKey": "execution"
+          },
+          {
+            "id": "execution-manual-book-5",
+            "url": "",
+            "stage": "execution",
+            "title": "Manual Book",
+            "value": "MASTER DATA MUI",
+            "status": "reference",
+            "phaseKey": "execution"
+          },
+          {
+            "id": "reporting-reporting-status-0",
+            "url": "",
+            "stage": "reporting",
+            "title": "Reporting Status",
+            "value": "MASTER DATA MUI",
+            "status": "reference",
+            "phaseKey": "reporting"
+          },
+          {
+            "id": "reporting-bast-1",
+            "url": "https://www.canva.com/design/DAG-MJ0YnKs/0h_hU9U1IffQ9kpPWZlrrQ/edit?utm_content=DAG-MJ0YnKs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "stage": "reporting",
+            "title": "BAST",
+            "value": "https://www.canva.com/design/DAG-MJ0YnKs/0h_hU9U1IffQ9kpPWZlrrQ/edit?utm_content=DAG-MJ0YnKs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "status": "available",
+            "phaseKey": "reporting"
+          },
+          {
+            "id": "reporting-report-documentation-2",
+            "url": "",
+            "stage": "reporting",
+            "title": "Report Documentation",
+            "value": "DONE",
+            "status": "reference",
+            "phaseKey": "reporting"
+          },
+          {
+            "id": "finance-finance-status-0",
+            "url": "",
+            "stage": "finance",
+            "title": "Finance Status",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "finance"
+          },
+          {
+            "id": "finance-cogs-1",
+            "url": "",
+            "stage": "finance",
+            "title": "COGS",
+            "value": "REPORT MUI",
+            "status": "reference",
+            "phaseKey": "finance"
+          },
+          {
+            "id": "finance-ppn-2",
+            "url": "",
+            "stage": "finance",
+            "title": "PPN",
+            "value": "PAID",
+            "status": "reference",
+            "phaseKey": "finance"
+          },
+          {
+            "id": "finance-amount-at-contract-3",
+            "url": "",
+            "stage": "finance",
+            "title": "Amount at Contract",
+            "value": "",
+            "status": "missing",
+            "phaseKey": "finance"
+          },
+          {
+            "id": "finance-invoice-4",
+            "url": "",
+            "stage": "finance",
+            "title": "Invoice",
+            "value": "-",
+            "status": "reference",
+            "phaseKey": "finance"
+          },
+          {
+            "id": "finance-p-l-document-5",
+            "url": "",
+            "stage": "finance",
+            "title": "P & L Document",
+            "value": "Rp2,939,000,000",
+            "status": "reference",
+            "phaseKey": "finance"
+          }
+        ],
+        "eventDate": "7/2/26",
+        "milestones": [
+          {
+            "id": "brief-received",
+            "done": false,
+            "label": "Brief Received",
+            "value": ""
+          },
+          {
+            "id": "proposal-sent",
+            "done": false,
+            "label": "Proposal Sent",
+            "value": ""
+          },
+          {
+            "id": "quotation-sent",
+            "done": true,
+            "label": "Quotation Sent",
+            "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+          },
+          {
+            "id": "contract-signed",
+            "done": true,
+            "label": "Contract Signed",
+            "value": "DONE"
+          },
+          {
+            "id": "event-day",
+            "done": true,
+            "label": "Event Day",
+            "value": "7/2/26"
+          },
+          {
+            "id": "report-delivered",
+            "done": true,
+            "label": "Report Delivered",
+            "value": "DONE"
+          },
+          {
+            "id": "invoice-sent",
+            "done": true,
+            "label": "Invoice Sent",
+            "value": "-"
+          },
+          {
+            "id": "payment-received",
+            "done": true,
+            "label": "Payment Received",
+            "value": ""
+          }
+        ],
+        "phaseLabel": "Finance",
+        "credentials": "PAID 100%",
+        "numberLabel": "1",
+        "projectName": "Doa Bersama Untuk Keselamatan Indonesia dan Pengukuhan Dewan Pimpinan MUI Pusat Periode 2025 - 2030",
+        "resultLabel": "Completed",
+        "serviceLine": "Event Management",
+        "currentStage": "completed",
+        "projectValue": 2939000000,
+        "sectionLabel": "Billed Projects",
+        "contactPerson": ".... - 08...",
+        "financeStatus": "-",
+        "searchableText": "mata air doa bersama untuk keselamatan indonesia dan pengukuhan dewan pimpinan mui pusat periode 2025 - 2030 .... - 08... bram hady sulton government  event management order completed completed",
+        "assignedVendors": [],
+        "vendorShortlist": [],
+        "currentStageLabel": "Completed",
+        "projectValueLabel": "Rp 2.939.000.000",
+        "vendorRequirements": [
+          {
+            "label": "Service Fit",
+            "summary": "Prioritaskan vendor dengan layanan Event Management."
+          },
+          {
+            "label": "Coverage",
+            "summary": "Pastikan vendor available pada tanggal event dan area kerja relevan."
+          },
+          {
+            "label": "Compliance",
+            "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
+          }
+        ]
+      }
+    ],
+    "relation": "Bram Hady Sulton",
+    "projectCount": 1,
+    "totalProjectValue": 2939000000,
+    "activeProjectCount": 0,
+    "totalProjectValueLabel": "Rp 2.939.000.000"
+  },
+  {
+    "id": "access-ind",
+    "name": "ACCESS IND",
+    "type": "agency",
+    "health": "on_track",
+    "status": "active",
+    "category": "CO. PARTNER",
+    "contacts": [
+      {
+        "name": "Mita (Access) - 08...",
+        "projects": [
+          "access-ind-nu-mengawal-indonesia-merdeka-menuju-peradaban-mulia-b053c834"
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "id": "access-ind-nu-mengawal-indonesia-merdeka-menuju-peradaban-mulia-b053c834",
         "tasks": [
           {
             "id": "brief-task-0",
@@ -1312,6 +1788,199 @@
             "required": true
           }
         ],
+        "client": "ACCESS IND",
+        "health": "on_track",
+        "owners": [],
+        "phases": [
+          {
+            "key": "brief",
+            "items": [
+              {
+                "label": "Brief Status",
+                "value": "DONE"
+              },
+              {
+                "label": "TOR / Brief Deck",
+                "value": "DONE"
+              },
+              {
+                "label": "Document A",
+                "value": ""
+              }
+            ],
+            "label": "Project Brief",
+            "status": "DONE",
+            "completion": 67
+          },
+          {
+            "key": "pitching",
+            "items": [
+              {
+                "label": "Pitching Status",
+                "value": ""
+              },
+              {
+                "label": "Pitching Deadline",
+                "value": ""
+              },
+              {
+                "label": "Proposal",
+                "value": ""
+              },
+              {
+                "label": "Quotation",
+                "value": "DECK_HARLAH 100 TAHUN NU_ISTORA.pdf"
+              },
+              {
+                "label": "Presentation",
+                "value": ""
+              }
+            ],
+            "label": "Pitching Process",
+            "status": "DECK_HARLAH 100 TAHUN NU_ISTORA.pdf",
+            "completion": 20
+          },
+          {
+            "key": "revision",
+            "items": [
+              {
+                "label": "Revision Status",
+                "value": ""
+              },
+              {
+                "label": "Revision Deadline",
+                "value": ""
+              },
+              {
+                "label": "Revision Proposal",
+                "value": ""
+              },
+              {
+                "label": "Revision Quotation",
+                "value": ""
+              }
+            ],
+            "label": "Revision / Negotiation",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "execution",
+            "items": [
+              {
+                "label": "Execution Status",
+                "value": ""
+              },
+              {
+                "label": "Contract / SPK Client",
+                "value": ""
+              },
+              {
+                "label": "PO to Vendor",
+                "value": ""
+              },
+              {
+                "label": "Manpower Contract",
+                "value": ""
+              },
+              {
+                "label": "Checklist",
+                "value": ""
+              },
+              {
+                "label": "Manual Book",
+                "value": ""
+              }
+            ],
+            "label": "Execution",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "reporting",
+            "items": [
+              {
+                "label": "Reporting Status",
+                "value": ""
+              },
+              {
+                "label": "BAST",
+                "value": ""
+              },
+              {
+                "label": "Report Documentation",
+                "value": ""
+              }
+            ],
+            "label": "Reporting",
+            "status": "",
+            "completion": 0
+          },
+          {
+            "key": "finance",
+            "items": [
+              {
+                "label": "Finance Status",
+                "value": ""
+              },
+              {
+                "label": "COGS",
+                "value": ""
+              },
+              {
+                "label": "PPN",
+                "value": "PAID"
+              },
+              {
+                "label": "Amount at Contract",
+                "value": ""
+              },
+              {
+                "label": "Invoice",
+                "value": ""
+              },
+              {
+                "label": "P & L Document",
+                "value": "Rp15,000,000"
+              }
+            ],
+            "label": "Finance",
+            "status": "PAID",
+            "completion": 33
+          }
+        ],
+        "remark": "Invoicing to Client",
+        "status": "ORDER",
+        "section": "billed",
+        "activity": [
+          {
+            "id": "imported",
+            "type": "imported",
+            "message": "Project diimpor dari tracker CSV 2026.",
+            "timestampLabel": "Imported"
+          },
+          {
+            "id": "status",
+            "type": "note",
+            "message": "Status terakhir: ORDER.",
+            "timestampLabel": "Current status"
+          },
+          {
+            "id": "progress",
+            "type": "note",
+            "message": "Progress monitoring: COMPLETED.",
+            "timestampLabel": "Current progress"
+          },
+          {
+            "id": "stage",
+            "type": "stage_change",
+            "message": "Project saat ini berada di stage Completed.",
+            "timestampLabel": "Workflow"
+          }
+        ],
+        "category": "CO. PARTNER",
+        "progress": "COMPLETED",
+        "relation": "Wasli Andril Fadjar",
         "documents": [
           {
             "id": "brief-brief-status-0",
@@ -1557,6 +2226,7 @@
             "phaseKey": "finance"
           }
         ],
+        "eventDate": "31/01/2026",
         "milestones": [
           {
             "id": "brief-received",
@@ -1607,35 +2277,22 @@
             "value": ""
           }
         ],
-        "activity": [
-          {
-            "id": "imported",
-            "type": "imported",
-            "message": "Project diimpor dari tracker CSV 2026.",
-            "timestampLabel": "Imported"
-          },
-          {
-            "id": "status",
-            "type": "note",
-            "message": "Status terakhir: ORDER.",
-            "timestampLabel": "Current status"
-          },
-          {
-            "id": "progress",
-            "type": "note",
-            "message": "Progress monitoring: COMPLETED.",
-            "timestampLabel": "Current progress"
-          },
-          {
-            "id": "stage",
-            "type": "stage_change",
-            "message": "Project saat ini berada di stage Completed.",
-            "timestampLabel": "Workflow"
-          }
-        ],
+        "phaseLabel": "Finance",
+        "credentials": "PAID 100%",
+        "numberLabel": "2",
+        "projectName": "Mengawal Indonesia Merdeka Menuju Peradaban Mulia",
+        "resultLabel": "Completed",
+        "serviceLine": "AFM",
+        "currentStage": "completed",
+        "projectValue": 15000000,
+        "sectionLabel": "Billed Projects",
+        "contactPerson": "Mita (Access) - 08...",
+        "financeStatus": "-",
         "searchableText": "access ind mengawal indonesia merdeka menuju peradaban mulia mita (access) - 08... wasli andril fadjar co. partner  afm order completed completed",
         "assignedVendors": [],
         "vendorShortlist": [],
+        "currentStageLabel": "Completed",
+        "projectValueLabel": "Rp 15.000.000",
         "vendorRequirements": [
           {
             "label": "Service Fit",
@@ -2410,23 +3067,99 @@
     "projects": []
   },
   {
-    "id": "mata-air",
-    "name": "MATA AIR",
+    "id": "unknown-client",
+    "name": "Bali Super Fast",
     "type": "agency",
     "health": "on_track",
     "status": "active",
+    "category": "CO. PARTNER",
+    "contacts": [
+      {
+        "name": ".... - 08...",
+        "projects": [
+          "unknown-client-pre-event-bali-superfast-run-a6817dea"
+        ]
+      }
+    ],
+    "projects": [],
+    "relation": "Ricky Wirjan",
+    "projectCount": 0,
+    "totalProjectValue": 0,
+    "activeProjectCount": 0,
+    "totalProjectValueLabel": "Rp 0"
+  },
+  {
+    "id": "mensesneg",
+    "name": "MENSESNEG",
+    "type": "brand",
+    "health": "on_track",
+    "status": "active",
+    "category": "GOVERNMENT",
+    "contacts": [],
+    "projects": [],
+    "relation": "Eka Marutha",
+    "projectCount": 0,
+    "totalProjectValue": 0,
+    "activeProjectCount": 0,
+    "totalProjectValueLabel": "Rp 0"
+  },
+  {
+    "id": "btn",
+    "name": "PT. BANK TABUNGAN NEGARA (BTN)",
+    "type": "brand",
+    "status": "active",
+    "address": "Menara BTN, Jl. Gajah Mada No.1, Jakarta Pusat",
+    "aliases": [
+      "BTN",
+      "Bank BTN"
+    ],
+    "website": "https://www.btn.co.id",
+    "category": "BRAND",
+    "industry": "Banking & Finance"
+  },
+  {
+    "id": "mirella",
+    "name": "MIRELA",
+    "type": "BRAND",
+    "aliases": [
+      "MIRELA"
+    ],
+    "category": "Client",
+    "projects": []
+  },
+  {
+    "id": "btv",
+    "name": "BTV",
+    "status": "lead",
+    "category": "BRAND",
+    "contacts": [],
+    "industry": "Television",
+    "projects": []
+  },
+  {
+    "id": "pemda-tangsel",
+    "name": "PEMERINTAH KOTA TANGERANG SELATAN",
+    "type": "government",
+    "health": "on_track",
+    "status": "active",
+    "address": "Jl. Maruga No.1, Ciputat, Tangerang Selatan",
+    "aliases": [
+      "PEMDA TANGSEL",
+      "Pemkot Tangsel"
+    ],
     "category": "GOVERNMENT",
     "contacts": [
       {
         "name": ".... - 08...",
         "projects": [
-          "mui-gus-nw-doa-bersama-untuk-keselamatan-indonesia-dan-pengukuhan-dewan-pimpinan-mui-pusat-periode-2025-2030-22b17b58"
+          "pemda-tangsel-bimtek-ldk-karang-taruna-0cebc7e9"
         ]
       }
     ],
+    "industry": "Government",
     "projects": [
       {
-        "id": "mui-gus-nw-doa-bersama-untuk-keselamatan-indonesia-dan-pengukuhan-dewan-pimpinan-mui-pusat-periode-2025-2030-22b17b58",
+        "id": "pemda-tangsel-bimtek-ldk-karang-taruna-0cebc7e9",
         "tasks": [
           {
             "id": "brief-task-0",
@@ -2474,28 +3207,28 @@
             "id": "pitching-task-3",
             "stage": "pitching",
             "title": "Quotation",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "pitching-task-4",
             "stage": "pitching",
             "title": "Presentation",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "revision-task-0",
             "stage": "negotiation",
             "title": "Revision Status",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "revision-task-1",
             "stage": "negotiation",
             "title": "Revision Deadline",
-            "status": "done",
+            "status": "pending",
             "required": false
           },
           {
@@ -2509,21 +3242,21 @@
             "id": "revision-task-3",
             "stage": "negotiation",
             "title": "Revision Quotation",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "execution-task-0",
             "stage": "execution",
             "title": "Execution Status",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "execution-task-1",
             "stage": "execution",
             "title": "Contract / SPK Client",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
@@ -2537,42 +3270,42 @@
             "id": "execution-task-3",
             "stage": "execution",
             "title": "Manpower Contract",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "execution-task-4",
             "stage": "execution",
             "title": "Checklist",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "execution-task-5",
             "stage": "execution",
             "title": "Manual Book",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "reporting-task-0",
             "stage": "reporting",
             "title": "Reporting Status",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "reporting-task-1",
             "stage": "reporting",
             "title": "BAST",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "reporting-task-2",
             "stage": "reporting",
             "title": "Report Documentation",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
@@ -2586,14 +3319,14 @@
             "id": "finance-task-1",
             "stage": "finance",
             "title": "COGS",
-            "status": "done",
+            "status": "pending",
             "required": false
           },
           {
             "id": "finance-task-2",
             "stage": "finance",
             "title": "PPN",
-            "status": "done",
+            "status": "pending",
             "required": false
           },
           {
@@ -2607,20 +3340,22 @@
             "id": "finance-task-4",
             "stage": "finance",
             "title": "Invoice",
-            "status": "done",
+            "status": "pending",
             "required": true
           },
           {
             "id": "finance-task-5",
             "stage": "finance",
             "title": "P & L Document",
-            "status": "done",
+            "status": "pending",
             "required": true
           }
         ],
-        "client": "MATA AIR",
-        "health": "on_track",
-        "owners": [],
+        "client": "PEMDA TANGSEL",
+        "health": "watch",
+        "owners": [
+          "Sindy"
+        ],
         "phases": [
           {
             "key": "brief",
@@ -2659,27 +3394,27 @@
               },
               {
                 "label": "Quotation",
-                "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+                "value": ""
               },
               {
                 "label": "Presentation",
-                "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf"
+                "value": ""
               }
             ],
             "label": "Pitching Process",
-            "status": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
-            "completion": 40
+            "status": "",
+            "completion": 0
           },
           {
             "key": "revision",
             "items": [
               {
                 "label": "Revision Status",
-                "value": "DONE"
+                "value": ""
               },
               {
                 "label": "Revision Deadline",
-                "value": "PROCEED"
+                "value": ""
               },
               {
                 "label": "Revision Proposal",
@@ -2687,23 +3422,23 @@
               },
               {
                 "label": "Revision Quotation",
-                "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+                "value": ""
               }
             ],
             "label": "Revision / Negotiation",
-            "status": "DONE",
-            "completion": 75
+            "status": "",
+            "completion": 0
           },
           {
             "key": "execution",
             "items": [
               {
                 "label": "Execution Status",
-                "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf"
+                "value": ""
               },
               {
                 "label": "Contract / SPK Client",
-                "value": "DONE"
+                "value": ""
               },
               {
                 "label": "PO to Vendor",
@@ -2711,40 +3446,40 @@
               },
               {
                 "label": "Manpower Contract",
-                "value": "Invoice Vendor"
+                "value": ""
               },
               {
                 "label": "Checklist",
-                "value": "SPK MUI Signed"
+                "value": ""
               },
               {
                 "label": "Manual Book",
-                "value": "MASTER DATA MUI"
+                "value": ""
               }
             ],
             "label": "Execution",
-            "status": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf",
-            "completion": 83
+            "status": "",
+            "completion": 0
           },
           {
             "key": "reporting",
             "items": [
               {
                 "label": "Reporting Status",
-                "value": "MASTER DATA MUI"
+                "value": ""
               },
               {
                 "label": "BAST",
-                "value": "https://www.canva.com/design/DAG-MJ0YnKs/0h_hU9U1IffQ9kpPWZlrrQ/edit?utm_content=DAG-MJ0YnKs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+                "value": ""
               },
               {
                 "label": "Report Documentation",
-                "value": "DONE"
+                "value": ""
               }
             ],
             "label": "Reporting",
-            "status": "MASTER DATA MUI",
-            "completion": 100
+            "status": "",
+            "completion": 0
           },
           {
             "key": "finance",
@@ -2755,11 +3490,11 @@
               },
               {
                 "label": "COGS",
-                "value": "REPORT MUI"
+                "value": ""
               },
               {
                 "label": "PPN",
-                "value": "PAID"
+                "value": ""
               },
               {
                 "label": "Amount at Contract",
@@ -2767,21 +3502,21 @@
               },
               {
                 "label": "Invoice",
-                "value": "-"
+                "value": ""
               },
               {
                 "label": "P & L Document",
-                "value": "Rp2,939,000,000"
+                "value": ""
               }
             ],
             "label": "Finance",
-            "status": "REPORT MUI",
-            "completion": 67
+            "status": "",
+            "completion": 0
           }
         ],
-        "remark": "INVOICING MUI",
-        "status": "ORDER",
-        "section": "billed",
+        "remark": "",
+        "status": "LEADS",
+        "section": "leads",
         "activity": [
           {
             "id": "imported",
@@ -2792,25 +3527,25 @@
           {
             "id": "status",
             "type": "note",
-            "message": "Status terakhir: ORDER.",
+            "message": "Status terakhir: LEADS.",
             "timestampLabel": "Current status"
           },
           {
             "id": "progress",
             "type": "note",
-            "message": "Progress monitoring: COMPLETED.",
+            "message": "Progress monitoring: IN PROGRESS.",
             "timestampLabel": "Current progress"
           },
           {
             "id": "stage",
             "type": "stage_change",
-            "message": "Project saat ini berada di stage Completed.",
+            "message": "Project saat ini berada di stage Lead.",
             "timestampLabel": "Workflow"
           }
         ],
         "category": "GOVERNMENT",
-        "progress": "COMPLETED",
-        "relation": "Bram Hady Sulton",
+        "progress": "IN PROGRESS",
+        "relation": "Eka Marutha",
         "documents": [
           {
             "id": "brief-brief-status-0",
@@ -2868,11 +3603,11 @@
           },
           {
             "id": "pitching-quotation-3",
-            "url": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "url": "",
             "stage": "pitching",
             "title": "Quotation",
-            "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
-            "status": "available",
+            "value": "",
+            "status": "missing",
             "phaseKey": "pitching"
           },
           {
@@ -2880,8 +3615,8 @@
             "url": "",
             "stage": "pitching",
             "title": "Presentation",
-            "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "pitching"
           },
           {
@@ -2889,8 +3624,8 @@
             "url": "",
             "stage": "negotiation",
             "title": "Revision Status",
-            "value": "DONE",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "revision"
           },
           {
@@ -2898,8 +3633,8 @@
             "url": "",
             "stage": "negotiation",
             "title": "Revision Deadline",
-            "value": "PROCEED",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "revision"
           },
           {
@@ -2913,11 +3648,11 @@
           },
           {
             "id": "revision-revision-quotation-3",
-            "url": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "url": "",
             "stage": "negotiation",
             "title": "Revision Quotation",
-            "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
-            "status": "available",
+            "value": "",
+            "status": "missing",
             "phaseKey": "revision"
           },
           {
@@ -2925,8 +3660,8 @@
             "url": "",
             "stage": "execution",
             "title": "Execution Status",
-            "value": "Quotation Pengukuhan MUI 7Feb Istiqlal_signed.pdf",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "execution"
           },
           {
@@ -2934,8 +3669,8 @@
             "url": "",
             "stage": "execution",
             "title": "Contract / SPK Client",
-            "value": "DONE",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "execution"
           },
           {
@@ -2952,8 +3687,8 @@
             "url": "",
             "stage": "execution",
             "title": "Manpower Contract",
-            "value": "Invoice Vendor",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "execution"
           },
           {
@@ -2961,8 +3696,8 @@
             "url": "",
             "stage": "execution",
             "title": "Checklist",
-            "value": "SPK MUI Signed",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "execution"
           },
           {
@@ -2970,8 +3705,8 @@
             "url": "",
             "stage": "execution",
             "title": "Manual Book",
-            "value": "MASTER DATA MUI",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "execution"
           },
           {
@@ -2979,17 +3714,17 @@
             "url": "",
             "stage": "reporting",
             "title": "Reporting Status",
-            "value": "MASTER DATA MUI",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "reporting"
           },
           {
             "id": "reporting-bast-1",
-            "url": "https://www.canva.com/design/DAG-MJ0YnKs/0h_hU9U1IffQ9kpPWZlrrQ/edit?utm_content=DAG-MJ0YnKs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
+            "url": "",
             "stage": "reporting",
             "title": "BAST",
-            "value": "https://www.canva.com/design/DAG-MJ0YnKs/0h_hU9U1IffQ9kpPWZlrrQ/edit?utm_content=DAG-MJ0YnKs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton",
-            "status": "available",
+            "value": "",
+            "status": "missing",
             "phaseKey": "reporting"
           },
           {
@@ -2997,8 +3732,8 @@
             "url": "",
             "stage": "reporting",
             "title": "Report Documentation",
-            "value": "DONE",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "reporting"
           },
           {
@@ -3015,8 +3750,8 @@
             "url": "",
             "stage": "finance",
             "title": "COGS",
-            "value": "REPORT MUI",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "finance"
           },
           {
@@ -3024,8 +3759,8 @@
             "url": "",
             "stage": "finance",
             "title": "PPN",
-            "value": "PAID",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "finance"
           },
           {
@@ -3042,8 +3777,8 @@
             "url": "",
             "stage": "finance",
             "title": "Invoice",
-            "value": "-",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "finance"
           },
           {
@@ -3051,12 +3786,12 @@
             "url": "",
             "stage": "finance",
             "title": "P & L Document",
-            "value": "Rp2,939,000,000",
-            "status": "reference",
+            "value": "",
+            "status": "missing",
             "phaseKey": "finance"
           }
         ],
-        "eventDate": "7/2/26",
+        "eventDate": "1/4/26",
         "milestones": [
           {
             "id": "brief-received",
@@ -3072,96 +3807,100 @@
           },
           {
             "id": "quotation-sent",
-            "done": true,
+            "done": false,
             "label": "Quotation Sent",
-            "value": "https://www.canva.com/design/DAG_huGJL8M/LkmvgaH8OQHKuMWqNqr2aw/edit?utm_content=DAG_huGJL8M&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton"
+            "value": ""
           },
           {
             "id": "contract-signed",
-            "done": true,
+            "done": false,
             "label": "Contract Signed",
-            "value": "DONE"
+            "value": ""
           },
           {
             "id": "event-day",
-            "done": true,
+            "done": false,
             "label": "Event Day",
-            "value": "7/2/26"
+            "value": "1/4/26"
           },
           {
             "id": "report-delivered",
-            "done": true,
+            "done": false,
             "label": "Report Delivered",
-            "value": "DONE"
+            "value": ""
           },
           {
             "id": "invoice-sent",
-            "done": true,
+            "done": false,
             "label": "Invoice Sent",
-            "value": "-"
+            "value": ""
           },
           {
             "id": "payment-received",
-            "done": true,
+            "done": false,
             "label": "Payment Received",
             "value": ""
           }
         ],
-        "phaseLabel": "Finance",
-        "credentials": "PAID 100%",
+        "phaseLabel": "Discovery",
+        "credentials": "",
         "numberLabel": "1",
-        "projectName": "Doa Bersama Untuk Keselamatan Indonesia dan Pengukuhan Dewan Pimpinan MUI Pusat Periode 2025 - 2030",
-        "resultLabel": "Completed",
-        "serviceLine": "Event Management",
-        "currentStage": "completed",
-        "projectValue": 2939000000,
-        "sectionLabel": "Billed Projects",
+        "projectName": "Bimtek LDK Karang Taruna",
+        "resultLabel": "In progress",
+        "serviceLine": "EM",
+        "currentStage": "lead",
+        "projectValue": 1312523040,
+        "sectionLabel": "Leads Projects",
         "contactPerson": ".... - 08...",
         "financeStatus": "-",
-        "searchableText": "mata air doa bersama untuk keselamatan indonesia dan pengukuhan dewan pimpinan mui pusat periode 2025 - 2030 .... - 08... bram hady sulton government  event management order completed completed",
-        "assignedVendors": [],
-        "vendorShortlist": [],
-        "currentStageLabel": "Completed",
-        "projectValueLabel": "Rp 2.939.000.000",
-        "vendorRequirements": [
-          {
-            "label": "Service Fit",
-            "summary": "Prioritaskan vendor dengan layanan Event Management."
-          },
-          {
-            "label": "Coverage",
-            "summary": "Pastikan vendor available pada tanggal event dan area kerja relevan."
-          },
-          {
-            "label": "Compliance",
-            "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
-          }
-        ]
+        "searchableText": "pemda tangsel bimtek ldk karang taruna .... - 08... eka marutha government sindy em leads in progress lead",
+        "currentStageLabel": "Lead",
+        "projectValueLabel": "Rp 1.312.523.040"
       }
     ],
-    "relation": "Bram Hady Sulton",
+    "relation": "Brand",
     "projectCount": 1,
-    "totalProjectValue": 2939000000,
+    "totalProjectValue": 1312523040,
     "activeProjectCount": 0,
-    "totalProjectValueLabel": "Rp 2.939.000.000"
+    "totalProjectValueLabel": "Rp 1.312.523.040"
   },
   {
-    "id": "unknown-client",
-    "name": "Bali Super Fast",
-    "type": "agency",
+    "id": "daikin",
+    "name": "PT DAIKIN AIRCONDITIONING INDONESIA",
+    "type": "brand",
+    "status": "active",
+    "aliases": [
+      "DAIKIN"
+    ],
+    "website": "https://www.daikin.co.id",
+    "category": "BRAND",
+    "industry": "Electronic & HVAC"
+  },
+  {
+    "id": "tugu-insurance",
+    "name": "PT ASURANSI TUGU PRATAMA INDONESIA TBK",
+    "type": "brand",
+    "status": "active",
+    "aliases": [
+      "Tugu Insurance"
+    ],
+    "category": "BRAND",
+    "industry": "Insurance"
+  },
+  {
+    "id": "telkom-indonesia",
+    "name": "PT TELKOM INDONESIA",
+    "type": "brand",
     "health": "on_track",
     "status": "active",
-    "category": "CO. PARTNER",
-    "contacts": [
-      {
-        "name": ".... - 08...",
-        "projects": [
-          "unknown-client-pre-event-bali-superfast-run-a6817dea"
-        ]
-      }
+    "aliases": [
+      "TELKOM"
     ],
+    "category": "BRAND",
+    "contacts": [],
+    "industry": "Telecommunication",
     "projects": [],
-    "relation": "Ricky Wirjan",
+    "relation": "Brand",
     "projectCount": 0,
     "totalProjectValue": 0,
     "activeProjectCount": 0,

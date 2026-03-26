@@ -261,7 +261,7 @@ button {
 .hero-panel h1,
 .modal-card h2 {
   margin: 0;
-  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
   line-height: 1.05;
   letter-spacing: -0.04em;
   font-weight: 700;
@@ -269,7 +269,7 @@ button {
 
 .detail-head h2 {
   margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.55rem);
   line-height: 1.15;
   letter-spacing: -0.02em;
   font-weight: 700;
@@ -417,8 +417,8 @@ button {
 .workflow-card,
 .feature-panel,
 .warning-card {
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 12px 14px;
 }
 
 .section-card span,
@@ -428,7 +428,7 @@ button {
 .metric-card span {
   display: block;
   color: #d0d0d8;
-  font-size: 0.78rem;
+  font-size: 0.72rem;
 }
 
 .section-card strong,
@@ -436,12 +436,12 @@ button {
 .detail-summary strong,
 .metric-card strong {
   display: block;
-  margin-top: 8px;
-  font-size: 1.08rem;
+  margin-top: 6px;
+  font-size: 0.94rem;
 }
 
 .detail-summary strong {
-  font-size: 0.94rem;
+  font-size: 0.88rem;
   line-height: 1.35;
 }
 
@@ -480,9 +480,9 @@ button {
 .table-row {
   display: grid;
   grid-template-columns: 20px 2fr 1fr 1fr 1.5fr 0.5fr 0.5fr; /* Match the data row structure */
-  gap: 16px;
+  gap: 12px;
   align-items: center;
-  padding: 12px 16px;
+  padding: 8px 14px;
   border-bottom: 1px solid var(--line);
   color: var(--text-main) !important; /* Force high visibility */
   text-align: left;
@@ -513,7 +513,7 @@ button {
 
 .table-head {
   color: var(--muted);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
   text-align: left;
   text-transform: uppercase;
@@ -587,8 +587,8 @@ button {
 .activity-card {
   width: 100%;
   text-align: left;
-  border-radius: 14px;
-  padding: 16px;
+  border-radius: 12px;
+  padding: 12px 14px;
   background: linear-gradient(180deg, #212126 0%, #1b1b20 100%);
   color: var(--text);
 }
@@ -721,8 +721,8 @@ button {
 .board-card h3,
 .detail-block h3,
 .document-card h3 {
-  margin: 12px 0 6px;
-  font-size: 0.92rem;
+  margin: 10px 0 4px;
+  font-size: 0.85rem;
   line-height: 1.35;
   color: var(--text);
 }
@@ -736,7 +736,7 @@ button {
   margin: 0;
   color: #ffffff;
   font-weight: 600;
-  font-size: 0.86rem;
+  font-size: 0.82rem;
 }
 
 .status-pill,

@@ -57,7 +57,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.965Z",
       "updatedAt": "2026-03-09T16:16:22.965Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "012201002838300"
     },
     {
       "id": "efc6f644-023f-4968-9ff8-cc2ecaab8b5d",
@@ -116,7 +117,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.965Z",
       "updatedAt": "2026-03-09T16:16:22.965Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "7670443307"
     },
     {
       "id": "4e50f719-cc47-4e8d-92b7-4cef8e6960fa",
@@ -175,7 +177,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "5405257791"
     },
     {
       "id": "c9060516-40aa-47bb-8c01-980608997de0",
@@ -234,7 +237,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1462452645"
     },
     {
       "id": "7c6f69f2-5856-489f-856a-72cfef26a678",
@@ -293,7 +297,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "0272556529"
     },
     {
       "id": "1b26bc04-0633-4c59-a948-ff899f21c8fd",
@@ -352,7 +357,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2211260906"
     },
     {
       "id": "cc52a408-5a2d-4fec-88c7-1600f0513f2f",
@@ -411,7 +417,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0941583333"
     },
     {
       "id": "75a4860a-5da5-4476-9f9a-49732b14c855",
@@ -470,7 +477,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "8780352117"
     },
     {
       "id": "a7a9deac-a382-4a34-9866-d43b7dfbbcc4",
@@ -529,7 +537,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "4290623630"
     },
     {
       "id": "70dfe394-0406-40c7-947f-ef527040efff",
@@ -588,7 +597,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "1.55001E+12"
     },
     {
       "id": "56b9d684-98f7-4b17-9d3e-d8bb1010f3f2",
@@ -647,7 +657,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "6975060474"
     },
     {
       "id": "ea46098b-cac1-4504-9641-091e54792e82",
@@ -706,7 +717,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "6830848981"
     },
     {
       "id": "df3dc07e-5ed0-4afe-9b8b-d8e11fe0c39b",
@@ -765,7 +777,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "6070552653"
     },
     {
       "id": "4c4f4008-c8ed-444a-ad71-ba6373a34485",
@@ -824,7 +837,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2064500421"
     },
     {
       "id": "8d141016-ab26-4ac5-98d4-b5af2cdfd92b",
@@ -883,7 +897,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "7650473331"
     },
     {
       "id": "b6211b8c-4caa-48ba-9836-c921d2638640",
@@ -942,7 +957,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "7330566285"
     },
     {
       "id": "3c541611-dc68-4595-aa43-b3b5b13dd38c",
@@ -1001,7 +1017,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "4290519506"
     },
     {
       "id": "860aa5a3-0667-49d0-925f-8539ab3da20b",
@@ -1060,7 +1077,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "4740251771"
     },
     {
       "id": "fd7f3002-9160-4d89-a9a4-b0215fdd63e2",
@@ -1119,7 +1137,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "BCA 5271 660554 a/n Stevenson Kevin Tanaka"
     },
     {
       "id": "35a592b2-da0f-4cff-9702-ca72e72c1d49",
@@ -1178,7 +1197,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "6300072061"
     },
     {
       "id": "44b9ef53-4a8a-495b-b758-d2b56c6e2076",
@@ -1237,7 +1257,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2040176198"
     },
     {
       "id": "7e98c3e7-d3eb-4a18-a8e0-06d7c289b95d",
@@ -1296,7 +1317,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1.33001E+12"
     },
     {
       "id": "6f533eaa-62c0-456b-a867-e0c0f31f7747",
@@ -1355,7 +1377,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0700133826"
     },
     {
       "id": "94a02549-1253-4988-9dd3-9139501f61b2",
@@ -1414,7 +1437,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.966Z",
       "updatedAt": "2026-03-09T16:16:22.966Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5465024094"
     },
     {
       "id": "1e18b00a-5d84-4e76-827b-6696f5ac2f57",
@@ -1473,7 +1497,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5931112539"
     },
     {
       "id": "d752d135-09ea-4fc5-8615-3ff563a382f8",
@@ -1532,7 +1557,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "5770718670"
     },
     {
       "id": "6602a647-75e3-4c1c-bb84-7faab21681bc",
@@ -1591,7 +1617,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "1662920759"
     },
     {
       "id": "aafb7d58-9cf5-4226-aeeb-20b984d4c5ec",
@@ -1650,7 +1677,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "8710119393"
     },
     {
       "id": "fbd81ec9-52b3-4197-9205-6bf5c8bbac53",
@@ -1709,7 +1737,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2146696969"
     },
     {
       "id": "3a260a29-36c8-4ef0-84e5-8a503305ddc5",
@@ -1768,7 +1797,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "4560899993"
     },
     {
       "id": "508d8582-9954-458c-bbd6-120aac34db12",
@@ -1827,7 +1857,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0152838067"
     },
     {
       "id": "bfe4a036-294f-444d-ba8d-350cb8370f17",
@@ -1886,7 +1917,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "8020818787"
     },
     {
       "id": "5b6e7860-34d6-48ae-8299-6a7607cfb8b8",
@@ -1945,7 +1977,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2520633751"
     },
     {
       "id": "5687ef5a-f851-44de-b30b-c96cf19463be",
@@ -2004,7 +2037,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "39207035541"
     },
     {
       "id": "d98fd256-f7e9-429a-b0ee-6bc042a57c01",
@@ -2063,7 +2097,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "0372700911"
     },
     {
       "id": "f3b380c3-da96-4b0d-aa3d-19f7d7fe74b7",
@@ -2122,7 +2157,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1070548549"
     },
     {
       "id": "6b15c95b-1b40-4743-8abb-f44ff122625d",
@@ -2181,7 +2217,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "6870701142"
     },
     {
       "id": "aa77376b-0263-4c5d-a2a2-8c5bfe290599",
@@ -2240,7 +2277,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "2310090983"
     },
     {
       "id": "b8680e10-d41a-4694-b424-d92896119ac2",
@@ -2299,7 +2337,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5490815858"
     },
     {
       "id": "e6c45d1c-0ec7-469b-bcad-d1f3473f77a5",
@@ -2358,7 +2397,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "8852272022"
     },
     {
       "id": "c44e7c27-ea93-49d5-98b7-f862678705a8",
@@ -2417,7 +2457,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "042001000897304"
     },
     {
       "id": "b21b7116-d885-462f-a1ff-9417e1e86e19",
@@ -2476,7 +2517,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "0882093849"
     },
     {
       "id": "38295f88-4108-4343-ab72-ddc1ed7849ff",
@@ -2535,7 +2577,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0111756987"
     },
     {
       "id": "17089906-6ac2-4f0b-ae44-ee6caa15bc0f",
@@ -2594,7 +2637,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "0102426884"
     },
     {
       "id": "d4e0a71f-38ea-4c0d-8394-f78ecff08cc6",
@@ -2653,7 +2697,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "8160438810"
     },
     {
       "id": "bb7846af-50a5-49e7-93e2-a8c49fe3e623",
@@ -2712,7 +2757,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "8161240559"
     },
     {
       "id": "3aad36e7-90a6-4878-bd9d-0f3aca8a64dc",
@@ -2771,7 +2817,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0880594826"
     },
     {
       "id": "ec21ea36-0349-451f-8797-49a9fff2db79",
@@ -2830,7 +2877,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "8935299949"
     },
     {
       "id": "abdd1d15-2619-4d61-bca0-233db71f0bab",
@@ -2889,7 +2937,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "2821000208"
     },
     {
       "id": "a5e62ba6-e94d-4991-a514-bc34226c364a",
@@ -2948,7 +2997,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "8220471277"
     },
     {
       "id": "444b808a-4a55-4963-8f69-b21c2600e95c",
@@ -3007,7 +3057,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "0670248445"
     },
     {
       "id": "2e0f9044-f31f-45ba-b642-7f16e7cee3fa",
@@ -3066,7 +3117,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "082131356023"
     },
     {
       "id": "d4d8694e-7755-4324-b5d0-3bb266563df3",
@@ -3125,7 +3177,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "6820397043"
     },
     {
       "id": "bc02e29b-8577-4879-9446-8dc5d0d7f183",
@@ -3184,7 +3237,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "0343110399"
     },
     {
       "id": "b29f510a-97f9-42c7-860e-831d1653add2",
@@ -3243,7 +3297,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1915749261"
     },
     {
       "id": "3a4c9154-bcf0-4d65-8c10-dfa98855795e",
@@ -3302,7 +3357,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1340087212"
     },
     {
       "id": "22a6822d-7966-4f09-8976-a81746306601",
@@ -3361,7 +3417,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "9882661900190004"
     },
     {
       "id": "98b3cb1b-24b1-4456-952f-d647d3f77d13",
@@ -3420,7 +3477,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "8720287863"
     },
     {
       "id": "e044b0e9-b737-4c17-a350-26ec14fe994a",
@@ -3479,7 +3537,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0970493786"
     },
     {
       "id": "5f0835b2-8f26-44d8-9d96-8f7a4360ec96",
@@ -3538,7 +3597,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2480312778"
     },
     {
       "id": "39660295-b14f-4bda-851d-a92b20baa649",
@@ -3597,7 +3657,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "083897554091"
     },
     {
       "id": "0c81825f-dbeb-44e3-968e-01273e1dba1d",
@@ -3656,7 +3717,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1.26E+12"
     },
     {
       "id": "4713fd2b-4ecb-4b81-a659-d5a63bd12d11",
@@ -3715,7 +3777,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "0700298591"
     },
     {
       "id": "2933b785-b6ff-4f10-ae0c-3aae2737066c",
@@ -3774,7 +3837,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5520809220"
     },
     {
       "id": "41c9a994-0532-438b-8791-1cde88b20c82",
@@ -3833,7 +3897,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5865509461"
     },
     {
       "id": "bedb8b9b-6f60-4832-9fbf-50ca9e674843",
@@ -3892,7 +3957,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "1652691654"
     },
     {
       "id": "c1a526c5-15dd-4752-923b-0e9750e4ef54",
@@ -3951,7 +4017,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "7750366371"
     },
     {
       "id": "5920e461-daa3-42a1-b44f-2752ea422052",
@@ -4010,7 +4077,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2180158475"
     },
     {
       "id": "54dbb296-37f9-45dc-ad0b-7c366275e029",
@@ -4069,7 +4137,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Barang"
+      "classification": "Penyedia Barang",
+      "bankAccountNumber": "053801002684564"
     },
     {
       "id": "4be8fab0-c0b3-4e16-ae45-ae40fab69e50",
@@ -4128,7 +4197,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2828822000"
     },
     {
       "id": "d743eaf8-aada-4642-9f52-9346cee7b50f",
@@ -4187,7 +4257,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "4960234630"
     },
     {
       "id": "93e070b5-a34f-4c5a-afa3-402009279dce",
@@ -4246,7 +4317,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "Dedi purnomo"
     },
     {
       "id": "db42ab13-1872-471c-ad2b-b7eb03543dbc",
@@ -4305,7 +4377,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5726195605"
     },
     {
       "id": "80579e1f-d867-4493-ae72-2035fac1df7c",
@@ -4364,7 +4437,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.968Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "6830848981"
     },
     {
       "id": "eeded6d1-0771-4bab-b983-72a1a0f3fcc3",
@@ -4423,7 +4497,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "2190186159"
     },
     {
       "id": "3c3c3e9c-0f5d-4aed-85b6-dee7296cf46d",
@@ -4482,7 +4557,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "5860584311"
     },
     {
       "id": "7f9cadde-0a05-497d-a021-d816f97e39a7",
@@ -4541,7 +4617,8 @@
       },
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
-      "classification": "Penyedia Jasa"
+      "classification": "Penyedia Jasa",
+      "bankAccountNumber": "4290532634"
     },
     {
       "id": "0b8f58d3-e221-47aa-9618-0c735b52768e",

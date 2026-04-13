@@ -1,0 +1,1808 @@
+
+=== SHEET: Phase Sales ===
+[
+  {
+    "__EMPTY": "Phase Sales",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "No",
+    "__EMPTY_1": "Fase",
+    "__EMPTY_2": "Description",
+    "__EMPTY_3": "Documents/Link"
+  },
+  {
+    "__EMPTY": "1.",
+    "__EMPTY_1": "Leads ",
+    "__EMPTY_2": "Tahap awal di mana klien menghubungi Juara untuk menyampaikan kebutuhan proyek (Project Brief). Brief ini bisa diterima melalui berbagai media seperti Whatsapp, Email, Telepon. Jenis briefnya dapat berbagai jenis, antara lain: Request For Proposal (RFP), Pesan Whatsapp, Direct Call (telepon) atau melalui pertemuan langsung dengan client (online/offline) ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "2.  ",
+    "__EMPTY_1": "Business (Project) Tracker ",
+    "__EMPTY_2": "Setelah mendapatkan Leads dan informasi mengenai pekerjaan (Project Brief), Divisi Business Development akan mengisi Business (Project) Tracker dan menginformasikan kepada Traffic agar diketahui oleh Tim Internal terkait",
+    "__EMPTY_3": "JUARA PROJECT TRACKER"
+  },
+  {
+    "__EMPTY": "3. ",
+    "__EMPTY_1": "Document A",
+    "__EMPTY_2": "Divisi Business Development akan mengumpulkan semua informasi yang sudah diketahui tentang project berdasarkan dari Project Brief klien",
+    "__EMPTY_3": "(FORMAT) DOCUMENT A.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Semua informasi tersebut akan dirangkum dan dimasukkan ke dalam Document A sebagai dasar untuk langkah-langkah berikutnya",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Link document A akan dicantumkan pada Business (Project) Tracker",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Divisi Business Development melaporkan ke C-Level untuk mengecek Document A: ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika Document A Lengkap Traffic akan menjadwalkan meeting dengan C-Level yang dihadiri oleh Divisi Business Development, Divisi Plan And Development, dan Divisi Project Management ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika Document A tidak lengkap C-Level tidak akan melanjutkannya ke Brainstorm Meeting",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "4. ",
+    "__EMPTY_1": "Brainstorm Meeting ",
+    "__EMPTY_2": "Dalam Brainstorm Meeting, topik yang akan dibahas: ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Review Document A ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Project Risk Analysis",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "5. ",
+    "__EMPTY_1": "Need External Support ",
+    "__EMPTY_2": "3. C-Level akan menentukan apakah diperlukan untuk melibatkan personil External Support atau tidak. Keputusan ini dibuat berdasarkan jenis project brief yang diterima, dengan pertimbangan berikut:",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "      a. Jika Brief untuk Pitching dan Kalah, maka semua biaya yang dikeluarkan untuk External Support akan diposting sebagai Biaya Operasional kantor",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "      b. Jika Brief untuk Pitching dan Menang, maka biaya External Support akan dimasukkan ke dalam RAB Project.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Jika C-Level Memutuskan untuk \"YES\" membutuhkan External Support maka Divisi Project Management akan membuat Purchase Order",
+    "__EMPTY_3": "PO.xlsx"
+  },
+  {
+    "__EMPTY": "6. ",
+    "__EMPTY_1": "Approval Purchase Order ",
+    "__EMPTY_2": "C-Level akan memastikan bahwa Purchase Order yang dibuat telah sesuai dengan kebutuhan operasional dan spesifikasi yang telah ditetapkan",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "   ",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Jika C-Level sudah melakukan Approval Purchase Order yang dibuat oleh Divisi Project Management, maka akan dilakukan pengajuan RFP, serta pengumpulan Invoice dan Quotation dari External Support",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Document tersebut akan di bundling dan di serahkan ke Finance guna untuk penunjang pembayaran",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Cek Doc.",
+    "__EMPTY_2": "Finance akan mengecek Document tersebut untuk memastikan kebenaran dan kelengkapannya. Jika terdapat kekurangan, maka akan di kembalikan ke Divisi Project Management untuk diperbaiki.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Jika Document tersebut sudah lengkap maka Finance akan menandatangani RFP tersebut dan melanjutkan Approval RFP ke C-Level :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Approval RFP",
+    "__EMPTY_2": "C-Level akan mengecek Document yang diajukan, jika terdapat kekurangan maka C-Level tidak akan menandatangani Approval RFP tersebut dan Document akan dikembalikan ke Finance ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Payment ",
+    "__EMPTY_2": "Jika document yang diajukan sudah sesuai, maka C-Level akan menandatangani pengajuan tersebut. Finance akan melakukan Payment hanya jika document tersebut telah ditandatangani",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Payment Receipt",
+    "__EMPTY_2": " Finance akan mengirim Bukti Payment tersebut ke Divisi Project Management",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Document Task List ",
+    "__EMPTY_2": "Divisi Project akan memberikan Document Task List yang berisi daftar pekerjaan yang harus diselesaikan oleh External Support",
+    "__EMPTY_3": "EVENT NAME - DOCUMENT TASK.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Jika C-Level memutuskan \"NO\" artinya tidak membutuhkan External Support maka dilanjutkan ke Document Task List",
+    "__EMPTY_3": "EVENT NAME - DOCUMENT TASK.xlsx"
+  },
+  {
+    "__EMPTY": "7.",
+    "__EMPTY_1": "Need Survey ",
+    "__EMPTY_2": "Dari Document Task list tersebut, C-Level akan memutuskan apakah membutuhkan Suvey Location atau tidak :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" artinya tidak membutuhkan survey Location maka akan lanjut ke pembuatan Proposal (P) / Quotation (Q)",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" membutuhkan Survey Location maka Divisi Project Management akan melakukan survey ke lokasi event ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Output yang dikeluarkan dari Divisi Project Management adalah :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Report Survey",
+    "__EMPTY_2": "    a. Divisi Project Management akan membuat Report Survey, yaitu foto lokasi dari berbagai sudut untuk referensi tim, gambaran kasar penempatan area di venue. Hasil survei akan ditetapkan seagai dasar pembuatan floor plan layout sebagai kebutuhan event. ",
+    "__EMPTY_3": "(FORMAT) SURVEY_ NAMA VENUE"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    b. Hasil dari Report Survey tersebut akan di berikan ke Divisi Plan Development untuk bahan pendukung dalam pembuatan Document Proposal ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    c. Divisi Project Management akan mengajukan Document RFP dan mengisi Form Advance yang dilampiri Nota/Kwitansi/Receipt selama melaksanakan survey ke Finance   ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Cek Doc",
+    "__EMPTY_2": "    d. Jika dokumen tersebut sudah lengkap, maka Finance akan menandatangani RFP dan Form Advance, serta melanjutkan approval RFP ke C-Level. Jika dokumen tidak lengkap, maka akan dikembalikan ke Divisi Project Management untuk diperbaiki",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Approval RFP ",
+    "__EMPTY_2": "     e. C-Level akan mengecek kembali pengajuan RFP tersebut dan menandatangani RFP ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     f. Jika C-Level tidak menyetujui untuk menandatangani RFP, maka dokumen tersebut akan dikembalikan oleh Finance ke Divisi Project Management untuk diperbaiki atau direvisi",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Payment",
+    "__EMPTY_2": "     g. Jika Document telah ditandatangani oleh C-Level, maka Finance akan melakukan Payment atas pengajuan tersebut",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Payment Receipt",
+    "__EMPTY_2": "     h. Finance akan mengirim Bukti Payment tersebut ke Divisi Project Management  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "8.",
+    "__EMPTY_1": "Proposal (P)",
+    "__EMPTY_2": "Plan Development akan membuat Proposal (P) dengan persetujuan oleh C-Level:",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\", artinya C-Level memutuskan untuk tidak melanjutkan pembuatan Proposal (P), dan proses akan dilanjutkan ke tahap Review/Analisa Lost Project.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "9.",
+    "__EMPTY_1": "Review / Lost Project Analysis",
+    "__EMPTY_2": "    a. C-Level dan tim akan melakukan review atau analisa terhadap project tersebut untuk mengidentifikasi alasan mengapa tidak dilanjutkan.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\", artinya C-Level memutuskan untuk Divisi Plan Development membuat Proposal (P)",
+    "__EMPTY_3": "(FORMAT)Proposal (P)"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     a. Divisi Plan Development akan membuka Business (Project) Tracker dan menempatkan Link Proposal (P) tersebut di dalamnya agar terpantau",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "10.",
+    "__EMPTY_1": "Quotation Project ",
+    "__EMPTY_2": "Divisi Project akan membuat Quotation dengan persetujuan oleh C-Level:",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\", artinya C-Level memutuskan untuk tidak melanjutkan pembuatan Quotation (Q), dan proses akan dilanjutkan ke tahap Review/Analisa Lost Project.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Review / Lost Project Analysis",
+    "__EMPTY_2": "    a. C-Level dan tim akan melakukan review atau analisa terhadap project tersebut untuk mengidentifikasi alasan mengapa tidak dilanjutkan.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" , Artinya C-Level memutuskan untuk Divisi Project Management membuat Quotation dengan tahapan: ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    a. Checklist, yaitu mengisi kebutuhan apa saja dalam Event tersebut ",
+    "__EMPTY_3": "CHECKLIST C.1"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    b. Cost Estimation, yaitu mengisi Estimasi Biaya dalam Event tersebut ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    c. Quotation, yaitu harga CE dinaikan berapa persen total ditambah margin ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    d. Divisi Project Management akan menempatkan Link Quotation tersebut ke Business (Project) Tracker supaya terpantau oleh C-Level  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "11.",
+    "__EMPTY_1": "Review Proposal &/ Quotation ",
+    "__EMPTY_2": "Setelah Proposal dan/atau Quotation yang dibuat oleh Divisi Plan Development dan/atau Divisi Project Management selesai dan terpantau di Business (Project) Tracker maka Traffic akan melakukan Review Proposal dan/atau Quotation bersama C-Level yang dihadiri oleh Divisi Plan Development dan/atau Divisi Project Management ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "12.",
+    "__EMPTY_1": "Cek Doc",
+    "__EMPTY_2": "1. C-Level akan mengecek kembali Proposal (P) dan/atau Quotation (Q) jika \"YES\" maka Document tersebut dapat disubmit ke Client",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"NO\", maka Proposal (P) dan/atau Quotation (Q) akan direvisi oleh Divisi Plan Development dan/atau Divisi Project Management",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "13.",
+    "__EMPTY_1": "Dealing Project ",
+    "__EMPTY_2": "Divisi Business Development akan melakukan negosiasi dengan Client:",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika Client \"YES\" pada Penawaran &/ Ideation yang diajukan maka Client akan mengeluarkan PO/SPK/Kontrak untuk Melanjutkan ke Phase Project",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Review / Project Lost Analysis",
+    "__EMPTY_2": "2. Jika Client \"NO\" pada Penawaran &/ Ideation yang diajukan maka Divisi Business Development dan C-Level akan melakukan Review/Analisa Project Lost yang dihadiri Oleh Divisi Project Management dan Divisi Plann Development  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "  ",
+    "__EMPTY_3": ""
+  }
+]
+
+=== SHEET: Phase Project  ===
+[
+  {
+    "__EMPTY": "Phase Project",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "No",
+    "__EMPTY_1": "Fase",
+    "__EMPTY_2": "Description",
+    "__EMPTY_3": "Documents/Link"
+  },
+  {
+    "__EMPTY": 1,
+    "__EMPTY_1": "PO/SPK/Kontrak",
+    "__EMPTY_2": "Client akan mengeluarkan Document PO/SPK/Kontrak yang minimal berisi: Scope of Work dalam bentuk BQ atau KAK/TOR (Kerangka Acuan Kerja/Term of Reference), RAB dalam bentuk Quotation yang sudah ditandatangani klien, Lampiran lainnya terkait teknis pekerjaan",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. PO adalah Document resmi yang berisi pesanan layanan atau barang.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. SPK adalah Surat Perintah Kerja yaitu Document yang memerintahkan untuk mulai bekerja sesuai kesepakatan",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "3. Kontrak Kerja adalah Document resmi yang mengikat kedua belah pihak dalam jangka waktu tertentu dengan aturan lebih detail.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 2,
+    "__EMPTY_1": "Request Project ",
+    "__EMPTY_2": "C-Level akan mengeluarkan Memo Penunjukan untuk Team yang akan In charge di Project ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 3,
+    "__EMPTY_1": "Approval Project ",
+    "__EMPTY_2": "1. Jika C-Level \"NO\" artinya C-Level belum menerima Document PO/SPK/Kontrak dari Client   ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika C-Level \"YES\" artinya sudah menerima Document tersebut, maka dilanjutkan untuk Pelaksanaan Event ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "C-Level akan mengeluarkan Memo Penunjukan untuk Team yang akan In charge di Project ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 4,
+    "__EMPTY_1": "CE & AC + TOP Vendor ",
+    "__EMPTY_2": "Divisi Project Management akan memantau Cost Estimation dan mengisi Actual Cost yang disertai dengan Term Of Payment Vendor yaitu Tanggal Payment ke Vendor yang akan disepakati ",
+    "__EMPTY_3": "(FORMAT) CE & AC"
+  },
+  {
+    "__EMPTY": 5,
+    "__EMPTY_1": "Approval CE&AC + TOP Vendor",
+    "__EMPTY_2": "Divisi Project Management akan melakukan approval CE & AC ke C-Level : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika C-Level \"NO\" artinya C-Level tidak menyetujui CE & AC yang dibuat oleh Divisi Project Management karena Actual Cost yang terlalu tinggi sehingga Divisi Project Management akan melakukan revisi ulang",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika C-Level \"YES\" artinya C-Level menyetujui CE&AC yang di buat maka Divisi Project akan melanjutkan ke tahap selanjutnya yaitu membuat PO Vendor",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 6,
+    "__EMPTY_1": "PO Vendor",
+    "__EMPTY_2": "Purchase Order Vendor adalah Document resmi Pemesanan Barang atau Jasa dari Juara ke Vendor. Document ini berfungsi sebagai Kontrak awal yang mengikat antara kedua belah pihak sebelum transaksi dilakukan",
+    "__EMPTY_3": "PO to Vendor .xlsx"
+  },
+  {
+    "__EMPTY": 7,
+    "__EMPTY_1": "Approval PO ",
+    "__EMPTY_2": "Jika sudah membuat PO Vendor maka Divisi Project Management akan melakukan Approval PO ke C-Level:",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika C-Level \"NO\" artinya C-Level tidak menyetujui Document Pemesanan yang dibuat oleh Divisi Project Management ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika C-Level \"YES\" artinya C-Level menyetujui Document Pemesanan tersebut dan Divisi Project management akan mengirim PO tersebut ke Vendor ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 8,
+    "__EMPTY_1": "Pengajuan DP Vendor ",
+    "__EMPTY_2": "Divisi Project Management akan mengajukan Payment DP Vendor ke Finance dengan melampirkan : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Request For Payment ",
+    "__EMPTY_3": "Request For Payment "
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Report PO",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Request Advance (Internal)",
+    "__EMPTY_2": "Divisi Project Management juga akan melakukan pengajuan Advance dengan mengisi Form Advance untuk Operational pada saat Event ",
+    "__EMPTY_3": "EXI - Formulir Permohonan Advance.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Pengajuan Advance juga dilampiri dengan : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Request For Payment ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Kwitansi / Invoice ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 9,
+    "__EMPTY_1": "Cek Doc ",
+    "__EMPTY_2": "Divisi Finance akan mengecek Document yang diajukan oleh Divisi Project Management : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" artinya Finance akan mengembalikan Document tersebut ke Divisi Project Management untuk dapat direvisi kembali  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" artinya dokumen sudah diperiksa oleh Finance dan lengkap. Dokumen akan diproses lanjut",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 10,
+    "__EMPTY_1": "Approval RFP & DP Vendor",
+    "__EMPTY_2": "Finance akan membawa Document tersebut ke C-Level :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" artinya C-Level tidak menyetujui Aprroval RFP tersebut maka Divisi Finance akan mengembalikan Document tersebut ke Divisi Project Management ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" maka C-Level akan menandatangani RFP tersebut",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 11,
+    "__EMPTY_1": "Approved RFP & DP Vendor ",
+    "__EMPTY_2": "Document yang sudah Ditandatangani  oleh C-Level akan disimpan oleh Finance untuk dilanjutkan ke tahap Payment ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 12,
+    "__EMPTY_1": "Payment ",
+    "__EMPTY_2": "Finance akan melakukan Payment ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 13,
+    "__EMPTY_1": "Payment Receipt",
+    "__EMPTY_2": "Finance akan mengirim Bukti Payment tersebut ke Divisi Project Management",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 14,
+    "__EMPTY_1": "Document P&L Project",
+    "__EMPTY_2": "Finance akan mengisi secara Pararel Document Profit And Lost untuk Laporan Laba Rugi pada Project ",
+    "__EMPTY_3": "Format Jurnal PnL.xlsx"
+  },
+  {
+    "__EMPTY": 15,
+    "__EMPTY_1": "Manual Book ",
+    "__EMPTY_2": "Project Management akan membuat Manual Book yaitu Document penting yang membantu individu atau tim untuk memahami dan menjalankan suatu sistem atau proses kerja dengan benar, efisien, dan sesuai standar. Dengan adanya Manual yang jelas, juara dapat mengurangi kesalahan, meningkatkan produktivitas, dan memastikan setiap pekerjaan dilakukan dengan cara yang tepat.",
+    "__EMPTY_3": "MANUAL BOOK PWC"
+  },
+  {
+    "__EMPTY": 16,
+    "__EMPTY_1": "Approval Manual Book ",
+    "__EMPTY_2": "Divisi Project Management akan mengajuakan approval Manual Book ke C-Level :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" artinya Manual Book tersebut kurang lengkap maka Divisi Project Management akan melakukan revisi ulang ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" artinya Manual Book tersebut sudah lengkap maka Divisi Project Management akan melanjutkan ke Team Briefing",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 17,
+    "__EMPTY_1": "Team Briefing ",
+    "__EMPTY_2": "Divisi Project Management akan melakukan pertemuan Internal yang dilakukan sebelum event berlangsung untuk memastikan semua anggota tim memahami tugas, dan tanggung jawabnya",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 18,
+    "__EMPTY_1": "Vendor Coordinator ",
+    "__EMPTY_2": "Divisi Project Management akan memastikan semua Vendor bisa bekerja sesuai kesepakatan ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 19,
+    "__EMPTY_1": "Venue Loading ",
+    "__EMPTY_2": "Divisi Project Management akan memastikan Vendor akan Loading ke Venue sesuai dengan Timeline yang sudah di sepakati ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 20,
+    "__EMPTY_1": "Event Production & Set Up ",
+    "__EMPTY_2": "Divisi Project Management akan memproses persiapan teknis, pemasangan peralatan, dan eksekusi elemen produksi yang dibutuhkan sebelum event berlangsung. Dan ini mencakup seperti sound system, lighting, LED screen, panggung, dekorasi, seating arrangement, hingga video & live streaming setup",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 21,
+    "__EMPTY_1": "Event Rehearsal plan",
+    "__EMPTY_2": "Divisi Project Management akan melaksanakan rencana latihan teknis dan simulasi acara sebelum hari H. Tujuan utamanya adalah memastikan semua tim, peralatan, dan rundown acara berjalan dengan lancar tanpa kendala teknis maupun koordinasi.",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 22,
+    "__EMPTY_1": "Final Check Concept & Design ",
+    "__EMPTY_2": "Divisi Plan Development juga akan melakukan proses pemeriksaan akhir terhadap konsep dan desain event sebelum event day run. untuk memastikan bahwa semua elemen visual, branding, tata letak, dan estetika event sudah sesuai dengan konsep yang dibuat.  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 23,
+    "__EMPTY_1": "Final Check Production Execution ",
+    "__EMPTY_2": "Divisi Project Management akan melakukan Final Check Production Execution untuk pemeriksaan terakhir sebelum event berjalan guna memastikan semua aspek produksi siap dieksekusi tanpa kendala teknis maupun operasional",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 24,
+    "__EMPTY_1": "Event Day Run ",
+    "__EMPTY_2": "Divisi  Project Management akan melaksanakan Event Day Run yaitu eksekusi penuh event pada hari H, mulai dari persiapan akhir, jalannya acara sesuai rundown, hingga penutupan dan evaluasi pasca-event. Ini mencakup koordinasi semua tim, manajemen teknis, kontrol rundown, dan penyelesaian acara tanpa kendala",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 25,
+    "__EMPTY_1": "Document Monitoring & Controling ",
+    "__EMPTY_2": "pada saat pelaksanaan event divisi project akan mengumpulkan Document Monitoring & Controling : ",
+    "__EMPTY_3": "FORMAT doc Monitoring AFM"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Document Absensi ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Document Serah Terima Barang",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "3. Medical Reporting (Jika terjadi kecelakaan pada saat event berlangsung) ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 26,
+    "__EMPTY_1": "Penyelesaian Advance ",
+    "__EMPTY_2": "Jika event sudah selesai maka divisi Project Management akan mengajukan Penyelesaian Advance ke Finance dengan catatan: ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Surplus",
+    "__EMPTY_2": "1. Jika penyelesaian Advance tersebut Surplus yaitu biaya yang diajukan lebih besar dari pengeluaran maka laporan dapat diajukan maksimal 5 Hari setelah event selesai dengan melampirkan: ",
+    "__EMPTY_3": "EXI - Formulir Penyelesaian Advance.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    a. Mengisi Form Penyelesaian Advance disertai dengan Report Kwitansi/Nota ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Cek Doc ",
+    "__EMPTY_2": "    b Finance akan mengecek Document yang diajukan sudah benar dan lengkap atau tidak ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "        a). Jika Document yang diajukan tidak lengkap maka Finance akan mengembalikannya ke Divisi Project Management ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Transfer Request ",
+    "__EMPTY_2": "        b). Jika Document yang diajukan lengkap maka Finance akan membuat Transfer Request untuk di lampirkan bersama Form Penyelesaian Advance ",
+    "__EMPTY_3": "Form Request Transfer.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    c. Tim project akan membayar sesuai dengan Transfer Request yg diajukan, ke Account : 005-767-8899 A/N Juara Berhasil Berkah Sejahtera",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Deficit ",
+    "__EMPTY_2": "2. Jika penyelesaian Advance tersebut Deficit artinya Advance yang diajukan kurang dan lebih besar dari pengeluaran maka Divisi Project Management akan mengajukan ke Finance dengan melampirkan:",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "    a. Form Penyelesaian Advance yang disertai dengan Report Kwitansi/Nota",
+    "__EMPTY_3": "EXI - Formulir Penyelesaian Advance.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "RFP ",
+    "__EMPTY_2": "    b. Mengisi RFP   ",
+    "__EMPTY_3": "JBBS - Formulir Request For Payment (RFP) .pdf"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Cek Doc ",
+    "__EMPTY_2": "    c. Finance akan mengecek kelengkapan Document yang diajukan :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "        a). Jika Document tersebut tidak lengkap maka Finance akan mengembalikan Document tersebut ke Divisi Project Management",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "        b). Jika Document tersebut lengkap maka Finance akan menandatangani RFP dan Form Penyelesaian Advance tersebut",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 27,
+    "__EMPTY_1": "Approval RFP ",
+    "__EMPTY_2": "Finance akan mengajukan Aproval RFP ke C-Level:   ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika Document tersebut \"NO\" maka C-Level tidak akan menandatangani RFP tersebut dan di kembalikan ke Finance ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Finance akan mengembalikan Document tersebut ke Divisi Project management untuk revisi ulang",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "3. Jika Document tersebut \"YES\" maka C-Level akan menandatangani RFP tersebut ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 28,
+    "__EMPTY_1": "Payment ",
+    "__EMPTY_2": "Divisi Finance akan melakukan Payment ke Account Project management yang ada pada pengajuan RFP sesuai dengan jumlah pengajuan pada Form Penyelesaian Advance",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 29,
+    "__EMPTY_1": "Payment Receipt",
+    "__EMPTY_2": "Divisi Finance akan mengirim Bukti Payment yang diajukan ke Divisi Project Management ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 30,
+    "__EMPTY_1": "Document P&L Project",
+    "__EMPTY_2": "Jika Surplus/Deficit tersebut sudah selesai maka Divisi Finance akan mengisi Document P&L project secara pararel ",
+    "__EMPTY_3": "Format Jurnal PnL.xlsx"
+  },
+  {
+    "__EMPTY": 31,
+    "__EMPTY_1": "Report & Documentation ",
+    "__EMPTY_2": "Divisi Project Management akan membuat Report & Documentation yaitu proses pengumpulan, pencatatan, dan pelaporan semua aspek event, mulai dari persiapan, eksekusi, hingga evaluasi pasca-event. Ini mencakup laporan teknis, dokumentasi foto/video.",
+    "__EMPTY_3": "(FORMAT) REPORT_ NAMA EVENT"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Divisi Project akan melampirkan Link Report & Documentation tersebut ke Business (Project) Tracker ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 32,
+    "__EMPTY_1": "Approval Report ",
+    "__EMPTY_2": "Divisi Project Management akan melakukan Approval Report ke C-Level: ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" artinya ada revisi dari C-Level dalam Document Report&Documentation tersebut ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" artinya C-Level akan meneruskan ke Divisi Business Development ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 33,
+    "__EMPTY_1": "Request Invoice ",
+    "__EMPTY_2": "Divisi Business Development akan mengajukan Request Invoice ke Finance dengan melampirkan Report & Documentation  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Divisi Finance akan menyiapkan document pendukung dalam pengajuan Invoicing :",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Report & Documentation ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Faktur Pajak ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "3. BAST ",
+    "__EMPTY_3": "DRAFT BAST.doc"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "4. Invoice & Kwitansi ",
+    "__EMPTY_3": "Kuitansi Juara.docx Format Invoice Pajak.xlsx"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Finance akan melampirkan Link Invoicing tersebut ke Business (Project) Tracker ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 34,
+    "__EMPTY_1": "Approved Document Invoicing ",
+    "__EMPTY_2": "Finance akan mengajukan Approved Document Invoicing ke C-Level : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" maka Finance akan merevisi ulang ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Invoicing ",
+    "__EMPTY_2": "2. Jika \"YES\" maka C-Level akan melanjutkan ke Divisi Business Development untuk dilanjutkan ke Client ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Payment Pelunasan ",
+    "__EMPTY_2": "Setelah Client menerima Invoicing dan Report&Documentation maka Client akan melakukan Payment Pelunasan ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Payment Receipt",
+    "__EMPTY_2": "Client akan memberikan Bukti Payment ke Divisi Business Development  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Divisi Business Development akan memberikan Bukti Payment tersebut ke Finance ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": 35,
+    "__EMPTY_1": "Final Project Report (Internal) ",
+    "__EMPTY_2": "Finance akan mengumpulkan : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Document Profit & Loss Project",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Bukti Payment ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Untuk dapat direview bersama dengan C-Level untuk melihat Profit Laba Rugi pada event yang sudah dilaksanakan ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Jika \"NO\" artinya ada revisi dalam laporan yang dibuat oleh Finance ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Jika \"YES\" artinya C-Level menyetujui hasil laporan tersebut dan sudah bisa tutup buku ",
+    "__EMPTY_3": ""
+  }
+]
+
+=== SHEET: Matrix ===
+[
+  {
+    "__EMPTY": "Matrix ",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "No",
+    "__EMPTY_1": "Fase",
+    "__EMPTY_2": "Description",
+    "__EMPTY_3": "Link "
+  },
+  {
+    "__EMPTY": 1,
+    "__EMPTY_1": "Document P ",
+    "__EMPTY_2": "1. Tim Event Producer akan membuat Draft Document P( Outline )",
+    "__EMPTY_3": "https://docs.google.com/presentation/d/1JSYMDg4m5WMCfYDQpIJVKrbZHa4JjX2zsokXsBeD_64/edit#slide=id.g3108a0cd828_0_5"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Creative Aset List",
+    "__EMPTY_2": "2. Pada saat pembuatan Document P Event Producer akan membuat Creative list berupa Visual/audio/video/Equipment untuk tim creative ",
+    "__EMPTY_3": "https://docs.google.com/document/d/1CSzIrbhwneOsuWye_nrVKGQGCkr1Z_iO/edit?usp=sharing&ouid=114434374211590633214&rtpof=true&sd=true"
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "Producce P",
+    "__EMPTY_2": "3. Tim creative akan membuat (Key Visual dan Beutify Doc P ) Sesuai dengan moodboard pada creative list yg di berikan oleh event producer ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "2.",
+    "__EMPTY_1": "Document C",
+    "__EMPTY_2": "Event Producer akan melakukan pembacaan proposal ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Event Producer akan mengisi Checklist dengan section : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "A. Permit & Retribusi",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "B. Venue Set-Up System ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "C. Talent ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "D. Participant ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "E. Committee",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "F. Operational & Equipment",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "G. Services ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "3.",
+    "__EMPTY_1": "Document Q",
+    "__EMPTY_2": "Akan ada 2 Opsi : ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "1. Opsi Vendor ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     a. Event Producer akan memberikan checklist ke vendor ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     b. Vendor akan memberikan feedback berupa rate card dan quot vendor sesuai dengan checklist yang telah diberikan",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "2. Event Producer akan mengisi  CE secara mandiri sesuai dengan database Vendor ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Setelah mengetahui Cost Estimation, Event producer akan menambahkan margin, tax, dan/atau services untuk di lanjutkan menjadi Quotation dengan ketentuan: ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     a. Item di gross up 2% (pph)  ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     b. Margin akan dinaikan beberapa persen tergantung dengan project yang diterima ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     c. Subtotal ditambah dengan PPN ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     d. Pembayaran Project dari klien BUMN dipotong PPN dan PPH 2% ",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "     e. Pembayaran dari klien dibayarkan ke rekening PT Juara Berhasil Berkah Sejahtera",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "Event producer akan memberikan Quotation kepada Penerima Brief/Account Manager untuk disubmit ke client",
+    "__EMPTY_3": ""
+  }
+]
+
+=== SHEET: Bisnis Flow  ===
+[
+  {
+    "Bisnis Flow ": "No",
+    "__EMPTY": "Fase",
+    "__EMPTY_1": "Description",
+    "__EMPTY_2": "Link "
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "External Process ",
+    "__EMPTY_1": "Jika C-Level memutuskan untuk membutuhkan Pihak external dalam menyusun Proposal pada saat Proses Pitching maka: ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Tim Project akan membuat PO External untuk memesan ",
+    "__EMPTY_2": "PO.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Tim Project akan mengisi RFP dan melampirkan PO, Quotation dari vendor dan Invoice dari vendor untuk mengajukan biaya ke finance ",
+    "__EMPTY_2": "JBBS - Formulir Request For Payment (RFP) .pdf"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "3. Finance akan memeriksa pengaajuan Biaya dari  project jika document tersebut lengkap yaitu ada RFP,Po,Quot Vendor dan Invoice maka Finance akan menandatangani RFP dan Finance akan membawa document tersebut ke C-Level untuk di approved ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "4. Jika Finance tidak menyetujui karna document yg diajukan tidak lengkap maka document tersebut akan dikembalikan ke tim project untuk dilengkapi ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "5. Jika C-level tidak menandatangani RFP karna dirasa ada yg salah maka C-Level akan mengembalikan ke FInance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Jika C-Level tidak membutuhkan pihak external dalam event ini maka proses selesai ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "Survei Location ",
+    "__EMPTY_1": "Jika C-Level merasa project perlu survei maka tim project akan melakukan survei ke lokasi event ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Pada saat ingin melakukan survei tim project akan membuat pengajuan Advance untuk memenuhi kebutuhan saat survei ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Tim project akan mengisi form advance atau hanya melampirkan Reimburse pada RFP ke finance ",
+    "__EMPTY_2": "EXI - Formulir Permohonan Advance.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "3. Tim project akan mengisi RFP (Request For Payment) disertai dengan melampirkan Form Advance dan report Nota/Kwitansi untuk diajukan ke Finance ",
+    "__EMPTY_2": "JBBS - Formulir Request For Payment (RFP) .pdf"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "4. Finance akan memeriksa kelengkapan document yang diajukan oleh tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. Jika document tersebut tidak lengkap maka finance berhak untuk mengembalikan document tersebut ke tim project",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Jika document tersebut lengkap maka finance akan menandatangani RFP tersebut dan membawa document pendukungnya ke C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    c. C-Level akan memeriksa document yang diajukan oleh finance, Jika document tersebut tidak lengkap maka C-Level tidak akan menandatangani RFP tersebut dan akan di kembalikan oleh finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    d. Finance akan menindaklanjuti Document tersebut ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    e. Jika document tersebut lengkap dan sesuai maka C-Level akan menandatangani RFP tersebut ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    f. Finance akan membayar sesuai dengan jumlah pengajuan pada Form advance dan RFP ketika RFP tersebut sudah di approved oleh C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "Penyelesaian Survei ",
+    "__EMPTY_1": "Pada saat penyelesaian survei tim project akan mengisi form penyelesaian Advance dengan catatan: ",
+    "__EMPTY_2": "EXI - Formulir Penyelesaian Advance.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Jika penyelesaian Advance tersebut Surplus artinya advance yang diajukan lebih besar dari pengeluaran ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. Maka tim project perlu mengisi form advance dengan melampirkan report kwitansi/Nota untuk dapat diajukan ke finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Finance akan mengecek document yang diajukan sudah benar dan lengkap atau tidak ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    c. Jika document yang diajukan tidak lengkap maka tidak akan diterima oleh Finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    d. Jika Document yang diajukan lengkap maka finance akan membuat request transfer untuk di lampirkan bersama form penyelesaian advance ",
+    "__EMPTY_2": "Form Request Transfer.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    e. Finance akan membwa document form penyelesaian advance yang sudah dilampirkan oleh report nota/kwitansi serta form transfer requset untuk di setujui oleh C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    f. Ketika C-Level tidak menyetujui maka finance akan merevisi document yang diajukan ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    g. Jika C-Level Menandatangani maka Finance akan mengirim transfer request yg sudah di approved ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    h. Tim project akan membayar sesuai dengan request transfer yg diajukan ke account : 005-767-8899 a/n Juara Berhasil Berkah Sejahtera",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Jika penyelesaian Advance tersebut Deficit artinya advance yang diajukan kurang dan lebih besar dari pengeluaran ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. Maka tim project akan mengisi form penyelesaian advance dengan melampirkan report kwitansi/Nota",
+    "__EMPTY_2": "EXI - Formulir Penyelesaian Advance.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Tim project akan mengisi RFP yang di lampiri oleh form penyelesai advance yg sudah disi serta report kwitansi/nota untuk diajukan ke finance ",
+    "__EMPTY_2": "JBBS - Formulir Request For Payment (RFP) .pdf"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    c. Finance akan mengecek kelengkapan document yang diajukan oleh tim project :",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "         a). Jika document tersebut tidak lengkap maka finance berhak untuk mengembalikan document tersebut ke tim project",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "         b). Jika document tersebut lengkap maka finance akan menandatangani RFP dan form penyelesaian advance tersebut dan membawa document pendukungnya ke C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    d. C-Level akan memeriksa document yang diajukan oleh finance, Jika document tersebut tidak lengkap maka C-Level tidak akan menandatangani RFP dan form penyelesaian advance tersebut dan akan di kembalikan oleh finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    e. Finance akan menindaklanjuti Document tersebut ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    f. Jika document tersebut lengkap dan sesuai maka C-Level akan menandatangani RFP dan form penyelesaian advance tersebut ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    g. Finance akan membayar ke account project yang tertera pada pengajuan RFP sesuai dengan jumlah pengajuan pada Form penyelesaian advance dan RFP ketika sudah di approved oleh C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    h. finance akan mengirim bukti pembayaran yang diajukan ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "Pelaksanaan Event ",
+    "__EMPTY_1": "Tim Account akan melaporkan ke finance ketika client sudah mengeluarkan SPK/PO/Kontrak",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Finance akan mengeluarkan Invoice dan kwitansi ke Client ",
+    "__EMPTY_2": "Kuitansi Juara.docx Format Invoice Pajak.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Finance akan mengajukan Invoice dan kwitansi ke C-Level untuk dapat diperiksa oleh C-level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Jika C-level menyetujui maka finance akan mengirim invoice dan kwitansi ke client",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Account akan bertanggung jawab untuk menjembatani antara finance dengan client ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "client akan membayar DP sesuai dengan kwitansi yang di buat oleh finance ke account : 005-767-8899 a/n Juara Berhasil Berkah Sejahtera",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Ketika client sudah membayar DP maka tim project akan memulai untuk membuat PO ke Vendor - Vendor yang sudah bekerja sama dengan juara pada event yang akan dilaaksanakan ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Tim project juga akan membuat CE yang disertai dengan TOP agar finance dapat memantau apa saja yang perlu di bayarkan terlebih dahulu ",
+    "__EMPTY_2": "(FORMAT) CE & AC"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Tim Project juga akan mengajukan advance pada saat event berjalan ",
+    "__EMPTY_2": "EXI - Formulir Permohonan Advance.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "untuk melakukan pengajuan ke finance maka tim project akan melampirkan form advance yang sudah ada report nota/kwitansi/Invoice, Request For Payment, dan Purchase Order ",
+    "__EMPTY_2": "JBBS - Formulir Request For Payment (RFP) .pdf"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Finance akan mengecek kelengkapan document tersebut :",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Jika document tersebut lengkap maka finance akan menandatangani RFP & form advance tersebut dan membawa document pendukungnya ke C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. C-Level akan memeriksa document yang diajukan oleh finance, Jika document tersebut tidak lengkap maka C-Level tidak akan menandatangani RFP & Form Advance tersebut dan akan di kembalikan oleh finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Finance akan menindaklanjuti Document tersebut ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Jika document tersebut lengkap dan sesuai maka C-Level akan menandatangani RFP tersebut ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. Finance akan membayar sesuai dengan jumlah pengajuan pada Form advance dan RFP ketika RFP tersebut sudah di approved oleh C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Secara Pararel Finance akan membayar Vendor sesuai dengan Tanggal yang ditetapkan oleh tim project pada form CE+TOP ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    c. Finance akan memberikan bukti pembayaran pada tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "Penyelesaian Event ",
+    "__EMPTY_1": "Pada saat penyelesaian Event tim project akan mengisi form penyelesaian Advance dengan catatan: ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Jika penyelesaian Advance tersebut Surplus artinya advance yang diajukan lebih besar dari pengeluaran ",
+    "__EMPTY_2": "EXI - Formulir Penyelesaian Advance.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. Maka tim project perlu mengisi form penyelesaian advance dengan melampirkan report kwitansi/Nota untuk dapat diajukan ke finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Finance akan mengecek document yang diajukan sudah benar dan lengkap atau tidak ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    c. Jika document yang diajukan tidak lengkap maka tidak akan dikembalikan ke tim project oleh Finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    d. Jika Document yang diajukan lengkap maka finance akan membuat request transfer untuk di lampirkan bersama form penyelesaian advance ",
+    "__EMPTY_2": "Form Request Transfer.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    e. Finance akan membwa document form penyelesaian advance yang sudah dilampirkan oleh report nota/kwitansi serta form transfer requset untuk di setujui oleh C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    f. Ketika C-Level tidak menyetujui maka finance akan merevisi document yang diajukan ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    g. Jika C-Level Menandatangani maka Finance akan mengirim transfer request yg sudah di approved ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    h. Tim project akan membayar sesuai dengan request transfer yg diajukan, ke account : 005-767-8899 a/n Juara Berhasil Berkah Sejahtera",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Jika penyelesaian Advance tersebut Deficit artinya advance yang diajukan kurang dan lebih besar dari pengeluaran ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    a. Maka tim project akan mengisi form penyelesaian advance dengan melampirkan report kwitansi/Nota",
+    "__EMPTY_2": "EXI - Formulir Penyelesaian Advance.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    b. Tim project akan mengisi RFP yang di lampiri oleh form penyelesai advance yg sudah disi serta report kwitansi/nota untuk diajukan ke finance ",
+    "__EMPTY_2": "JBBS - Formulir Request For Payment (RFP) .pdf"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    c. Finance akan mengecek kelengkapan document yang diajukan oleh tim project :",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "         a). Jika document tersebut tidak lengkap maka finance berhak untuk mengembalikan document tersebut ke tim project",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "         b). Jika document tersebut lengkap maka finance akan menandatangani RFP dan form penyelesaian advance tersebut dan membawa document pendukungnya ke C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "    d. C-Level akan memeriksa document yang diajukan oleh finance:  ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "       a) Jika document tersebut tidak lengkap maka C-Level tidak akan menandatangani RFP dan form penyelesaian advance tersebut dan akan di kembalikan oleh finance ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "            Finance akan menindaklanjuti Document tersebut ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "        b) Jika document tersebut lengkap dan sesuai maka C-Level akan menandatangani RFP dan form penyelesaian advance tersebut ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "   e. Finance akan membayar ke account project yang tertera pada pengajuan RFP sesuai dengan jumlah pengajuan pada Form penyelesaian advance dan RFP ketika sudah di approved oleh C-Level ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "   f. finance akan mengirim bukti pembayaran yang diajukan ke tim project ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "disisi lain ketika event selesai Tim accont akan mengajukan Request Invoicing ke finance dengan melampirkan Report & Documentation pada saat pelaksanaan ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Finance akan melampirkan : ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "a. Faktur Pajak ",
+    "__EMPTY_2": ""
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "b. Invoice dan Kwitansi ",
+    "__EMPTY_2": "Kuitansi Juara.docx Format Invoice Pajak.xlsx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "c. BAST ",
+    "__EMPTY_2": "DRAFT BAST.doc"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "d. Report & Documentation Event",
+    "__EMPTY_2": "(FORMAT) REPORT_ NAMA EVENT.pptx"
+  },
+  {
+    "Bisnis Flow ": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Account akan bertanggung jawab untuk menjembatani antara finance dengan client untuk melakukan pelunasan Event ",
+    "__EMPTY_2": ""
+  }
+]
+
+=== SHEET: Pelaksanaan Event ===
+[
+  {
+    "__EMPTY": "Pelaksanaan Event",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "",
+    "__EMPTY_3": ""
+  },
+  {
+    "__EMPTY": "No",
+    "__EMPTY_1": "Fase",
+    "__EMPTY_2": "Description",
+    "__EMPTY_3": "Link "
+  }
+]
+
+=== SHEET: Pelaksanan Event  ===
+[
+  {
+    "FASE EVENT": "No",
+    "__EMPTY": "Fase",
+    "__EMPTY_1": "Description",
+    "__EMPTY_2": "Link"
+  },
+  {
+    "FASE EVENT": 1,
+    "__EMPTY": "Perencanaan Detail Acara",
+    "__EMPTY_1": "Event producer akan membuat : ",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Event Master Plan yaitu berupa breakdown Rundown konten",
+    "__EMPTY_2": "MASTER PLAN ISCOMICE 2024 \nMASTERPLAN PROGRAM.xlsx"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Requirment Checklist memuat kebutuhan seluruh aspek acara ",
+    "__EMPTY_2": "Salinan dari MASTER CHECKLIST ISCOMICE 2024"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "MASTER CHECKLIST SINGKAT BERBUDAYA"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "3. Site Inspection Doc memuat detail venue  untuk mencatat semua informasi tentang tempat acara untuk memastikan kesesuaian dengan kebutuhan acara.",
+    "__EMPTY_2": "Survey Venue GGM Tako"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "4. Talent Treatment  memuat serangkaian perlakuan, fasilitas, dan layanan yang disediakan oleh penyelenggara acara untuk para talent, seperti pembicara, artis, MC, atau pengisi acara lainnya.",
+    "__EMPTY_2": "Riders Checklist Artis.xlsx"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "5. Budget Plan adalah rencana anggaran yang mencakup semua biaya yang diperlukan untuk pelaksanaan untuk memastikan pengeluaran dapat dikendalikan sesuai dengan target anggaran dan semua kebutuhan terpenuhi.",
+    "__EMPTY_2": "RAB_Iscomice 2024"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "6. Manual Book ",
+    "__EMPTY_2": "Manual Book Shared To Lokal- GGM-HOP- Nyala Sinemusika 6.0"
+  },
+  {
+    "FASE EVENT": 2,
+    "__EMPTY": "Pembagian Tugas",
+    "__EMPTY_1": "Event producer akan menentukan : ",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Team Allocation Sheet yaitu pembagian tugas yang berisi deskripsi pekerjaan pada tiap divisi pada pelaksaan event ",
+    "__EMPTY_2": "Organizing Committee Structure Description of ISCOMICE 2024.pdf"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Event Timeline and Task Tracker berupa timeline pekerjaan untuk memastikan pekerjaan tersebut berjalan tepat waktu dan sesuai rencana ",
+    "__EMPTY_2": "Copy of TIMELINE ISCOMICE 2024"
+  },
+  {
+    "FASE EVENT": 3,
+    "__EMPTY": "Eksekusi Acara",
+    "__EMPTY_1": "Tim Production, Tim Logistict dan event producer akan membuat: ",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "1. Venue loading memuat jadwal rinci, skema, layouting area, yang mengatur waktu dan urutan kegiatan pengangkutan peralatan dan perlengkapan ke dalam venue selama persiapan acara",
+    "__EMPTY_2": "Salinan dari MASTER CHECKLIST ISCOMICE 2024"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "",
+    "__EMPTY_2": "time line loading.xlsx"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "2. Event Rehearsal Plan yaitu rencana yang mengatur urutan dan persiapan gladi resik atau latihan jalannya acara sebelum hari H. untuk memastikan semua elemen acara, mulai dari program, teknis, hingga logistik sudah sesuai",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "3. Event Day Run Sheet memuat finalisasi/penetapan contraflow event ",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": 4,
+    "__EMPTY": "Evaluasi Pasca Acara",
+    "__EMPTY_1": "Tim Production/ Event Producer akan membuat: ",
+    "__EMPTY_2": "Copy of Feedback HOP"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Vendor Report untuk menilai kualitas vendor yang digunakan pada keseluruhan acara",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "     a. Jika Penilaiannya bagus maka vendor akan digunakan lagi pada event selanjutnya ",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "     b. Jika penilaiannya kurang maka vendor akan dipertimbangkan lagi untuk kerjasama selanjutnya ",
+    "__EMPTY_2": ""
+  },
+  {
+    "FASE EVENT": 5,
+    "__EMPTY": "Dokumentasi dan Pelaporan",
+    "__EMPTY_1": "Event producer dan seluruh tim membuat:",
+    "__EMPTY_2": "Report Kahforward  Pressconterence & Community Gathering"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Financial Reconciliation Report yaitu Finance akan membuat report cash flow event ",
+    "__EMPTY_2": "REPORT GGM HOP NYALA SINEMUSIKA - 24 AGUSTUS 2024"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Final Event Report yaitu memuat event documentation file dan rangkuman semua aspek acara, dari perencanaan hingga pelaksanaan, dan memberikan analisis mendalam tentang pencapaian tujuan acara, hasil yang diperoleh, dan rekomendasi untuk acara berikutnya.",
+    "__EMPTY_2": "Lembar Pertanggungjawaban Kegiatan_Craftopiart 2024"
+  },
+  {
+    "FASE EVENT": "",
+    "__EMPTY": "",
+    "__EMPTY_1": "Berita Acara",
+    "__EMPTY_2": "BERITA ACARA ISCOMICE 2024.pdf"
+  }
+]
+
+=== SHEET: Total Sales ===
+[
+  {
+    "Total Fase Sales": "No",
+    "__EMPTY": "Fase",
+    "__EMPTY_1": "Description ",
+    "__EMPTY_2": "Link"
+  }
+]
+
+=== SHEET: Sheet4 ===
+[
+  {
+    "No": "",
+    "Fase": "",
+    "Description": 6,
+    "Modul": ""
+  }
+]

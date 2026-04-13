@@ -1,0 +1,794 @@
+[
+  {
+    "id": "po-mock-1",
+    "projectId": "mock-project-1",
+    "projectName": "Annual Gathering 2026",
+    "vendorName": "PT. Sentosa Event",
+    "documentType": "PO",
+    "issueDate": "2026-04-10",
+    "description": "Sewa Lighting & Sound System",
+    "amount": 50000000,
+    "status": "paid",
+    "rfpId": "rfp-mock-1",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-10T07:48:43.914Z",
+      "digitalSignature": "SIG-A1B2C3"
+    }
+  },
+  {
+    "id": "spk-mock-1",
+    "projectId": "mock-project-1",
+    "projectName": "Annual Gathering 2026",
+    "vendorName": "Catering Bu Anis",
+    "documentType": "SPK",
+    "issueDate": "2026-04-10",
+    "description": "Catering untuk 500 pax",
+    "amount": 25000000,
+    "status": "paid"
+  },
+  {
+    "id": "kontrak-mock-1",
+    "projectId": "mock-project-2",
+    "projectName": "Exhibition Tech Expo",
+    "vendorName": "Digital Display Solusindo",
+    "documentType": "KONTRAK",
+    "issueDate": "2026-04-09",
+    "description": "Sewa LED Videotron 4x3m",
+    "amount": 75000000,
+    "status": "submitted"
+  },
+  {
+    "id": "PO-5NGZD5",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "Addiksi Kreatif Imagi",
+    "documentType": "PO",
+    "issueDate": "2026-04-10T04:49:12.466Z",
+    "description": "Design 3d",
+    "amount": 3000000,
+    "status": "paid",
+    "rfpId": "RFP-S3GM8O",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-10T08:47:32.249Z",
+      "digitalSignature": "SIG-F9G8H7"
+    }
+  },
+  {
+    "id": "003/JBBS/PO/04/2026",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "Aldo Printing",
+    "vendorAddress": "DKI Jakarta",
+    "vendorTaxId": "095397915017000",
+    "documentType": "PO",
+    "issueDate": "2026-04-10T06:03:43.977Z",
+    "description": "",
+    "amount": 840000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "tese",
+        "specification": "gfhg",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": 1,
+        "volUnit": "Event",
+        "price": "500000",
+        "amount": 500000
+      },
+      {
+        "no": 2,
+        "description": "asdfa",
+        "specification": "dfad",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": 1,
+        "freqUnit": "Time",
+        "vol": 1,
+        "volUnit": "Event",
+        "price": "340000",
+        "amount": 340000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-1DSDMT",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-10T09:21:57.856Z",
+      "digitalSignature": "SIG-Z5X4Y3"
+    }
+  },
+  {
+    "id": "002/JBBS/SPK/04/2026",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "fatma nabila",
+    "vendorAddress": "DKI Jakarta",
+    "vendorTaxId": "3173054905030001",
+    "documentType": "SPK",
+    "issueDate": "2026-04-10T06:19:42.913Z",
+    "description": "",
+    "amount": 1250000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "adfa",
+        "specification": "df",
+        "qty": 1,
+        "unit": "pckg",
+        "freq": 1,
+        "freqUnit": "Time",
+        "vol": 1,
+        "volUnit": "Event",
+        "price": "1250000",
+        "amount": 1250000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-0YRFD1",
+    "verifiedBy": {
+      "name": "Finance Admin",
+      "date": "2026-04-10T07:21:23.204Z"
+    },
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-10T07:21:36.688Z",
+      "digitalSignature": "SIG-L9M8K7"
+    }
+  },
+  {
+    "id": "004/JBBS/PO/04/2026",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "Addiksi Kreatif Imagi",
+    "vendorAddress": "Jawa Timur",
+    "vendorTaxId": "45 435.083.6-643 000",
+    "documentType": "PO",
+    "issueDate": "2026-04-10T19:57:59.662Z",
+    "description": "",
+    "amount": 10000000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "adfafd",
+        "specification": "xfadf",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "1",
+        "volUnit": "Event",
+        "price": "10000000",
+        "amount": 10000000
+      }
+    ],
+    "paymentTerms": "DP 50%",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-0JQWBB",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-10T20:02:12.479Z",
+      "digitalSignature": "SIG-L2YI4J"
+    }
+  },
+  {
+    "id": "005/JBBS/PO/04/2026",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "Dodo",
+    "vendorAddress": "DKI Jakarta",
+    "vendorTaxId": "085643925825",
+    "documentType": "PO",
+    "issueDate": "2026-04-10T20:12:47.583Z",
+    "description": "",
+    "amount": 40000000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "dance",
+        "specification": "1",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "1",
+        "volUnit": "Event",
+        "price": "40000000",
+        "amount": 40000000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-Z8RGUK",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-11T03:56:13.491Z",
+      "digitalSignature": "SIG-QV3IWJ"
+    }
+  },
+  {
+    "id": "006/JBBS/PO/04/2026",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "CV Afifah Kreatif",
+    "vendorAddress": "DKI Jakarta",
+    "vendorTaxId": "0055521322009000",
+    "documentType": "PO",
+    "issueDate": "2026-04-11T05:45:45.005Z",
+    "description": "pembayaran Tes",
+    "amount": 400000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "",
+        "specification": "",
+        "qty": "",
+        "unit": "pckg",
+        "freq": "",
+        "freqUnit": "Time",
+        "vol": "",
+        "volUnit": "Event",
+        "price": "",
+        "amount": 0
+      },
+      {
+        "no": 2,
+        "description": "tes",
+        "specification": "",
+        "qty": 1,
+        "unit": "pckg",
+        "freq": 1,
+        "freqUnit": "Time",
+        "vol": 1,
+        "volUnit": "Event",
+        "price": "400000",
+        "amount": 400000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-0WXV1B",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-11T05:48:13.340Z",
+      "digitalSignature": "SIG-GDB024"
+    }
+  },
+  {
+    "id": "CA-QZSRUD",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "daxo",
+    "vendorAddress": "",
+    "vendorTaxId": "",
+    "documentType": "CASH_ADVANCE",
+    "issueDate": "2026-04-11T08:35:27.178Z",
+    "description": "Belanja Logistik ",
+    "amount": 4333000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "jhgjhg",
+        "specification": "",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "1",
+        "volUnit": "Event",
+        "price": "2000000",
+        "amount": 2000000
+      },
+      {
+        "no": 2,
+        "description": "2332123",
+        "specification": "",
+        "qty": 1,
+        "unit": "pckg",
+        "freq": 1,
+        "freqUnit": "Time",
+        "vol": 1,
+        "volUnit": "Event",
+        "price": "2333000",
+        "amount": 2333000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-NAD5JX",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-11T09:04:21.944Z",
+      "digitalSignature": "SIG-OSP0GA"
+    }
+  },
+  {
+    "id": "007/JBBS/PO/04/2026",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "GEOMETRIX (CV KARUNIA BUMI)",
+    "vendorAddress": "DIY dan Jawa Tengah",
+    "vendorTaxId": "53.022.278.5-542.000",
+    "documentType": "PO",
+    "issueDate": "2026-04-11T10:45:12.090Z",
+    "description": "",
+    "amount": 35000000,
+    "status": "paid",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "Booth ",
+        "specification": "5x5",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "1",
+        "volUnit": "Event",
+        "price": "35000000",
+        "amount": 35000000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "rfpId": "RFP-FAYA5D",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-11T10:46:42.475Z",
+      "digitalSignature": "SIG-9350FX"
+    }
+  },
+  {
+    "id": "008/JBBS/PO/04/2026",
+    "projectId": "1773806241580",
+    "projectName": "Digital Activation Rockin' Surabaya",
+    "vendorName": "TestVendor",
+    "vendorAddress": "",
+    "vendorTaxId": "",
+    "documentType": "PO",
+    "issueDate": "2026-04-12T18:58:56.197Z",
+    "description": "No description",
+    "amount": 1000000,
+    "status": "approved",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "Test Item",
+        "specification": "",
+        "qty": "1",
+        "unit": "pc1kg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "",
+        "volUnit": "Event",
+        "price": "1000000",
+        "amount": 0
+      }
+    ],
+    "paymentTerms": "Full PaymentFull Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice"
+    ],
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-12T18:59:55.784Z",
+      "digitalSignature": "SIG-LALHLN"
+    }
+  },
+  {
+    "id": "009/JBBS/PO/04/2026",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "PT. PERFORMA MAHAKARYA INDONESIA",
+    "vendorAddress": "Indonesia",
+    "vendorTaxId": "20.553.546.1-017.000",
+    "documentType": "PO",
+    "issueDate": "2026-04-13T05:33:18.608Z",
+    "description": "No description",
+    "amount": 10000000,
+    "status": "approved",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "booth ",
+        "specification": "5x5",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "1",
+        "volUnit": "Event",
+        "price": "10000000",
+        "amount": 10000000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "2026-04-14",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice"
+    ],
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-13T05:33:35.742Z",
+      "digitalSignature": "SIG-T9D3KH"
+    }
+  },
+  {
+    "id": "010/JBBS/PO/04/2026",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "Gudang Production",
+    "vendorAddress": "Banten",
+    "vendorTaxId": "44.038.947.6-001.000",
+    "documentType": "PO",
+    "issueDate": "2026-04-13T05:52:32.231Z",
+    "description": "No description",
+    "amount": 4000000,
+    "status": "approved",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "test sdfadfadfa",
+        "specification": "dfadfadf",
+        "qty": "1",
+        "unit": "pckg",
+        "freq": "1",
+        "freqUnit": "Time",
+        "vol": "1",
+        "volUnit": "Event",
+        "price": "4000000",
+        "amount": 4000000
+      }
+    ],
+    "paymentTerms": "Full Payment",
+    "deliveryInstruction": "",
+    "deliveryDate": "2026-05-12",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice"
+    ],
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-13T05:53:25.794Z",
+      "digitalSignature": "SIG-MQ6577"
+    }
+  },
+  {
+    "id": "CA-PUY01F",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "Internal User (Cash Advance)",
+    "vendorAddress": "",
+    "vendorTaxId": "",
+    "documentType": "CASH_ADVANCE",
+    "issueDate": "2026-04-13T06:07:28.036Z",
+    "description": "Operasional",
+    "amount": 5000000,
+    "status": "paid",
+    "paymentTerms": "Full Payment",
+    "rfpId": "RFP-90V013",
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-13T06:08:15.258Z",
+      "digitalSignature": "SIG-T4MPQM"
+    }
+  },
+  {
+    "id": "011/JBBS/PO/04/2026",
+    "projectId": "1773806241580",
+    "projectName": "Digital Activation Rockin' Surabaya",
+    "vendorName": "PT. Abhinaya Visual Radhikasakti",
+    "vendorAddress": "Banten",
+    "vendorTaxId": "41.488.027.8-452.000",
+    "documentType": "PO",
+    "issueDate": "2026-04-13T10:24:09.337Z",
+    "description": "",
+    "amount": 35456454,
+    "status": "approved",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "dfadf",
+        "specification": "dfadfa",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Ha",
+        "price": "1222220",
+        "amount": 1222220
+      },
+      {
+        "no": 2,
+        "description": "dfad",
+        "specification": "fdafd",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Ha",
+        "price": "34234234",
+        "amount": 34234234
+      }
+    ],
+    "paymentTerms": "DP 50%",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "preparedBy": {
+      "name": "Purchasing Division",
+      "date": "2026-04-13T10:24:08.364Z"
+    },
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-13T10:25:07.487Z",
+      "digitalSignature": "SIG-8HUDIF"
+    }
+  },
+  {
+    "id": "012/JBBS/PO/04/2026",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "Addiksi Kreatif Imagi",
+    "vendorAddress": "Jawa Timur",
+    "vendorTaxId": "45 435.083.6-643 000",
+    "documentType": "PO",
+    "issueDate": "2026-04-13T10:33:54.906Z",
+    "description": "",
+    "amount": 10000000,
+    "status": "draft",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "Design Booth ",
+        "specification": "3x3 meter",
+        "qty": "1",
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Ha",
+        "price": "2500000",
+        "amount": 2500000
+      },
+      {
+        "no": 2,
+        "description": "Booth ",
+        "specification": "3x3 m, fin vinyl, kerangka besi",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Ha",
+        "price": "7500000",
+        "amount": 7500000
+      }
+    ],
+    "paymentTerms": "DP 30%",
+    "deliveryDate": "2026-05-02",
+    "shipTo": "PPKPI Jakarta",
+    "billingInstruction": "admin@juaraevent.id",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "preparedBy": {
+      "name": "Purchasing Division",
+      "date": "2026-04-13T10:33:54.314Z"
+    }
+  },
+  {
+    "id": "013/JBBS/PO/04/2026",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "Addiksi Kreatif Imagi",
+    "vendorAddress": "Jawa Timur",
+    "vendorTaxId": "45 435.083.6-643 000",
+    "documentType": "PO",
+    "issueDate": "2026-04-13T10:42:59.883Z",
+    "description": "",
+    "amount": 40000000,
+    "status": "approved",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "dfadf",
+        "specification": "df",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Ha",
+        "price": "40000000",
+        "amount": 40000000
+      }
+    ],
+    "paymentTerms": "DP 30%",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "preparedBy": {
+      "name": "Purchasing Division",
+      "date": "2026-04-13T10:42:58.906Z"
+    },
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-13T11:05:11.042Z",
+      "digitalSignature": "SIG-S9N6DB"
+    },
+    "rfpId": "RFP-YP1Q7A"
+  },
+  {
+    "id": "014/JBBS/PO/04/2026",
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "vendorName": "Gudang Production",
+    "vendorAddress": "Banten",
+    "vendorTaxId": "44.038.947.6-001.000",
+    "documentType": "PO",
+    "issueDate": "2026-04-13T11:16:36.601Z",
+    "description": "",
+    "amount": 12000000,
+    "status": "draft",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "dfadf",
+        "specification": "dffa",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Hari",
+        "price": "12000000",
+        "amount": 12000000
+      }
+    ],
+    "paymentTerms": "Custom Schedule",
+    "deliveryDate": "2026-04-18",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "preparedBy": {
+      "name": "Purchasing Division",
+      "date": "2026-04-13T11:16:36.073Z"
+    }
+  },
+  {
+    "id": "003/JBBS/SPK/04/2026",
+    "projectId": "1773806241580",
+    "projectName": "Digital Activation Rockin' Surabaya",
+    "vendorName": "69 Show Management",
+    "vendorAddress": "Jawa Timur",
+    "vendorTaxId": "8.96822E+14",
+    "documentType": "SPK",
+    "issueDate": "2026-04-13T12:07:46.484Z",
+    "description": "",
+    "amount": 10000000,
+    "status": "draft",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "hgfjhgf",
+        "specification": "jhgjh",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Hari",
+        "price": "10000000",
+        "amount": 10000000
+      }
+    ],
+    "paymentTerms": "Custom Schedule",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "preparedBy": {
+      "name": "Purchasing Division",
+      "date": "2026-04-13T12:07:45.839Z"
+    }
+  }
+]

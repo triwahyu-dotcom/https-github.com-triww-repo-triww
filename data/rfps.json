@@ -1,0 +1,303 @@
+[
+  {
+    "id": "rfp-mock-1",
+    "documentIds": [
+      "po-mock-1"
+    ],
+    "projectId": "mock-project-1",
+    "projectName": "Annual Gathering 2026",
+    "payeeName": "PT. Sentosa Event",
+    "totalAmount": 50000000,
+    "requestDate": "2026-04-10",
+    "requiredDate": "2026-04-15",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "1234567890",
+      "accountName": "PT Sentosa Event"
+    },
+    "notes": "DP 50% untuk kebutuhan acara"
+  },
+  {
+    "id": "rfp-mock-2",
+    "documentIds": [
+      "spk-mock-1"
+    ],
+    "projectId": "mock-project-1",
+    "projectName": "Annual Gathering 2026",
+    "payeeName": "Catering Bu Anis",
+    "totalAmount": 25000000,
+    "requestDate": "2026-04-05",
+    "requiredDate": "2026-04-08",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "Mandiri",
+      "accountNo": "0987654321",
+      "accountName": "Anis Wijaya"
+    },
+    "notes": "Pelunasan Catering"
+  },
+  {
+    "id": "RFP-S3GM8O",
+    "documentIds": [
+      "PO-5NGZD5"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "Addiksi Kreatif Imagi",
+    "totalAmount": 3000000,
+    "requestDate": "2026-04-10T04:49:12.466Z",
+    "requiredDate": "2026-04-17T04:49:12.466Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "4290532634",
+      "accountName": "Muhammad Risa Farid Wajdi"
+    },
+    "notes": "Design 3d"
+  },
+  {
+    "id": "RFP-1DSDMT",
+    "documentIds": [
+      "003/JBBS/PO/04/2026"
+    ],
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "payeeName": "Aldo Printing",
+    "totalAmount": 840000,
+    "requestDate": "2026-04-10T06:03:43.978Z",
+    "requiredDate": "2026-04-17T06:03:43.978Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "2211260906",
+      "accountName": "Maria Risnawati Klees"
+    },
+    "notes": "Auto-generated from PO"
+  },
+  {
+    "id": "RFP-0YRFD1",
+    "documentIds": [
+      "002/JBBS/SPK/04/2026"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "fatma nabila",
+    "totalAmount": 1250000,
+    "requestDate": "2026-04-10T06:19:42.913Z",
+    "requiredDate": "2026-04-17T06:19:42.913Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "5520809220",
+      "accountName": "Fatma Nabila"
+    },
+    "notes": "Auto-generated from SPK"
+  },
+  {
+    "id": "RFP-0JQWBB",
+    "documentIds": [
+      "004/JBBS/PO/04/2026"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "Addiksi Kreatif Imagi",
+    "totalAmount": 5000000,
+    "requestDate": "2026-04-10T19:57:59.662Z",
+    "requiredDate": "2026-04-17T19:57:59.662Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "4290532634",
+      "accountName": "Muhammad Risa Farid Wajdi"
+    },
+    "notes": "Auto-generated from PO\n\nNext Payment Date: 2026-04-13"
+  },
+  {
+    "id": "RFP-Z8RGUK",
+    "documentIds": [
+      "005/JBBS/PO/04/2026"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "Dodo",
+    "totalAmount": 40000000,
+    "requestDate": "2026-04-10T20:12:47.583Z",
+    "requiredDate": "2026-04-17T20:12:47.583Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "6975060474",
+      "accountName": "DWI KURNIAWAN"
+    },
+    "notes": "Auto-generated from PO"
+  },
+  {
+    "id": "RFP-0WXV1B",
+    "documentIds": [
+      "006/JBBS/PO/04/2026"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "CV Afifah Kreatif",
+    "totalAmount": 400000,
+    "requestDate": "2026-04-11T05:45:45.005Z",
+    "requiredDate": "2026-04-18T05:45:45.005Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BNI",
+      "accountNo": "1915749261",
+      "accountName": "CV Afifah Kreatif"
+    },
+    "notes": "pembayaran Tes"
+  },
+  {
+    "id": "RFP-NAD5JX",
+    "documentIds": [
+      "CA-QZSRUD"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "daxo",
+    "totalAmount": 4333000,
+    "requestDate": "2026-04-11T08:35:27.178Z",
+    "requiredDate": "2026-04-18T08:35:27.178Z",
+    "status": "pending_settlement_approval",
+    "paymentType": "Cash",
+    "bankAccount": {
+      "bankName": "-",
+      "accountNo": "-",
+      "accountName": "-"
+    },
+    "notes": "Belanja Logistik ",
+    "settlementDetails": {
+      "actualAmount": 4300000,
+      "difference": -33000,
+      "notes": "",
+      "settlementDate": "2026-04-11T09:06:19.043Z",
+      "items": [
+        {
+          "no": 1,
+          "description": "hfhghgfghg",
+          "specification": "",
+          "qty": 1,
+          "unit": "Ls",
+          "freq": 0,
+          "freqUnit": "",
+          "vol": 0,
+          "volUnit": "",
+          "price": "4300000",
+          "amount": 4300000
+        }
+      ]
+    }
+  },
+  {
+    "id": "RFP-FAYA5D",
+    "documentIds": [
+      "007/JBBS/PO/04/2026"
+    ],
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "payeeName": "GEOMETRIX (CV KARUNIA BUMI)",
+    "totalAmount": 17500000,
+    "requestDate": "2026-04-11T10:45:12.090Z",
+    "requiredDate": "2026-04-18T10:45:12.090Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "8020818787",
+      "accountName": "CV KARUNIA BUMI"
+    },
+    "notes": "Auto-generated from PO\n\nNext Payment Date: 2026-05-11"
+  },
+  {
+    "id": "RFP-678TCL",
+    "documentIds": [
+      "009/JBBS/PO/04/2026"
+    ],
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "payeeName": "PT. PERFORMA MAHAKARYA INDONESIA",
+    "totalAmount": 5000000,
+    "requestDate": "2026-04-13T05:39:25.331Z",
+    "requiredDate": "2026-04-20T05:39:25.331Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "5405257791",
+      "accountName": "PT. PERFORMA MAHAKARYA INDONESIA"
+    },
+    "notes": "No description"
+  },
+  {
+    "id": "RFP-PLPF8A",
+    "documentIds": [
+      "010/JBBS/PO/04/2026"
+    ],
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "payeeName": "Gudang Production",
+    "totalAmount": 2000000,
+    "requestDate": "2026-04-13T05:56:27.918Z",
+    "requiredDate": "2026-04-20T05:56:27.918Z",
+    "status": "paid",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "4740251771",
+      "accountName": "Syaiful Ramadhan"
+    },
+    "notes": "No description"
+  },
+  {
+    "id": "RFP-90V013",
+    "documentIds": [
+      "CA-PUY01F"
+    ],
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "payeeName": "Internal User (Cash Advance)",
+    "totalAmount": 5000000,
+    "requestDate": "2026-04-13T06:07:28.037Z",
+    "requiredDate": "2026-04-20T06:07:28.037Z",
+    "status": "paid",
+    "paymentType": "Cash",
+    "bankAccount": {
+      "bankName": "-",
+      "accountNo": "-",
+      "accountName": "-"
+    },
+    "notes": "Operasional\n\nNext Payment Date: 2026-04-15"
+  },
+  {
+    "id": "RFP-YP1Q7A",
+    "documentIds": [
+      "013/JBBS/PO/04/2026"
+    ],
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "payeeName": "Addiksi Kreatif Imagi",
+    "totalAmount": 12000000,
+    "requestDate": "2026-04-13T11:04:04.388Z",
+    "requiredDate": "2026-05-12",
+    "status": "approved",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "4290532634",
+      "accountName": "Muhammad Risa Farid Wajdi"
+    },
+    "notes": "[Termin 30%] \n\nRef. Document: 013/JBBS/PO/04/2026"
+  }
+]

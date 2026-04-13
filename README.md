@@ -1,3 +1,13 @@
+# Project Tracker JUARA
+
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live%20App-black?style=for-the-badge&logo=vercel)](https://vendor-management-app-peach.vercel.app/crm)
+
+## Vercel App Links
+- **CRM/Internal:** [https://vendor-management-app-peach.vercel.app/crm](https://vendor-management-app-peach.vercel.app/crm)
+- **Vendor Registration:** [https://vendor-management-app-peach.vercel.app/vendor/register](https://vendor-management-app-peach.vercel.app/vendor/register)
+
+---
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

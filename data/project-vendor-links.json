@@ -12,5 +12,19 @@
     "vendorId": "1b26bc04-0633-4c59-a948-ff899f21c8fd",
     "assignedAt": "2026-03-10T10:43:04.892Z",
     "note": ""
+  },
+  {
+    "id": "e7100951-98df-4139-abc4-9311c63176ab",
+    "projectId": "1773643614092",
+    "vendorId": "b29f510a-97f9-42c7-860e-831d1653add2",
+    "assignedAt": "2026-04-11T10:55:05.454Z",
+    "note": ""
+  },
+  {
+    "id": "60fdc01a-6e90-4d6a-bcb1-8a59f8869026",
+    "projectId": "1773643614092",
+    "vendorId": "3c541611-dc68-4595-aa43-b3b5b13dd38c",
+    "assignedAt": "2026-04-11T10:55:09.381Z",
+    "note": ""
   }
 ]

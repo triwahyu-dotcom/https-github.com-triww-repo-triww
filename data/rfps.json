@@ -299,5 +299,26 @@
       "accountName": "Muhammad Risa Farid Wajdi"
     },
     "notes": "[Termin 30%] \n\nRef. Document: 013/JBBS/PO/04/2026"
+  },
+  {
+    "id": "RFP-5HDKUW",
+    "documentIds": [
+      "013/JBBS/PO/04/2026"
+    ],
+    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
+    "projectName": "Center of Excellence PPKPI Pasar Rebo",
+    "payeeName": "Addiksi Kreatif Imagi",
+    "totalAmount": 20000000,
+    "requestDate": "2026-04-13T16:16:56.404Z",
+    "requiredDate": "2026-04-20T16:16:56.404Z",
+    "status": "pending_c_level",
+    "paymentType": "Transfer",
+    "bankAccount": {
+      "bankName": "BCA",
+      "accountNo": "4290532634",
+      "accountName": "Muhammad Risa Farid Wajdi"
+    },
+    "notes": "[DP 50%] \n\nRef. Document: 013/JBBS/PO/04/2026",
+    "terminLabel": "DP 50%"
   }
 ]

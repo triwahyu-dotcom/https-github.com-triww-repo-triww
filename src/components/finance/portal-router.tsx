@@ -6,7 +6,7 @@ import { ProjectRecord } from "@/lib/project/types";
 import { PMDashboard } from "./pm-dashboard";
 import { FinanceOpsDashboard } from "./finance-ops-dashboard";
 import { DirectorApprovals as DirectorDashboard } from "./director-dashboard";
-import { PurchasingDashboard } from "./purchasing-dashboard";
+import { ProcurementDashboard } from "./procurement-dashboard";
 
 interface Props {
   initialData: FinanceDashboardData;
@@ -32,8 +32,8 @@ export function FinancePortalRouter(props: Props) {
     return <DirectorDashboard initialData={props.initialData} />;
   }
 
-  if (role === "purchasing") {
-    return <PurchasingDashboard {...props} />;
+  if (role === "procurement") {
+    return <ProcurementDashboard {...props} />;
   }
 
   return <PMDashboard {...props} />;

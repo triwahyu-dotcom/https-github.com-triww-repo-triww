@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
@@ -11,6 +11,8 @@ import { POCreatorModal } from "./po-creator-modal";
 import { CashAdvanceModal } from "./cash-advance-modal";
 import { RfpFromDocModal } from "./rfp-from-doc-modal";
 import { SettlementModal } from "./settlement-modal";
+import { FilterBar } from "./filter-bar";
+import { updateDocStatus, updateRFPStatus } from "@/lib/finance/actions";
 
 interface Props {
   initialData: FinanceDashboardData;
@@ -33,31 +35,47 @@ const statusColors: Record<string, string> = {
   settled: "tone-green",
 };
 
-export function PurchasingDashboard({ initialData, activeProjects, availableVendors = [] }: Props) {
+export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [] }: Props) {
   const [activeTab, setActiveTab] = useState<"docs" | "rfps">("docs");
   const [showPOModal, setShowPOModal] = useState(false);
   const [showCAModal, setShowCAModal] = useState(false);
   const [selectedDocForRFP, setSelectedDocForRFP] = useState<ExpenseDocument | null>(null);
   const [selectedRfpForSettlement, setSelectedRfpForSettlement] = useState<RequestForPayment | null>(null);
+  const [viewProofUrl, setViewProofUrl] = useState<string | null>(null);
+  
+  const [editDocData, setEditDocData] = useState<ExpenseDocument | null>(null);
+  const [editRfpData, setEditRfpData] = useState<RequestForPayment | null>(null);
 
   const reload = () => window.location.reload();
 
-  // Docs that are approved and don't yet have an RFP
-  const docs = initialData.expenseDocuments || [];
-  const rfps = initialData.rfps || [];
+  // Docs and RFPs from initialData
+  const docs = useMemo(() => initialData.expenseDocuments || [], [initialData.expenseDocuments]);
+  const rfps = useMemo(() => initialData.rfps || [], [initialData.rfps]);
 
-  const pendingApprovalDocs = docs.filter(d => d.status === "draft" || d.status === "submitted");
+  const [filteredDocs, setFilteredDocs] = useState<ExpenseDocument[]>([]);
+  const [filteredRfps, setFilteredRfps] = useState<RequestForPayment[]>([]);
+
+  const pendingApprovalDocs = useMemo(() => docs.filter(d => d.status === "draft" || d.status === "submitted"), [docs]);
   
   // A doc is ready for RFP if it's approved and its total rfps amount < doc amount
-  const getDocRfps = (docId: string) => rfps.filter(r => r.documentIds.includes(docId));
-  const getDocTotalRfpAmount = (docId: string) => getDocRfps(docId).reduce((s, r) => s + r.totalAmount, 0);
+  const getDocRfps = useCallback((docId: string) => rfps.filter(r => r.documentIds.includes(docId)), [rfps]);
+  const getDocTotalRfpAmount = useCallback((docId: string) => getDocRfps(docId).reduce((s, r) => s + r.totalAmount, 0), [getDocRfps]);
 
-  const approvedDocs = docs.filter(d => {
-    if (d.status !== "approved") return false;
+  const readyForRfpDocs = useMemo(() => docs.filter(d => {
+    if (d.status !== "approved" && d.status !== "submitted") return false;
     const totalPaid = getDocTotalRfpAmount(d.id);
     return totalPaid < d.amount - 100; // Tolerance for rounding
-  });
-  const totalDocValue = docs.reduce((s, d) => s + d.amount, 0);
+  }), [docs, getDocTotalRfpAmount]);
+
+  const totalDocValue = useMemo(() => docs.reduce((s, d) => s + d.amount, 0), [docs]);
+
+  const handleFilterDocs = useCallback((items: ExpenseDocument[]) => {
+    setFilteredDocs(items);
+  }, []);
+
+  const handleFilterRfps = useCallback((items: RequestForPayment[]) => {
+    setFilteredRfps(items);
+  }, []);
 
   const headerActions = (
     <div className="workspace-actions" style={{ display: "flex", gap: "10px" }}>
@@ -69,20 +87,20 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
   return (
     <WorkspaceShell
       title="Procurement Cockpit"
-      eyebrow="Purchasing Workspace"
+      eyebrow="Procurement Workspace"
       actions={headerActions}
     >
       {/* Summary Cards */}
       <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px" }}>
         <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon="📋" />
         <SummaryCard label="Menunggu Approve" value={String(pendingApprovalDocs.length)} description="Belum ditandatangani Director" icon="⏳" />
-        <SummaryCard label="Siap Buat RFP" value={String(approvedDocs.length)} description="Approved, belum ada RFP" icon="✅" />
+        <SummaryCard label="Siap Buat RFP" value={String(readyForRfpDocs.length)} description="Submitted/Approved, belum ada RFP" icon="✅" />
         <SummaryCard label="Total Nilai Dokumen" value={formatCurrencyIDR(totalDocValue)} description="Semua dokumen aktif" icon="💰" />
       </section>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "4px", marginBottom: "20px", background: "var(--panel-soft)", padding: "4px", borderRadius: "10px", width: "fit-content" }}>
-        <button onClick={() => setActiveTab("docs")} style={{ padding: "8px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "13px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)", boxShadow: activeTab === "docs" ? "0 1px 3px rgba(0,0,0,0.2)" : "none" }}>
+      <div style={{ display: "flex", gap: "2px", marginBottom: "16px", background: "var(--panel-soft)", padding: "3px", borderRadius: "8px", width: "fit-content", border: "1px solid var(--line)" }}>
+        <button onClick={() => setActiveTab("docs")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)" }}>
           📄 Dokumen Pengadaan ({docs.length})
         </button>
         <button onClick={() => setActiveTab("rfps")} style={{ padding: "8px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "13px", background: activeTab === "rfps" ? "var(--panel)" : "transparent", color: activeTab === "rfps" ? "var(--text)" : "var(--muted)", boxShadow: activeTab === "rfps" ? "0 1px 3px rgba(0,0,0,0.2)" : "none" }}>
@@ -95,10 +113,12 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
         <div className="panel">
           <div className="panel-kicker">Semua Dokumen Pengadaan</div>
           {pendingApprovalDocs.length > 0 && (
-            <div style={{ margin: "12px 0", padding: "12px 16px", background: "rgba(234,179,8,0.08)", border: "1px solid rgba(234,179,8,0.2)", borderRadius: "8px", fontSize: "13px", color: "#ca8a04" }}>
+            <div style={{ margin: "10px 0", padding: "10px 14px", background: "rgba(99,102,241,0.05)", border: "1px solid var(--line-strong)", borderRadius: "6px", fontSize: "12px", color: "var(--blue)" }}>
               ⏳ {pendingApprovalDocs.length} dokumen menunggu approval dari Director
             </div>
           )}
+          <FilterBar items={docs} type="docs" onFilter={handleFilterDocs} />
+
           <div className="table-shell" style={{ marginTop: "16px" }}>
             <div className="project-table" style={{ minWidth: "900px" }}>
               <div className="table-row table-head" style={{ gridTemplateColumns: "1.8fr 1.5fr 1.2fr 1fr 1fr 1.4fr" }}>
@@ -109,12 +129,12 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
                 <div>Nilai</div>
                 <div style={{ textAlign: "right" }}>Status & Aksi</div>
               </div>
-              {docs.length === 0 ? (
+              {filteredDocs.length === 0 ? (
                 <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
                   <div style={{ fontSize: "24px", marginBottom: "12px" }}>📄</div>
-                  Belum ada dokumen. Klik "+ New PO / SPK / Kontrak" untuk mulai.
+                  Tidak ada dokumen yang sesuai dengan filter.
                 </div>
-              ) : docs.map(doc => (
+              ) : filteredDocs.map(doc => (
                 <div key={doc.id} className="table-row" style={{ gridTemplateColumns: "1.8fr 1.5fr 1.2fr 1fr 1fr 1.4fr", alignItems: "center" }}>
                   <div>
                     <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600 }}>{doc.id}</div>
@@ -123,14 +143,46 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
                   <div>{doc.vendorName}</div>
                   <div style={{ fontSize: "12px" }}>{doc.projectName}</div>
                   <div>
-                    <span className="status-pill" style={{ background: "rgba(91,140,255,0.15)", color: "var(--blue)" }}>{docTypeLabel[doc.documentType]}</span>
+                    <span className="status-pill" style={{ background: "rgba(99,102,241,0.1)", color: "var(--blue)" }}>{docTypeLabel[doc.documentType]}</span>
                   </div>
                   <div style={{ fontWeight: 700 }}>{formatCurrencyIDR(doc.amount)}</div>
                   <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
                     <span className={`status-pill ${statusColors[doc.status] || "tone-amber"}`}>
                       {doc.status.toUpperCase()}
                     </span>
-                    {doc.status === "approved" && (() => {
+                    {doc.rejectionReason && (
+                      <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
+                        ⚠️ {doc.rejectionReason}
+                      </div>
+                    )}
+                    {doc.status === "draft" && (
+                      <button 
+                        onClick={() => {
+                          if (doc.documentType === "CASH_ADVANCE") setEditDocData(doc);
+                          else setEditDocData(doc);
+                          // Actually editDocData works for both, but we need to know which modal to open
+                        }} 
+                        className="secondary-button" 
+                        style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
+                      >
+                        Edit & Fix
+                      </button>
+                    )}
+                    {doc.status === "submitted" && (
+                      <button 
+                        onClick={async () => {
+                          if (confirm("Tarik kembali dokumen ini untuk diperbaiki?")) {
+                            await updateDocStatus(doc.id, "draft");
+                            reload();
+                          }
+                        }}
+                        className="secondary-button"
+                        style={{ fontSize: "10px", height: "24px", padding: "0 8px" }}
+                      >
+                        ↩ Tarik
+                      </button>
+                    )}
+                    {(doc.status === "approved" || doc.status === "submitted") && (() => {
                       const docRfps = getDocRfps(doc.id);
                       const totalPaid = docRfps.reduce((s, r) => s + r.totalAmount, 0);
                       const isFullyRequested = totalPaid >= doc.amount - 100;
@@ -173,6 +225,8 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
       {activeTab === "rfps" && (
         <div className="panel">
           <div className="panel-kicker">Request For Payment — Tracking</div>
+          <FilterBar items={rfps} type="rfps" onFilter={handleFilterRfps} />
+
           <div className="table-shell" style={{ marginTop: "16px" }}>
             <div className="project-table" style={{ minWidth: "900px" }}>
               <div className="table-row table-head" style={{ gridTemplateColumns: "1.2fr 1.5fr 1.5fr 1fr 1.6fr" }}>
@@ -182,12 +236,12 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
                 <div>Nominal</div>
                 <div style={{ textAlign: "right" }}>Status & Aksi</div>
               </div>
-              {rfps.length === 0 ? (
+              {filteredRfps.length === 0 ? (
                 <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
                   <div style={{ fontSize: "24px", marginBottom: "12px" }}>💳</div>
-                  Belum ada RFP. Approve dokumen terlebih dahulu, lalu klik "Buat RFP".
+                  Tidak ada RFP yang sesuai dengan filter.
                 </div>
-              ) : rfps.map(rfp => (
+              ) : filteredRfps.map(rfp => (
                 <div key={rfp.id} className="table-row" style={{ gridTemplateColumns: "1.2fr 1.5fr 1.5fr 1fr 1.6fr", alignItems: "center" }}>
                   <div style={{ fontFamily: "monospace", fontSize: "12px" }}>#{rfp.id.substring(0, 10)}</div>
                   <div>
@@ -203,6 +257,43 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
                     }`}>
                       {rfp.status.replace(/_/g, " ").toUpperCase()}
                     </span>
+                    {rfp.rejectionReason && (
+                      <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
+                        ⚠️ {rfp.rejectionReason}
+                      </div>
+                    )}
+                    {rfp.status === "draft" && (
+                      <button 
+                        onClick={() => setEditRfpData(rfp)} 
+                        className="secondary-button" 
+                        style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
+                      >
+                        Edit & Fix
+                      </button>
+                    )}
+                    {(rfp.status === "pending_c_level" || rfp.status === "pending_finance") && (
+                      <button 
+                        onClick={async () => {
+                          if (confirm("Tarik kembali RFP ini untuk diperbaiki?")) {
+                            await updateRFPStatus(rfp.id, "draft");
+                            reload();
+                          }
+                        }}
+                        className="secondary-button"
+                        style={{ fontSize: "10px", height: "24px", padding: "0 8px" }}
+                      >
+                        ↩ Tarik
+                      </button>
+                    )}
+                    {rfp.paymentProofUrl && (
+                      <button 
+                        className="secondary-button" 
+                        style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)" }}
+                        onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
+                      >
+                        👁️ Bukti
+                      </button>
+                    )}
                     {rfp.status === "paid" && rfp.paymentType === "Cash" && (
                       <button className="primary-button" style={{ padding: "4px 12px", fontSize: "11px", height: "auto", minHeight: "auto" }} onClick={() => setSelectedRfpForSettlement(rfp)}>
                         Settle
@@ -220,29 +311,32 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
       )}
 
       {/* Modals */}
-      {showPOModal && (
+      {(showPOModal || (editDocData && editDocData.documentType !== "CASH_ADVANCE")) && (
         <POCreatorModal
           activeProjects={activeProjects}
           availableVendors={availableVendors}
-          onClose={() => setShowPOModal(false)}
-          onSuccess={() => { setShowPOModal(false); reload(); }}
+          editDoc={editDocData && editDocData.documentType !== "CASH_ADVANCE" ? editDocData : undefined}
+          onClose={() => { setShowPOModal(false); setEditDocData(null); }}
+          onSuccess={() => { setShowPOModal(false); setEditDocData(null); reload(); }}
         />
       )}
-      {showCAModal && (
+      {(showCAModal || (editDocData && editDocData.documentType === "CASH_ADVANCE")) && (
         <CashAdvanceModal
           activeProjects={activeProjects}
           availableVendors={availableVendors}
-          onClose={() => setShowCAModal(false)}
-          onSuccess={() => { setShowCAModal(false); reload(); }}
+          editDoc={editDocData && editDocData.documentType === "CASH_ADVANCE" ? editDocData : undefined}
+          onClose={() => { setShowCAModal(false); setEditDocData(null); }}
+          onSuccess={() => { setShowCAModal(false); setEditDocData(null); reload(); }}
         />
       )}
-      {selectedDocForRFP && (
+      {(selectedDocForRFP || editRfpData) && (
         <RfpFromDocModal
-          doc={selectedDocForRFP}
+          doc={selectedDocForRFP || docs.find(d => d.id === editRfpData?.documentIds[0])!}
+          editRfp={editRfpData || undefined}
           allRfps={rfps}
           availableVendors={availableVendors}
-          onClose={() => setSelectedDocForRFP(null)}
-          onSuccess={() => { setSelectedDocForRFP(null); reload(); }}
+          onClose={() => { setSelectedDocForRFP(null); setEditRfpData(null); }}
+          onSuccess={() => { setSelectedDocForRFP(null); setEditRfpData(null); reload(); }}
         />
       )}
       {selectedRfpForSettlement && (
@@ -251,6 +345,19 @@ export function PurchasingDashboard({ initialData, activeProjects, availableVend
           isOpen={true}
           onClose={() => setSelectedRfpForSettlement(null)}
         />
+      )}
+
+      {/* Proof Lightbox */}
+      {viewProofUrl && (
+        <div 
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}
+          onClick={() => setViewProofUrl(null)}
+        >
+          <div style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
+            <button style={{ position: "absolute", top: "-40px", right: "0", background: "none", border: "none", color: "white", fontSize: "24px", cursor: "pointer" }}>&times; Tutup</button>
+            <img src={viewProofUrl} alt="Bukti Transfer" style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: "8px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }} />
+          </div>
+        </div>
       )}
     </WorkspaceShell>
   );

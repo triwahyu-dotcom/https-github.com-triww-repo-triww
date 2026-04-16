@@ -1,0 +1,35 @@
+Retrieving project…
+Deploying triwahyu-6814s-projects/vendor-management-app
+Uploading [--------------------] (0.0B/33.6KB)
+Uploading [======--------------] (10.5KB/33.6KB)
+Uploading [===============-----] (26.5KB/33.6KB)
+Uploading [====================] (33.6KB/33.6KB)
+Inspect: https://vercel.com/triwahyu-6814s-projects/vendor-management-app/DMwd8MFxv7q8DRyU1YrEV2eu3pdk [8s]
+Production: https://vendor-management-etuh19mrf-triwahyu-6814s-projects.vercel.app [8s]
+Building...
+Building...
+[2K[1A[2K[GProduction: https://vendor-management-etuh19mrf-triwahyu-6814s-projects.vercel.app [1m]
+Completing...
+Aliased: https://vendor-management-app-peach.vercel.app [1m]
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_DMwd8MFxv7q8DRyU1YrEV2eu3pdk",
+    "url": "https://vendor-management-etuh19mrf-triwahyu-6814s-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/triwahyu-6814s-projects/vendor-management-app/DMwd8MFxv7q8DRyU1YrEV2eu3pdk",
+    "readyState": "READY",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_DMwd8MFxv7q8DRyU1YrEV2eu3pdk"
+  },
+  "message": "Deployment vendor-management-etuh19mrf-triwahyu-6814s-projects.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect vendor-management-etuh19mrf-triwahyu-6814s-projects.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

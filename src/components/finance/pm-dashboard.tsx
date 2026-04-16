@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { FinanceDashboardData, ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
 import { SummaryCard } from "../ui/summary-card";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
+import { FilterBar } from "./filter-bar";
 
 interface Props {
   initialData: FinanceDashboardData;
@@ -34,15 +35,28 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
     activeProjects[0]?.id ?? null
   );
 
-  const docs = initialData.expenseDocuments || [];
-  const rfps = initialData.rfps || [];
+  const docs = useMemo(() => initialData.expenseDocuments || [], [initialData.expenseDocuments]);
+  const rfps = useMemo(() => initialData.rfps || [], [initialData.rfps]);
 
-  const selectedProject = activeProjects.find(p => p.id === selectedProjectId);
-  const projectDocs = docs.filter(d => d.projectId === selectedProjectId);
-  const projectRfps = rfps.filter(r => r.projectId === selectedProjectId);
+  const selectedProject = useMemo(() => activeProjects.find(p => p.id === selectedProjectId), [activeProjects, selectedProjectId]);
+  const projectDocs = useMemo(() => docs.filter(d => d.projectId === selectedProjectId), [docs, selectedProjectId]);
+  const projectRfps = useMemo(() => rfps.filter(r => r.projectId === selectedProjectId), [rfps, selectedProjectId]);
 
-  const totalApproved = rfps.filter(r => r.status === "approved" || r.status === "paid" || r.status === "settled").reduce((s, r) => s + r.totalAmount, 0);
-  const totalPending = rfps.filter(r => r.status !== "paid" && r.status !== "settled").reduce((s, r) => s + r.totalAmount, 0);
+  const totalApproved = useMemo(() => rfps.filter(r => r.status === "approved" || r.status === "paid" || r.status === "settled").reduce((s, r) => s + r.totalAmount, 0), [rfps]);
+  const totalPending = useMemo(() => rfps.filter(r => r.status !== "paid" && r.status !== "settled").reduce((s, r) => s + r.totalAmount, 0), [rfps]);
+
+  const [filteredProjectDocs, setFilteredProjectDocs] = useState<ExpenseDocument[]>([]);
+  const [filteredProjectRfps, setFilteredProjectRfps] = useState<RequestForPayment[]>([]);
+  const [viewProofUrl, setViewProofUrl] = useState<string | null>(null);
+
+  const handleFilter = useCallback((items: any[]) => {
+    const d = items.filter(i => "documentType" in i);
+    const r = items.filter(i => !("documentType" in i));
+    setFilteredProjectDocs(d);
+    setFilteredProjectRfps(r);
+  }, []);
+
+  const combinedItems = useMemo(() => [...projectDocs, ...projectRfps], [projectDocs, projectRfps]);
 
   const headerActions = (
     <div className="workspace-actions">
@@ -58,7 +72,6 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
       eyebrow="PM Workspace (Read-Only)"
       actions={headerActions}
     >
-      {/* Summary */}
       <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px" }}>
         <SummaryCard label="My Projects" value={String(activeProjects.length)} description="Active executions" icon="📂" />
         <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon="📄" />
@@ -68,7 +81,6 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
 
       <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "20px", alignItems: "start" }}>
 
-        {/* Left: Project selector */}
         <div className="panel" style={{ padding: "16px" }}>
           <div className="panel-kicker" style={{ marginBottom: "12px" }}>Pilih Project</div>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -102,11 +114,9 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
           </div>
         </div>
 
-        {/* Right: Project detail */}
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {selectedProject ? (
             <>
-              {/* Project info header */}
               <div className="panel" style={{ padding: "20px 24px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
@@ -121,7 +131,15 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                 </div>
               </div>
 
-              {/* Documents for this project */}
+              <div style={{ marginBottom: "16px" }}>
+                <FilterBar 
+                  items={combinedItems} 
+                  type="rfps" 
+                  onFilter={handleFilter}
+                  placeholder="Cari dalam project ini..."
+                />
+              </div>
+
               <div className="panel">
                 <div className="panel-kicker">Dokumen Pengadaan</div>
                 <div className="table-shell" style={{ marginTop: "12px" }}>
@@ -133,11 +151,11 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                       <div>Nilai</div>
                       <div style={{ textAlign: "right" }}>Status & Aksi</div>
                     </div>
-                    {projectDocs.length === 0 ? (
+                    {filteredProjectDocs.length === 0 ? (
                       <div style={{ padding: "32px", textAlign: "center", color: "var(--muted-soft)", fontSize: "13px" }}>
-                        Belum ada dokumen untuk project ini.
+                        Tidak ada dokumen yang sesuai filter.
                       </div>
-                    ) : projectDocs.map(doc => {
+                    ) : filteredProjectDocs.map(doc => {
                       const s = statusLabel[doc.status] ?? { text: doc.status, tone: "tone-amber" };
                       return (
                         <div key={doc.id} className="table-row" style={{ gridTemplateColumns: "1.8fr 1.2fr 0.8fr 1fr 1.4fr", alignItems: "center" }}>
@@ -150,6 +168,11 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                           <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(doc.amount)}</div>
                           <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
                             <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px" }}>{s.text}</span>
+                            {doc.rejectionReason && (
+                              <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600 }}>
+                                ⚠️ {doc.rejectionReason}
+                              </div>
+                            )}
                             {(doc.status === "approved" || doc.status === "paid") && (
                               <button
                                 className="secondary-button"
@@ -167,7 +190,6 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                 </div>
               </div>
 
-              {/* RFPs for this project */}
               <div className="panel">
                 <div className="panel-kicker">Request For Payment (RFP)</div>
                 <div className="table-shell" style={{ marginTop: "12px" }}>
@@ -179,11 +201,11 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                       <div>Nominal</div>
                       <div style={{ textAlign: "right" }}>Status & Aksi</div>
                     </div>
-                    {projectRfps.length === 0 ? (
+                    {filteredProjectRfps.length === 0 ? (
                       <div style={{ padding: "32px", textAlign: "center", color: "var(--muted-soft)", fontSize: "13px" }}>
-                        Belum ada RFP untuk project ini.
+                        Tidak ada RFP yang sesuai filter.
                       </div>
-                    ) : projectRfps.map(rfp => {
+                    ) : filteredProjectRfps.map(rfp => {
                       const s = statusLabel[rfp.status] ?? { text: rfp.status.replace(/_/g, " ").toUpperCase(), tone: "tone-amber" };
                       return (
                         <div key={rfp.id} className="table-row" style={{ gridTemplateColumns: "1.2fr 1.5fr 0.8fr 1fr 1.4fr", alignItems: "center" }}>
@@ -193,6 +215,20 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                           <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
                           <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
                             <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px" }}>{s.text}</span>
+                            {rfp.rejectionReason && (
+                              <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600 }}>
+                                ⚠️ {rfp.rejectionReason}
+                              </div>
+                            )}
+                            {rfp.paymentProofUrl && (
+                              <button 
+                                className="secondary-button" 
+                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)" }}
+                                onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
+                              >
+                                👁️ Bukti
+                              </button>
+                            )}
                             {(rfp.status === "approved" || rfp.status === "paid") && (
                               <button
                                 className="secondary-button"
@@ -217,6 +253,18 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
           )}
         </div>
       </div>
+
+      {viewProofUrl && (
+        <div 
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}
+          onClick={() => setViewProofUrl(null)}
+        >
+          <div style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
+            <button style={{ position: "absolute", top: "-40px", right: "0", background: "none", border: "none", color: "white", fontSize: "24px", cursor: "pointer" }}>&times; Tutup</button>
+            <img src={viewProofUrl} alt="Bukti Transfer" style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: "8px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }} />
+          </div>
+        </div>
+      )}
     </WorkspaceShell>
   );
 }

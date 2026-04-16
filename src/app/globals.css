@@ -1,19 +1,19 @@
 :root {
-  --bg: #111111;
-  --panel: #18181b;
-  --panel-soft: #232327;
-  --panel-hover: #2b2b31;
-  --line: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.12);
-  --text: #fbfbfc;
-  --muted: #c7c7ce;
-  --muted-soft: #9999a5;
-  --blue: #5b8cff;
-  --green: #4ecb71;
-  --amber: #ffca45;
-  --red: #ff7f7f;
-  --slate: #8a8a98;
-  --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+  --bg: #09090b;
+  --panel: #121216;
+  --panel-soft: #1c1c22;
+  --panel-hover: #23232a;
+  --line: rgba(255, 255, 255, 0.05);
+  --line-strong: rgba(255, 255, 255, 0.1);
+  --text: #fafafa;
+  --muted: #a1a1aa;
+  --muted-soft: #71717a;
+  --blue: #6366f1;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --slate: #64748b;
+  --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
 }
 
 :root[data-theme="light"] {
@@ -109,22 +109,22 @@ button {
 .form-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 24px;
+  gap: 16px;
 }
 
 .form-grid-3 {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  gap: 24px;
+  gap: 16px;
 }
 
 .form-section-title {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--blue);
-  margin: 32px 0 16px;
+  margin: 20px 0 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid var(--line);
 }
@@ -153,18 +153,17 @@ button {
 .board-column {
   border: 1px solid var(--line);
   background: var(--panel);
-  box-shadow: var(--shadow);
 }
 
 .workspace-topbar {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
-  padding: 10px 14px;
-  border-radius: 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .workspace-breadcrumbs,
@@ -194,14 +193,11 @@ button {
 }
 
 .page-cover {
-  height: 220px;
-  border-radius: 18px;
-  border: 1px solid var(--line);
   background:
-    radial-gradient(circle at 68% 34%, rgba(91, 140, 255, 0.26), transparent 18%),
-    radial-gradient(circle at 24% 70%, rgba(78, 203, 113, 0.18), transparent 18%),
-    radial-gradient(circle at 82% 66%, rgba(255, 102, 196, 0.14), transparent 18%),
-    linear-gradient(135deg, #17171a 0%, #0f0f11 56%, #151519 100%);
+    radial-gradient(circle at 68% 34%, rgba(99, 102, 241, 0.2), transparent 18%),
+    radial-gradient(circle at 24% 70%, rgba(34, 197, 94, 0.12), transparent 18%),
+    radial-gradient(circle at 82% 66%, rgba(245, 158, 11, 0.08), transparent 18%),
+    linear-gradient(135deg, #09090b 0%, #0c0c0e 56%, #121216 100%);
 }
 
 :root[data-theme="light"] .page-cover {
@@ -417,8 +413,8 @@ button {
 .workflow-card,
 .feature-panel,
 .warning-card {
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 6px;
+  padding: 8px 12px;
 }
 
 .section-card span,
@@ -464,8 +460,8 @@ button {
 }
 
 .panel {
-  border-radius: 18px;
-  padding: 18px;
+  border-radius: 6px;
+  padding: 12px;
 }
 
 .table-shell {
@@ -480,9 +476,9 @@ button {
 .table-row {
   display: grid;
   grid-template-columns: 20px 2fr 1fr 1fr 1.5fr 0.5fr 0.5fr; /* Match the data row structure */
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-bottom: 1px solid var(--line);
   color: var(--text-main) !important; /* Force high visibility */
   text-align: left;
@@ -587,9 +583,9 @@ button {
 .activity-card {
   width: 100%;
   text-align: left;
-  border-radius: 12px;
-  padding: 12px 14px;
-  background: linear-gradient(180deg, #212126 0%, #1b1b20 100%);
+  border-radius: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(180deg, #121216 0%, #0c0c0e 100%);
   color: var(--text);
 }
 
@@ -750,8 +746,8 @@ button {
 }
 
 .section-pill {
-  background: rgba(91, 140, 255, 0.16);
-  color: #cfd9ff;
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
 }
 
 .tone-green {
@@ -1116,10 +1112,9 @@ button {
 .modal-card {
   width: min(860px, 100%);
   border: 1px solid var(--line-strong);
-  border-radius: 18px;
+  border-radius: 8px;
   background: var(--panel);
-  box-shadow: var(--shadow);
-  padding: 22px;
+  padding: 16px;
 }
 
 .modal-controls {
@@ -1154,13 +1149,13 @@ button {
 }
 
 .hub-hero {
-  padding: 36px;
+  padding: 24px;
   border: 1px solid var(--line);
-  border-radius: 22px;
+  border-radius: 12px;
   background:
-    radial-gradient(circle at top right, rgba(59, 130, 246, 0.2), transparent 25%),
-    radial-gradient(circle at bottom left, rgba(80, 185, 124, 0.18), transparent 24%),
-    linear-gradient(135deg, #171717, #121212);
+    radial-gradient(circle at top right, rgba(99, 102, 241, 0.15), transparent 25%),
+    radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.1), transparent 24%),
+    linear-gradient(135deg, #09090b, #121216);
 }
 
 .hub-kicker {
@@ -1191,11 +1186,11 @@ button {
 
 .hub-card {
   display: grid;
-  gap: 10px;
-  min-height: 220px;
-  padding: 22px;
+  gap: 8px;
+  min-height: 180px;
+  padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: 8px;
   background: var(--panel);
 }
 
@@ -1299,8 +1294,8 @@ button {
 
 .pm-sidebar {
   border-right: 1px solid var(--line);
-  background: #10131d;
-  padding: 16px 12px;
+  background: #09090b;
+  padding: 12px 10px;
   display: grid;
   gap: 18px;
   align-content: start;
@@ -1365,14 +1360,14 @@ button {
 .pm-sidebar-item {
   border: 1px solid transparent;
   background: transparent;
-  color: #d8deef;
-  border-radius: 10px;
+  color: #a1a1aa;
+  border-radius: 6px;
   text-align: left;
-  padding: 8px 10px;
+  padding: 6px 10px;
   font-size: 13px;
   display: flex;
   align-items: center;
-  transition: background 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
   overflow: hidden;
 }
@@ -1410,8 +1405,8 @@ button {
 }
 
 .pm-sidebar-item.active {
-  border-color: rgba(94, 144, 255, 0.45);
-  background: rgba(94, 144, 255, 0.16);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.1);
   color: #ffffff;
 }
 

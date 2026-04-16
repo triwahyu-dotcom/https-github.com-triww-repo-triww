@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProjectRecord } from "@/lib/project/types";
+import { ExpenseDocument } from "@/lib/finance/types";
 import { formatCurrencyIDR } from "@/lib/utils/format";
 
 interface CaLine {
@@ -12,11 +13,12 @@ interface CaLine {
 interface Props {
   activeProjects: ProjectRecord[];
   availableVendors?: any[];
+  editDoc?: ExpenseDocument;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function CashAdvanceModal({ activeProjects, availableVendors = [], onClose, onSuccess }: Props) {
+export function CashAdvanceModal({ activeProjects, availableVendors = [], editDoc, onClose, onSuccess }: Props) {
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -47,6 +49,22 @@ export function CashAdvanceModal({ activeProjects, availableVendors = [], onClos
   // Line items
   const [lines, setLines] = useState<CaLine[]>([{ description: "", amount: 0 }]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Handle Edit Mode
+  useEffect(() => {
+    if (editDoc) {
+      const proj = activeProjects.find(p => p.id === editDoc.projectId);
+      if (proj) setSelectedProject(proj);
+      setPayTo(editDoc.vendorName);
+      setDescription(editDoc.description || "");
+      // Bank info for CA is often in bankAccount field
+      setBankName((editDoc as any).bankAccount?.bankName || "");
+      setAccountNo((editDoc as any).bankAccount?.accountNo || "");
+      setAccountName((editDoc as any).bankAccount?.accountName || "");
+      setLines(editDoc.lineItems?.map(l => ({ description: l.description, amount: l.amount })) || [{ description: "", amount: 0 }]);
+      setStep(2);
+    }
+  }, [editDoc, activeProjects]);
 
   const total = lines.reduce((s, l) => s + (Number(l.amount) || 0), 0);
 
@@ -82,9 +100,10 @@ export function CashAdvanceModal({ activeProjects, availableVendors = [], onClos
       }));
 
       const res = await fetch("/api/finance/document", {
-        method: "POST",
+        method: editDoc ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: editDoc?.id, // Only for PATCH
           projectId: selectedProject.id,
           documentType: "CASH_ADVANCE",
           vendorName: payTo,

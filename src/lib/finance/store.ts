@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import path from "node:path";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 import { ExpenseDocument, RequestForPayment, FinanceDashboardData } from "./types";
 import { getProjectDashboardData } from "../project/store";
 
@@ -14,6 +15,13 @@ function ensureDataDir() {
 }
 
 export async function readDocuments(): Promise<ExpenseDocument[]> {
+  if (isSupabaseConfigured()) {
+    const { data, error } = await supabase!.from('finance_documents').select('data');
+    if (!error && data) {
+      return data.map(item => item.data);
+    }
+  }
+
   if (existsSync(DOCS_PATH)) {
     try {
       return JSON.parse(readFileSync(DOCS_PATH, "utf-8"));
@@ -25,6 +33,13 @@ export async function readDocuments(): Promise<ExpenseDocument[]> {
 }
 
 export async function readRFPs(): Promise<RequestForPayment[]> {
+  if (isSupabaseConfigured()) {
+    const { data, error } = await supabase!.from('finance_rfps').select('data');
+    if (!error && data) {
+      return data.map(item => item.data);
+    }
+  }
+
   if (existsSync(RFPS_PATH)) {
     try {
       return JSON.parse(readFileSync(RFPS_PATH, "utf-8"));
@@ -56,6 +71,12 @@ export async function getFinanceDashboardData(): Promise<FinanceDashboardData> {
 }
 
 export async function saveDocument(doc: ExpenseDocument) {
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('finance_documents').upsert({ id: doc.id, data: doc });
+    if (error) console.error("Supabase finance document update error:", error.message);
+    return;
+  }
+
   ensureDataDir();
   const docs = await readDocuments();
   const index = docs.findIndex(d => d.id === doc.id);
@@ -68,6 +89,12 @@ export async function saveDocument(doc: ExpenseDocument) {
 }
 
 export async function saveRFP(rfp: RequestForPayment) {
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('finance_rfps').upsert({ id: rfp.id, data: rfp });
+    if (error) console.error("Supabase finance RFP update error:", error.message);
+    return;
+  }
+
   ensureDataDir();
   const rfps = await readRFPs();
   const index = rfps.findIndex(r => r.id === rfp.id);

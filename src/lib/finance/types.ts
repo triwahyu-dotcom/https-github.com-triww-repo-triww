@@ -45,6 +45,7 @@ export interface ExpenseDocument {
   shipTo?: string;
   billingInstruction?: string;
   billingTerms?: string[];
+  notes?: string;
   
   // SPK Specific fields
   workScope?: string[];
@@ -54,6 +55,7 @@ export interface ExpenseDocument {
   preparedBy?: { name: string; date: string };
   verifiedBy?: { name: string; date: string };
   approvedBy?: { name: string; date: string; digitalSignature?: string };
+  rejectionReason?: string;
 }
 
 export interface RequestForPayment {
@@ -81,6 +83,11 @@ export interface RequestForPayment {
     settlementDate: string;
     items: LineItem[];
   };
+  paymentProofUrl?: string;
+  vendorInvoiceUrl?: string;
+  financeApprovedBy?: { name: string; date: string; signature?: string };
+  cLevelApprovedBy?: { name: string; date: string; signature?: string };
+  rejectionReason?: string;
 }
 
 export interface FinanceDashboardData {

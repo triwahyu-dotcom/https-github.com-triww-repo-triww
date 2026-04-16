@@ -85,7 +85,7 @@ export function WorkspaceShell({
             }}
             defaultValue={typeof window !== 'undefined' ? localStorage.getItem("pm-role") || "pm" : "pm"}
           >
-            <option value="purchasing">Purchasing Division (PO Maker)</option>
+            <option value="procurement">Procurement Division (PO Maker)</option>
             <option value="pm">Project Manager (Viewer)</option>
             <option value="finance">Finance Admin</option>
             <option value="director">Director (C-Level)</option>

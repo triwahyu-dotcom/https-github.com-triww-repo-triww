@@ -69,11 +69,11 @@ export function PrintLayout({ rfp, doc }: Props) {
   const rfpPreparedByName = doc?.preparedBy?.name || "Project Officer";
   const rfpPreparedByDate = doc?.preparedBy?.date ? formatDateID(doc?.preparedBy?.date) : today;
   
-  const rfpVerifiedByName = doc?.verifiedBy?.name || "Finance Admin";
-  const rfpVerifiedByDate = doc?.verifiedBy?.date ? formatDateID(doc?.verifiedBy?.date) : today;
+  const rfpVerifiedByName = rfp?.financeApprovedBy?.name || doc?.verifiedBy?.name || "Finance Admin";
+  const rfpVerifiedByDate = rfp?.financeApprovedBy?.date ? formatDateID(rfp.financeApprovedBy.date) : (doc?.verifiedBy?.date ? formatDateID(doc.verifiedBy.date) : today);
   
-  const rfpApprovedByName = doc?.approvedBy?.name || "Eka Marutha Yuswardana";
-  const rfpApprovedByDate = doc?.approvedBy?.date ? formatDateID(doc?.approvedBy?.date) : today;
+  const rfpApprovedByName = rfp?.cLevelApprovedBy?.name || doc?.approvedBy?.name || "Eka Marutha Yuswardana";
+  const rfpApprovedByDate = rfp?.cLevelApprovedBy?.date ? formatDateID(rfp.cLevelApprovedBy.date) : (doc?.approvedBy?.date ? formatDateID(doc.approvedBy.date) : today);
 
   const docTypeLabel: Record<string, string> = {
     "PO": "Purchase Order",
@@ -405,6 +405,9 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <p style={{ margin: '2px 0' }}>3. Report Dokumentasi</p>
                       </>
                    )}
+                   {rfp?.vendorInvoiceUrl && (
+                      <p style={{ margin: '2px 0' }}>4. Invoice Vendor (Attached in System)</p>
+                   )}
                 </div>
              </div>
           </div>
@@ -423,10 +426,10 @@ export function PrintLayout({ rfp, doc }: Props) {
              </div>
              <div className="signature-box" style={{ borderLeft: 'none', position: 'relative' }}>
                 <div>Approved by:</div>
-                 {doc.approvedBy?.digitalSignature && (
+                 {(rfp?.cLevelApprovedBy?.signature || doc?.approvedBy?.digitalSignature) && (
                     <div style={{ position: 'absolute', top: '-15px', left: '10px', right: '10px', border: '1.5px solid #2563eb', padding: '10px 4px', borderRadius: '4px', transform: 'rotate(-5deg)', background: 'rgba(255, 255, 255, 0.98)', color: '#1e40af', textAlign: 'center', pointerEvents: 'none', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <div style={{ fontFamily: 'var(--font-signature)', fontSize: '24px', lineHeight: 1, marginBottom: '4px', fontWeight: 'normal' }}>{rfpApprovedByName}</div>
-                       <div style={{ fontSize: '7px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', opacity: 0.8 }}>E-SIGNATURE VERIFIED • {doc.approvedBy.digitalSignature}</div>
+                       <div style={{ fontSize: '7px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', opacity: 0.8 }}>E-SIGNATURE VERIFIED • {rfp?.cLevelApprovedBy?.signature || doc.approvedBy.digitalSignature}</div>
                     </div>
                  )}
                 <div style={{ fontWeight: 'bold', marginTop: doc.approvedBy?.digitalSignature ? '20px' : '0' }}>{rfpApprovedByName}</div>

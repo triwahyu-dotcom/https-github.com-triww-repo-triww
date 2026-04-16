@@ -1,18 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { ExpenseDocument } from "@/lib/finance/types";
+import { useState, useEffect } from "react";
+import { ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
 import { formatCurrencyIDR } from "@/lib/utils/format";
 
 interface Props {
   doc: ExpenseDocument;
+  editRfp?: RequestForPayment;
   allRfps?: any[];
   availableVendors?: any[];
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export function RfpFromDocModal({ doc, allRfps = [], availableVendors, onClose, onSuccess }: Props) {
+export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, onClose, onSuccess }: Props) {
   const isCA = doc.documentType === "CASH_ADVANCE";
 
   const [selectedTermRatio, setSelectedTermRatio] = useState<"100" | "50" | "30" | "20" | "custom">("100");
@@ -22,9 +23,25 @@ export function RfpFromDocModal({ doc, allRfps = [], availableVendors, onClose, 
   const [bankName, setBankName] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountName, setAccountName] = useState("");
-  const [notes, setNotes] = useState("");
   const [requiredDate, setRequiredDate] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notes, setNotes] = useState("");
+  const [invoiceFile, setInvoiceFile] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Handle Edit RFP Mode
+  useEffect(() => {
+    if (editRfp) {
+      setRfpAmount(editRfp.totalAmount);
+      setPaymentTerms(editRfp.terminLabel || "");
+      setPaymentType(editRfp.paymentType as "Transfer" | "Cash");
+      setBankName(editRfp.bankAccount?.bankName || "");
+      setAccountNo(editRfp.bankAccount?.accountNo || "");
+      setAccountName(editRfp.bankAccount?.accountName || "");
+      setNotes(editRfp.notes || "");
+      setRequiredDate(editRfp.requiredDate || "");
+      setSelectedTermRatio("custom");
+    }
+  }, [editRfp]);
 
   // Auto-populate from VMS if available
   useState(() => {
@@ -56,16 +73,18 @@ export function RfpFromDocModal({ doc, allRfps = [], availableVendors, onClose, 
   };
 
   const handleSubmit = async () => {
-    if (!rfpAmount || rfpAmount <= 0) {
-      alert("Masukkan nominal yang valid.");
+    if (rfpAmount === 0 || (paymentType === "Transfer" && (!bankName || !accountNo))) {
+      alert("Lengkapi semua field wajib.");
       return;
     }
+    
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/finance/rfp", {
-        method: "POST",
+        method: editRfp ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: editRfp?.id, // Only for PATCH
           documentId: doc.id,
           rfpAmount,
           paymentTerms,
@@ -73,6 +92,7 @@ export function RfpFromDocModal({ doc, allRfps = [], availableVendors, onClose, 
           bankAccount: { bankName, accountNo, accountName },
           notes,
           requiredDate,
+          vendorInvoiceUrl: invoiceFile,
         }),
       });
       if (res.ok) {
@@ -248,10 +268,25 @@ export function RfpFromDocModal({ doc, allRfps = [], availableVendors, onClose, 
             </div>
           </div>
 
+          {/* Document Upload */}
+          <div className="form-section-title" style={{ marginBottom: "16px", marginTop: "24px" }}>Dokumen Pendukung Audit (Optional)</div>
+          <div style={{ padding: "20px", background: "var(--panel-soft)", border: "1px dashed var(--line)", borderRadius: "12px", marginBottom: "24px" }}>
+            <label className="mini-meta" style={{ display: "block", marginBottom: "8px" }}>Upload Invoice Vendor (Jika ada)</label>
+            <input 
+              type="file" 
+              accept="image/*,application/pdf" 
+              onChange={handleInvoiceChange}
+              style={{ width: "100%", fontSize: "12px" }} 
+            />
+            {invoiceFile && <div style={{ marginTop: "10px", color: "var(--green)", fontSize: "11px" }}>✅ Invoice berhasil diunggah</div>}
+            {isUploading && <div style={{ marginTop: "10px", color: "var(--blue)", fontSize: "11px" }}>⌛ Memproses file...</div>}
+            <p className="mini-meta" style={{ marginTop: "10px", fontSize: "10px" }}>Wajib mengunggah invoice untuk pengecekan Finance.</p>
+          </div>
+
           {/* Summary */}
           <div style={{ padding: "14px 18px", background: "rgba(91,140,255,0.06)", border: "1px solid rgba(91,140,255,0.2)", borderRadius: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
             <div className="mini-meta">
-              RFP akan dikirim ke Director untuk tanda tangan sebelum diproses Finance.
+              RFP akan diverifikasi oleh Finance sebelum diajukan ke Director untuk otorisasi.
             </div>
             <div style={{ textAlign: "right", minWidth: "140px" }}>
               <div className="mini-meta">Nominal RFP</div>

@@ -50,3 +50,17 @@ values
   ('ubaid@juaraevent.id', 'jbbs8899', 'ubaid'),
   ('sindy@juaraevent.id', 'jbbs8899', 'sindy')
 on conflict (email) do nothing;
+
+-- Finance Documents table (PO, SPK, CA, dll)
+create table if not exists finance_documents (
+  id text primary key,
+  data jsonb not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Finance RFPs table
+create table if not exists finance_rfps (
+  id text primary key,
+  data jsonb not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);

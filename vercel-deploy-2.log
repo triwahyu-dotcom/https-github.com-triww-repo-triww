@@ -1,0 +1,126 @@
+Retrieving project…
+Deploying triwahyu-6814s-projects/vendor-management-app
+Uploading [--------------------] (0.0B/40.1KB)
+Uploading [============--------] (24.2KB/40.1KB)
+Uploading [====================] (40.1KB/40.1KB)
+Inspect: https://vercel.com/triwahyu-6814s-projects/vendor-management-app/Fv2qGqTp7Nzo93wkswfLm4uzDvVC [5s]
+Production: https://vendor-management-32i4b4rsl-triwahyu-6814s-projects.vercel.app [5s]
+Building...
+Building...
+Building: Running build in Washington, D.C., USA (East) – iad1
+Building: Build machine configuration: 2 cores, 8 GB
+Building: Retrieving list of deployment files...
+Building: Downloading 139 deployment files...
+Building: Restored build cache from previous deployment (5fFxMnnpvKeuwvGjbzmHUf6oPeVN)
+Building: Warning: "vercel" found in project dependencies and will be ignored.
+Building: Running "vercel build"
+Building: Vercel CLI 51.2.1
+Building: Installing dependencies...
+Building: added 36 packages in 4s
+Building: 171 packages are looking for funding
+Building: run `npm fund` for details
+Building: Detected Next.js version: 16.2.1
+Building: Running "npm run build"
+Building: > vendor-management-app@0.1.0 build
+Building: > next build
+Building: Applying modifyConfig from Vercel
+Building: ▲ Next.js 16.2.1 (Turbopack)
+Building: Creating an optimized production build ...
+Building: Turbopack build encountered 1 warnings:
+Building: ./next.config.ts
+Building: Encountered unexpected file in NFT list
+Building: A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+Building: - filesystem operations (like path.join, path.resolve or fs.readFile), or
+Building: - very dynamic requires (like require('./' + foo)).
+Building: To resolve this, you can
+Building: - remove them if possible, or
+Building: - only use them in development, or
+Building: - make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+Building: - add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+Building: Import trace:
+Building: App Route:
+Building: ./next.config.ts
+Building: ./src/lib/vendor/store.ts
+Building: ./src/app/api/vendor-status/route.ts
+Building: ✓ Compiled successfully in 16.0s
+Building: Running TypeScript ...
+Building: Finished TypeScript in 10.1s ...
+Building: Collecting page data using 1 worker ...
+Building: Generating static pages using 1 worker (0/24) ...
+Building: Generating static pages using 1 worker (6/24)
+Building: Generating static pages using 1 worker (12/24)
+Building: Generating static pages using 1 worker (18/24)
+Building: ✓ Generating static pages using 1 worker (24/24) in 3.6s
+Building: Finalizing page optimization ...
+Building: Running onBuildComplete from Vercel
+Building: Route (app)
+Building: ┌ ○ /
+Building: ├ ○ /_not-found
+Building: ├ ƒ /api/auth/login
+Building: ├ ƒ /api/auth/logout
+Building: ├ ƒ /api/clients
+Building: ├ ƒ /api/finance/document
+Building: ├ ƒ /api/finance/generate
+Building: ├ ƒ /api/finance/rfp
+Building: ├ ƒ /api/finance/settle
+Building: ├ ƒ /api/finance/status
+Building: ├ ƒ /api/project-vendor-links
+Building: ├ ƒ /api/project-vendor-shortlists
+Building: ├ ƒ /api/projects
+Building: ├ ƒ /api/projects/[id]
+Building: ├ ƒ /api/vendor-identity/request-code
+Building: ├ ƒ /api/vendor-identity/verify-code
+Building: ├ ƒ /api/vendor-intake
+Building: ├ ƒ /api/vendor-revision/[token]
+Building: ├ ƒ /api/vendor-status
+Building: ├ ƒ /api/vendor-status/link
+Building: ├ ƒ /api/vendors/[vendorId]
+Building: ├ ƒ /api/vendors/[vendorId]/compliance
+Building: ├ ƒ /api/vendors/[vendorId]/lifecycle
+Building: ├ ƒ /api/vendors/[vendorId]/profile
+Building: ├ ƒ /api/vendors/[vendorId]/review
+Building: ├ ƒ /api/vendors/[vendorId]/revision
+Building: ├ ƒ /api/vendors/[vendorId]/scorecards
+Building: ├ ƒ /api/vendors/export
+Building: ├ ƒ /api/vendors/sync
+Building: ├ ƒ /crm
+Building: ├ ○ /docs
+Building: ├ ƒ /finance
+Building: ├ ƒ /finance/print/[...id]
+Building: ├ ○ /login
+Building: ├ ƒ /projects
+Building: ├ ƒ /vendor/my/[token]
+Building: ├ ○ /vendor/register
+Building: ├ ƒ /vendor/revise/[token]
+Building: ├ ○ /vendor/status
+Building: └ ƒ /vendors
+Building: ƒ Proxy (Middleware)
+Building: ○  (Static)   prerendered as static content
+Building: ƒ  (Dynamic)  server-rendered on demand
+Building: Build Completed in /vercel/output [38s]
+Building: Deploying outputs...
+[2K[1A[2K[GProduction: https://vendor-management-32i4b4rsl-triwahyu-6814s-projects.vercel.app [55s]
+Completing...
+Aliased: https://vendor-management-app-peach.vercel.app [55s]
+{
+  "status": "ok",
+  "deployment": {
+    "id": "dpl_Fv2qGqTp7Nzo93wkswfLm4uzDvVC",
+    "url": "https://vendor-management-32i4b4rsl-triwahyu-6814s-projects.vercel.app",
+    "inspectorUrl": "https://vercel.com/triwahyu-6814s-projects/vendor-management-app/Fv2qGqTp7Nzo93wkswfLm4uzDvVC",
+    "readyState": "READY",
+    "target": "production",
+    "deploymentApiUrl": "https://api.vercel.com/v13/deployments/dpl_Fv2qGqTp7Nzo93wkswfLm4uzDvVC"
+  },
+  "message": "Deployment vendor-management-32i4b4rsl-triwahyu-6814s-projects.vercel.app ready.",
+  "next": [
+    {
+      "command": "vercel inspect vendor-management-32i4b4rsl-triwahyu-6814s-projects.vercel.app",
+      "when": "Inspect deployment"
+    },
+    {
+      "command": "vercel deploy --prod",
+      "when": "Promote to production"
+    }
+  ]
+}

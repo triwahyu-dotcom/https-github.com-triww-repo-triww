@@ -3,7 +3,7 @@ import { readRFPs, saveRFP, readDocuments, saveDocument } from "@/lib/finance/st
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { rfpId, docId, status, digitalSignature, rejectionReason } = await req.json();
+    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl } = await req.json();
     const today = new Date().toISOString();
 
     // ── Handle Document (PO/SPK/Kontrak/CA) approval by Director ──
@@ -16,6 +16,9 @@ export async function PATCH(req: NextRequest) {
       docs[idx].status = status as any;
       if (status === "approved" && digitalSignature) {
         docs[idx].approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
+        docs[idx].rejectionReason = ""; // Clear on approval
+      } else if (rejectionReason) {
+        docs[idx].rejectionReason = rejectionReason;
       }
       await saveDocument(docs[idx]);
       return NextResponse.json({ success: true, doc: docs[idx] });
@@ -35,7 +38,10 @@ export async function PATCH(req: NextRequest) {
     const rfp = rfps[rfpIndex];
     rfp.status = status;
     if (rejectionReason) {
-      rfp.notes = (rfp.notes || "") + `\n\n[REJECTION REASON]: ${rejectionReason}`;
+      rfp.rejectionReason = rejectionReason;
+    } else if (status !== "draft" && status !== "pending_finance") {
+      // Clear rejection reason when moving to C-level or Paid
+      rfp.rejectionReason = "";
     }
     await saveRFP(rfp);
 

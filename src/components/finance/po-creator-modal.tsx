@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ProjectRecord } from "@/lib/project/types";
-import { LineItem, PaymentEvent } from "@/lib/finance/types";
+import { LineItem, PaymentEvent, ExpenseDocument } from "@/lib/finance/types";
 import { formatCurrencyIDR } from "@/lib/utils/format";
 
 type DocType = "PO" | "SPK" | "KONTRAK";
@@ -10,6 +10,7 @@ type DocType = "PO" | "SPK" | "KONTRAK";
 interface Props {
   activeProjects: ProjectRecord[];
   availableVendors?: any[];
+  editDoc?: ExpenseDocument;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -35,7 +36,7 @@ const emptyLine = (): LineItem => ({
   amount: 0,
 });
 
-export function POCreatorModal({ activeProjects, availableVendors = [], onClose, onSuccess }: Props) {
+export function POCreatorModal({ activeProjects, availableVendors = [], editDoc, onClose, onSuccess }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
   const [docType, setDocType] = useState<DocType>("PO");
@@ -75,6 +76,31 @@ export function POCreatorModal({ activeProjects, availableVendors = [], onClose,
     "Menampilkan pertunjukan sesuai dengan konsep dan rundown acara.",
     "Mendukung kelancaran jalannya program acara selama penampilan berlangsung."
   ]);
+
+  // Handle Edit Doc Mode
+  useEffect(() => {
+    if (editDoc) {
+      const proj = activeProjects.find(p => p.id === editDoc.projectId);
+      if (proj) setSelectedProject(proj);
+      setDocType(editDoc.documentType as DocType);
+      setVendorName(editDoc.vendorName);
+      setVendorAddress(editDoc.vendorAddress || "");
+      setVendorTaxId(editDoc.vendorTaxId || "");
+      setLineItems(editDoc.lineItems || [{ ...emptyLine() }]);
+      setPaymentTerms(editDoc.paymentTerms || "");
+      setPaymentSchedule(editDoc.paymentSchedule || []);
+      setDeliveryDate(editDoc.deliveryDate || "");
+      setShipTo(editDoc.shipTo || "");
+      setBillingInstruction(editDoc.billingInstruction || "");
+      setBillingTerms(editDoc.billingTerms || []);
+      setNotes(editDoc.notes || "");
+      setVenue(editDoc.venue || "");
+      setDuration(editDoc.duration || "");
+      setLampiran(editDoc.lampiran || "");
+      setWorkScope(editDoc.workScope || []);
+      setStep(2); // Jump to detail step if editing
+    }
+  }, [editDoc, activeProjects]);
 
   const updateLine = (idx: number, field: keyof LineItem, value: any) => {
     setLineItems(prev => {
@@ -142,9 +168,10 @@ export function POCreatorModal({ activeProjects, availableVendors = [], onClose,
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/finance/document", {
-        method: "POST",
+        method: editDoc ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: editDoc?.id, // Only for PATCH
           projectId: selectedProject.id,
           documentType: docType,
           vendorName,
@@ -166,7 +193,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], onClose,
           lampiran,
           workScope,
           description: lineItems[0]?.description || "", // Principal job name
-          preparedBy: { name: "Purchasing Division", date: new Date().toISOString() },
+          preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
         }),
       });
       if (res.ok) {

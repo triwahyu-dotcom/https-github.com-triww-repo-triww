@@ -619,7 +619,7 @@
     "issueDate": "2026-04-13T10:33:54.906Z",
     "description": "",
     "amount": 10000000,
-    "status": "draft",
+    "status": "approved",
     "lineItems": [
       {
         "no": 1,
@@ -660,6 +660,11 @@
     "preparedBy": {
       "name": "Purchasing Division",
       "date": "2026-04-13T10:33:54.314Z"
+    },
+    "approvedBy": {
+      "name": "Eka Marutha Yuswardana",
+      "date": "2026-04-13T16:18:19.424Z",
+      "digitalSignature": "SIG-IC9DF1"
     }
   },
   {
@@ -707,7 +712,10 @@
       "date": "2026-04-13T11:05:11.042Z",
       "digitalSignature": "SIG-S9N6DB"
     },
-    "rfpId": "RFP-YP1Q7A"
+    "rfpId": "RFP-5HDKUW",
+    "rfpIds": [
+      "RFP-5HDKUW"
+    ]
   },
   {
     "id": "014/JBBS/PO/04/2026",
@@ -748,7 +756,8 @@
     "preparedBy": {
       "name": "Purchasing Division",
       "date": "2026-04-13T11:16:36.073Z"
-    }
+    },
+    "rejectionReason": "salah nominal"
   },
   {
     "id": "003/JBBS/SPK/04/2026",
@@ -790,5 +799,111 @@
       "name": "Purchasing Division",
       "date": "2026-04-13T12:07:45.839Z"
     }
+  },
+  {
+    "id": "CA-003-04/2026",
+    "projectId": "1773801941114",
+    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
+    "vendorName": "EL BRAMO",
+    "vendorAddress": "",
+    "vendorTaxId": "",
+    "documentType": "CASH_ADVANCE",
+    "issueDate": "2026-04-13T17:37:19.805Z",
+    "description": "Operasional ",
+    "amount": 30000000,
+    "status": "draft",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "dfasdf",
+        "specification": "",
+        "qty": 1,
+        "unit": "Paket",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "",
+        "price": 10000000,
+        "amount": 10000000
+      },
+      {
+        "no": 2,
+        "description": "dfasdf23",
+        "specification": "",
+        "qty": 1,
+        "unit": "Paket",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "",
+        "price": 20000000,
+        "amount": 20000000
+      }
+    ],
+    "paymentTerms": "Full",
+    "itemTotal": 30000000,
+    "preparedBy": {
+      "name": "EL BRAMO",
+      "date": "2026-04-13T17:37:18.768Z"
+    },
+    "rejectionReason": "salah nominal"
+  },
+  {
+    "id": "015/JBBS/PO/04/2026",
+    "projectId": "mui-gus-nw-doa-bersama-untuk-keselamatan-indonesia-dan-pengukuhan-dewan-pimpinan-mui-pusat-periode-2025-2030-22b17b58",
+    "projectName": "Doa Bersama Untuk Keselamatan Indonesia dan Pengukuhan Dewan Pimpinan MUI Pusat Periode 2025 - 2030",
+    "vendorName": "PT. Abhinaya Visual Radhikasakti",
+    "vendorAddress": "Banten",
+    "vendorTaxId": "41.488.027.8-452.000",
+    "documentType": "PO",
+    "issueDate": "2026-04-16T07:48:26.993Z",
+    "description": "asdfaf",
+    "amount": 100000000,
+    "status": "draft",
+    "lineItems": [
+      {
+        "no": 1,
+        "description": "asdfaf",
+        "specification": "",
+        "qty": 1,
+        "unit": "Unit",
+        "freq": 1,
+        "freqUnit": "Kali",
+        "vol": 1,
+        "volUnit": "Hari",
+        "price": "100000000",
+        "amount": 100000000
+      }
+    ],
+    "paymentTerms": "Custom Schedule",
+    "deliveryDate": "",
+    "shipTo": "",
+    "billingInstruction": "",
+    "billingTerms": [
+      "Invoice",
+      "BAST",
+      "Report Dokumentasi"
+    ],
+    "preparedBy": {
+      "name": "Procurement Division",
+      "date": "2026-04-16T07:48:24.688Z"
+    },
+    "venue": "",
+    "duration": "",
+    "workScope": [
+      "Penerima kerja wajib mengikuti meeting online dan offline, selama persiapan event.",
+      "Wajib hadir pada kegiatan Gladi Resik (GR) pada tanggal event.",
+      "Menampilkan pertunjukan sesuai dengan konsep dan rundown acara.",
+      "Mendukung kelancaran jalannya program acara selama penampilan berlangsung."
+    ],
+    "lampiran": "1 (satu) set",
+    "paymentSchedule": [
+      {
+        "label": "Termin 1",
+        "percentage": 50,
+        "amount": 50000000,
+        "date": "2026-02-11"
+      }
+    ]
   }
 ]

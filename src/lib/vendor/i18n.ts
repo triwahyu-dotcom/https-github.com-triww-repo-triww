@@ -156,7 +156,6 @@ export const dictionary: Dictionary = {
   businessEmail: { id: "Email Bisnis", en: "Business Email" },
   servicesOffered: { id: "Layanan yang Ditawarkan", en: "Services Offered" },
   servicesPlaceholder: { id: "cth. Dekorasi Panggung, Sound System, Katering", en: "e.g. Stage Decoration, Sound System, Catering" },
-  legalStatus: { id: "Status Legal", en: "Legal Status" },
   taxStatus: { id: "Status Pajak", en: "Tax Status" },
   coverageArea: { id: "Area Layanan", en: "Coverage Area" },
   businessAddress: { id: "Alamat Usaha", en: "Business Address" },

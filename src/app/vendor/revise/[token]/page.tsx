@@ -51,7 +51,6 @@ export default async function VendorRevisionPage({
         picTitle: vendor.contacts[0]?.title ?? "",
         picPhone: vendor.contacts[0]?.phone ?? "",
         picEmail: vendor.contacts[0]?.email ?? "",
-        picEmail: vendor.contacts[0]?.email ?? "",
         documentsFolderUrl: vendor.documentsFolderUrl,
       }}
     />

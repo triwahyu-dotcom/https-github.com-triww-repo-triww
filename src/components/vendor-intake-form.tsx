@@ -220,24 +220,21 @@ export function VendorIntakeForm({
   }
 
   return (
-    <div className="notion-shell vendor-form-shell" style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
-      <header className="vendor-form-header" style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <em className="eyebrow" style={{ color: 'var(--blue)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>VENDOR PORTAL</em>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '12px 0 16px', letterSpacing: '-0.02em' }}>
-          {mode === "revision" ? "Revise your profile" : "Join our community"}
-        </h1>
-        <p className="text-muted" style={{ fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 24px', lineHeight: 1.6 }}>
-          {mode === "revision"
-            ? "Please update the requested fields below to complete your verification."
-            : "Connect with our procurement team by sharing your company details and capabilities."}
-        </p>
-        <div className="vendor-form-links" style={{ justifyContent: 'center' }}>
-          <Link href="/vendor/status" className="chip active" style={{ padding: '8px 16px', borderRadius: '20px' }}>Check status</Link>
-          <Link href="/vendors" className="chip" style={{ padding: '8px 16px', borderRadius: '20px' }}>Admin Dashboard</Link>
-        </div>
-      </header>
-
-      <form className="project-card vendor-form-card" onSubmit={handleSubmit} style={{ padding: '32px', background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '24px' }}>
+    <div className="notion-shell vendor-form-shell" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
+      <form 
+        className="vendor-form-card" 
+        onSubmit={handleSubmit} 
+        style={{ 
+          padding: '40px', 
+          background: 'rgba(255, 255, 255, 0.01)', 
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255, 255, 255, 0.1)', 
+          borderRadius: '32px',
+          boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
+          marginTop: '20px'
+        }}
+      >
         {mode === "revision" ? (
           <section className="revision-highlight" style={{ marginBottom: '32px', padding: '20px', background: 'rgba(255, 107, 107, 0.05)', borderRadius: '16px', border: '1px solid rgba(255, 107, 107, 0.2)' }}>
             <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 12px', color: '#ff6b6b' }}>Items to revise</h3>

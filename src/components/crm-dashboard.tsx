@@ -18,29 +18,47 @@ export function CRMDashboard({ initialData }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"add" | "edit">("add");
   const [formData, setFormData] = useState<Partial<CRMClient>>({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSaveClient = async () => {
+    if (!formData.name) {
+      setError("Please enter a company name.");
+      return;
+    }
+
     const endpoint = "/api/clients";
     const method = modalMode === "add" ? "POST" : "PUT";
     
+    setIsSaving(true);
+    setError(null);
+
     try {
       const res = await fetch(endpoint, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-      if (res.ok) {
+      const data = await res.json();
+      
+      if (res.ok && data.success) {
         setIsModalOpen(false);
-        window.location.reload(); // Simple refresh for now
+        window.location.reload(); 
+      } else {
+        setError(data.error || "Failed to save client. Check your connection.");
       }
     } catch (err) {
       console.error("Save error", err);
+      setError("Server connection error. Please try again.");
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const openAddModal = () => {
     setModalMode("add");
     setFormData({ status: "lead", category: "BRAND", contacts: [], projects: [] });
+    setError(null);
     setIsModalOpen(true);
   };
 
@@ -51,14 +69,15 @@ export function CRMDashboard({ initialData }: Props) {
   };
 
   const filteredClients = useMemo(() => {
-    return initialData.clients.filter((client) => {
+    const unique = Array.from(new Map(initialData.clients.map(c => [c.id, c])).values());
+    return unique.filter((client) => {
       const matchesSearch =
         client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         client.contacts.some((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesStatus = filterStatus === "all" || client.status === filterStatus;
       const matchesCategory = filterCategory === "all" || (client.category || "").toUpperCase() === filterCategory;
       return matchesSearch && matchesStatus && matchesCategory;
-    });
+    }).sort((a, b) => a.name.localeCompare(b.name));
   }, [initialData.clients, searchQuery, filterStatus, filterCategory]);
 
   const headerActions = (
@@ -263,6 +282,12 @@ export function CRMDashboard({ initialData }: Props) {
           <div className="modal-content wide-modal" style={{ backgroundColor: '#1a1a1a', padding: '32px', borderRadius: '16px', width: '100%', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
             <h2 style={{ marginBottom: '24px' }}>{modalMode === 'add' ? 'Add New Lead' : 'Edit Client Profile'}</h2>
             
+            {error && (
+              <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem' }}>
+                ⚠️ {error}
+              </div>
+            )}
+
             <div className="form-section-title">Company Identity</div>
             <div className="form-grid-2">
               <div className="form-group">
@@ -312,8 +337,10 @@ export function CRMDashboard({ initialData }: Props) {
               </div>
             </div>
             <div style={{ marginTop: '24px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} onClick={() => setIsModalOpen(false)}>Cancel</button>
-              <button className="primary-button" onClick={handleSaveClient}>Save Changes</button>
+              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} disabled={isSaving} onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <button className="primary-button" disabled={isSaving} onClick={handleSaveClient}>
+                {isSaving ? "Connecting..." : "Save Changes"}
+              </button>
             </div>
           </div>
         </div>

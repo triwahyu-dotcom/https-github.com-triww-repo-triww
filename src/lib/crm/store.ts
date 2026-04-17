@@ -1,8 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
-import path from "node:path";
 import { ProjectRecord, CRMClient, CRMDashboardData } from "@/lib/project/types";
-
-const CLIENTS_DB_PATH = path.join(process.cwd(), "data/clients.json");
+import { getJsonClients } from "@/lib/project/store";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -21,20 +18,13 @@ function getOfficialClient(clientName: string, officialClients: CRMClient[]): CR
 }
 
 export async function getCRMDashboardData(projects: ProjectRecord[]): Promise<CRMDashboardData> {
-  let officialClients: CRMClient[] = [];
-  if (existsSync(CLIENTS_DB_PATH)) {
-    try {
-      officialClients = JSON.parse(readFileSync(CLIENTS_DB_PATH, "utf-8"));
-    } catch (e) {
-      console.error("Error loading clients.json", e);
-    }
-  }
+  const officialClients = await getJsonClients();
 
   const clientsMap = new Map<string, CRMClient>();
 
-  // Pre-populate with all official clients from clients.json
+  // Pre-populate with all official clients from the store
   officialClients.forEach(official => {
-    clientsMap.set(official.name, {
+    clientsMap.set(official.id, {
       ...official,
       health: official.health || "on_track",
       status: official.status || "active",
@@ -50,7 +40,7 @@ export async function getCRMDashboardData(projects: ProjectRecord[]): Promise<CR
 
   const getOrCreateClient = (name: string, project: ProjectRecord): CRMClient => {
     const official = getOfficialClient(name, officialClients);
-    const key = official ? official.name : name;
+    const key = official ? official.id : name;
 
     const existing = clientsMap.get(key);
     if (existing) return existing;
@@ -128,10 +118,12 @@ export async function getCRMDashboardData(projects: ProjectRecord[]): Promise<CR
     }
   });
 
-  const clients = Array.from(clientsMap.values()).map((c) => ({
-    ...c,
-    totalProjectValueLabel: formatCurrency(c.totalProjectValue),
-  }));
+  const clients = Array.from(clientsMap.values())
+    .map((c) => ({
+      ...c,
+      totalProjectValueLabel: formatCurrency(c.totalProjectValue),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const totalPortfolioValue = clients.reduce((acc, c) => acc + c.totalProjectValue, 0);
 

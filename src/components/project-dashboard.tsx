@@ -1671,9 +1671,12 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     onChange={(e) => setProjectFormData({ ...projectFormData, client: e.target.value })}
                   >
                     <option value="">-- Select Client --</option>
-                    {clients.sort((a, b) => a.name.localeCompare(b.name)).map(c => (
-                      <option key={c.id} value={c.name}>{c.name}</option>
-                    ))}
+                    {/* Deduplicate by ID to prevent "duplicate key" console errors */}
+                    {Array.from(new Map(clients.map(c => [c.id, c])).values())
+                      .sort((a, b) => a.name.localeCompare(b.name))
+                      .map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
                   </select>
                 </div>
               </div>

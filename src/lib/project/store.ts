@@ -166,6 +166,33 @@ export function normalizeProject(project: Partial<ProjectRecord>): ProjectRecord
   return normalized;
 }
 
+export function normalizeClient(client: Partial<CRMClient>): CRMClient {
+  const name = client.name || "Untitled Client";
+  const status = client.status || "lead";
+  const id = client.id || `${slug(name)}-${Math.random().toString(36).substring(2, 6)}`;
+
+  return {
+    id,
+    name,
+    aliases: client.aliases || [],
+    type: client.type || "brand",
+    category: client.category || "BRAND",
+    industry: client.industry || "",
+    address: client.address || "",
+    website: client.website || "",
+    relation: client.relation || "",
+    totalProjectValue: client.totalProjectValue || 0,
+    totalProjectValueLabel: client.totalProjectValueLabel || formatCurrency(client.totalProjectValue || 0),
+    projectCount: client.projectCount || 0,
+    activeProjectCount: client.activeProjectCount || 0,
+    lastContactDate: client.lastContactDate || "",
+    contacts: client.contacts || [],
+    projects: client.projects || [],
+    health: client.health || "on_track",
+    status,
+  };
+}
+
 export async function updateJsonProject(project: ProjectRecord) {
   const normalized = normalizeProject(project);
 
@@ -233,10 +260,31 @@ export async function getJsonClients(): Promise<CRMClient[]> {
   return readJsonClients();
 }
 
-export async function updateJsonClient(client: CRMClient) {
+export async function deleteJsonClient(id: string) {
+  // If Supabase is configured, delete only from Supabase
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('clients').delete().eq('id', id);
+    if (error) {
+      console.error("Supabase client deletion error:", error.message);
+      throw new Error(`Supabase deletion failed: ${error.message}`);
+    }
+    return;
+  }
+
+  // Fallback: delete from local JSON file (development only)
+  if (existsSync(JSON_CLIENTS_PATH)) {
+    const existing = await readJsonClients();
+    const filtered = existing.filter((c: CRMClient) => c.id !== id);
+    writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(filtered, null, 2));
+  }
+}
+
+export async function updateJsonClient(client: Partial<CRMClient>) {
+  const normalized = normalizeClient(client);
+
   // If Supabase is configured (production/Vercel), write only to Supabase
   if (isSupabaseConfigured()) {
-    const { error } = await supabase!.from('clients').upsert({ id: client.id, data: client });
+    const { error } = await supabase!.from('clients').upsert({ id: normalized.id, data: normalized });
     if (error) {
       console.error("Supabase client update error:", error.message);
       throw new Error(`Supabase update failed: ${error.message}`);
@@ -246,11 +294,11 @@ export async function updateJsonClient(client: CRMClient) {
 
   // Fallback: write to local JSON file (development only)
   const existing = await readJsonClients();
-  const index = existing.findIndex((c: CRMClient) => c.id === client.id);
+  const index = existing.findIndex((c: CRMClient) => c.id === normalized.id);
   if (index !== -1) {
-    existing[index] = client;
+    existing[index] = normalized;
   } else {
-    existing.push(client);
+    existing.push(normalized);
   }
   writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(existing, null, 2));
 }

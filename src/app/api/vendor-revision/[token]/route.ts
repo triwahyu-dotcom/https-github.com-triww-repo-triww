@@ -35,6 +35,8 @@ export async function POST(
     picTitle: String(body.picTitle ?? "").trim(),
     picPhone: String(body.picPhone ?? "").trim(),
     picEmail: String(body.picEmail ?? "").trim(),
+    businessAddress: String(body.businessAddress ?? "").trim(),
+    documentsFolderUrl: String(body.documentsFolderUrl ?? "").trim(),
     companyProfileUrl: String(body.companyProfileUrl ?? "").trim(),
     catalogUrl: String(body.catalogUrl ?? "").trim(),
     npwpScanUrl: String(body.npwpScanUrl ?? "").trim(),

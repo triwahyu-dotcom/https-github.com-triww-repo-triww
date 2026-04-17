@@ -1,0 +1,49 @@
+Retrieving project…
+Deploying triwahyu-6814s-projects/vendor-management-app
+Uploading [--------------------] (0.0B/548.6KB)
+Uploading [=====---------------] (143.2KB/548.6KB)
+Uploading [==========----------] (284.8KB/548.6KB)
+Uploading [===============-----] (412.3KB/548.6KB)
+Uploading [====================] (548.6KB/548.6KB)
+Inspect: https://vercel.com/triwahyu-6814s-projects/vendor-management-app/CK7p5JZTQ5gs1mQTcmcTEPhuMnV5 [4s]
+Production: https://vendor-management-qfstbow33-triwahyu-6814s-projects.vercel.app [4s]
+https://vendor-management-qfstbow33-triwahyu-6814s-projects.vercel.appBuilding...
+Building...
+Building: Running build in Washington, D.C., USA (East) – iad1
+Building: Build machine configuration: 2 cores, 8 GB
+Building: Retrieving list of deployment files...
+Building: Downloading 148 deployment files...
+Building: Restored build cache from previous deployment (7EM31QBbETDcfE4svskGZxGCTKM7)
+Building: Warning: "vercel" found in project dependencies and will be ignored.
+Building: Running "vercel build"
+Building: Vercel CLI 51.6.1
+Building: Installing dependencies...
+Building: up to date in 1s
+Building: 171 packages are looking for funding
+Building: run `npm fund` for details
+Building: Detected Next.js version: 16.2.1
+Building: Running "npm run build"
+Building: > vendor-management-app@0.1.0 build
+Building: > next build
+Building: Applying modifyConfig from Vercel
+Building: ▲ Next.js 16.2.1 (Turbopack)
+Building: Creating an optimized production build ...
+Building: Turbopack build encountered 1 warnings:
+Building: ./next.config.ts
+Building: Encountered unexpected file in NFT list
+Building: A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+Building: - filesystem operations (like path.join, path.resolve or fs.readFile), or
+Building: - very dynamic requires (like require('./' + foo)).
+Building: To resolve this, you can
+Building: - remove them if possible, or
+Building: - only use them in development, or
+Building: - make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+Building: - add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+Building: Import trace:
+Building: App Route:
+Building: ./next.config.ts
+Building: ./src/lib/vendor/store.ts
+Building: ./src/app/api/vendor-status/link/route.ts
+Building: ✓ Compiled successfully in 17.2s
+Building: Running TypeScript ...
+Error: Command "npm run build" exited with 1

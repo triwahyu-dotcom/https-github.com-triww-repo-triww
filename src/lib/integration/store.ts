@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 import { ProjectVendorLink, ProjectVendorShortlist } from "@/lib/integration/types";
 import { appendVendorAuditEntry } from "@/lib/vendor/ops-store";
@@ -15,33 +16,50 @@ async function ensureDataDir() {
 }
 
 export async function getProjectVendorLinks(): Promise<ProjectVendorLink[]> {
-  await ensureDataDir();
-
-  if (!existsSync(LINKS_PATH)) {
-    return [];
+  if (isSupabaseConfigured()) {
+    const { data, error } = await supabase!.from('project_vendor_links').select('data');
+    if (!error && data) return data.map(item => item.data as ProjectVendorLink);
   }
 
+  await ensureDataDir();
+  if (!existsSync(LINKS_PATH)) return [];
   const content = await readFile(LINKS_PATH, "utf8");
   return JSON.parse(content) as ProjectVendorLink[];
 }
 
 async function writeProjectVendorLinks(links: ProjectVendorLink[]) {
+  if (isSupabaseConfigured()) {
+    // upsert each link individually
+    for (const link of links) {
+      await supabase!.from('project_vendor_links').upsert({ id: link.id, data: link });
+    }
+    return;
+  }
+
   await ensureDataDir();
   await writeFile(LINKS_PATH, JSON.stringify(links, null, 2));
 }
 
 export async function getProjectVendorShortlists(): Promise<ProjectVendorShortlist[]> {
-  await ensureDataDir();
-
-  if (!existsSync(SHORTLISTS_PATH)) {
-    return [];
+  if (isSupabaseConfigured()) {
+    const { data, error } = await supabase!.from('project_vendor_shortlists').select('data');
+    if (!error && data) return data.map(item => item.data as ProjectVendorShortlist);
   }
 
+  await ensureDataDir();
+  if (!existsSync(SHORTLISTS_PATH)) return [];
   const content = await readFile(SHORTLISTS_PATH, "utf8");
   return JSON.parse(content) as ProjectVendorShortlist[];
 }
 
 async function writeProjectVendorShortlists(shortlists: ProjectVendorShortlist[]) {
+  if (isSupabaseConfigured()) {
+    for (const item of shortlists) {
+      await supabase!.from('project_vendor_shortlists').upsert({ id: item.id, data: item });
+    }
+    return;
+  }
+
   await ensureDataDir();
   await writeFile(SHORTLISTS_PATH, JSON.stringify(shortlists, null, 2));
 }

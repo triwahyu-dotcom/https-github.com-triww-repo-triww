@@ -2,6 +2,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 type VerificationChannel = "email" | "phone";
 
@@ -83,17 +84,23 @@ async function ensureDataDir() {
 }
 
 async function readState() {
-  await ensureDataDir();
-
-  if (!existsSync(IDENTITY_STATE_PATH)) {
-    return structuredClone(EMPTY_STATE);
+  if (isSupabaseConfigured()) {
+    const { data, error } = await supabase!.from('vendor_identity_state').select('data').limit(1).single();
+    if (!error && data) return data.data as VendorIdentityState;
   }
 
+  await ensureDataDir();
+  if (!existsSync(IDENTITY_STATE_PATH)) return structuredClone(EMPTY_STATE);
   const content = await readFile(IDENTITY_STATE_PATH, "utf8");
   return JSON.parse(content) as VendorIdentityState;
 }
 
 async function writeState(state: VendorIdentityState) {
+  if (isSupabaseConfigured()) {
+    await supabase!.from('vendor_identity_state').upsert({ id: 'current', data: state });
+    return;
+  }
+
   await ensureDataDir();
   await writeFile(IDENTITY_STATE_PATH, JSON.stringify(state, null, 2));
 }

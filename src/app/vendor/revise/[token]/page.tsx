@@ -42,6 +42,7 @@ export default async function VendorRevisionPage({
         bankAccountNumber: vendor.bankAccountNumber,
         bankAccountHolder: vendor.bankAccountHolder,
         npwpNumber: vendor.npwpNumber,
+        businessAddress: vendor.businessAddress,
         websiteUrl: vendor.websiteUrl,
         instagramUrl: vendor.instagramUrl,
         tiktokUrl: vendor.tiktokUrl,
@@ -50,15 +51,8 @@ export default async function VendorRevisionPage({
         picTitle: vendor.contacts[0]?.title ?? "",
         picPhone: vendor.contacts[0]?.phone ?? "",
         picEmail: vendor.contacts[0]?.email ?? "",
-        companyProfileUrl: vendor.documents.find((item) => item.type === "company_profile")?.url ?? "",
-        catalogUrl: vendor.documents.find((item) => item.type === "catalog")?.url ?? "",
-        npwpScanUrl: vendor.documents.find((item) => item.type === "npwp_scan")?.url ?? "",
-        ownerKtpUrl: vendor.documents.find((item) => item.type === "owner_ktp")?.url ?? "",
-        nibUrl: vendor.documents.find((item) => item.type === "nib")?.url ?? "",
-        invoiceSampleUrl: vendor.documents.find((item) => item.type === "invoice_sample")?.url ?? "",
-        pkpCertificateUrl: vendor.documents.find((item) => item.type === "pkp_certificate")?.url ?? "",
-        ndaUrl: vendor.documents.find((item) => item.type === "nda")?.url ?? "",
-        picKtpUrl: vendor.documents.find((item) => item.type === "pic_ktp")?.url ?? "",
+        picEmail: vendor.contacts[0]?.email ?? "",
+        documentsFolderUrl: vendor.documentsFolderUrl,
       }}
     />
   );

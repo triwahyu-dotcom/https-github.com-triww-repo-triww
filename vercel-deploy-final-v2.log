@@ -1,0 +1,59 @@
+Retrieving project…
+Deploying triwahyu-6814s-projects/vendor-management-app
+Uploading [--------------------] (0.0B/5.1KB)
+Uploading [==========----------] (2.7KB/5.1KB)
+Uploading [====================] (5.1KB/5.1KB)
+Inspect: https://vercel.com/triwahyu-6814s-projects/vendor-management-app/5YxirzKGpaPivZZ6UNgpEANb7gy1 [3s]
+Production: https://vendor-management-20wrx0qpb-triwahyu-6814s-projects.vercel.app [3s]
+https://vendor-management-20wrx0qpb-triwahyu-6814s-projects.vercel.appBuilding...
+Building...
+Building: Running build in Washington, D.C., USA (East) – iad1
+Building: Build machine configuration: 2 cores, 8 GB
+Building: Retrieving list of deployment files...
+Building: Downloading 149 deployment files...
+Building: Restored build cache from previous deployment (7EM31QBbETDcfE4svskGZxGCTKM7)
+Building: Warning: "vercel" found in project dependencies and will be ignored.
+Building: Running "vercel build"
+Building: Vercel CLI 51.6.1
+Building: Installing dependencies...
+Building: up to date in 2s
+Building: 171 packages are looking for funding
+Building: run `npm fund` for details
+Building: Detected Next.js version: 16.2.1
+Building: Running "npm run build"
+Building: > vendor-management-app@0.1.0 build
+Building: > next build
+Building: Applying modifyConfig from Vercel
+Building: ▲ Next.js 16.2.1 (Turbopack)
+Building: Creating an optimized production build ...
+Building: Turbopack build encountered 1 warnings:
+Building: ./next.config.ts
+Building: Encountered unexpected file in NFT list
+Building: A file was traced that indicates that the whole project was traced unintentionally. Somewhere in the import trace below, there are:
+Building: - filesystem operations (like path.join, path.resolve or fs.readFile), or
+Building: - very dynamic requires (like require('./' + foo)).
+Building: To resolve this, you can
+Building: - remove them if possible, or
+Building: - only use them in development, or
+Building: - make sure they are statically scoped to some subfolder: path.join(process.cwd(), 'data', bar), or
+Building: - add ignore comments: path.join(/*turbopackIgnore: true*/ process.cwd(), bar)
+Building: Import trace:
+Building: App Route:
+Building: ./next.config.ts
+Building: ./src/lib/vendor/store.ts
+Building: ./src/app/api/vendor-status/link/route.ts
+Building: ✓ Compiled successfully in 14.2s
+Building: Running TypeScript ...
+Building: Failed to type check.
+Building: ./src/app/vendor/revise/[token]/page.tsx:53:9
+Building: Type error: Object literal may only specify known properties, and 'companyProfileUrl' does not exist in type 'Partial<{ vendorName: string; services: string; coverageArea: string; email: string; businessAddress: string; legalStatus: LegalStatus; taxStatus: TaxStatus; bankName: string; ... 11 more ...; documentsFolderUrl: string; }>'.
+Building: 51 |         picPhone: vendor.contacts[0]?.phone ?? "",
+Building: 52 |         picEmail: vendor.contacts[0]?.email ?? "",
+Building: > 53 |         companyProfileUrl: vendor.documents.find((item) => item.type === "company_profile"...
+Building: |         ^
+Building: 54 |         catalogUrl: vendor.documents.find((item) => item.type === "catalog")?.url ?? "",
+Building: 55 |         npwpScanUrl: vendor.documents.find((item) => item.type === "npwp_scan")?.url ?? "",
+Building: 56 |         ownerKtpUrl: vendor.documents.find((item) => item.type === "owner_ktp")?.url ?? "",
+Building: Next.js build worker exited with code: 1 and signal: null
+Building: Error: Command "npm run build" exited with 1
+Error: Command "npm run build" exited with 1

@@ -169,6 +169,17 @@ export function normalizeProject(project: Partial<ProjectRecord>): ProjectRecord
 export async function updateJsonProject(project: ProjectRecord) {
   const normalized = normalizeProject(project);
 
+  // If Supabase is configured (production/Vercel), write only to Supabase
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('projects').upsert({ id: normalized.id, data: normalized });
+    if (error) {
+      console.error("Supabase project update error:", error.message);
+      throw new Error(`Supabase update failed: ${error.message}`);
+    }
+    return;
+  }
+
+  // Fallback: write to local JSON file (development only)
   const existing = await readJsonProjects();
   const index = existing.findIndex((p: ProjectRecord) => p.id === normalized.id);
   if (index !== -1) {
@@ -176,18 +187,7 @@ export async function updateJsonProject(project: ProjectRecord) {
   } else {
     existing.push(normalized);
   }
-  
-  // Write local
   writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(existing, null, 2));
-
-  // Write Supabase
-  if (isSupabaseConfigured()) {
-    const { error } = await supabase!.from('projects').upsert({ id: normalized.id, data: normalized });
-    if (error) {
-      console.error("Supabase project update error:", error.message);
-      throw new Error(`Supabase update failed: ${error.message}`);
-    }
-  }
 }
 
 export async function getJsonProjects(): Promise<ProjectRecord[]> {
@@ -195,19 +195,20 @@ export async function getJsonProjects(): Promise<ProjectRecord[]> {
 }
 
 export async function deleteJsonProject(id: string) {
-  // 1. Delete locally to ensure sync
-  const existing = await readJsonProjects();
-  const filtered = existing.filter((p: ProjectRecord) => p.id !== id);
-  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(filtered, null, 2));
-
-  // 2. Delete from Supabase
+  // If Supabase is configured, delete only from Supabase
   if (isSupabaseConfigured()) {
     const { error } = await supabase!.from('projects').delete().eq('id', id);
     if (error) {
       console.error("Supabase project deletion error:", error.message);
       throw new Error(`Supabase deletion failed: ${error.message}`);
     }
+    return;
   }
+
+  // Fallback: delete from local JSON file (development only)
+  const existing = await readJsonProjects();
+  const filtered = existing.filter((p: ProjectRecord) => p.id !== id);
+  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(filtered, null, 2));
 }
 
 async function readJsonClients(): Promise<CRMClient[]> {
@@ -233,6 +234,17 @@ export async function getJsonClients(): Promise<CRMClient[]> {
 }
 
 export async function updateJsonClient(client: CRMClient) {
+  // If Supabase is configured (production/Vercel), write only to Supabase
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('clients').upsert({ id: client.id, data: client });
+    if (error) {
+      console.error("Supabase client update error:", error.message);
+      throw new Error(`Supabase update failed: ${error.message}`);
+    }
+    return;
+  }
+
+  // Fallback: write to local JSON file (development only)
   const existing = await readJsonClients();
   const index = existing.findIndex((c: CRMClient) => c.id === client.id);
   if (index !== -1) {
@@ -240,18 +252,7 @@ export async function updateJsonClient(client: CRMClient) {
   } else {
     existing.push(client);
   }
-  
-  // Write local
   writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(existing, null, 2));
-
-  // Write Supabase
-  if (isSupabaseConfigured()) {
-    const { error } = await supabase!.from('clients').upsert({ id: client.id, data: client });
-    if (error) {
-      console.error("Supabase client update error:", error.message);
-      throw new Error(`Supabase update failed: ${error.message}`);
-    }
-  }
 }
 
 const SECTION_LABELS: Record<ProjectSection, string> = {

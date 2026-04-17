@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { ProjectRecord } from "@/lib/project/types";
 import { LineItem, PaymentEvent, ExpenseDocument } from "@/lib/finance/types";
 import { formatCurrencyIDR } from "@/lib/utils/format";
+import { supabase } from "@/lib/supabase";
 
 type DocType = "PO" | "SPK" | "KONTRAK";
 
@@ -53,17 +54,23 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
   const [lineItems, setLineItems] = useState<LineItem[]>([{ ...emptyLine() }]);
 
   // Terms
-  const [paymentTerms, setPaymentTerms] = useState("Custom Schedule");
+  const [paymentTerms, setPaymentTerms] = useState("Full Payment");
   const [paymentSchedule, setPaymentSchedule] = useState<PaymentEvent[]>([
-    { label: "DP 30%", percentage: 30, date: "" },
-    { label: "Pelunasan 70%", percentage: 70, date: "" }
+    { label: "Full Payment", percentage: 100, date: "" }
   ]);
   const [paymentDate, setPaymentDate] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
   const [shipTo, setShipTo] = useState("");
   const [billingInstruction, setBillingInstruction] = useState("");
   const [billingTerms, setBillingTerms] = useState<string[]>(["Invoice", "BAST", "Report Dokumentasi"]);
+  const [paymentKeterangan, setPaymentKeterangan] = useState<string[]>([
+    "Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)"
+  ]);
+  const [penaltyFile, setPenaltyFile] = useState<File | null>(null);
+  const [penaltyMemoUrl, setPenaltyMemoUrl] = useState("");
+  const [isUploadingPenalty, setIsUploadingPenalty] = useState(false);
   const [notes, setNotes] = useState("");
+  const [pph21Mode, setPph21Mode] = useState<"none" | "deduction" | "grossup">("none");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // SPK Specific
@@ -94,10 +101,15 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
       setBillingInstruction(editDoc.billingInstruction || "");
       setBillingTerms(editDoc.billingTerms || []);
       setNotes(editDoc.notes || "");
+      setPph21Mode(editDoc.pph21Mode || (editDoc.usePPh21 ? "deduction" : "none"));
       setVenue(editDoc.venue || "");
       setDuration(editDoc.duration || "");
       setLampiran(editDoc.lampiran || "");
       setWorkScope(editDoc.workScope || []);
+      setPaymentKeterangan(editDoc.paymentKeterangan || [
+        "Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)"
+      ]);
+      setPenaltyMemoUrl(editDoc.penaltyMemoUrl || "");
       setStep(2); // Jump to detail step if editing
     }
   }, [editDoc, activeProjects]);
@@ -122,7 +134,25 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
   const addLine = () => setLineItems(prev => [...prev, { ...emptyLine(), no: prev.length + 1 }]);
   const removeLine = (idx: number) => setLineItems(prev => prev.filter((_, i) => i !== idx));
 
-  const grandTotal = lineItems.reduce((s, l) => s + (l.amount || 0), 0);
+  const subtotalItems = lineItems.reduce((s, l) => s + (l.amount || 0), 0);
+  
+  // Tax logic based on mode selection
+  let docGross = subtotalItems;
+  let docNet = subtotalItems;
+  let docTax = 0;
+
+  if (pph21Mode === "deduction") {
+    docGross = subtotalItems;
+    docNet = subtotalItems * 0.975;
+    docTax = docGross - docNet;
+  } else if (pph21Mode === "grossup") {
+    docGross = subtotalItems / 0.975;
+    docNet = subtotalItems;
+    docTax = docGross - docNet;
+  }
+
+  const grandTotal = docNet; // The amount to be paid/transferred
+  const finalDocGross = docGross; // The amount that appears on the document/tax-base
 
   const toggleBillingTerm = (term: string) => {
     setBillingTerms(prev => prev.includes(term) ? prev.filter(t => t !== term) : [...prev, term]);
@@ -155,18 +185,94 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
     setShowVendorSuggestions(false);
   };
 
+  const handleTermsChange = (mode: string) => {
+    setPaymentTerms(mode);
+    const bullets = ["Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)"];
+    
+    if (mode === "Full Payment") {
+      setPaymentSchedule([{ label: "Full Payment", percentage: 100, date: "" }]);
+      bullets.push("Pembayaran 100% akan dilakukan setelah pekerjaan selesai dan invoice diterima.");
+    } else if (mode === "DP + Pelunasan") {
+      setPaymentSchedule([
+        { label: "Down Payment (DP)", percentage: 50, date: "" },
+        { label: "Pelunasan", percentage: 50, date: "" }
+      ]);
+      bullets.push("DP 50% akan dibayarkan setelah invoice diterima.");
+      bullets.push("Pelunasan 50% akan dibayarkan setelah pekerjaan selesai.");
+    } else if (mode === "Retensi 5%") {
+      setPaymentSchedule([
+        { label: "Pekerjaan Selesai (95%)", percentage: 95, date: "" },
+        { label: "Retensi (5%)", percentage: 5, date: "" }
+      ]);
+      bullets.push("Pembayaran 95% setelah pekerjaan selesai.");
+      bullets.push("Retensi 5% akan dibayarkan setelah masa pemeliharaan selesai.");
+    }
+    setPaymentKeterangan(bullets);
+  };
+
   const filteredVendors = availableVendors.filter(v => 
     v.name.toLowerCase().includes(vendorSearch.toLowerCase()) ||
     (v.serviceNames && v.serviceNames.some((s: string) => s.toLowerCase().includes(vendorSearch.toLowerCase())))
   ).slice(0, 5);
+
+  const hasPenalty = lineItems.some(item => item.price < 0);
+
+  const uploadPenaltyMemo = async (file: File) => {
+    if (!supabase) return "";
+    setIsUploadingPenalty(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `penalty-memos/${fileName}`;
+
+      const { data, error } = await supabase.storage
+        .from('finance-docs')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('finance-docs')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (err) {
+      console.error("Upload failed:", err);
+      alert("Gagal mengunggah Memo Penalti. Silakan coba lagi.");
+      return "";
+    } finally {
+      setIsUploadingPenalty(false);
+    }
+  };
 
   const handleSubmit = async () => {
     if (!selectedProject || !vendorName) {
       alert("Lengkapi Project dan Vendor terlebih dahulu.");
       return;
     }
+    
+    if (hasPenalty && !penaltyFile && !penaltyMemoUrl) {
+      alert("Wajib mengunggah Internal Memo / Surat Penalti jika terdapat penalti (harga negatif).");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      let finalMemoUrl = penaltyMemoUrl;
+      if (hasPenalty && penaltyFile) {
+        finalMemoUrl = await uploadPenaltyMemo(penaltyFile);
+        if (!finalMemoUrl) {
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Ensure payment schedule amounts are synced with final grandTotal
+      const finalPaymentSchedule = paymentSchedule.map(ev => ({
+        ...ev,
+        amount: (grandTotal * (ev.percentage || 0)) / 100
+      }));
+
       const res = await fetch("/api/finance/document", {
         method: editDoc ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -181,8 +287,8 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
           lineItems,
           documentTotal: grandTotal,
           paymentTerms,
-          paymentSchedule,
-          paymentDate: paymentSchedule[0]?.date || "", // Fallback
+          paymentSchedule: finalPaymentSchedule,
+          paymentDate: finalPaymentSchedule[0]?.date || "", // Fallback
           deliveryDate,
           shipTo,
           billingInstruction,
@@ -192,7 +298,14 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
           duration,
           lampiran,
           workScope,
+          paymentKeterangan,
+          penaltyMemoUrl: finalMemoUrl,
           description: lineItems[0]?.description || "", // Principal job name
+          pph21Mode,
+          usePPh21: pph21Mode !== "none",
+          grossAmount: finalDocGross,
+          taxAmount: docTax,
+          netAmount: grandTotal,
           preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
         }),
       });
@@ -397,19 +510,93 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td colSpan={8} style={{ padding: "12px 8px", textAlign: "right", fontWeight: 700, color: "var(--text)" }}>TOTAL</td>
-                      <td colSpan={2} style={{ padding: "12px 8px", fontWeight: 700, fontSize: "14px", color: "var(--blue)" }}>{formatCurrencyIDR(grandTotal)}</td>
+                      <td colSpan={8} style={{ padding: "12px 0px 4px 8px", textAlign: "right", color: "var(--muted)", fontSize: "11px" }}>NOMINAL DI SPK (GROSS)</td>
+                      <td colSpan={2} style={{ padding: "12px 8px 4px", fontSize: "12px", textAlign: "right", color: "var(--text)" }}>{formatCurrencyIDR(finalDocGross)}</td>
+                    </tr>
+                    {pph21Mode !== "none" && (
+                      <tr>
+                        <td colSpan={8} style={{ padding: "4px 0px 4px 8px", textAlign: "right", color: "#f87171", fontSize: "11px" }}>PPH 21 (2.5%)</td>
+                        <td colSpan={2} style={{ padding: "4px 8px", fontSize: "12px", textAlign: "right", color: "#f87171" }}>- {formatCurrencyIDR(docTax)}</td>
+                      </tr>
+                    )}
+                    <tr style={{ borderTop: "1px solid var(--line)" }}>
+                      <td colSpan={8} style={{ padding: "8px 0px 12px 8px", textAlign: "right", fontWeight: 700, color: "var(--text)" }}>TOTAL YANG DITRANSFER (NET)</td>
+                      <td colSpan={2} style={{ padding: "8px 8px 12px", fontWeight: 700, fontSize: "18px", color: "var(--blue)", textAlign: "right" }}>{formatCurrencyIDR(grandTotal)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
               <button onClick={addLine} style={{ marginTop: "10px", background: "rgba(91,140,255,0.1)", border: "1px dashed var(--blue)", borderRadius: "8px", color: "var(--blue)", cursor: "pointer", padding: "8px 20px", width: "100%", fontSize: "12px" }}>+ Tambah Item</button>
 
+              {docType !== "PO" && (
+                <div style={{ marginTop: "24px", padding: "16px", borderRadius: "12px", background: "rgba(91,140,255,0.05)", border: "1px solid rgba(91,140,255,0.1)" }}>
+                  <label className="mini-meta" style={{ display: "block", marginBottom: "12px" }}>PENGATURAN PAJAK PPH 21 (2,5%)</label>
+                  <div style={{ display: "flex", gap: "10px" }}>
+                    {[
+                      { id: "none", label: "Tanpa Pajak", desc: "No deduction" },
+                      { id: "deduction", label: "Potongan (Netto)", desc: "Vendor pays tax" },
+                      { id: "grossup", label: "Gross Up", desc: "Company pays tax" }
+                    ].map((opt) => (
+                      <div 
+                        key={opt.id}
+                        onClick={() => setPph21Mode(opt.id as any)}
+                        style={{ 
+                          flex: 1, 
+                          padding: "12px", 
+                          borderRadius: "8px", 
+                          border: `2px solid ${pph21Mode === opt.id ? "var(--blue)" : "var(--line)"}`,
+                          background: pph21Mode === opt.id ? "rgba(91,140,255,0.08)" : "var(--panel)",
+                          cursor: "pointer",
+                          transition: "all 0.2s"
+                        }}
+                      >
+                        <div style={{ fontWeight: 600, fontSize: "13px", color: pph21Mode === opt.id ? "var(--blue)" : "var(--text)" }}>{opt.label}</div>
+                        <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "2px" }}>{opt.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+                </div>
+              )}
+
+              {hasPenalty && (
+                <div style={{ marginTop: "24px", padding: "16px", borderRadius: "12px", background: "rgba(220, 38, 38, 0.05)", border: "1px dashed #dc2626" }}>
+                  <label className="mini-meta" style={{ display: "block", marginBottom: "8px", color: "#dc2626" }}>DOCUMENTATION REQUIRED</label>
+                  <p style={{ fontSize: "12px", marginBottom: "12px" }}>Terdeteksi nilai penalti (negatif). Wajib mengunggah Internal Memo atau Surat Penalti sebagai dasar pemotongan.</p>
+                  
+                  {penaltyMemoUrl && !penaltyFile ? (
+                    <div style={{ fontSize: "12px", color: "var(--blue)", marginBottom: "8px" }}>✓ Dokumen sudah tersedia (Edit Mode)</div>
+                  ) : null}
+
+                  <input 
+                    type="file" 
+                    onChange={e => setPenaltyFile(e.target.files?.[0] || null)}
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    style={{ fontSize: "12px", color: "var(--text)" }}
+                  />
+                  {isUploadingPenalty && <div style={{ fontSize: "10px", marginTop: "4px", color: "var(--blue)" }}>Mengunggah...</div>}
+                </div>
+              )}
+
               <div style={{ marginTop: "32px", display: "flex", justifyContent: "space-between", gap: "12px" }}>
                 <button onClick={() => setStep(1)} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>← Kembali</button>
                 <div style={{ display: "flex", gap: "12px" }}>
                   <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
-                  <button onClick={() => setStep(3)} disabled={grandTotal === 0} className="primary-button">Lanjut →</button>
+                  <button 
+                    onClick={() => {
+                      if (hasPenalty && !penaltyFile && !penaltyMemoUrl) {
+                        alert("Silakan unggah Memo Penalti terlebih dahulu.");
+                        return;
+                      }
+                      setStep(3);
+                    }} 
+                    disabled={grandTotal === 0} 
+                    className="primary-button"
+                  >
+                    Lanjut →
+                  </button>
                 </div>
               </div>
             </div>
@@ -424,9 +611,29 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                 <div style={{ fontWeight: 700 }}>{selectedProject?.projectName}</div>
               </div>
 
-              <div className="form-section-title" style={{ marginBottom: "16px" }}>Syarat & Ketentuan Pembayaran (Termin)</div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
+                <div>
+                  <label className="mini-meta">Payment Method Reference</label>
+                  <select 
+                    style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--blue)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} 
+                    value={paymentTerms} 
+                    onChange={e => handleTermsChange(e.target.value)}
+                  >
+                    <option>Full Payment</option>
+                    <option>DP + Pelunasan</option>
+                    <option>Retensi 5%</option>
+                    <option>Custom Schedule</option>
+                  </select>
+                  <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>Pilih referensi untuk mengisi jadwal otomatis.</div>
+                </div>
+                <div>
+                  <label className="mini-meta">Catatan Pembayaran</label>
+                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Misal: Pembayaran bertahap sesuai progres..." />
+                </div>
+              </div>
+
+              <div className="form-section-title" style={{ marginBottom: "16px" }}>Detail Jadwal Pembayaran (Schedule)</div>
               <div style={{ marginBottom: "20px" }}>
-                <label className="mini-meta" style={{ display: "block", marginBottom: "12px" }}>Atur Jadwal Pembayaran (Schedule):</label>
                 <div style={{ display: "grid", gap: "10px" }}>
                   {paymentSchedule.map((ev, idx) => (
                     <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 100px 160px auto", gap: "10px", alignItems: "center", background: "var(--panel-soft)", padding: "10px", borderRadius: "8px", border: "1px solid var(--line)" }}>
@@ -436,6 +643,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                           const updated = [...paymentSchedule];
                           updated[idx].label = e.target.value;
                           setPaymentSchedule(updated);
+                          setPaymentTerms("Custom Schedule");
                         }}
                         placeholder="e.g. DP / Termin 1"
                         style={{ background: "transparent", border: "none", borderBottom: "1px solid var(--line)", padding: "4px", color: "var(--text)", fontSize: "14px" }}
@@ -449,6 +657,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                             updated[idx].percentage = Number(e.target.value);
                             updated[idx].amount = (grandTotal * (updated[idx].percentage || 0)) / 100;
                             setPaymentSchedule(updated);
+                            setPaymentTerms("Custom Schedule");
                           }}
                           style={{ width: "50px", background: "transparent", border: "none", borderBottom: "1px solid var(--line)", padding: "4px", color: "var(--text)", textAlign: "center" }}
                         />
@@ -464,27 +673,38 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                         }}
                         style={{ background: "transparent", border: "none", borderBottom: "1px solid var(--line)", padding: "4px", color: "var(--text)" }}
                       />
-                      <button onClick={() => setPaymentSchedule(prev => prev.filter((_, i) => i !== idx))} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>&times;</button>
+                      <button onClick={() => {
+                        setPaymentSchedule(prev => prev.filter((_, i) => i !== idx));
+                        setPaymentTerms("Custom Schedule");
+                      }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>&times;</button>
                     </div>
                   ))}
                 </div>
-                <button onClick={() => setPaymentSchedule(prev => [...prev, emptyEvent(`Termin ${prev.length + 1}`)])} style={{ marginTop: "12px", background: "none", border: "1px dashed var(--blue)", color: "var(--blue)", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontSize: "12px" }}>+ Tambah Termin / Pembayaran</button>
+                <button onClick={() => {
+                  setPaymentSchedule(prev => [...prev, emptyEvent(`Termin ${prev.length + 1}`)]);
+                  setPaymentTerms("Custom Schedule");
+                }} style={{ marginTop: "12px", background: "none", border: "1px dashed var(--blue)", color: "var(--blue)", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontSize: "12px" }}>+ Tambah Termin / Pembayaran</button>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                <div>
-                  <label className="mini-meta">Payment Method Reference</label>
-                  <select style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)}>
-                    <option>Custom Schedule</option>
-                    <option>Full Payment</option>
-                    <option>DP + Pelunasan</option>
-                    <option>Retensi 5%</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="mini-meta">Catatan Tambahan</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Catatan atau instruksi khusus..." />
-                </div>
+              <div className="form-section-title" style={{ margin: "24px 0 16px" }}>Keterangan Pembayaran (Bullet Points)</div>
+              <div style={{ background: "rgba(91,140,255,0.06)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(91,140,255,0.1)" }}>
+                 <div style={{ display: "grid", gap: "8px" }}>
+                    {paymentKeterangan.map((k, i) => (
+                       <div key={i} style={{ display: "flex", gap: "10px" }}>
+                          <input 
+                            value={k} 
+                            onChange={e => {
+                               const updated = [...paymentKeterangan];
+                               updated[i] = e.target.value;
+                               setPaymentKeterangan(updated);
+                            }}
+                            style={{ flex: 1, background: "var(--panel)", border: "1px solid var(--line)", padding: "8px 12px", borderRadius: "6px", color: "var(--text)", fontSize: "12px" }} 
+                          />
+                          <button onClick={() => setPaymentKeterangan(prev => prev.filter((_, idx) => idx !== i))} style={{ color: "#f87171", background: "none", border: "none", cursor: "pointer" }}>✕</button>
+                       </div>
+                    ))}
+                 </div>
+                 <button onClick={() => setPaymentKeterangan(prev => [...prev, ""])} style={{ marginTop: "12px", background: "none", border: "1px dashed var(--blue)", color: "var(--blue)", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", cursor: "pointer" }}>+ Tambah Poin Keterangan</button>
               </div>
 
               <div className="form-section-title" style={{ margin: "24px 0 16px" }}>Delivery Instruction</div>

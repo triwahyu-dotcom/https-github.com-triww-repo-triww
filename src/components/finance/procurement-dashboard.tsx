@@ -32,7 +32,18 @@ const statusColors: Record<string, string> = {
   submitted: "tone-amber",
   approved: "tone-blue",
   paid: "tone-green",
+  settlement_pending: "tone-amber",
   settled: "tone-green",
+};
+
+const statusLabels: Record<string, string> = {
+  draft: "DRAFT",
+  pending_finance: "PENDING FINANCE",
+  pending_c_level: "PENDING C-LEVEL",
+  approved: "APPROVED",
+  paid: "PAID",
+  settlement_pending: "PENDING SETTLEMENT",
+  settled: "SETTLED",
 };
 
 export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [] }: Props) {
@@ -148,7 +159,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                   <div style={{ fontWeight: 700 }}>{formatCurrencyIDR(doc.amount)}</div>
                   <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
                     <span className={`status-pill ${statusColors[doc.status] || "tone-amber"}`}>
-                      {doc.status.toUpperCase()}
+                      {statusLabels[doc.status] || doc.status.toUpperCase()}
                     </span>
                     {doc.rejectionReason && (
                       <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
@@ -254,7 +265,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                     <span className={`status-pill ${rfp.status === "settled" || rfp.status === "paid" ? "tone-green" :
                         rfp.status === "approved" ? "tone-blue" : "tone-amber"
                       }`}>
-                      {rfp.status.replace(/_/g, " ").toUpperCase()}
+                      {statusLabels[rfp.status] || rfp.status.replace(/_/g, " ").toUpperCase()}
                     </span>
                     {rfp.rejectionReason && (
                       <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>

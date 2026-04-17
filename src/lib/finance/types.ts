@@ -34,7 +34,7 @@ export interface ExpenseDocument {
   issueDate: string;
   description: string;
   amount: number;
-  status: "draft" | "pending_finance" | "pending_c_level" | "approved" | "paid";
+  status: "draft" | "pending_finance" | "pending_c_level" | "approved" | "paid" | "settlement_pending";
   rfpId?: string; // Legacy
   rfpIds?: string[]; // Multiple RFPs for termins
   lineItems?: LineItem[];
@@ -45,7 +45,14 @@ export interface ExpenseDocument {
   shipTo?: string;
   billingInstruction?: string;
   billingTerms?: string[];
+  paymentKeterangan?: string[];
+  penaltyMemoUrl?: string;
   notes?: string;
+  usePPh21?: boolean;
+  pph21Mode?: "none" | "deduction" | "grossup";
+  grossAmount?: number;
+  taxAmount?: number;
+  netAmount?: number;
   
   // SPK Specific fields
   workScope?: string[];

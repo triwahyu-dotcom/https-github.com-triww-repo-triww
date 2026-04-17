@@ -60,22 +60,33 @@ export async function PATCH(req: NextRequest) {
 
     // Cascade status to linked documents
     const docs = await readDocuments();
+    let docsUpdated = 0;
+
     for (const doc of docs) {
-      if (doc.rfpId === rfpId) {
+      // Check if this doc is linked to this RFP (checking both legacy ID and new documentIds array)
+      const isLinked = doc.rfpId === rfpId || (rfp.documentIds && rfp.documentIds.includes(doc.id));
+
+      if (isLinked) {
         if (status === "approved") {
           doc.status = "approved";
           doc.approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
         } else if (status === "paid") {
-          doc.status = "paid";
+          // Special logic for Cash Advance: after payment, it becomes "Pending Settlement"
+          if (doc.documentType === "CASH_ADVANCE") {
+            doc.status = "settlement_pending";
+          } else {
+            doc.status = "paid";
+          }
         } else if (status === "pending_finance") {
           doc.status = "pending_finance";
         }
         await saveDocument(doc);
+        docsUpdated++;
       }
     }
 
-    logger.audit("FinanceAPI", "RFP_STATUS_CHANGED", { rfpId, status, rejectionReason });
-    return NextResponse.json({ success: true, rfp });
+    logger.audit("FinanceAPI", "RFP_STATUS_CHANGED", { rfpId, status, rejectionReason, docsImpacted: docsUpdated });
+    return NextResponse.json({ success: true, rfp, docsUpdated });
   } catch (error: any) {
     logger.error("FinanceAPI", "STATUS_UPDATE_FAILED", { error });
     console.error("Status Update Error:", error);

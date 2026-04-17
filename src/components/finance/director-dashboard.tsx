@@ -301,6 +301,39 @@ export function DirectorApprovals({ initialData }: Props) {
                     </div>
                   </div>
                 )}
+                {selectedDoc.documentType === "CASH_ADVANCE" && (() => {
+                  const linkedRfp = initialData.rfps?.find(r => r.documentIds?.includes(selectedDoc.id));
+                  if (!linkedRfp) return (
+                    <div style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "12px", padding: "12px", marginTop: "16px", color: "#f87171", fontSize: "12px", textAlign: "center" }}>
+                      ⚠️ RFP belum dibuat untuk Cash Advance ini.
+                    </div>
+                  );
+
+                  return (
+                    <div style={{ background: "rgba(91,140,255,0.05)", border: "1px solid rgba(91,140,255,0.1)", borderRadius: "12px", padding: "16px", marginTop: "24px" }}>
+                      <div style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--blue)", fontWeight: 700, marginBottom: "12px", letterSpacing: "1px" }}>RFP Payment Destination</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                        <div>
+                          <label className="eyebrow" style={{ color: "var(--blue)" }}>Penerima / Payee</label>
+                          <div style={{ fontWeight: 600, fontSize: "14px", marginTop: "4px" }}>{linkedRfp.payeeName}</div>
+                        </div>
+                        <div>
+                          <label className="eyebrow" style={{ color: "var(--blue)" }}>Bank</label>
+                          <div style={{ fontWeight: 600, fontSize: "14px", marginTop: "4px" }}>{linkedRfp.bankAccount.bankName}</div>
+                        </div>
+                        <div style={{ gridColumn: "span 2" }}>
+                          <label className="eyebrow" style={{ color: "var(--blue)" }}>Account Number</label>
+                          <div style={{ fontSize: "20px", fontWeight: 700, marginTop: "4px", color: "var(--text)" }}>{linkedRfp.bankAccount.accountNo}</div>
+                          <div style={{ fontSize: "12px", color: "var(--muted-soft)", marginTop: "2px" }}>a.n. {linkedRfp.bankAccount.accountName}</div>
+                        </div>
+                      </div>
+                      <div style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px dotted var(--line)", display: "flex", justifyContent: "space-between", fontSize: "13px" }}>
+                        <span>Total Disbursement:</span>
+                        <span style={{ fontWeight: 700, color: "var(--blue)" }}>{formatCurrencyIDR(linkedRfp.totalAmount)}</span>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
               <SignaturePad name="Eka Marutha Yuswardana" onSign={handleApproveDoc} onReject={handleRejectDoc} isSigning={isSigningDoc} label="Dokumen" />
             </div>

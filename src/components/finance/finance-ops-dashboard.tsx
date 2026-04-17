@@ -419,13 +419,37 @@ export function FinanceOpsDashboard({ initialData }: Props) {
         />
       )}
 
-      {selectedReviewDoc && (
-        <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-          <div style={{ backgroundColor: "var(--panel)", borderRadius: "16px", width: "100%", maxWidth: "500px", border: "1px solid var(--line)", padding: "32px", textAlign: "center" }}>
-             <h2 style={{ marginTop: 0 }}>Forward Dokumen ke Direktur</h2>
-             <div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "24px" }}>Dengan ini Anda mengkonfirmasi bahwa dokumen <strong>{selectedReviewDoc.id}</strong> telah diverifikasi kelengkapannya oleh staf Finance dan disetujui format administrasinya.</div>
-             
-             <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+      {selectedReviewDoc && (() => {
+        const linkedRfp = initialData.rfps?.find(r => r.documentIds?.includes(selectedReviewDoc.id));
+        
+        return (
+          <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+            <div style={{ backgroundColor: "var(--panel)", borderRadius: "16px", width: "100%", maxWidth: "500px", border: "1px solid var(--line)", padding: "32px", textAlign: "center" }}>
+              <h2 style={{ marginTop: 0 }}>Forward Dokumen ke Direktur</h2>
+              <div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "24px" }}>
+                Dengan ini Anda mengkonfirmasi bahwa dokumen <strong>{selectedReviewDoc.id}</strong> telah diverifikasi kelengkapannya oleh staf Finance.
+              </div>
+              
+              {selectedReviewDoc.documentType === "CASH_ADVANCE" && linkedRfp && (
+                <div style={{ background: "rgba(91,140,255,0.05)", border: "1px solid rgba(91,140,255,0.1)", borderRadius: "12px", padding: "16px", marginBottom: "24px", textAlign: "left" }}>
+                  <div style={{ fontSize: "11px", textTransform: "uppercase", color: "var(--blue)", fontWeight: 700, marginBottom: "8px", letterSpacing: "1px" }}>Linked RFP Payment Details</div>
+                  <div style={{ fontWeight: 600, fontSize: "14px" }}>{linkedRfp.bankAccount.bankName}</div>
+                  <div style={{ fontSize: "18px", margin: "4px 0", fontWeight: 700 }}>{linkedRfp.bankAccount.accountNo}</div>
+                  <div style={{ fontSize: "12px", color: "var(--muted)" }}>a.n. {linkedRfp.bankAccount.accountName}</div>
+                  <div style={{ marginTop: "8px", paddingTop: "8px", borderTop: "1px solid var(--line)", display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+                    <span>Amount:</span>
+                    <span style={{ fontWeight: 700 }}>{formatCurrencyIDR(linkedRfp.totalAmount)}</span>
+                  </div>
+                </div>
+              )}
+
+              {selectedReviewDoc.documentType === "CASH_ADVANCE" && !linkedRfp && (
+                <div style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "12px", padding: "12px", marginBottom: "24px", color: "#f87171", fontSize: "12px" }}>
+                  ⚠️ RFP belum dibuat untuk Cash Advance ini.
+                </div>
+              )}
+              
+              <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
                 <button onClick={() => setSelectedReviewDoc(null)} className="secondary-button" style={{minWidth: "120px"}}>Batal</button>
                 <button 
                   onClick={() => handleSignAndForwardDoc(selectedReviewDoc)} 
@@ -434,10 +458,11 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                 >
                   Ya, Sign & Forward
                 </button>
-             </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {rejectionDocId && (
         <RejectionModal

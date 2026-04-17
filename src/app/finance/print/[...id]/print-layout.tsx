@@ -305,97 +305,118 @@ export function PrintLayout({ rfp, doc }: Props) {
           </div>
 
           {/* Table */}
-          <table className="po-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-            <thead>
-              <tr>
-                <th rowSpan={2} style={{ width: '30px' }}>No</th>
-                <th rowSpan={2}>Item / Task</th>
-                <th rowSpan={2}>Specification</th>
-                <th colSpan={2}>Qty</th>
-                <th colSpan={2}>Freq</th>
-                <th colSpan={2}>Vol</th>
-                <th rowSpan={2} style={{ width: '100px' }}>Price</th>
-                <th rowSpan={2} style={{ width: '110px' }}>Amount IDR</th>
-              </tr>
-              <tr>
-                <th style={{ width: '30px' }}>Qty</th>
-                <th style={{ width: '40px' }}>Unit</th>
-                <th style={{ width: '30px' }}>Fq</th>
-                <th style={{ width: '40px' }}>Unit</th>
-                <th style={{ width: '30px' }}>Vol</th>
-                <th style={{ width: '45px' }}>Unit</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(doc.lineItems && doc.lineItems.length > 0) ? doc.lineItems.map((item, idx) => (
-                <tr key={idx}>
-                  <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                  <td>{item.description}</td>
-                  <td>{item.specification || "-"}</td>
-                  <td style={{ textAlign: 'center' }}>{item.qty}</td>
-                  <td style={{ textAlign: 'center' }}>{item.unit}</td>
-                  <td style={{ textAlign: 'center' }}>{item.freq}</td>
-                  <td style={{ textAlign: 'center' }}>{item.freqUnit}</td>
-                  <td style={{ textAlign: 'center' }}>{item.vol}</td>
-                  <td style={{ textAlign: 'center' }}>{item.volUnit}</td>
-                  <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price)}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount)}</td>
-                </tr>
-              )) : (
-                <tr>
-                  <td style={{ textAlign: 'center' }}>1</td>
-                  <td>{doc.description}</td>
-                  <td>-</td>
-                  <td style={{ textAlign: 'center' }}>1</td>
-                  <td style={{ textAlign: 'center' }}>-</td>
-                  <td style={{ textAlign: 'center' }}>1</td>
-                  <td style={{ textAlign: 'center' }}>-</td>
-                  <td style={{ textAlign: 'center' }}>1</td>
-                  <td style={{ textAlign: 'center' }}>-</td>
-                  <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
-                </tr>
-              )}
-            </tbody>
-            <tfoot>
-              <tr style={{ fontWeight: 'bold' }}>
-                <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>Grand Total</td>
-                <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
-              </tr>
-            </tfoot>
-          </table>
+          {(() => {
+            const calculatedTotal = (doc.lineItems && doc.lineItems.length > 0) 
+              ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
+              : doc.amount;
+            
+            return (
+              <>
+                <table className="po-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
+                  <thead>
+                    <tr>
+                      <th rowSpan={2} style={{ width: '30px' }}>No</th>
+                      <th rowSpan={2}>Item / Task</th>
+                      <th rowSpan={2}>Specification</th>
+                      <th colSpan={2}>Qty</th>
+                      <th colSpan={2}>Freq</th>
+                      <th colSpan={2}>Vol</th>
+                      <th rowSpan={2} style={{ width: '100px' }}>Price</th>
+                      <th rowSpan={2} style={{ width: '110px' }}>Amount IDR</th>
+                    </tr>
+                    <tr>
+                      <th style={{ width: '30px' }}>Qty</th>
+                      <th style={{ width: '40px' }}>Unit</th>
+                      <th style={{ width: '30px' }}>Fq</th>
+                      <th style={{ width: '40px' }}>Unit</th>
+                      <th style={{ width: '30px' }}>Vol</th>
+                      <th style={{ width: '45px' }}>Unit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(doc.lineItems && doc.lineItems.length > 0) ? doc.lineItems.map((item, idx) => (
+                      <tr key={idx}>
+                        <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                        <td>{item.description}</td>
+                        <td>{item.specification || "-"}</td>
+                        <td style={{ textAlign: 'center' }}>{item.qty}</td>
+                        <td style={{ textAlign: 'center' }}>{item.unit}</td>
+                        <td style={{ textAlign: 'center' }}>{item.freq}</td>
+                        <td style={{ textAlign: 'center' }}>{item.freqUnit}</td>
+                        <td style={{ textAlign: 'center' }}>{item.vol}</td>
+                        <td style={{ textAlign: 'center' }}>{item.volUnit}</td>
+                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount)}</td>
+                      </tr>
+                    )) : (
+                      <tr>
+                        <td style={{ textAlign: 'center' }}>1</td>
+                        <td>{doc.description}</td>
+                        <td>-</td>
+                        <td style={{ textAlign: 'center' }}>1</td>
+                        <td style={{ textAlign: 'center' }}>-</td>
+                        <td style={{ textAlign: 'center' }}>1</td>
+                        <td style={{ textAlign: 'center' }}>-</td>
+                        <td style={{ textAlign: 'center' }}>1</td>
+                        <td style={{ textAlign: 'center' }}>-</td>
+                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
+                      </tr>
+                    )}
+                  </tbody>
+                  <tfoot>
+                    <tr style={{ fontWeight: 'bold' }}>
+                      <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>NOMINAL DI SPK (GROSS)</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px', background: '#f9f9f9' }}>{formatCurrency(doc.grossAmount || calculatedTotal)}</td>
+                    </tr>
+                    {doc.usePPh21 && (
+                      <tr style={{ color: '#d32f2f' }}>
+                        <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPh 21 (2,5%)</td>
+                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>- {formatCurrency(doc.taxAmount || (calculatedTotal * 0.025))}</td>
+                      </tr>
+                    )}
+                    <tr style={{ fontWeight: 'bold', borderTop: '2px solid #333' }}>
+                      <td colSpan={10} style={{ textAlign: 'right', padding: '10px', background: '#f0f4f8' }}>TOTAL YANG DITRANSFER (NET)</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '14px', background: '#f0f4f8', color: '#004a99' }}>{formatCurrency(doc.netAmount || doc.amount)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
 
-          {/* Details Sections */}
-          <div style={{ fontSize: '11px', lineHeight: '1.6' }}>
-             <p style={{ margin: '8px 0' }}><strong>Notes :</strong> {doc.description && doc.lineItems?.length ? doc.description : "-"}</p>
-             
-             {doc.paymentSchedule && doc.paymentSchedule.length > 0 ? (
-               <div style={{ margin: '12px 0' }}>
-                 <p style={{ fontWeight: 'bold', marginBottom: '6px' }}>Jadwal Pembayaran (Payment Schedule):</p>
-                 <table style={{ width: '400px', borderCollapse: 'collapse', fontSize: '10px', border: '1px solid #ddd' }}>
-                   <thead>
-                     <tr style={{ background: '#f8f9fa' }}>
-                       <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>Keterangan</th>
-                       <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>%</th>
-                       <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right' }}>Nominal (IDR)</th>
-                       <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>Estimasi Tanggal</th>
-                     </tr>
-                   </thead>
-                   <tbody>
-                     {doc.paymentSchedule.map((ev, i) => (
-                       <tr key={i}>
-                         <td style={{ border: '1px solid #ddd', padding: '4px' }}>{ev.label}</td>
-                         <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>{ev.percentage}%</td>
-                         <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right' }}>{formatCurrency(ev.amount || (doc.amount * (ev.percentage || 0) / 100))}</td>
-                         <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>{formatDateID(ev.date)}</td>
-                       </tr>
-                     ))}
-                   </tbody>
-                 </table>
-               </div>
-             ) : (
-               <p style={{ margin: '8px 0' }}><strong>Payment Terms:</strong> {doc.paymentTerms || "-"}</p>
-             )}
+                {/* Details Sections */}
+                <div style={{ fontSize: '11px', lineHeight: '1.6' }}>
+                  <p style={{ margin: '8px 0' }}><strong>Notes :</strong> {doc.description && doc.lineItems?.length ? doc.description : "-"}</p>
+                  
+                  {doc.paymentSchedule && doc.paymentSchedule.length > 0 ? (
+                    <div style={{ margin: '12px 0' }}>
+                      <p style={{ fontWeight: 'bold', marginBottom: '6px' }}>Jadwal Pembayaran (Payment Schedule):</p>
+                      <table style={{ width: '400px', borderCollapse: 'collapse', fontSize: '10px', border: '1px solid #ddd' }}>
+                        <thead>
+                          <tr style={{ background: '#f8f9fa' }}>
+                            <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'left' }}>Keterangan</th>
+                            <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>%</th>
+                            <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right' }}>Nominal (IDR)</th>
+                            <th style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>Estimasi Tanggal</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {doc.paymentSchedule.map((ev, i) => (
+                            <tr key={i}>
+                              <td style={{ border: '1px solid #ddd', padding: '4px' }}>{ev.label}</td>
+                              <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>{ev.percentage}%</td>
+                              <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'right' }}>{formatCurrency(ev.amount || (calculatedTotal * (ev.percentage || 0) / 100))}</td>
+                              <td style={{ border: '1px solid #ddd', padding: '4px', textAlign: 'center' }}>{formatDateID(ev.date)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p style={{ margin: '8px 0' }}><strong>Payment Terms:</strong> {doc.paymentTerms || "-"}</p>
+                  )}
+                </div>
+              </>
+            );
+          })()}
              
              <div style={{ display: 'flex', marginTop: '20px' }}>
                 <div style={{ flex: 1 }}>
@@ -423,7 +444,6 @@ export function PrintLayout({ rfp, doc }: Props) {
                    )}
                 </div>
              </div>
-          </div>
 
           {/* Signatures */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0', marginTop: '60px' }}>
@@ -494,34 +514,35 @@ export function PrintLayout({ rfp, doc }: Props) {
             </table>
           </div>
 
-          <p>Selaku Penyedia Jasa Event Organizer yang bertindak untuk dan atas nama <strong>PT Juara Berhasil Berkah Sejahtera</strong>, selanjutnya:</p>
+          <p style={{ textAlign: 'justify', lineHeight: 1.6 }}>Selaku Penyedia Jasa Event Organizer yang bertindak untuk dan atas nama <strong>PT Juara Berhasil Berkah SEJAHTERA</strong>, selanjutnya disebut sebagai <strong>Pihak Pertama</strong>, dengan ini memberikan penugasan kepada:</p>
           
-          <div style={{ marginLeft: '40px', margin: '20px 0' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <div style={{ marginLeft: '30px', margin: '15px 0' }}>
+            <table style={{ borderCollapse: 'collapse', width: '100%', lineHeight: 1.6 }}>
               <tbody>
-                <tr><td style={{ width: '110px' }}>Nama</td><td style={{ width: '20px' }}>:</td><td><strong>{doc.vendorName}</strong></td></tr>
+                <tr><td style={{ width: '100px' }}>Nama</td><td style={{ width: '15px' }}>:</td><td><strong>{doc.vendorName}</strong></td></tr>
                 <tr><td style={{ verticalAlign: 'top' }}>Alamat</td><td style={{ verticalAlign: 'top' }}>:</td><td>{doc.vendorAddress || "-"}</td></tr>
               </tbody>
             </table>
           </div>
+          <p style={{ marginBottom: '15px' }}>Disebut sebagai <strong>Pihak Kedua</strong>.</p>
 
-          <p>Bertindak untuk dan atas nama sendiri untuk menyatakan ketersediaan dengan rincian sebagai berikut:</p>
-          <div style={{ marginLeft: '40px', marginBottom: '30px' }}>
+          <p style={{ textAlign: 'justify', lineHeight: 1.6 }}>Pihak Kedua bertindak untuk dan atas nama sendiri untuk menyatakan ketersediaan dengan rincian sebagai berikut:</p>
+          <div style={{ marginLeft: '30px', marginBottom: '25px' }}>
             <table style={{ borderCollapse: 'collapse', width: '100%', lineHeight: 1.8 }}>
               <tbody>
-                <tr><td style={{ width: '160px' }}>Nama Event</td><td style={{ width: '20px' }}>:</td><td><strong>{doc.projectName}</strong></td></tr>
+                <tr><td style={{ width: '140px' }}>Nama Event</td><td style={{ width: '15px' }}>:</td><td><strong>{doc.projectName}</strong></td></tr>
                 <tr><td>Tanggal Event</td><td>:</td><td>{doc.deliveryDate ? formatDateID(doc.deliveryDate) : "-"}</td></tr>
                 <tr><td>Durasi Pekerjaan</td><td>:</td><td>{doc.duration || (doc.deliveryDate ? formatDateID(doc.deliveryDate) : "-")}</td></tr>
                 <tr><td>Lokasi</td><td>:</td><td>{doc.venue || doc.shipTo || "-"}</td></tr>
                 <tr><td>Nama Pekerjaan</td><td>:</td><td>{doc.description?.toUpperCase() || "JASA VENDOR"}</td></tr>
                 <tr>
-                  <td style={{ verticalAlign: 'top' }}>Ruang lingkup Pekerjaan</td>
+                  <td style={{ verticalAlign: 'top' }}>Ruang lingkup</td>
                   <td style={{ verticalAlign: 'top' }}>:</td>
                   <td> 
                     {doc.workScope && doc.workScope.length > 0 ? (
-                      <ul style={{ margin: '0', paddingLeft: '20px', listStyleType: 'disc' }}>
+                      <ul style={{ margin: '0', paddingLeft: '18px', listStyleType: 'disc' }}>
                         {doc.workScope.map((item, idx) => item.trim() && (
-                          <li key={idx} style={{ marginBottom: '4px' }}>{item}</li>
+                          <li key={idx} style={{ marginBottom: '2px' }}>{item}</li>
                         ))}
                       </ul>
                     ) : (
@@ -533,19 +554,49 @@ export function PrintLayout({ rfp, doc }: Props) {
             </table>
           </div>
 
-          <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #eee', background: '#fafafa' }}>
-             <p style={{ margin: '0 0 10px' }}><strong>Nilai Pekerjaan :</strong> Rp {new Intl.NumberFormat("id-ID").format(doc.amount)} (Netto)</p>
-             <p style={{ margin: '0 0 5px' }}><strong>Keterangan :</strong></p>
-             <ul style={{ margin: '0', paddingLeft: '20px' }}>
-                <li>Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)</li>
-                {doc.paymentSchedule && doc.paymentSchedule.length > 0 ? (
-                  doc.paymentSchedule.map((ev, i) => (
-                    <li key={i}>{ev.label} ({ev.percentage}%) sebesar {formatCurrency(ev.amount || (doc.amount * (ev.percentage || 0) / 100))} akan dibayarkan {ev.date ? `pada tanggal ${formatDateID(ev.date)}` : "setelah invoice diterima"}.</li>
-                  ))
-                ) : (
-                  <li>{doc.paymentTerms || "Pembayaran dilakukan 3 hari kerja setelah invoice diterima."}</li>
+          <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #ddd', background: '#fafafa', borderRadius: '4px' }}>
+             <p style={{ margin: '0 0 10px', fontSize: '14px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}><strong>Rincian Nilai Pekerjaan :</strong></p>
+             <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
+                <div style={{ whiteSpace: 'nowrap' }}>Nominal di SPK (Gross)</div>
+                <div>: <strong>{formatCurrency(doc.grossAmount || doc.amount / (doc.usePPh21 ? 0.975 : 1))}</strong></div>
+                
+                {doc.usePPh21 && (
+                  <>
+                    <div style={{ whiteSpace: 'nowrap', color: '#d32f2f' }}>PPh 21 (2,5%)</div>
+                    <div style={{ color: '#d32f2f' }}>: - {formatCurrency(doc.taxAmount || (doc.grossAmount ? doc.grossAmount * 0.025 : 0))}</div>
+                  </>
                 )}
-             </ul>
+                
+                <div style={{ whiteSpace: 'nowrap', fontSize: '13px', marginTop: '5px' }}><strong>Total yang ditransfer (Net)</strong></div>
+                <div style={{ fontSize: '13px', marginTop: '5px' }}>: <strong>{formatCurrency(doc.netAmount || doc.amount)}</strong></div>
+              </div>
+              
+              <p style={{ margin: '15px 0 10px', fontSize: '12px' }}>
+                <strong>Terbilang:</strong> 
+                <em style={{ color: '#004a99', marginLeft: '8px', fontWeight: 'bold' }}>
+                  ## {terbilang(doc.netAmount || doc.amount).toUpperCase()} ##
+                </em>
+              </p>
+
+              <p style={{ margin: '15px 0 5px' }}><strong>Keterangan Pembayaran :</strong></p>
+              <ul style={{ margin: '0', paddingLeft: '18px', lineHeight: 1.5 }}>
+                 {doc.paymentKeterangan && doc.paymentKeterangan.length > 0 ? (
+                   doc.paymentKeterangan.map((item, i) => (
+                     <li key={i} style={{ marginBottom: '4px' }}>{item}</li>
+                   ))
+                 ) : (
+                   <>
+                     <li style={{ marginBottom: '4px' }}>Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)</li>
+                     {doc.paymentSchedule && doc.paymentSchedule.length > 0 ? (
+                       doc.paymentSchedule.map((ev, i) => (
+                         <li key={i} style={{ marginBottom: '4px' }}>{ev.label} ({ev.percentage}%) sebesar {formatCurrency(ev.amount || (doc.amount * (ev.percentage || 0) / 100))} akan dibayarkan {ev.date ? `pada tanggal ${formatDateID(ev.date)}` : "setelah invoice diterima"}.</li>
+                       ))
+                     ) : (
+                       <li style={{ marginBottom: '4px' }}>{doc.paymentTerms || "Pembayaran dilakukan 3 hari kerja setelah invoice diterima."}</li>
+                     )}
+                   </>
+                 )}
+              </ul>
           </div>
 
           <p style={{ marginTop: '40px', textAlign: 'right' }}>Jakarta, {today}</p>

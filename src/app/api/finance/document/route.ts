@@ -12,6 +12,8 @@ export async function POST(request: Request) {
       vendorTaxId, lineItems, description, documentTotal, paymentTerms,
       paymentDate, deliveryDate, shipTo, billingInstruction, billingTerms,
       notes, preparedBy, venue, duration, workScope, lampiran, paymentSchedule,
+      paymentKeterangan, penaltyMemoUrl,
+      usePPh21, pph21Mode, grossAmount, taxAmount, netAmount,
     } = body;
     if (!projectId || !documentType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -34,14 +36,41 @@ export async function POST(request: Request) {
       const sequence = String(typeDocs.length + 1).padStart(3, '0');
       docId = `${sequence}/JBBS/${documentType}/${month}/${year}`;
     }
-    const calculatedTotal = lineItems?.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0) ?? Number(documentTotal) ?? 0;
+    const subtotalItems = lineItems?.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0) ?? 0;
+    
+    // Server-side recalculation logic
+    let calculatedNet = subtotalItems;
+    let calculatedGross = subtotalItems;
+    let calculatedTax = 0;
+
+    if (pph21Mode === "deduction") {
+      calculatedGross = subtotalItems;
+      calculatedNet = subtotalItems * 0.975;
+      calculatedTax = calculatedGross - calculatedNet;
+    } else if (pph21Mode === "grossup") {
+      calculatedGross = subtotalItems / 0.975;
+      calculatedNet = subtotalItems;
+      calculatedTax = calculatedGross - calculatedNet;
+    }
+
+    const finalAmount = calculatedNet || Number(documentTotal) || 0;
+    
+    // Determine initial status based on document type
+    // PO, SPK, KONTRAK bypass Finance verification and go direct to C-level
+    const initialStatus = (documentType === "PO" || documentType === "SPK" || documentType === "KONTRAK") 
+      ? "pending_c_level" 
+      : "pending_finance";
+
     const newDoc: ExpenseDocument = {
       id: docId, projectId, projectName, vendorName: vendorName || "Unknown Vendor",
       vendorAddress, vendorTaxId, documentType, issueDate: now.toISOString(),
-      description: description || "", amount: calculatedTotal, status: "pending_finance", 
+      description: description || "", amount: finalAmount, status: initialStatus, 
       lineItems: lineItems || [], paymentTerms, deliveryDate, shipTo,
       billingInstruction, billingTerms,
       preparedBy, venue, duration, workScope, lampiran, paymentSchedule,
+      paymentKeterangan: paymentKeterangan || [],
+      penaltyMemoUrl,
+      usePPh21, pph21Mode, grossAmount: calculatedGross, taxAmount: calculatedTax, netAmount: calculatedNet,
     };
     await saveDocument(newDoc);
     logger.audit("FinanceAPI", "DOCUMENT_CREATED", { docId, projectId, documentType });
@@ -61,8 +90,35 @@ export async function PATCH(request: Request) {
     const docIndex = allDocs.findIndex(d => d.id === id);
     if (docIndex === -1) return NextResponse.json({ error: "Document not found" }, { status: 404 });
     const doc = allDocs[docIndex];
+    
+    // Recalculate amount if lineItems are being updated
+    let updatedAmount = doc.amount;
+    if (updates.lineItems) {
+      const subtotal = updates.lineItems.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0);
+      const mode = updates.pph21Mode || doc.pph21Mode || "none";
+      
+      if (mode === "deduction") {
+        updatedAmount = subtotal * 0.975;
+      } else if (mode === "grossup") {
+        updatedAmount = subtotal; // Net remains matching subtotal in grossup
+      } else {
+        updatedAmount = subtotal;
+      }
+    } else if (updates.documentTotal !== undefined) {
+      updatedAmount = Number(updates.documentTotal);
+    }
+
+    // Determine status based on document type
+    const resetStatus = (doc.documentType === "PO" || doc.documentType === "SPK" || doc.documentType === "KONTRAK") 
+      ? "pending_c_level" 
+      : "pending_finance";
+
     const updatedDoc: ExpenseDocument = {
-      ...doc, ...updates, status: "pending_finance", rejectionReason: "", 
+      ...doc,
+      ...updates,
+      amount: updatedAmount,
+      status: resetStatus,
+      rejectionReason: "", 
     };
     await saveDocument(updatedDoc);
     logger.audit("FinanceAPI", "DOCUMENT_UPDATED", { docId: id, updates });

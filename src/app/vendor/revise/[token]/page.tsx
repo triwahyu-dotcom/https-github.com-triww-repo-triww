@@ -34,7 +34,6 @@ export default async function VendorRevisionPage({
       initialForm={{
         vendorName: vendor.name,
         services: vendor.serviceNames.join(", "),
-        coverageArea: vendor.coverageArea,
         email: vendor.email,
         legalStatus: vendor.legalStatus,
         taxStatus: vendor.taxStatus,

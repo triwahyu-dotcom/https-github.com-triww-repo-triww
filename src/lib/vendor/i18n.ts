@@ -51,8 +51,8 @@ export const dictionary: Dictionary = {
     en: "Service",
   },
   location: {
-    id: "Lokasi",
-    en: "Location",
+    id: "Alamat",
+    en: "Address",
   },
   legalStatus: {
     id: "Legalitas",

@@ -78,7 +78,6 @@ type ImportedRow = {
 export type VendorIntakePayload = {
   vendorName: string;
   services: string[];
-  coverageArea: string;
   email: string;
   legalStatus: LegalStatus;
   taxStatus: TaxStatus;
@@ -96,15 +95,6 @@ export type VendorIntakePayload = {
   picEmail: string;
   businessAddress: string;
   documentsFolderUrl: string;
-  companyProfileUrl: string;
-  catalogUrl: string;
-  npwpScanUrl: string;
-  ownerKtpUrl: string;
-  nibUrl: string;
-  invoiceSampleUrl: string;
-  pkpCertificateUrl: string;
-  ndaUrl: string;
-  picKtpUrl: string;
 };
 
 function slug(value: string) {
@@ -119,7 +109,16 @@ function stringValue(value: unknown) {
   if (value === undefined || value === null) {
     return "";
   }
-  return String(value).trim();
+  const str = String(value).trim();
+  // Handle scientific notation (common in Excel for long numbers)
+  if (str.includes("E+") && !isNaN(Number(str))) {
+    try {
+      return BigInt(Math.round(Number(str))).toString();
+    } catch {
+      return str;
+    }
+  }
+  return str;
 }
 
 function normalizeLegalStatus(value: string): LegalStatus {
@@ -304,15 +303,7 @@ export function validateVendorIntakePayload(payload: VendorIntakePayload) {
     ["instagramUrl", payload.instagramUrl],
     ["tiktokUrl", payload.tiktokUrl],
     ["linkedinUrl", payload.linkedinUrl],
-    ["companyProfileUrl", payload.companyProfileUrl],
-    ["catalogUrl", payload.catalogUrl],
-    ["npwpScanUrl", payload.npwpScanUrl],
-    ["ownerKtpUrl", payload.ownerKtpUrl],
-    ["nibUrl", payload.nibUrl],
-    ["invoiceSampleUrl", payload.invoiceSampleUrl],
-    ["pkpCertificateUrl", payload.pkpCertificateUrl],
-    ["ndaUrl", payload.ndaUrl],
-    ["picKtpUrl", payload.picKtpUrl],
+    ["documentsFolderUrl", payload.documentsFolderUrl],
   ];
 
   for (const [name, value] of urlFields) {
@@ -321,24 +312,8 @@ export function validateVendorIntakePayload(payload: VendorIntakePayload) {
     }
   }
 
-  const requiredDocFieldByType: Record<DocumentType, keyof VendorIntakePayload> = {
-    company_profile: "companyProfileUrl",
-    catalog: "catalogUrl",
-    npwp_scan: "npwpScanUrl",
-    owner_ktp: "ownerKtpUrl",
-    nib: "nibUrl",
-    invoice_sample: "invoiceSampleUrl",
-    pkp_certificate: "pkpCertificateUrl",
-    nda: "ndaUrl",
-    pic_ktp: "picKtpUrl",
-  };
-
-  for (const type of requiredTypes) {
-    const fieldKey = requiredDocFieldByType[type];
-    const value = payload[fieldKey] as string;
-    if (!value.trim()) {
-      errors.push(`${DOCUMENT_LABELS[type]} is required for ${payload.legalStatus}.`);
-    }
+  if (requiredTypes.length > 0 && !payload.documentsFolderUrl.trim()) {
+    errors.push("Documents Folder Link is required.");
   }
 
   return errors;
@@ -404,12 +379,11 @@ async function importSpreadsheetRows(): Promise<ImportedRow[]> {
         classification: inferClassification(splitServices(rawSource["Partner"])),
         legalStatus,
         taxStatus,
-        coverageArea: rawSource["Lokasi"],
         email,
         bankName: rawSource["Nama Bank"],
-        bankAccountNumber: rawSource["Nomor Rekening : "] || rawSource["Nomor Rekening :"] || rawSource["Nomor Rekening"],
-        bankAccountHolder: rawSource["Nama Rekening :"] || rawSource["Nama Rekening : "],
-        npwpNumber: rawSource["Nomor Pokok Wajib Pajak (NPWP)"],
+        bankAccountNumber: stringValue(rawSource["Nomor Rekening : "] || rawSource["Nomor Rekening :"] || rawSource["Nomor Rekening"]),
+        bankAccountHolder: stringValue(rawSource["Nama Rekening :"] || rawSource["Nama Rekening : "]),
+        npwpNumber: stringValue(rawSource["Nomor Pokok Wajib Pajak (NPWP)"]),
         websiteUrl: rawSource["Website"],
         instagramUrl: rawSource["Instagram"],
         tiktokUrl: rawSource["TikTok"],
@@ -551,7 +525,7 @@ export async function syncFromSource() {
       existingVendor.classification = imported.vendor.classification;
       existingVendor.legalStatus = imported.vendor.legalStatus;
       existingVendor.taxStatus = imported.vendor.taxStatus;
-      existingVendor.coverageArea = imported.vendor.coverageArea;
+      existingVendor.businessAddress = imported.vendor.businessAddress;
       existingVendor.email = imported.vendor.email;
       existingVendor.bankName = imported.vendor.bankName;
       existingVendor.bankAccountNumber = imported.vendor.bankAccountNumber;
@@ -743,7 +717,7 @@ function buildVendorSummary(
     phoneVerifiedAt: vendor.phoneVerifiedAt,
     legalStatus: vendor.legalStatus,
     taxStatus: vendor.taxStatus,
-    coverageArea: vendor.coverageArea,
+    businessAddress: vendor.businessAddress,
     email: vendor.email,
     classification: vendor.classification || "Unknown",
     serviceNames: Array.from(
@@ -807,7 +781,7 @@ function buildRawSourceFromPayload(payload: VendorIntakePayload, timestamp: stri
     Timestamp: timestamp,
     "Nama Vendor/Supplier/Partner": payload.vendorName,
     Partner: payload.services.map((service) => service.trim()).filter(Boolean).join(", "),
-    Lokasi: payload.coverageArea,
+    Lokasi: payload.businessAddress,
     Email: payload.email,
     "Nama Bank": payload.bankName,
     "Nomor Rekening : ": payload.bankAccountNumber,
@@ -825,15 +799,6 @@ function buildRawSourceFromPayload(payload: VendorIntakePayload, timestamp: stri
     "Email PIC": payload.picEmail,
     "Alamat Usaha": payload.businessAddress,
     "Link Folder Dokumen": payload.documentsFolderUrl,
-    "Upload Compro/Item Pricelist/Catalog": payload.companyProfileUrl,
-    "Upload Compro/Item Pricelist/Catalog 2": payload.catalogUrl,
-    "Upload Scan NPWP (PDF/JPG) ": payload.npwpScanUrl,
-    "Upload Scan KTP Pemilik (PDF/JPG)": payload.ownerKtpUrl,
-    "Upload NIB (untuk PT/CV)": payload.nibUrl,
-    "Upload Invoice (Optional jika sudah pernah bekerja sama dengan EO lain) ": payload.invoiceSampleUrl,
-    "Upload Surat Tanda PKP/ Surat Keterangan Non-PKP": payload.pkpCertificateUrl,
-    "Upload NDA": payload.ndaUrl,
-    "Upload KTP PIC": payload.picKtpUrl,
     ...extra,
   };
 }
@@ -874,7 +839,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     services: Array.from(
       new Set(state.vendorServices.map((service) => normalizeServiceName(service.name))),
     ).sort(),
-    locations: Array.from(new Set(state.vendors.map((vendor) => vendor.coverageArea).filter(Boolean))).sort(),
+    locations: Array.from(new Set(state.vendors.map((vendor) => vendor.businessAddress).filter(Boolean))).sort(),
     sourcePath: SOURCE_PATH,
     sourceAvailable: existsSync(SOURCE_PATH),
   };
@@ -1018,7 +983,7 @@ export async function exportVendorsCsv(filters?: {
 
   const filteredVendors = dashboard.vendors.filter((vendor) => {
     if (filters?.service && !vendor.serviceNames.includes(filters.service)) return false;
-    if (filters?.location && vendor.coverageArea !== filters.location) return false;
+    if (filters?.location && !vendor.businessAddress?.includes(filters.location)) return false;
     if (filters?.reviewStatus && vendor.reviewStatus !== filters.reviewStatus) return false;
     if (filters?.search) {
       const haystack = `${vendor.name} ${vendor.email} ${vendor.serviceNames.join(" ")}`.toLowerCase();
@@ -1063,7 +1028,7 @@ export async function exportVendorsCsv(filters?: {
       vendor.lifecycleStatus,
       vendor.reviewStatus,
       vendor.serviceNames.join(" | "),
-      vendor.coverageArea,
+      vendor.businessAddress,
       vendor.email,
       vendor.contacts[0]?.phone || "",
       String(vendor.performance.average),
@@ -1107,10 +1072,9 @@ export async function updateVendorIdentity(
     name?: string;
     email?: string;
     classification?: VendorClassification;
-    coverageArea?: string;
+    businessAddress?: string;
     websiteUrl?: string;
     serviceNames?: string[];
-    businessAddress?: string;
     documentsFolderUrl?: string;
   },
 ) {
@@ -1125,9 +1089,8 @@ export async function updateVendorIdentity(
   if (updates.name !== undefined) vendor.name = updates.name;
   if (updates.email !== undefined) vendor.email = updates.email;
   if (updates.classification !== undefined) vendor.classification = updates.classification;
-  if (updates.coverageArea !== undefined) vendor.coverageArea = updates.coverageArea;
-  if (updates.websiteUrl !== undefined) vendor.websiteUrl = updates.websiteUrl;
   if (updates.businessAddress !== undefined) vendor.businessAddress = updates.businessAddress;
+  if (updates.websiteUrl !== undefined) vendor.websiteUrl = updates.websiteUrl;
   if (updates.documentsFolderUrl !== undefined) vendor.documentsFolderUrl = updates.documentsFolderUrl;
 
   if (updates.serviceNames !== undefined) {
@@ -1187,7 +1150,6 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     classification: inferClassification(normalizedServices),
     legalStatus: payload.legalStatus,
     taxStatus: payload.taxStatus,
-    coverageArea: payload.coverageArea,
     email: payload.email,
     businessAddress: payload.businessAddress,
     bankName: payload.bankName,
@@ -1220,15 +1182,15 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
   ].filter((contact) => contact.name || contact.email || contact.phone);
 
   const documents: VendorDocument[] = [
-    createDocument(vendorId, "company_profile", payload.companyProfileUrl, requiredTypes),
-    createDocument(vendorId, "catalog", payload.catalogUrl, requiredTypes),
-    createDocument(vendorId, "npwp_scan", payload.npwpScanUrl, requiredTypes),
-    createDocument(vendorId, "owner_ktp", payload.ownerKtpUrl, requiredTypes),
-    createDocument(vendorId, "nib", payload.nibUrl, requiredTypes),
-    createDocument(vendorId, "invoice_sample", payload.invoiceSampleUrl, requiredTypes),
-    createDocument(vendorId, "pkp_certificate", payload.pkpCertificateUrl, requiredTypes),
-    createDocument(vendorId, "nda", payload.ndaUrl, requiredTypes),
-    createDocument(vendorId, "pic_ktp", payload.picKtpUrl, requiredTypes),
+    createDocument(vendorId, "company_profile", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "catalog", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "npwp_scan", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "owner_ktp", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "nib", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "invoice_sample", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "pkp_certificate", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "nda", payload.documentsFolderUrl, requiredTypes),
+    createDocument(vendorId, "pic_ktp", payload.documentsFolderUrl, requiredTypes),
   ].flatMap((document) => (document ? [document] : []));
 
   const services: VendorService[] = normalizedServices.map((serviceName) => ({
@@ -1354,7 +1316,6 @@ export async function resubmitVendorRevision(token: string, payload: VendorIntak
   vendor.displayType = normalizedServices.join(", ");
   vendor.legalStatus = payload.legalStatus;
   vendor.taxStatus = payload.taxStatus;
-  vendor.coverageArea = payload.coverageArea;
   vendor.email = payload.email;
   vendor.businessAddress = payload.businessAddress;
   vendor.bankName = payload.bankName;
@@ -1390,15 +1351,15 @@ export async function resubmitVendorRevision(token: string, payload: VendorIntak
   );
   state.vendorDocuments.push(
     ...[
-      createDocument(vendor.id, "company_profile", payload.companyProfileUrl, requiredTypes),
-      createDocument(vendor.id, "catalog", payload.catalogUrl, requiredTypes),
-      createDocument(vendor.id, "npwp_scan", payload.npwpScanUrl, requiredTypes),
-      createDocument(vendor.id, "owner_ktp", payload.ownerKtpUrl, requiredTypes),
-      createDocument(vendor.id, "nib", payload.nibUrl, requiredTypes),
-      createDocument(vendor.id, "invoice_sample", payload.invoiceSampleUrl, requiredTypes),
-      createDocument(vendor.id, "pkp_certificate", payload.pkpCertificateUrl, requiredTypes),
-      createDocument(vendor.id, "nda", payload.ndaUrl, requiredTypes),
-      createDocument(vendor.id, "pic_ktp", payload.picKtpUrl, requiredTypes),
+      createDocument(vendor.id, "company_profile", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "catalog", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "npwp_scan", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "owner_ktp", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "nib", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "invoice_sample", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "pkp_certificate", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "nda", payload.documentsFolderUrl, requiredTypes),
+      createDocument(vendor.id, "pic_ktp", payload.documentsFolderUrl, requiredTypes),
     ].flatMap((document) => (document ? [document] : [])),
   );
 

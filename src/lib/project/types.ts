@@ -102,7 +102,7 @@ export interface ProjectRecord {
     vendorId: string;
     vendorName: string;
     vendorType: string;
-    coverageArea: string;
+    businessAddress: string;
     whatsappPhone: string;
     averageScore: number;
   }[];
@@ -111,7 +111,7 @@ export interface ProjectRecord {
     vendorId: string;
     vendorName: string;
     vendorType: string;
-    coverageArea: string;
+    businessAddress: string;
     whatsappPhone: string;
     averageScore: number;
     serviceLine: string;
@@ -204,7 +204,7 @@ export interface ProjectDashboardData {
     id: string;
     name: string;
     serviceNames: string[];
-    coverageArea: string;
+    businessAddress: string;
     whatsappPhone: string;
     averageScore: number;
     lifecycleStatus: string;

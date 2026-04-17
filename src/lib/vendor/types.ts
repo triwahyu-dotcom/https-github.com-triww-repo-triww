@@ -40,7 +40,6 @@ export interface Vendor {
   classification: VendorClassification;
   legalStatus: LegalStatus;
   taxStatus: TaxStatus;
-  coverageArea: string;
   email: string;
   businessAddress: string;
   bankName: string;
@@ -252,7 +251,7 @@ export interface VendorSummary {
   phoneVerifiedAt: string;
   legalStatus: LegalStatus;
   taxStatus: TaxStatus;
-  coverageArea: string;
+  businessAddress: string;
   email: string;
   classification: VendorClassification;
   serviceNames: string[];

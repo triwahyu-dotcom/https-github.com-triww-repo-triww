@@ -642,7 +642,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   vendorId: selectedOption.id,
                   vendorName: selectedOption.name,
                   vendorType: selectedOption.serviceNames[0] || "-",
-                  coverageArea: selectedOption.coverageArea,
+                  businessAddress: selectedOption.businessAddress,
                   whatsappPhone: selectedOption.whatsappPhone,
                   averageScore: selectedOption.averageScore,
                 },
@@ -717,7 +717,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   vendorId: selectedOption.id,
                   vendorName: selectedOption.name,
                   vendorType: selectedOption.serviceNames[0] || "-",
-                  coverageArea: selectedOption.coverageArea,
+                  businessAddress: selectedOption.businessAddress,
                   whatsappPhone: selectedOption.whatsappPhone,
                   averageScore: selectedOption.averageScore,
                   serviceLine: selectedProject.serviceLine,
@@ -1204,7 +1204,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                         <div>
                           <strong>{vendor.vendorName}</strong>
                           <p className="detail-client">
-                            {vendor.vendorType} • {vendor.coverageArea || "-"} • Score {vendor.averageScore || "-"}
+                            {vendor.vendorType} • {vendor.businessAddress || "-"} • Score {vendor.averageScore || "-"}
                           </p>
                         </div>
                         <div className="action-row">
@@ -1257,7 +1257,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                         <div>
                           <strong>{vendor.vendorName}</strong>
                           <p className="detail-client">
-                            {vendor.vendorType} • {vendor.coverageArea || "-"} • Score {vendor.averageScore || "-"}
+                            {vendor.vendorType} • {vendor.businessAddress || "-"} • Score {vendor.averageScore || "-"}
                           </p>
                           <p className="detail-client">
                             {vendor.status} • {vendor.quotedPrice ? formatCurrency(vendor.quotedPrice) : "No quote yet"}

@@ -164,13 +164,13 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
     
     // Address extraction - try more keys
     setVendorAddress(
+      vendor.businessAddress || 
       vendor.address || 
       raw["Alamat :"] || 
       raw["Alamat Vendor"] || 
       raw["Alamat Kantor"] || 
       raw["Domisili"] || 
       raw["Alamat Lengkap"] || 
-      vendor.coverageArea || 
       ""
     );
     

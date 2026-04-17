@@ -7,7 +7,6 @@ import { LegalStatus, TaxStatus } from "@/lib/vendor/types";
 const INITIAL_FORM = {
   vendorName: "",
   services: "",
-  coverageArea: "",
   email: "",
   businessAddress: "",
   legalStatus: "Freelance/Perorangan" as LegalStatus,
@@ -276,10 +275,6 @@ export function VendorIntakeForm({
               <option value="Non-PKP">Non-PKP</option>
               <option value="PKP">PKP</option>
             </select>
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            {t(locale, "coverageArea")}
-            <input value={form.coverageArea} onChange={(event) => updateField("coverageArea", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
         </section>
 

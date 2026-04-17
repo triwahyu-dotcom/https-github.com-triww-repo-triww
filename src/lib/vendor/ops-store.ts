@@ -147,7 +147,7 @@ export async function ensureVendorOpsState(vendors: Vendor[]) {
         lifecycleStatus: defaultLifecycleStatus(vendor),
         rateCardNotes: "",
         availabilityNotes: "",
-        cities: vendor.coverageArea ? [vendor.coverageArea] : [],
+        cities: vendor.businessAddress ? [vendor.businessAddress.slice(0, 20)] : [],
         accountManager: "",
         emailNotifications: true,
         whatsappNotifications: true,

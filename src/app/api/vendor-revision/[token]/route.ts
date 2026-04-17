@@ -19,7 +19,6 @@ export async function POST(
   const payload: VendorIntakePayload = {
     vendorName: String(body.vendorName ?? "").trim(),
     services: parseServices(body.services),
-    coverageArea: String(body.coverageArea ?? "").trim(),
     email: String(body.email ?? "").trim(),
     legalStatus: (String(body.legalStatus ?? "Unknown").trim() as VendorIntakePayload["legalStatus"]),
     taxStatus: (String(body.taxStatus ?? "Unknown").trim() as VendorIntakePayload["taxStatus"]),
@@ -37,15 +36,6 @@ export async function POST(
     picEmail: String(body.picEmail ?? "").trim(),
     businessAddress: String(body.businessAddress ?? "").trim(),
     documentsFolderUrl: String(body.documentsFolderUrl ?? "").trim(),
-    companyProfileUrl: String(body.companyProfileUrl ?? "").trim(),
-    catalogUrl: String(body.catalogUrl ?? "").trim(),
-    npwpScanUrl: String(body.npwpScanUrl ?? "").trim(),
-    ownerKtpUrl: String(body.ownerKtpUrl ?? "").trim(),
-    nibUrl: String(body.nibUrl ?? "").trim(),
-    invoiceSampleUrl: String(body.invoiceSampleUrl ?? "").trim(),
-    pkpCertificateUrl: String(body.pkpCertificateUrl ?? "").trim(),
-    ndaUrl: String(body.ndaUrl ?? "").trim(),
-    picKtpUrl: String(body.picKtpUrl ?? "").trim(),
   };
 
   const validationErrors = validateVendorIntakePayload(payload);

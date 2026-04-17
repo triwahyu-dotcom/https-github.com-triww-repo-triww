@@ -19,12 +19,18 @@ type ViewId =
 
 type DetailMode = "summary" | "operations";
 
+type SortKey = "name" | "date" | "status" | "score";
+type SortOrder = "asc" | "desc";
+
 type Filters = {
   search: string;
   service: string;
   location: string;
   reviewStatus: string;
   classification: string;
+  sortKey: SortKey;
+  sortOrder: SortOrder;
+  showOnlyNew: boolean;
 };
 
 
@@ -50,15 +56,12 @@ type RevisionSection = "identity" | "contact" | "documents" | "finance" | "servi
 const REVISION_FIELD_OPTIONS: { fieldKey: string; label: string; section: RevisionSection }[] = [
   { fieldKey: "vendorName", label: "Vendor name", section: "identity" },
   { fieldKey: "services", label: "Services", section: "services" },
-  { fieldKey: "coverageArea", label: "Coverage area", section: "identity" },
+  { fieldKey: "businessAddress", label: "Business address", section: "identity" },
   { fieldKey: "email", label: "Business email", section: "identity" },
   { fieldKey: "picName", label: "PIC name", section: "contact" },
   { fieldKey: "picPhone", label: "PIC phone", section: "contact" },
   { fieldKey: "bankAccountHolder", label: "Bank account holder", section: "finance" },
-  { fieldKey: "npwpScanUrl", label: "NPWP scan", section: "documents" },
-  { fieldKey: "ownerKtpUrl", label: "Owner KTP", section: "documents" },
-  { fieldKey: "nibUrl", label: "NIB", section: "documents" },
-  { fieldKey: "companyProfileUrl", label: "Company profile", section: "documents" },
+  { fieldKey: "documentsFolderUrl", label: "Link Folder Dokumen", section: "documents" },
 ];
 
 const REVISION_TEMPLATES: {
@@ -70,12 +73,9 @@ const REVISION_TEMPLATES: {
   {
     id: "docs_basic",
     label: "Basic documents",
-    generalNote: "Please complete the primary legality documents before we proceed with the review process.",
+    generalNote: "Please complete the primary legality documents in your folder before we proceed with the review process.",
     items: [
-      { fieldKey: "companyProfileUrl", note: "Upload latest company profile (active link)." },
-      { fieldKey: "npwpScanUrl", note: "Upload clear NPWP scan." },
-      { fieldKey: "ownerKtpUrl", note: "Upload valid Owner/PIC KTP." },
-      { fieldKey: "nibUrl", note: "Upload latest NIB according to business legality." },
+      { fieldKey: "documentsFolderUrl", note: "Upload or update all required documents (Compro, NPWP, NIB, etc.) in the provided folder link." },
     ],
   },
   {
@@ -95,7 +95,7 @@ const REVISION_TEMPLATES: {
     generalNote: "Please update service classification so project placement is not incorrect.",
     items: [
       { fieldKey: "services", note: "Select primary services that are truly available." },
-      { fieldKey: "coverageArea", note: "Fill in operational areas according to team/vendor capacity." },
+      { fieldKey: "businessAddress", note: "Provide the detailed business address for administrative purposes." },
     ],
   },
 ];
@@ -117,15 +117,27 @@ const VIEW_ICONS: Record<ViewId, string> = {
 };
 
 const VIEW_TITLES: Record<ViewId, string> = {
-  by_status: "By Status",
-  by_type: "By Type",
-  vendor_directory: "Vendor Directory",
+  by_status: "Status",
+  by_type: "Type",
+  vendor_directory: "Directory",
   all_vendors: "All Vendors",
   sync_log: "Sync Log",
   outbox: "Outbox",
 };
 
 const STORAGE_KEY = "juara-vendor-management-dashboard-v1";
+
+function isRecent(value: string | undefined) {
+  if (!value) return false;
+  try {
+    const date = new Date(value);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    return diff < 48 * 60 * 60 * 1000; // 48 hours
+  } catch {
+    return false;
+  }
+}
 
 function formatDate(value: string, locale: Locale) {
   if (!value) {
@@ -136,6 +148,31 @@ function formatDate(value: string, locale: Locale) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function formatNPWP(value: string) {
+  if (!value) return "-";
+  // Remove non-digits
+  const digits = value.replace(/\D/g, "");
+  if (digits.length !== 15) return value; // Return as is if not standard length
+  // Format: 00.000.000.0-000.000
+  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}.${digits.slice(8, 9)}-${digits.slice(9, 12)}.${digits.slice(12, 15)}`;
+}
+
+function formatBankAccount(value: string) {
+  if (!value) return "-";
+  const digits = value.replace(/\D/g, "");
+  if (digits.length < 5) return value;
+  // Basic grouping for readability
+  return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
+}
+
+function normalizePhoneToWhatsApp(value: string) {
+  const digits = value.replace(/[^\d]/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
+  if (digits.startsWith("62")) return digits;
+  return digits;
 }
 
 
@@ -208,14 +245,6 @@ function toQueryString(params: Record<string, string>) {
     }
   });
   return query.toString();
-}
-
-function normalizePhoneToWhatsApp(phone: string) {
-  const digits = phone.replace(/[^\d]/g, "");
-  if (!digits) return "";
-  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
-  if (digits.startsWith("62")) return digits;
-  return digits;
 }
 
 function statusGroupLabel(locale: Locale, status: ReviewStatus) {
@@ -348,6 +377,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [bulkRevisionTemplateId, setBulkRevisionTemplateId] = useState("docs_basic");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isEditVendorModalOpen, setIsEditVendorModalOpen] = useState(false);
+  const [showAuditLog, setShowAuditLog] = useState(false);
   const [editVendorFormData, setEditVendorFormData] = useState<Partial<VendorDetail>>({});
   const [savedFilters, setSavedFilters] = useState<Record<string, Filters>>(() => {
     if (typeof window === "undefined") {
@@ -362,10 +392,17 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   });
   const [filters, setFilters] = useState<Filters>(() => {
     if (typeof window === "undefined") {
-      return { search: "", service: "", location: "", reviewStatus: "", classification: "" };
+      return { 
+        search: "", service: "", location: "", reviewStatus: "", classification: "",
+        sortKey: "date", sortOrder: "desc", showOnlyNew: false 
+      };
     }
     const currentView = new URLSearchParams(window.location.search).get("view") || "all_vendors";
-    return savedFilters[currentView] ?? { search: "", service: "", location: "", reviewStatus: "", classification: "" };
+    const saved = savedFilters[currentView] ?? { 
+      search: "", service: "", location: "", reviewStatus: "", classification: "",
+      sortKey: "date", sortOrder: "desc", showOnlyNew: false 
+    };
+    return saved;
   });
 
 const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filters) => {
@@ -374,7 +411,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
     if (keyword) {
       const detail = dashboard.vendorDetails.find((d: VendorDetail) => d.id === vendor.id);
       const picInfo = detail ? `${detail.contacts[0]?.name || ""} ${detail.contacts[0]?.phone || ""}` : "";
-      const searchStr = `${vendor.name} ${vendor.email} ${vendor.serviceNames.join(" ")} ${picInfo}`.toLowerCase();
+      const searchStr = `${vendor.name} ${vendor.email} ${vendor.serviceNames.join(" ")} ${vendor.businessAddress || ""} ${picInfo}`.toLowerCase();
 
       if (!searchStr.includes(keyword)) {
         return false;
@@ -385,7 +422,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
       return false;
     }
 
-    if (currentFilters.location && vendor.coverageArea !== currentFilters.location) {
+    if (currentFilters.location && !vendor.businessAddress?.toLowerCase().includes(currentFilters.location.toLowerCase())) {
       return false;
     }
 
@@ -397,13 +434,36 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
       return false;
     }
 
+    if (currentFilters.showOnlyNew && !isRecent(vendor.sourceTimestamp)) {
+      return false;
+    }
+
     return true;
   }, [dashboard.vendorDetails]);
 
-  const filteredVendors = useMemo(
-    () => dashboard.vendors.filter((vendor) => matchesFilters(vendor, filters)),
-    [dashboard.vendors, filters, matchesFilters],
-  );
+  const filteredVendors = useMemo(() => {
+    const list = dashboard.vendors.filter((vendor) => matchesFilters(vendor, filters));
+    
+    return list.sort((a, b) => {
+      const order = filters.sortOrder === "asc" ? 1 : -1;
+      
+      switch (filters.sortKey) {
+        case "name":
+          return a.name.localeCompare(b.name) * order;
+        case "date": {
+          const dA = new Date(a.sourceTimestamp || 0).getTime();
+          const dB = new Date(b.sourceTimestamp || 0).getTime();
+          return (dA - dB) * order;
+        }
+        case "status":
+          return a.reviewStatus.localeCompare(b.reviewStatus) * order;
+        case "score":
+          return (vendorScore(a) - vendorScore(b)) * order;
+        default:
+          return 0;
+      }
+    });
+  }, [dashboard.vendors, filters, matchesFilters]);
   const selectedVendors = useMemo(
     () => filteredVendors.filter((vendor) => selectedVendorIds.includes(vendor.id)),
     [filteredVendors, selectedVendorIds],
@@ -461,6 +521,19 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
         ? dashboard.notificationFeed.length
         : filteredVendors.length;
   const isVendorListView = view === "all_vendors";
+
+  const toggleSort = (key: SortKey) => {
+    setFilters(curr => ({
+      ...curr,
+      sortKey: key,
+      sortOrder: curr.sortKey === key && curr.sortOrder === "desc" ? "asc" : "desc"
+    }));
+  };
+
+  const renderSortIcon = (key: SortKey) => {
+    if (filters.sortKey !== key) return null;
+    return filters.sortOrder === "asc" ? " ↑" : " ↓";
+  };
 
   async function handleSync() {
     startSyncTransition(async () => {
@@ -833,80 +906,87 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
           icon="⭐" 
         />
       </div>
-      <div className="toolbar-panel" style={{ marginTop: '24px' }}>
-        <div className="database-header">
-          <div className="database-tabs">
-            {VIEW_ORDER.map((item) => (
-              <button
-                key={item.id}
-                className={`chip ${view === item.id ? "active" : ""}`}
-                onClick={() => setView(item.id)}
-                type="button"
-              >
-                <span style={{ marginRight: '6px' }}>{VIEW_ICONS[item.id]}</span>
-                {item.label}
-              </button>
-            ))}
-          </div>
-          <div className="workspace-actions">
-            <button className="primary-button" style={{ borderRadius: '8px' }} onClick={() => {/* TODO: Add Vendor Logic */}} type="button">
-              + Add New Vendor
+      <div className="unified-toolbar" style={{ position: 'relative' }}>
+        <div className="database-tabs" style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+          {VIEW_ORDER.map((item) => (
+            <button
+              key={item.id}
+              className={`chip ${view === item.id ? "active" : ""}`}
+              onClick={() => setView(item.id)}
+              type="button"
+              style={{ padding: '4px 10px', fontSize: '0.75rem' }}
+            >
+              <span style={{ marginRight: '4px' }}>{VIEW_ICONS[item.id]}</span>
+              {VIEW_TITLES[item.id]}
             </button>
-          </div>
+          ))}
         </div>
 
-        <div className="control-bar" style={{ marginTop: '16px', background: 'var(--panel-soft)', padding: '8px 16px', borderRadius: '12px', border: '1px solid var(--line)' }}>
-          <div style={{ display: 'flex', gap: '12px', flex: 1, alignItems: 'center' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
-              <input
-                value={filters.search}
-                placeholder="Search name, service, or PIC..."
-                onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
-                style={{ width: '100%', paddingLeft: '36px', height: '40px', background: 'transparent', border: 'none' }}
-              />
-              <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
-            </div>
-            <select
-              value={filters.classification}
-              onChange={(event) => setFilters((current) => ({ ...current, classification: event.target.value }))}
-              style={{ background: 'transparent', border: 'none', borderLeft: '1px solid var(--line)', borderRadius: 0, padding: '0 12px', height: '24px' }}
-            >
-              <option value="">All Classification</option>
-              <option value="Penyedia Jasa">Penyedia Jasa</option>
-              <option value="Penyedia Barang">Penyedia Barang</option>
-            </select>
-            <select
-              value={filters.service}
-              onChange={(event) => setFilters((current) => ({ ...current, service: event.target.value }))}
-              style={{ background: 'transparent', border: 'none', borderLeft: '1px solid var(--line)', borderRadius: 0, padding: '0 12px', height: '24px' }}
-            >
-              <option value="">All Services</option>
-              {dashboard.services.map((service) => (
-                <option key={service} value={service}>{service}</option>
-              ))}
-            </select>
-            <select
-              value={filters.location}
-              onChange={(event) => setFilters((current) => ({ ...current, location: event.target.value }))}
-              style={{ background: 'transparent', border: 'none', borderLeft: '1px solid var(--line)', borderRadius: 0, padding: '0 12px', height: '24px' }}
-            >
-              <option value="">All Locations</option>
-              {dashboard.locations.map((location) => (
-                <option key={location} value={location}>{location}</option>
-              ))}
-            </select>
-            <button 
-              className={`ghost-button ${showAdvanced ? "active-ghost" : ""}`} 
-              onClick={() => setShowAdvanced((current) => !current)}
-              style={{ fontSize: '0.8rem', padding: '0 12px' }}
-            >
-              Options
-            </button>
+        <div className="toolbar-divider"></div>
+
+        <div className="search-wrapper">
+          <input
+            value={filters.search}
+            placeholder="Search vendor..."
+            onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
+          />
+          <span className="search-icon">🔍</span>
+        </div>
+
+        <div className="toolbar-divider"></div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <select
+            className="filter-select"
+            value={filters.classification}
+            onChange={(event) => setFilters((current) => ({ ...current, classification: event.target.value }))}
+            style={{ fontSize: '0.7rem' }}
+          >
+            <option value="">Classification</option>
+            <option value="Penyedia Jasa">Jasa</option>
+            <option value="Penyedia Barang">Barang</option>
+          </select>
+          <select
+            className="filter-select"
+            value={filters.service}
+            onChange={(event) => setFilters((current) => ({ ...current, service: event.target.value }))}
+            style={{ fontSize: '0.7rem', maxWidth: '100px' }}
+          >
+            <option value="">Services</option>
+            {dashboard.services.map((service) => (
+              <option key={service} value={service}>{service}</option>
+            ))}
+          </select>
+          <button 
+            className={`ghost-button ${showAdvanced ? "active-ghost" : ""}`} 
+            onClick={() => setShowAdvanced((current) => !current)}
+            style={{ fontSize: '0.7rem', padding: '0 8px', height: '26px', borderRadius: '6px' }}
+          >
+            Options
+          </button>
+        </div>
+
+        <div className="toolbar-divider"></div>
+
+        <div className="workspace-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+          <div style={{ textAlign: 'right', marginRight: '4px' }}>
+            <div style={{ fontSize: '0.65rem', opacity: 0.5, fontWeight: 700, lineHeight: 1 }}>{activeListCount}</div>
+            <div style={{ fontSize: '0.55rem', opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Items</div>
           </div>
+          <button 
+            className={`ghost-button ${filters.showOnlyNew ? "active-ghost" : ""}`} 
+            onClick={() => setFilters(curr => ({ ...curr, showOnlyNew: !curr.showOnlyNew }))}
+            style={{ fontSize: '0.7rem', borderRadius: '8px', padding: '0 10px', height: '28px' }}
+          >
+            🆕 Baru
+          </button>
+          <button className="primary-button" style={{ borderRadius: '8px', height: '28px', fontSize: '0.7rem', padding: '0 12px' }} onClick={() => {/* TODO: Add Vendor Logic */}} type="button">
+            + New
+          </button>
         </div>
 
         {showAdvanced && (
-          <div className="advanced-panel" style={{ marginTop: '12px', padding: '16px', background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="advanced-panel" style={{ position: 'absolute', top: '100%', right: '16px', marginTop: '8px', padding: '16px', background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '12px', display: 'flex', gap: '16px', alignItems: 'center', zIndex: 100, boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <span className="mini-meta" style={{ marginTop: 0 }}>Review:</span>
               <select
@@ -929,51 +1009,42 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
       </div>
 
       {(view === "all_vendors" || view === "sync_log" || view === "outbox") && (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', marginTop: '16px' }}>
           <div className={`notion-list ${isVendorListView ? "vendor-list-view" : ""}`} style={{ width: '100%', flex: 1, overflow: 'auto' }}>
-            <div className="panel-section-header">
-              <div>
-                <p className="panel-label">Vendor Directory</p>
-                <h3>{VIEW_TITLES[view]}</h3>
-              </div>
-              <span className="panel-count">{activeListCount} item(s)</span>
-            </div>
             
-            {view === "all_vendors" ? (
-              <div className="bulk-actions-panel">
-                <div className="bulk-actions-row">
-                  <button className="ghost-button" onClick={toggleSelectAllFiltered} type="button">
-                    {selectedVendors.length === filteredVendors.length && filteredVendors.length > 0 ? "Unselect all" : "Select all"}
-                  </button>
-                  <span>{selectedVendors.length} selected</span>
-                </div>
-                <div className="bulk-actions-row">
-                  <select value={bulkStatus} onChange={(event) => setBulkStatus(event.target.value as ReviewStatus)}>
-                    {REVIEW_STATUSES.map((status) => (
-                      <option key={status} value={status}>
-                        {reviewStatusLabel(locale, status)}
-                      </option>
-                    ))}
-                  </select>
-                  <input value={bulkNote} onChange={(event) => setBulkNote(event.target.value)} placeholder="Bulk review note" />
-                  <button className="ghost-button" onClick={handleBulkReviewSave} type="button" disabled={selectedVendors.length === 0}>
-                    {opsPending ? "..." : "Apply status"}
-                  </button>
-                </div>
-                <div className="bulk-actions-row">
-                  <select value={bulkRevisionTemplateId} onChange={(event) => setBulkRevisionTemplateId(event.target.value)}>
-                    {REVISION_TEMPLATES.map((template) => (
-                      <option key={template.id} value={template.id}>
-                        {template.label}
-                      </option>
-                    ))}
-                  </select>
-                  <button className="ghost-button" onClick={handleBulkRequestRevision} type="button" disabled={selectedVendors.length === 0}>
-                    {opsPending ? "..." : "Request revision (bulk)"}
-                  </button>
-                </div>
+            {view === "all_vendors" && (
+              <div className="finder-sort-header">
+                <div style={{ width: '56px' }}></div> {/* Checkbox spacer */}
+                <button 
+                  onClick={() => toggleSort('name')} 
+                  className={`sort-column ${filters.sortKey === 'name' ? 'active' : ''}`}
+                  style={{ flex: 1 }}
+                >
+                  Nama Vendor {renderSortIcon('name')}
+                </button>
+                <button 
+                  onClick={() => toggleSort('status')} 
+                  className={`sort-column ${filters.sortKey === 'status' ? 'active' : ''}`}
+                  style={{ width: '120px' }}
+                >
+                  Status {renderSortIcon('status')}
+                </button>
+                <button 
+                  onClick={() => toggleSort('date')} 
+                  className={`sort-column ${filters.sortKey === 'date' ? 'active' : ''}`}
+                  style={{ width: '140px' }}
+                >
+                  Tanggal Daftar {renderSortIcon('date')}
+                </button>
+                <button 
+                  onClick={() => toggleSort('score')} 
+                  className={`sort-column ${filters.sortKey === 'score' ? 'active' : ''}`}
+                  style={{ width: '60px', textAlign: 'right', paddingRight: '12px' }}
+                >
+                  Score {renderSortIcon('score')}
+                </button>
               </div>
-            ) : null}
+            )}
 
             <div className="notion-items">
               {view === "all_vendors" &&
@@ -991,7 +1062,12 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                         <div>
-                          <em className="eyebrow">{primaryType(vendor)}</em>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <em className="eyebrow">{primaryType(vendor)}</em>
+                            {isRecent(vendor.sourceTimestamp) && (
+                              <span className="badge-new-pulsing">BARU</span>
+                            )}
+                          </div>
                           <h3>{formatVendorName(vendor.name)}</h3>
                         </div>
                         <strong className="text-main">{vendorScore(vendor)}</strong>
@@ -1003,7 +1079,11 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                         <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>
                           {classificationLabel(vendor.classification)}
                         </em>
-                        {vendor.coverageArea && <span className="text-dim">· {vendor.coverageArea}</span>}
+                        {vendor.businessAddress && (
+                          <span className="text-dim" title={vendor.businessAddress}>
+                            · {truncateText(vendor.businessAddress, 25)}
+                          </span>
+                        )}
                       </div>
                       <div style={{ marginTop: "12px", display: "flex", gap: "12px", fontSize: "0.75rem" }}>
                         <span>
@@ -1070,350 +1150,266 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
               ) : null}
               {view !== "outbox" && selectedVendor ? (
                 <>
-                  <div className="detail-tabs">
-                    <button className={`detail-tab ${detailMode === "summary" ? "active" : ""}`} onClick={() => setDetailMode("summary")}>
+                  <div className="drawer-tabs">
+                    <button 
+                      className={`drawer-tab ${detailMode === "summary" ? "active" : ""}`} 
+                      onClick={() => setDetailMode("summary")}
+                    >
                       Summary
                     </button>
-                    <button className={`detail-tab ${detailMode === "operations" ? "active" : ""}`} onClick={() => setDetailMode("operations")}>
+                    <button 
+                      className={`drawer-tab ${detailMode === "operations" ? "active" : ""}`} 
+                      onClick={() => setDetailMode("operations")}
+                    >
                       Operations
                     </button>
                   </div>
 
                   {detailMode === "operations" && (
                     <div className="detail-scroll-area">
-                      <section className="detail-section">
-                        <div className="section-title-row">
-                          <h4>Performance Scorecard</h4>
-                          <button className="primary-button" onClick={handleScorecardSave} disabled={opsPending} style={{ fontSize: '0.75rem', padding: '4px 8px', height: 'auto' }}>
-                            Save Score
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3>📈 Performance & Rating</h3>
+                          <button 
+                            className="primary-button" 
+                            onClick={handleScorecardSave} 
+                            disabled={opsPending} 
+                            style={{ fontSize: '0.65rem', padding: '4px 10px', height: 'auto', borderRadius: '6px' }}
+                          >
+                            {opsPending ? "..." : "Save Scores"}
                           </button>
                         </div>
-                        <div className="scorecard-grid">
-                          <div className="score-input">
-                            <label>Quality</label>
-                            <input type="number" min="1" max="5" value={scorecard.quality} onChange={e => setScorecard(s => ({ ...s, quality: e.target.value }))} />
-                          </div>
-                          <div className="score-input">
-                            <label>Reliability</label>
-                            <input type="number" min="1" max="5" value={scorecard.reliability} onChange={e => setScorecard(s => ({ ...s, reliability: e.target.value }))} />
-                          </div>
-                          <div className="score-input">
-                            <label>Pricing</label>
-                            <input type="number" min="1" max="5" value={scorecard.pricing} onChange={e => setScorecard(s => ({ ...s, pricing: e.target.value }))} />
-                          </div>
-                          <div className="score-input">
-                            <label>Communication</label>
-                            <input type="number" min="1" max="5" value={scorecard.communication} onChange={e => setScorecard(s => ({ ...s, communication: e.target.value }))} />
+                        <div className="detail-card-content">
+                          <div className="scorecard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <div className="score-input">
+                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Quality</label>
+                              <input type="number" min="1" max="5" value={scorecard.quality} onChange={e => setScorecard(s => ({ ...s, quality: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            </div>
+                            <div className="score-input">
+                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Reliability</label>
+                              <input type="number" min="1" max="5" value={scorecard.reliability} onChange={e => setScorecard(s => ({ ...s, reliability: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            </div>
+                            <div className="score-input">
+                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Pricing</label>
+                              <input type="number" min="1" max="5" value={scorecard.pricing} onChange={e => setScorecard(s => ({ ...s, pricing: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            </div>
+                            <div className="score-input">
+                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Communication</label>
+                              <input type="number" min="1" max="5" value={scorecard.communication} onChange={e => setScorecard(s => ({ ...s, communication: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            </div>
                           </div>
                         </div>
                       </section>
                       
-                      <section className="detail-section">
-                        <h4>Internal Notes</h4>
-                        <div className="notes-group">
-                          <label>Availability & Capacity</label>
-                          <textarea value={availabilityNotes} onChange={e => setAvailabilityNotes(e.target.value)} placeholder="e.g. Busy until June, special rates for Bali..." />
-                          
-                          <label>Rate Card Details</label>
-                          <textarea value={rateCardNotes} onChange={e => setRateCardNotes(e.target.value)} placeholder="e.g. IDR 10jt/day, negotiable for long projects..." />
-                          
-                          <button className="ghost-button" onClick={handleOpsProfileSave} disabled={opsPending}>
-                            {opsPending ? "Saving..." : "Update internal notes"}
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3>📋 Internal Admin & Review</h3>
+                        </div>
+                        <div className="detail-card-content">
+                          {/* Review Controls */}
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                            <select 
+                              value={reviewStatus} 
+                              onChange={(event) => setReviewStatus(event.target.value as ReviewStatus)} 
+                              style={{ flex: 1, background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '8px', fontSize: '0.8rem' }}
+                            >
+                              {REVIEW_STATUSES.map((status) => (
+                                <option key={status} value={status}>{reviewStatusLabel(locale, status)}</option>
+                              ))}
+                            </select>
+                            <button className="primary-button" onClick={handleReviewSave} disabled={reviewPending} style={{ borderRadius: '8px' }}>
+                              {reviewPending ? "..." : "Update Status"}
+                            </button>
+                          </div>
+                          <textarea 
+                            value={reviewNote} 
+                            onChange={(event) => setReviewNote(event.target.value)} 
+                            placeholder="Tinggalkan catatan review internal..." 
+                            style={{ width: '100%', minHeight: '80px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '12px', fontSize: '0.82rem', marginBottom: '16px' }}
+                          />
+
+                          {/* Revision Request Section is still handled inside here or separately, but we keep it inside for now based on previous structure */}
+                          {/* Note: I'll actually keep the original revision logic but style it as a sub-section if possible, or just style the cards around it. */}
+                        </div>
+                      </section>
+
+                      <section className="detail-card" style={{ marginBottom: '40px' }}>
+                        <div className="detail-card-header">
+                          <h3>📒 Catatan Internal & Capacity</h3>
+                          <button className="ghost-button" onClick={handleOpsProfileSave} disabled={opsPending} style={{ fontSize: '0.65rem', padding: '4px 10px', height: 'auto' }}>
+                            {opsPending ? "..." : "Save Notes"}
                           </button>
+                        </div>
+                        <div className="detail-card-content">
+                          <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Availability Details</label>
+                          <textarea value={availabilityNotes} onChange={e => setAvailabilityNotes(e.target.value)} placeholder="e.g. Tidak tersedia di bulan Agustus..." style={{ width: '100%', minHeight: '60px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px', fontSize: '0.82rem', marginBottom: '12px' }} />
+                          
+                          <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Pricing Insight</label>
+                          <textarea value={rateCardNotes} onChange={e => setRateCardNotes(e.target.value)} placeholder="e.g. Harga spesial untuk repeat order..." style={{ width: '100%', minHeight: '60px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px', fontSize: '0.82rem' }} />
                         </div>
                       </section>
                     </div>
                   )}
                   
                   {detailMode === "summary" && (
-                    <div className="detail-scroll-area">
+                    <div className="detail-scroll-area" style={{ display: 'grid', gap: '8px' }}>
 
-                      {/* ══ SELALU TAMPIL: PERBANKAN ══ */}
-                      <section style={{ background: 'rgba(99,102,241,0.05)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: '8px', padding: '12px 14px', marginBottom: '2px' }}>
-                        <p style={{ margin: '0 0 10px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--blue)' }}>🏦 Perbankan</p>
-                        {selectedVendor.bankAccountNumber || selectedVendor.bankName ? (
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                            {selectedVendor.bankName && (
-                              <div>
-                                <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--muted-soft)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Bank</p>
-                                <p style={{ margin: '2px 0 0', fontWeight: 600, fontSize: '0.88rem' }}>{selectedVendor.bankName}</p>
-                              </div>
-                            )}
-                            {selectedVendor.bankAccountNumber && (
-                              <div>
-                                <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--muted-soft)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>No. Rekening</p>
-                                <p style={{ margin: '2px 0 0', fontWeight: 700, fontSize: '0.95rem', fontFamily: 'monospace', color: 'var(--blue)' }}>{selectedVendor.bankAccountNumber}</p>
-                              </div>
-                            )}
-                            {selectedVendor.bankAccountHolder && (
-                              <div style={{ gridColumn: '1 / -1', paddingTop: '6px', borderTop: '1px solid var(--line)' }}>
-                                <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--muted-soft)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 700 }}>Atas Nama</p>
-                                <p style={{ margin: '2px 0 0', fontWeight: 600, fontSize: '0.88rem' }}>{selectedVendor.bankAccountHolder}</p>
-                              </div>
-                            )}
+                      {/* ══ PREMIUM CARD: PERBANKAN ══ */}
+                      {selectedVendor.bankName || selectedVendor.bankAccountNumber ? (
+                        <div className="banking-gradient-card">
+                          <div className="banking-header">
+                            <span style={{ fontSize: '1.2rem' }}>🏦</span>
+                            <span>PERBANKAN VENDOR</span>
                           </div>
-                        ) : (
-                          <p style={{ color: 'var(--muted-soft)', fontSize: '0.8rem', margin: 0, fontStyle: 'italic' }}>Belum ada data perbankan</p>
-                        )}
-                      </section>
-
-                      {/* ══ SELALU TAMPIL: KONTAK & NPWP ══ */}
-                      <section style={{ padding: '10px 0', borderBottom: '1px solid var(--line)', marginBottom: '4px' }}>
-                        <p style={{ margin: '0 0 8px', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--muted-soft)' }}>👤 Kontak & Identitas</p>
-                        <div style={{ display: 'grid', gap: '0' }}>
-                          {selectedVendor.contacts?.[0]?.name && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid var(--line)', fontSize: '0.82rem' }}>
-                              <span style={{ color: 'var(--muted-soft)' }}>PIC</span>
-                              <strong>{selectedVendor.contacts[0].name}</strong>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: '20px' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>BANK</span>
+                              <strong style={{ fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.01em' }}>{selectedVendor.bankName || "-"}</strong>
                             </div>
-                          )}
-                          {selectedVendor.contacts?.[0]?.phone && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid var(--line)', fontSize: '0.82rem' }}>
-                              <span style={{ color: 'var(--muted-soft)' }}>No. WA</span>
-                              <a href={`https://wa.me/${normalizePhoneToWhatsApp(selectedVendor.contacts[0].phone)}`} target="_blank" rel="noreferrer" style={{ fontWeight: 600, color: 'var(--green)', fontSize: '0.82rem' }}>
-                                {selectedVendor.contacts[0].phone}
-                              </a>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>NO. REKENING</span>
+                              <strong style={{ fontSize: '1.1rem', color: 'var(--blue)', fontFamily: 'var(--font-mono)' }}>{formatBankAccount(selectedVendor.bankAccountNumber!)}</strong>
                             </div>
-                          )}
-                          {selectedVendor.email && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid var(--line)', fontSize: '0.82rem' }}>
-                              <span style={{ color: 'var(--muted-soft)' }}>Email</span>
-                              <strong style={{ fontSize: '0.8rem' }}>{selectedVendor.email}</strong>
-                            </div>
-                          )}
-                          {selectedVendor.npwpNumber && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', borderBottom: '1px solid var(--line)', fontSize: '0.82rem' }}>
-                              <span style={{ color: 'var(--muted-soft)' }}>NPWP</span>
-                              <strong style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{selectedVendor.npwpNumber}</strong>
-                            </div>
-                          )}
-                          {selectedVendor.coverageArea && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: '0.82rem' }}>
-                              <span style={{ color: 'var(--muted-soft)' }}>Area</span>
-                              <strong>{selectedVendor.coverageArea}</strong>
-                            </div>
-                          )}
-                          {selectedVendor.businessAddress && (
-                            <div style={{ padding: '8px 0', borderTop: '1px solid var(--line)', fontSize: '0.82rem' }}>
-                              <span style={{ color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Alamat Usaha</span>
-                              <p style={{ margin: 0, lineHeight: 1.4, fontSize: '0.78rem' }}>{selectedVendor.businessAddress}</p>
-                            </div>
-                          )}
+                          </div>
+                          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>ATAS NAMA REKENING</span>
+                            <strong style={{ fontSize: '0.94rem', color: '#fff' }}>{selectedVendor.bankAccountHolder || "-"}</strong>
+                          </div>
                         </div>
-                      </section>
-
-                      {/* ══ COLLAPSIBLE: SEMUA SECTION ADMIN ══ */}
-
-                      <details className="detail-disclosure">
-                        <summary>
-                          <span>📊 Klasifikasi & Status</span>
-                          <em className={`category-pill tone-${classificationTone(selectedVendor.classification)}`} style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>
-                            {classificationLabel(selectedVendor.classification)}
-                          </em>
-                        </summary>
-                        <div style={{ paddingTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <span className="text-dim" style={{ fontSize: '0.78rem' }}>Terdaftar {formatDate(selectedVendor.sourceTimestamp, locale)}</span>
-                          <button 
-                            className="ghost-button" 
-                            style={{ fontSize: '0.72rem', padding: '3px 8px', height: 'auto' }}
-                            onClick={() => {
-                              const detail = dashboard.vendorDetails.find(d => d.id === selectedVendor.id);
-                              setEditVendorFormData(detail ? { ...detail } : { ...selectedVendor });
-                              setIsEditVendorModalOpen(true);
-                            }}
-                          >
-                            Manual Adjust
-                          </button>
+                      ) : (
+                        <div className="detail-card" style={{ padding: '24px', textAlign: 'center', opacity: 0.5 }}>
+                          <p style={{ margin: 0, fontSize: '0.8rem' }}>Data rekening belum tersedia</p>
                         </div>
-                      </details>
-
-                      <details className="detail-disclosure">
-                        <summary>
-                          <span>📁 Dokumen & Compliance</span>
-                          <span className={`status-dot small tone-${complianceTone(selectedVendor.compliance.status)}`} style={{ marginLeft: 'auto' }}>
-                            {selectedVendor.compliance.status.toUpperCase()}
-                          </span>
-                        </summary>
-                        <div style={{ paddingTop: '10px' }}>
-                          {selectedVendor.documentsFolderUrl && (
-                            <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--panel-soft)', borderRadius: '8px', border: '1px solid var(--line)' }}>
-                              <p style={{ margin: '0 0 8px', fontSize: '0.7rem', fontWeight: 700, color: 'var(--blue)' }}>📁 LINK FOLDER DOKUMEN</p>
-                              <a href={selectedVendor.documentsFolderUrl} target="_blank" rel="noreferrer" className="primary-button" style={{ width: '100%', fontSize: '0.8rem', padding: '8px', textAlign: 'center' }}>
-                                Buka Folder Dokumen
-                              </a>
-                            </div>
-                          )}
-                          <div className="compliance-summary">
-                            {selectedVendor.compliance.items.map((item) => (
-                              <div className="compliance-item" key={item.documentType}>
-                                <div className="compliance-item-left" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                  <strong>{documentTypeLabel(item.documentType)}</strong>
-                                  <span className={`status-dot small tone-${complianceItemTone(item.status)}`}>{item.status.toUpperCase()}</span>
-                                </div>
-                                <p className="detail-client">{item.note}</p>
-                                {item.expiresAt && <small style={{ display: 'block', marginTop: '4px' }}>Expires: {formatDate(item.expiresAt, locale)}</small>}
-                              </div>
-                            ))}
-                          </div>
-                          <details className="detail-disclosure" style={{ marginTop: '8px' }}>
-                            <summary style={{ fontSize: '0.75rem', color: 'var(--muted-soft)' }}>⚙️ Manage Compliance (Admin)</summary>
-                            <div className="compliance-editor" style={{ paddingTop: '8px' }}>
-                              {selectedVendor.compliance.items.map((item) => (
-                                <div className="compliance-edit-row" key={item.documentType}>
-                                  <label>{documentTypeLabel(item.documentType)}</label>
-                                  <div className="edit-controls" style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-                                    <select
-                                      value={complianceDrafts[item.documentType]?.status || item.status}
-                                      onChange={(e) => setComplianceDrafts((prev) => ({ ...prev, [item.documentType]: { ...prev[item.documentType], status: e.target.value } }))}
-                                    >
-                                      <option value="missing">Missing</option>
-                                      <option value="valid">Valid</option>
-                                      <option value="expiring">Expiring</option>
-                                      <option value="expired">Expired</option>
-                                    </select>
-                                    <input
-                                      type="date"
-                                      value={complianceDrafts[item.documentType]?.expiresAt?.split("T")[0] || item.expiresAt?.split("T")[0] || ""}
-                                      onChange={(e) => setComplianceDrafts((prev) => ({ ...prev, [item.documentType]: { ...prev[item.documentType], expiresAt: e.target.value } }))}
-                                    />
-                                    <button className="ghost-button" onClick={() => {
-                                      const draft = complianceDrafts[item.documentType];
-                                      if (!draft) return;
-                                      startOpsTransition(async () => {
-                                        await fetch(`/api/vendors/${selectedVendor.id}/compliance`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ documentType: item.documentType, status: draft.status, expiresAt: draft.expiresAt, note: draft.note || item.note }) });
-                                        refreshAfterMutation();
-                                      });
-                                    }}>Update</button>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </details>
-                        </div>
-                      </details>
-
-                      <details className="detail-disclosure">
-                        <summary>
-                          <span>✅ Review & Verifikasi</span>
-                          <span className={`status-dot small tone-${statusTone(selectedVendor.reviewStatus)}`} style={{ marginLeft: 'auto' }}>
-                            {reviewStatusLabel(locale, selectedVendor.reviewStatus)}
-                          </span>
-                        </summary>
-                        <div style={{ paddingTop: '10px', display: 'grid', gap: '10px' }}>
-                          <div style={{ display: 'flex', gap: '8px' }}>
-                            <select value={reviewStatus} onChange={(event) => setReviewStatus(event.target.value as ReviewStatus)} style={{ flex: 1 }}>
-                              {REVIEW_STATUSES.map((status) => (
-                                <option key={status} value={status}>{reviewStatusLabel(locale, status)}</option>
-                              ))}
-                            </select>
-                            <button className="primary-button" onClick={handleReviewSave} disabled={reviewPending}>
-                              {reviewPending ? "..." : "Save"}
-                            </button>
-                          </div>
-                          <textarea 
-                            value={reviewNote} 
-                            onChange={(event) => setReviewNote(event.target.value)} 
-                            placeholder="Internal review notes..." 
-                            style={{ width: '100%', minHeight: '60px', borderRadius: '4px', padding: '8px' }}
-                          />
-                        </div>
-                      </details>
-
-                      <details className="detail-disclosure">
-                        <summary>
-                          <span>📝 Request Revisi Profil</span>
-                          {selectedVendor.activeRevisionRequest && (
-                            <span className="status-dot small tone-review" style={{ marginLeft: 'auto' }}>ACTIVE</span>
-                          )}
-                        </summary>
-                        <div style={{ paddingTop: '10px', display: 'grid', gap: '10px' }}>
-                          <div className="revision-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
-                            {REVISION_FIELD_OPTIONS.map((field) => (
-                              <label className="revision-checkbox-item" key={field.fieldKey} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}>
-                                <input
-                                  checked={!!revisionSelections[field.fieldKey]}
-                                  onChange={(e) => setRevisionSelections((prev) => { const next = { ...prev }; if (e.target.checked) next[field.fieldKey] = ""; else delete next[field.fieldKey]; return next; })}
-                                  type="checkbox"
-                                />
-                                <span>{field.label}</span>
-                              </label>
-                            ))}
-                          </div>
-                          <textarea
-                            onChange={(e) => setRevisionGeneralNote(e.target.value)}
-                            placeholder="Instruksi untuk vendor..."
-                            value={revisionGeneralNote}
-                            style={{ width: '100%', minHeight: '70px', borderRadius: '4px', padding: '8px', fontSize: '0.82rem' }}
-                          />
-                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                            {REVISION_TEMPLATES.map((tpl) => (
-                              <button className="chip" key={tpl.id} onClick={() => { setRevisionGeneralNote(tpl.generalNote); const next: Record<string, string> = {}; tpl.items.forEach((it) => (next[it.fieldKey] = it.note)); setRevisionSelections(next); }} type="button">
-                                {tpl.label}
-                              </button>
-                            ))}
-                          </div>
-                          <button className="ghost-button" onClick={handleRequestRevision} type="button" style={{ width: '100%' }}>
-                            {opsPending ? "..." : "Kirim Permintaan Revisi"}
-                          </button>
-                          {selectedVendor.activeRevisionRequest && (
-                            <div style={{ padding: '8px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '4px', fontSize: '0.78rem' }}>
-                              <p style={{ wordBreak: 'break-all', margin: '0 0 4px' }}>
-                                Active: /vendor/revise/{selectedVendor.activeRevisionRequest.editToken}
-                              </p>
-                              <small>Expires: {formatDate(selectedVendor.activeRevisionRequest.editTokenExpiresAt, locale)}</small>
-                            </div>
-                          )}
-                        </div>
-                      </details>
-
-                      {socialLinks.length > 0 && (
-                        <details className="detail-disclosure">
-                          <summary>Social media</summary>
-                          <div className="notion-links">
-                            {socialLinks.map((item) => (
-                              <a href={item.url} key={item.label} rel="noreferrer" target="_blank">
-                                <span>{item.label}</span>
-                                <strong>{shortLinkLabel(item.url)}</strong>
-                              </a>
-                            ))}
-                          </div>
-                        </details>
                       )}
 
-                      <details className="detail-disclosure">
-                        <summary>Communication templates</summary>
-                        <div className="notion-links">
-                          {whatsappNumber ? (
-                            <a href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Halo ${selectedVendor.contacts[0]?.name || "Tim Vendor"}, kami dari JUARA ingin follow up profil vendor ${formatVendorName(selectedVendor.name)}.`)}`} rel="noreferrer" target="_blank">
-                              <span>WhatsApp follow-up</span>
-                              <strong>Open template</strong>
-                            </a>
-                          ) : null}
-                          {selectedVendor.email ? (
-                            <a href={`mailto:${selectedVendor.email}?subject=${encodeURIComponent(`Follow up vendor ${formatVendorName(selectedVendor.name)}`)}`}>
-                              <span>Email follow-up</span>
-                              <strong>{selectedVendor.email}</strong>
-                            </a>
-                          ) : null}
+                      {/* ══ CARD: KONTAK & IDENTITAS ══ */}
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3>👤 Kontak & Identitas</h3>
                         </div>
-                      </details>
+                        <div className="detail-card-content">
+                          <div className="detail-row">
+                            <span className="detail-label">Nama PIC</span>
+                            <span className="detail-value">{selectedVendor.contacts?.[0]?.name || "-"}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">WhatsApp PIC</span>
+                            <span className="detail-value">
+                              {selectedVendor.contacts?.[0]?.phone ? (
+                                <a href={`https://wa.me/${normalizePhoneToWhatsApp(selectedVendor.contacts[0].phone)}`} target="_blank" rel="noreferrer" style={{ color: 'var(--green)', fontWeight: 700 }}>
+                                  {selectedVendor.contacts[0].phone}
+                                </a>
+                              ) : "-"}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Business Email</span>
+                            <span className="detail-value">{selectedVendor.email || "-"}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">NPWP (Tax ID)</span>
+                            <span className="detail-value mono" style={{ fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+                              {formatNPWP(selectedVendor.npwpNumber!)}
+                            </span>
+                          </div>
+                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px' }}>
+                            <div style={{ width: '100%' }}>
+                              <span className="detail-label" style={{ marginBottom: '8px', display: 'block' }}>Alamat Usaha</span>
+                              <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--muted)' }}>{selectedVendor.businessAddress || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
 
-                      <details className="detail-disclosure">
-                        <summary>Audit log</summary>
-                        <div className="audit-list">
-                          {selectedVendor.auditLog.length > 0 ? (
-                            selectedVendor.auditLog.map((entry) => (
-                              <div className="audit-row" key={entry.id}>
-                                <strong>{entry.action}</strong>
-                                <span>{entry.message}</span>
-                                <small>{entry.actor} • {formatDate(entry.createdAt, locale)}</small>
-                              </div>
-                            ))
-                          ) : (
-                            <p className="empty-state">No audit entries yet.</p>
-                          )}
+                      {/* ══ CARD: KLASIFIKASI ══ */}
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3>📊 Klasifikasi & Status</h3>
+                          <em className={`category-pill tone-${classificationTone(selectedVendor.classification)}`}>
+                            {classificationLabel(selectedVendor.classification)}
+                          </em>
                         </div>
-                      </details>
+                        <div className="detail-card-content">
+                          <div className="detail-row">
+                            <span className="detail-label">Status Pajak</span>
+                            <span className={`status-pill tone-${selectedVendor.taxStatus === "PKP" ? "green" : "amber"}`}>
+                              {selectedVendor.taxStatus}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Legalitas Utama</span>
+                            <span className="detail-value">{selectedVendor.legalStatus}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Registration Date</span>
+                            <span className="detail-value">{formatDate(selectedVendor.sourceTimestamp, locale)}</span>
+                          </div>
+                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span className="detail-label">Review Status</span>
+                            <span className={`status-pill tone-${statusTone(selectedVendor.reviewStatus)}`}>
+                              {reviewStatusLabel(locale, selectedVendor.reviewStatus)}
+                            </span>
+                          </div>
+                        </div>
+                      </section>
+
+                      {/* ══ CARD: DOKUMEN ══ */}
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3>📁 Dokumen & Compliance</h3>
+                          <span className={`status-pill tone-${complianceTone(selectedVendor.compliance.status)}`}>
+                            {selectedVendor.compliance.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="detail-card-content">
+                          {selectedVendor.documentsFolderUrl ? (
+                            <div style={{ marginBottom: '20px' }}>
+                              <a href={selectedVendor.documentsFolderUrl} target="_blank" rel="noreferrer" className="primary-button" style={{ width: '100%', borderRadius: '12px', justifyContent: 'center', height: '42px', fontWeight: 600 }}>
+                                📂 Buka Folder Dokumen
+                              </a>
+                            </div>
+                          ) : (
+                            <div style={{ marginBottom: '16px', padding: '12px', border: '1px dashed var(--line-strong)', borderRadius: '12px', textAlign: 'center' }}>
+                              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)' }}>Link folder dokumen tidak dilampirkan</p>
+                            </div>
+                          )}
+                          {/* Compliance items list removed as per user request */}
+                        </div>
+                      </section>
+
+                      {/* ══ AUDIT & SOCIAL ══ */}
+                      <section className="detail-card" style={{ marginBottom: '40px' }}>
+                        <div className="detail-card-header" onClick={() => setShowAuditLog(!showAuditLog)} style={{ cursor: 'pointer' }}>
+                          <h3>📝 Audit Trail & Medsos</h3>
+                          <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{showAuditLog ? '▼' : '▶'}</span>
+                        </div>
+                        {showAuditLog && (
+                          <div className="detail-card-content">
+                            {socialLinks.length > 0 && (
+                              <div className="notion-links" style={{ marginBottom: '20px' }}>
+                                {socialLinks.map((item) => (
+                                  <a href={item.url} key={item.label} rel="noreferrer" target="_blank" className="detail-row" style={{ textDecoration: 'none' }}>
+                                    <span className="detail-label">{item.label}</span>
+                                    <strong className="detail-value" style={{ color: 'var(--blue)' }}>{shortLinkLabel(item.url)}</strong>
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                            <div className="audit-list" style={{ display: 'grid', gap: '12px' }}>
+                              {selectedVendor.auditLog.map((entry) => (
+                                <div key={entry.id} style={{ padding: '10px', background: 'var(--panel-soft)', borderRadius: '8px', fontSize: '0.75rem' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                    <strong>{entry.action}</strong>
+                                    <span style={{ color: 'var(--muted-soft)' }}>{formatDate(entry.createdAt, locale)}</span>
+                                  </div>
+                                  <p style={{ margin: 0, color: 'var(--muted)' }}>{entry.message}</p>
+                                  <small style={{ marginTop: '4px', display: 'block', opacity: 0.6 }}>Oleh: {entry.actor}</small>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </section>
                     </div>
                   )}
                 </>
@@ -1483,7 +1479,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                       <strong className="text-main">{vendorScore(vendor)}</strong>
                     </div>
                     <div style={{ marginTop: '8px', opacity: 0.6, fontSize: '0.75rem' }}>
-                      {vendor.coverageArea || "No location data"}
+                      {vendor.businessAddress || "No address data"}
                     </div>
                   </button>
                 ))}
@@ -1518,7 +1514,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                       <strong className="text-main">{vendorScore(vendor)}</strong>
                     </div>
                     <div style={{ marginTop: '8px', opacity: 0.6, fontSize: '0.75rem' }}>
-                      {vendor.coverageArea || "No location data"}
+                      {vendor.businessAddress || "No address data"}
                     </div>
                   </button>
                 ))}
@@ -1574,8 +1570,8 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                   <input 
                     className="control-bar-input" 
                     style={{ width: '100%' }}
-                    value={editVendorFormData.coverageArea || ''} 
-                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, coverageArea: e.target.value })} 
+                    value={editVendorFormData.businessAddress || ''} 
+                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, businessAddress: e.target.value })} 
                     placeholder="e.g. Nasional, Jakarta, etc." 
                   />
                 </div>

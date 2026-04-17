@@ -10,7 +10,7 @@ import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 import { POCreatorModal } from "./po-creator-modal";
 import { CashAdvanceModal } from "./cash-advance-modal";
 import { RfpFromDocModal } from "./rfp-from-doc-modal";
-import { SettlementModal } from "./settlement-modal";
+
 import { FilterBar } from "./filter-bar";
 import { updateDocStatus, updateRFPStatus } from "@/lib/finance/actions";
 
@@ -40,9 +40,9 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
   const [showPOModal, setShowPOModal] = useState(false);
   const [showCAModal, setShowCAModal] = useState(false);
   const [selectedDocForRFP, setSelectedDocForRFP] = useState<ExpenseDocument | null>(null);
-  const [selectedRfpForSettlement, setSelectedRfpForSettlement] = useState<RequestForPayment | null>(null);
+
   const [viewProofUrl, setViewProofUrl] = useState<string | null>(null);
-  
+
   const [editDocData, setEditDocData] = useState<ExpenseDocument | null>(null);
   const [editRfpData, setEditRfpData] = useState<RequestForPayment | null>(null);
 
@@ -55,14 +55,14 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
   const [filteredDocs, setFilteredDocs] = useState<ExpenseDocument[]>([]);
   const [filteredRfps, setFilteredRfps] = useState<RequestForPayment[]>([]);
 
-  const pendingApprovalDocs = useMemo(() => docs.filter(d => d.status === "draft" || d.status === "submitted"), [docs]);
-  
+  const pendingApprovalDocs = useMemo(() => docs.filter(d => d.status === "draft" || d.status === "pending_finance" || d.status === "pending_c_level"), [docs]);
+
   // A doc is ready for RFP if it's approved and its total rfps amount < doc amount
   const getDocRfps = useCallback((docId: string) => rfps.filter(r => r.documentIds.includes(docId)), [rfps]);
   const getDocTotalRfpAmount = useCallback((docId: string) => getDocRfps(docId).reduce((s, r) => s + r.totalAmount, 0), [getDocRfps]);
 
   const readyForRfpDocs = useMemo(() => docs.filter(d => {
-    if (d.status !== "approved" && d.status !== "submitted") return false;
+    if (d.status !== "approved" && d.status !== "pending_finance" && d.status !== "pending_c_level") return false;
     const totalPaid = getDocTotalRfpAmount(d.id);
     return totalPaid < d.amount - 100; // Tolerance for rounding
   }), [docs, getDocTotalRfpAmount]);
@@ -156,20 +156,20 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       </div>
                     )}
                     {doc.status === "draft" && (
-                      <button 
+                      <button
                         onClick={() => {
                           if (doc.documentType === "CASH_ADVANCE") setEditDocData(doc);
                           else setEditDocData(doc);
                           // Actually editDocData works for both, but we need to know which modal to open
-                        }} 
-                        className="secondary-button" 
+                        }}
+                        className="secondary-button"
                         style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
                       >
                         Edit & Fix
                       </button>
                     )}
-                    {doc.status === "submitted" && (
-                      <button 
+                    {(doc.status === "pending_finance" || doc.status === "pending_c_level") && (
+                      <button
                         onClick={async () => {
                           if (confirm("Tarik kembali dokumen ini untuk diperbaiki?")) {
                             await updateDocStatus(doc.id, "draft");
@@ -182,11 +182,11 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         ↩ Tarik
                       </button>
                     )}
-                    {(doc.status === "approved" || doc.status === "submitted") && (() => {
+                    {(doc.status === "approved" || doc.status === "pending_finance" || doc.status === "pending_c_level") && (() => {
                       const docRfps = getDocRfps(doc.id);
                       const totalPaid = docRfps.reduce((s, r) => s + r.totalAmount, 0);
                       const isFullyRequested = totalPaid >= doc.amount - 100;
-                      
+
                       return (
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           {docRfps.length > 0 && (
@@ -251,10 +251,9 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                   <div style={{ fontSize: "12px" }}>{rfp.projectName}</div>
                   <div style={{ fontWeight: 700 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
                   <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap", alignItems: "center" }}>
-                    <span className={`status-pill ${
-                      rfp.status === "settled" || rfp.status === "paid" ? "tone-green" :
-                      rfp.status === "approved" ? "tone-blue" : "tone-amber"
-                    }`}>
+                    <span className={`status-pill ${rfp.status === "settled" || rfp.status === "paid" ? "tone-green" :
+                        rfp.status === "approved" ? "tone-blue" : "tone-amber"
+                      }`}>
                       {rfp.status.replace(/_/g, " ").toUpperCase()}
                     </span>
                     {rfp.rejectionReason && (
@@ -263,16 +262,16 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       </div>
                     )}
                     {rfp.status === "draft" && (
-                      <button 
-                        onClick={() => setEditRfpData(rfp)} 
-                        className="secondary-button" 
+                      <button
+                        onClick={() => setEditRfpData(rfp)}
+                        className="secondary-button"
                         style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
                       >
                         Edit & Fix
                       </button>
                     )}
                     {(rfp.status === "pending_c_level" || rfp.status === "pending_finance") && (
-                      <button 
+                      <button
                         onClick={async () => {
                           if (confirm("Tarik kembali RFP ini untuk diperbaiki?")) {
                             await updateRFPStatus(rfp.id, "draft");
@@ -286,19 +285,15 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       </button>
                     )}
                     {rfp.paymentProofUrl && (
-                      <button 
-                        className="secondary-button" 
+                      <button
+                        className="secondary-button"
                         style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)" }}
                         onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
                       >
                         👁️ Bukti
                       </button>
                     )}
-                    {rfp.status === "paid" && rfp.paymentType === "Cash" && (
-                      <button className="primary-button" style={{ padding: "4px 12px", fontSize: "11px", height: "auto", minHeight: "auto" }} onClick={() => setSelectedRfpForSettlement(rfp)}>
-                        Settle
-                      </button>
-                    )}
+
                     <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto" }} onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")}>
                       Print
                     </button>
@@ -339,17 +334,11 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           onSuccess={() => { setSelectedDocForRFP(null); setEditRfpData(null); reload(); }}
         />
       )}
-      {selectedRfpForSettlement && (
-        <SettlementModal
-          rfp={selectedRfpForSettlement}
-          isOpen={true}
-          onClose={() => setSelectedRfpForSettlement(null)}
-        />
-      )}
+
 
       {/* Proof Lightbox */}
       {viewProofUrl && (
-        <div 
+        <div
           style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "40px" }}
           onClick={() => setViewProofUrl(null)}
         >

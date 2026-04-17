@@ -36,7 +36,7 @@ export function DirectorApprovals({ initialData }: Props) {
 
   const [rejectionTarget, setRejectionTarget] = useState<{ id: string; type: "DOC" | "RFP" } | null>(null);
 
-  const pendingDocs = useMemo(() => (initialData.expenseDocuments || []).filter(d => d.status === "submitted"), [initialData.expenseDocuments]);
+  const pendingDocs = useMemo(() => (initialData.expenseDocuments || []).filter(d => d.status === "pending_c_level"), [initialData.expenseDocuments]);
   const pendingRfps = useMemo(() => (initialData.rfps || []).filter(r => r.status === "pending_c_level"), [initialData.rfps]);
   const historyDocs = useMemo(() => (initialData.expenseDocuments || []).filter(d => d.status === "approved" || d.status === "paid"), [initialData.expenseDocuments]);
   const historyRfps = useMemo(() => (initialData.rfps || []).filter(r => ["approved", "paid", "settled"].includes(r.status)), [initialData.rfps]);
@@ -348,13 +348,14 @@ export function DirectorApprovals({ initialData }: Props) {
                     </div>
                   </div>
                   <div style={{ padding: "12px", background: "rgba(91,140,255,0.05)", borderRadius: "8px", border: "1px solid rgba(91,140,255,0.1)" }}>
-                    <label className="eyebrow" style={{ color: "var(--blue)" }}>Audit Documents</label>
-                    <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                      <a href={`/finance/print/${selectedRfp.id}`} target="_blank" style={{ color: "var(--blue)", textDecoration: "none", fontSize: "11px", fontWeight: 600 }}>👁️ View Audit Docs (PO + RFP)</a>
+                    <label className="eyebrow" style={{ color: "var(--blue)" }}>Audit Documents (Tiga Dokumen Khusus)</label>
+                    <div style={{ marginTop: "12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                      <button onClick={() => window.open(`/finance/print/${selectedRfp.documentIds?.[0] || selectedRfp.id}?only=po`, "_blank")} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", border: "1px solid var(--blue)", color: "var(--blue)", background: "white" }}>📄 Buka PO/Kontrak</button>
+                      <button onClick={() => window.open(`/finance/print/${selectedRfp.id}?only=rfp`, "_blank")} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", border: "1px solid var(--green)", color: "var(--green)", background: "white" }}>💳 Buka RFP</button>
                       {selectedRfp.vendorInvoiceUrl ? (
-                        <button onClick={() => setViewProofUrl(selectedRfp.vendorInvoiceUrl!)} style={{ background: "none", border: "none", color: "var(--green)", fontSize: "11px", fontWeight: 600, cursor: "pointer", textAlign: "left", padding: 0 }}>👁️ View Vendor Invoice</button>
+                         <button onClick={() => setViewProofUrl(selectedRfp.vendorInvoiceUrl!)} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", gridColumn: "span 2", border: "1px solid #f59e0b", color: "#d97706", background: "white" }}>🧾 Buka Invoice Vendor</button>
                       ) : (
-                        <div style={{ fontSize: "11px", color: "#f87171" }}>❌ Invoice Missing</div>
+                         <div style={{ fontSize: "11px", color: "#f87171", gridColumn: "span 2", textAlign: "center", padding: "6px" }}>❌ Invoice Vendor Tidak Dilampirkan</div>
                       )}
                     </div>
                   </div>

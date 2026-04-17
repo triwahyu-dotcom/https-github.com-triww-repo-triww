@@ -11,11 +11,17 @@ interface Props {
 
 export function PrintLayout({ rfp, doc }: Props) {
   const [mounted, setMounted] = useState(false);
+  const [onlyRender, setOnlyRender] = useState<string | null>(null);
+
   useEffect(() => {
     setMounted(true);
+    setOnlyRender(new URLSearchParams(window.location.search).get('only'));
   }, []);
 
   if (!mounted) return null;
+  
+  const showRfp = (!onlyRender || onlyRender === 'rfp') && rfp;
+  const showPo = (!onlyRender || onlyRender === 'po') && doc;
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(val);
@@ -122,7 +128,7 @@ export function PrintLayout({ rfp, doc }: Props) {
       {/* =========================================================
           PAGE 1: FORMAL RFP (REQUEST FOR PAYMENT)
           ========================================================= */}
-      {rfp && (
+      {showRfp && (
         <div className="print-page page-break" style={{ zIndex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '10px' }}>
              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#004a99', letterSpacing: '1px' }}>JUARA</div>
@@ -232,15 +238,22 @@ export function PrintLayout({ rfp, doc }: Props) {
                 <td style={{ border: "1px solid #000", height: "80px", verticalAlign: "bottom", padding: "8px" }}>
                   <div style={{ fontWeight: "bold", textDecoration: "underline" }}>{rfpPreparedByName}</div>
                 </td>
-                <td style={{ border: "1px solid #000", height: "80px", verticalAlign: "bottom", padding: "8px" }}>
-                  <div style={{ color: rfp.status !== "pending_finance" ? "green" : "transparent", fontSize: "18px", marginBottom: "10px" }}>{rfp.status !== "pending_finance" ? "✔️" : ""}</div>
+                <td style={{ border: "1px solid #000", height: "80px", verticalAlign: "bottom", padding: "8px", position: "relative" }}>
+                   {rfp?.financeApprovedBy?.signature ? (
+                      <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', border: '1px solid #16a34a', padding: '4px', borderRadius: '4px', transform: 'rotate(-2deg)', background: 'rgba(255, 255, 255, 0.9)', color: '#16a34a', zIndex: 10 }}>
+                         <div style={{ fontFamily: 'var(--font-signature)', fontSize: '14px', lineHeight: 1 }}>{rfpVerifiedByName}</div>
+                         <div style={{ fontSize: '5px', fontWeight: 'bold' }}>{rfp.financeApprovedBy.signature}</div>
+                      </div>
+                   ) : (
+                      <div style={{ color: rfp?.status !== "pending_finance" && rfp?.status !== "draft" ? "green" : "transparent", fontSize: "18px", marginBottom: "10px" }}>{rfp?.status !== "pending_finance" && rfp?.status !== "draft" ? "✔️" : ""}</div>
+                   )}
                   <div style={{ fontWeight: "bold", textDecoration: "underline" }}>{rfpVerifiedByName}</div>
                 </td>
                 <td style={{ border: "1px solid #000", height: "80px", verticalAlign: "bottom", padding: "8px", position: "relative" }}>
                    {doc?.approvedBy?.digitalSignature && (
                       <div style={{ position: 'absolute', top: '10px', left: '10px', right: '10px', border: '1px solid #2563eb', padding: '4px', borderRadius: '4px', transform: 'rotate(-5deg)', background: 'rgba(255, 255, 255, 0.9)', color: '#1e40af', zIndex: 10 }}>
                          <div style={{ fontFamily: 'var(--font-signature)', fontSize: '14px', lineHeight: 1 }}>{rfpApprovedByName}</div>
-                         <div style={{ fontSize: '5px', fontWeight: 'bold' }}>{doc.approvedBy.digitalSignature}</div>
+                         <div style={{ fontSize: '5px', fontWeight: 'bold' }}>{doc?.approvedBy?.digitalSignature}</div>
                       </div>
                    )}
                   <div style={{ fontWeight: "bold", textDecoration: "underline" }}>{rfpApprovedByName}</div>
@@ -429,7 +442,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                  {(rfp?.cLevelApprovedBy?.signature || doc?.approvedBy?.digitalSignature) && (
                     <div style={{ position: 'absolute', top: '-15px', left: '10px', right: '10px', border: '1.5px solid #2563eb', padding: '10px 4px', borderRadius: '4px', transform: 'rotate(-5deg)', background: 'rgba(255, 255, 255, 0.98)', color: '#1e40af', textAlign: 'center', pointerEvents: 'none', zIndex: 10, boxShadow: '0 4px 12px rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                        <div style={{ fontFamily: 'var(--font-signature)', fontSize: '24px', lineHeight: 1, marginBottom: '4px', fontWeight: 'normal' }}>{rfpApprovedByName}</div>
-                       <div style={{ fontSize: '7px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', opacity: 0.8 }}>E-SIGNATURE VERIFIED • {rfp?.cLevelApprovedBy?.signature || doc.approvedBy.digitalSignature}</div>
+                       <div style={{ fontSize: '7px', fontWeight: 'bold', letterSpacing: '1px', textTransform: 'uppercase', opacity: 0.8 }}>E-SIGNATURE VERIFIED • {rfp?.cLevelApprovedBy?.signature || doc?.approvedBy?.digitalSignature}</div>
                     </div>
                  )}
                 <div style={{ fontWeight: 'bold', marginTop: doc.approvedBy?.digitalSignature ? '20px' : '0' }}>{rfpApprovedByName}</div>
@@ -445,7 +458,7 @@ export function PrintLayout({ rfp, doc }: Props) {
         </div>
       )}
 
-      {doc && isSPK && (
+      {showPo && isSPK && (
         <div className="print-page" style={{ padding: "60px 50px", fontSize: "12.5px", lineHeight: 1.6, color: "#333", position: 'relative' }}>
           {/* Header */}
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '30px' }}>
@@ -563,7 +576,7 @@ export function PrintLayout({ rfp, doc }: Props) {
         </div>
       )}
 
-      {doc && isCashAdvance && (
+      {showPo && isCashAdvance && (
         <>
           <div className="print-page page-break" style={{ padding: "60px 40px", fontSize: "12px", lineHeight: 1.5 }}>
             <div style={{ textAlign: "center", marginBottom: "30px" }}>
@@ -636,7 +649,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                     {doc.approvedBy?.digitalSignature && (
                       <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translate(-50%, 0) rotate(-5deg)', border: '1px solid #2563eb', padding: '4px 10px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.9)', color: '#1e40af', width: 'max-content' }}>
                          <div style={{ fontFamily: 'var(--font-signature)', fontSize: '18px', lineHeight: 1 }}>{rfpApprovedByName}</div>
-                         <div style={{ fontSize: '6px', fontWeight: 'bold', letterSpacing: '0.5px' }}>SIGNED • {doc.approvedBy.digitalSignature}</div>
+                         <div style={{ fontSize: '6px', fontWeight: 'bold', letterSpacing: '0.5px' }}>SIGNED • {doc?.approvedBy?.digitalSignature}</div>
                       </div>
                     )}
                   </td>
@@ -805,6 +818,22 @@ export function PrintLayout({ rfp, doc }: Props) {
               </tr>
             </tbody>
           </table>
+        </div>
+      )}
+      {!doc && (!onlyRender || onlyRender === 'po') && (
+        <div className="print-page" style={{ padding: "60px 40px", fontSize: "12px", lineHeight: 1.5, textAlign: "center" }}>
+          <h2>PO / Kontrak (Dokumen Dasar) Tidak Ditemukan</h2>
+          <p>Dokumen asli mungkin telah dihapus dari database atau referensinya rusak.</p>
+        </div>
+      )}
+
+      {showRfp && rfp.vendorInvoiceUrl && (
+        <div className="print-page page-break" style={{ padding: "60px 40px", fontSize: "12px", lineHeight: 1.5, textAlign: "center", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+          <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>VENDOR INVOICE ATTACHMENT</div>
+          <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '30px' }}>Reference RFP: {rfp.id}</div>
+          <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <img src={rfp.vendorInvoiceUrl} alt="Vendor Invoice" style={{ maxWidth: "100%", maxHeight: "80vh", objectFit: "contain", border: "1px solid var(--line)" }} />
+          </div>
         </div>
       )}
     </div>

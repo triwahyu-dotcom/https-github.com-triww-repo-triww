@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { readRFPs, saveRFP } from "@/lib/finance/store";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -32,8 +33,10 @@ export async function POST(request: Request) {
 
     await saveRFP(rfp);
 
+    logger.audit("FinanceAPI", "RFP_SETTLEMENT_SUBMITTED", { rfpId, actualAmount: Number(actualAmount), difference: Number(difference) });
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
+    logger.error("FinanceAPI", "RFP_SETTLEMENT_FAILED", { error });
     console.error(error);
     return NextResponse.json({ error: "Failed to submit settlement" }, { status: 500 });
   }

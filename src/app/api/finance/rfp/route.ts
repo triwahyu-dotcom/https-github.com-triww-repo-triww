@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { readDocuments, readRFPs, saveDocument, saveRFP } from "@/lib/finance/store";
 import { RequestForPayment } from "@/lib/finance/types";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -27,8 +28,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Source document not found" }, { status: 404 });
     }
 
-    if (sourceDoc.status !== "approved" && sourceDoc.status !== "submitted") {
-      return NextResponse.json({ error: "Document must be submitted or approved before creating an RFP" }, { status: 400 });
+    if (sourceDoc.status !== "approved" && sourceDoc.status !== "pending_finance" && sourceDoc.status !== "pending_c_level") {
+      return NextResponse.json({ error: "Document must be approved or in review before creating an RFP" }, { status: 400 });
     }
 
     const allRFPs = await readRFPs();
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
         accountNo: bankAccount?.accountNo || "-",
         accountName: bankAccount?.accountName || "-",
       },
-      notes: `${paymentTerms ? `[${paymentTerms}] ` : ""}${notes || ""}\n\nRef. Document: ${documentId}`,
+      notes: notes || "",
       terminLabel: paymentTerms,
       vendorInvoiceUrl,
     };
@@ -80,8 +81,10 @@ export async function POST(request: Request) {
     await saveDocument(sourceDoc);
     await saveRFP(newRFP);
 
+    logger.audit("FinanceAPI", "RFP_CREATED", { rfpId, amount: Number(rfpAmount), documentId });
     return NextResponse.json({ success: true, rfpId });
-  } catch (error) {
+  } catch (error: any) {
+    logger.error("FinanceAPI", "RFP_CREATE_FAILED", { error });
     console.error("[/api/finance/rfp]", error);
     return NextResponse.json({ error: "Failed to create RFP" }, { status: 500 });
   }
@@ -113,8 +116,10 @@ export async function PATCH(request: Request) {
 
     await saveRFP(updatedRFP);
 
+    logger.audit("FinanceAPI", "RFP_UPDATED", { rfpId: id, updates });
     return NextResponse.json({ success: true, rfp: updatedRFP });
-  } catch (error) {
+  } catch (error: any) {
+    logger.error("FinanceAPI", "RFP_UPDATE_FAILED", { error });
     console.error("[PATCH /api/finance/rfp]", error);
     return NextResponse.json({ error: "Failed to update RFP" }, { status: 500 });
   }

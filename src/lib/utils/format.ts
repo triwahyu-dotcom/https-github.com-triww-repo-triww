@@ -11,7 +11,8 @@ export const formatCurrencyIDR = (amount: number) => {
   }).format(amount);
 };
 
-export const formatDateFullID = (dateString: string | Date) => {
+export const formatDateFullID = (dateString?: string | Date | null) => {
+  if (!dateString) return "No Date";
   const date = typeof dateString === "string" ? new Date(dateString) : dateString;
   if (isNaN(date.getTime())) return "Invalid Date";
   
@@ -22,7 +23,8 @@ export const formatDateFullID = (dateString: string | Date) => {
   });
 };
 
-export const formatTimeID = (dateString: string | Date) => {
+export const formatTimeID = (dateString?: string | Date | null) => {
+  if (!dateString) return "";
   const date = typeof dateString === "string" ? new Date(dateString) : dateString;
   if (isNaN(date.getTime())) return "";
   

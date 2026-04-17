@@ -16,17 +16,48 @@ interface Props {
 export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, onClose, onSuccess }: Props) {
   const isCA = doc.documentType === "CASH_ADVANCE";
 
+  // Find the next unpaid termin automatically
+  const getNextUnpaidTerm = () => {
+    if (!doc.paymentSchedule || doc.paymentSchedule.length === 0) return null;
+    const rfpsForDoc = allRfps.filter(r => r.documentIds && r.documentIds.includes(doc.id));
+    for (const term of doc.paymentSchedule) {
+      const alreadyRequested = rfpsForDoc.some(r => r.terminLabel === term.label);
+      if (!alreadyRequested) return term;
+    }
+    return null;
+  };
+
+  const nextTerm = editRfp ? null : getNextUnpaidTerm();
+  const defaultAmount = nextTerm
+    ? (nextTerm.amount || Math.round(doc.amount * (nextTerm.percentage || 0) / 100))
+    : doc.amount;
+  const defaultTermLabel = nextTerm ? nextTerm.label : (doc.paymentSchedule && doc.paymentSchedule.length > 0 ? "" : "Full Payment");
+
   const [selectedTermRatio, setSelectedTermRatio] = useState<"100" | "50" | "30" | "20" | "custom">("100");
-  const [rfpAmount, setRfpAmount] = useState<number>(doc.amount);
-  const [paymentTerms, setPaymentTerms] = useState("Full Payment");
+  const [rfpAmount, setRfpAmount] = useState<number>(defaultAmount);
+  const [paymentTerms, setPaymentTerms] = useState(defaultTermLabel);
   const [paymentType, setPaymentType] = useState<"Transfer" | "Cash">("Transfer");
   const [bankName, setBankName] = useState("");
   const [accountNo, setAccountNo] = useState("");
   const [accountName, setAccountName] = useState("");
   const [requiredDate, setRequiredDate] = useState("");
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(doc.description || "");
   const [invoiceFile, setInvoiceFile] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInvoiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setIsUploading(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setInvoiceFile(reader.result as string);
+        setIsUploading(false);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Handle Edit RFP Mode
   useEffect(() => {
@@ -77,6 +108,8 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
       alert("Lengkapi semua field wajib.");
       return;
     }
+
+    const finalNotes = notes;
     
     setIsSubmitting(true);
     try {
@@ -90,7 +123,7 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
           paymentTerms,
           paymentType,
           bankAccount: { bankName, accountNo, accountName },
-          notes,
+          notes: finalNotes,
           requiredDate,
           vendorInvoiceUrl: invoiceFile,
         }),
@@ -153,28 +186,26 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
           {/* Termin / Payment Schedule Selection */}
           {doc.paymentSchedule && doc.paymentSchedule.length > 0 && (
             <div style={{ marginBottom: "24px" }}>
-               <div className="form-section-title" style={{ marginBottom: "12px" }}>Pilih Termin Pembayaran (Sesuai PO)</div>
+               <div className="form-section-title" style={{ marginBottom: "4px" }}>Status Termin Pembayaran (Sesuai PO)</div>
+               <div style={{ fontSize: "11px", color: "var(--muted)", marginBottom: "12px" }}>Termin aktif berikutnya dipilih & dikunci otomatis untuk menghindari kesalahan jumlah transfer.</div>
                <div style={{ display: "grid", gap: "8px" }}>
                   {doc.paymentSchedule.map((term, idx) => {
                     const rfpsForThisDoc = allRfps.filter(r => r.documentIds.includes(doc.id));
                     const isPaid = rfpsForThisDoc.some(r => r.terminLabel === term.label);
-                    
-                    // Sequence check: Termin (idx) can be paid only if (idx-1) is already in rfpsForThisDoc
                     const prevTerm = idx > 0 ? doc.paymentSchedule![idx - 1] : null;
                     const isPrevPaid = idx === 0 || rfpsForThisDoc.some(r => r.terminLabel === prevTerm?.label);
-                    const isSelectable = !isPaid && isPrevPaid;
+                    const isNext = !isPaid && isPrevPaid; // this is the auto-selected next term
 
                     return (
                       <div 
                         key={idx} 
-                        onClick={() => isSelectable && handleTermSelection(term)}
                         style={{ 
                           padding: "12px 16px", 
                           borderRadius: "10px", 
-                          border: `1px solid ${paymentTerms === term.label ? "var(--blue)" : "var(--line)"}`,
-                          background: paymentTerms === term.label ? "rgba(91,140,255,0.08)" : (isPaid ? "var(--panel-soft)" : "transparent"),
-                          cursor: isSelectable ? "pointer" : "not-allowed",
-                          opacity: isPaid ? 0.6 : (isSelectable ? 1 : 0.4),
+                          border: `${isNext ? "2px" : "1px"} solid ${isNext ? "var(--blue)" : (isPaid ? "rgba(78,203,113,0.3)" : "var(--line)")}`,
+                          background: isNext ? "rgba(91,140,255,0.08)" : (isPaid ? "rgba(78,203,113,0.05)" : "transparent"),
+                          cursor: "default",
+                          opacity: (!isPaid && !isNext) ? 0.4 : 1,
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center"
@@ -182,13 +213,14 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
                       >
                         <div>
                           <div style={{ fontWeight: 600, fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
-                            {isPaid && <span style={{ color: "var(--green)" }}>[TERBAYAR]</span>}
-                            {!isPaid && !isPrevPaid && <span style={{ color: "var(--muted)" }}>[ANTRE]</span>}
+                            {isPaid && <span style={{ color: "var(--green)", fontSize: "11px", background: "rgba(78,203,113,0.1)", padding: "2px 6px", borderRadius: "4px" }}>✓ TERBAYAR</span>}
+                            {isNext && <span style={{ color: "var(--blue)", fontSize: "11px", background: "rgba(91,140,255,0.12)", padding: "2px 6px", borderRadius: "4px" }}>🔵 DIPILIH OTOMATIS</span>}
+                            {!isPaid && !isNext && <span style={{ color: "var(--muted)", fontSize: "11px" }}>⏳ MENUNGGU</span>}
                             {term.label} {term.percentage}%
                           </div>
                           <div className="mini-meta">{term.date ? `Estimasi: ${term.date}` : "Syarat terpenuhi"}</div>
                         </div>
-                        <div style={{ fontWeight: 700 }}>
+                        <div style={{ fontWeight: 700, color: isNext ? "var(--blue)" : "inherit" }}>
                           {formatCurrencyIDR(term.amount || (doc.amount * (term.percentage || 0) / 100))}
                         </div>
                       </div>
@@ -218,14 +250,17 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
               <input
                 type="number"
                 value={rfpAmount || ""}
-                disabled={selectedTermRatio !== "custom" && doc.paymentSchedule && doc.paymentSchedule.length > 0}
+                disabled={!!(doc.paymentSchedule && doc.paymentSchedule.length > 0)}
                 onChange={e => setRfpAmount(Number(e.target.value))}
-                style={{ width: "100%", background: "var(--panel-soft)", border: "2px solid var(--blue)", padding: "12px", color: "var(--text)", borderRadius: "8px", marginTop: "4px", fontSize: "18px", fontWeight: 700 }}
+                style={{ width: "100%", background: (doc.paymentSchedule && doc.paymentSchedule.length > 0) ? "var(--panel-soft)" : "var(--panel-soft)", border: "2px solid var(--blue)", padding: "12px", color: "var(--text)", borderRadius: "8px", marginTop: "4px", fontSize: "18px", fontWeight: 700, opacity: (doc.paymentSchedule && doc.paymentSchedule.length > 0) ? 0.85 : 1, cursor: (doc.paymentSchedule && doc.paymentSchedule.length > 0) ? "not-allowed" : "text" }}
               />
+              {doc.paymentSchedule && doc.paymentSchedule.length > 0 && (
+                <div style={{ fontSize: "10px", color: "var(--blue)", marginTop: "4px" }}>🔒 Dikunci otomatis sesuai termin aktif</div>
+              )}
             </div>
             <div>
               <label className="mini-meta">Keterangan Term</label>
-              <input value={paymentTerms} onChange={e => setPaymentTerms(e.target.value)} style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "12px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} />
+              <input value={paymentTerms} readOnly={!!(doc.paymentSchedule && doc.paymentSchedule.length > 0)} onChange={e => setPaymentTerms(e.target.value)} style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "12px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} />
             </div>
           </div>
 

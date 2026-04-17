@@ -13,7 +13,10 @@ export default async function PrintRFPPage({ params }: { params: Promise<{ id: s
   
   // Find if it's an RFP or a Doc
   const rfp = financeData.rfps.find(r => r.id === id);
-  const doc = financeData.expenseDocuments.find(d => d.id === id || d.rfpId === id);
+  const targetDocId = rfp?.documentIds?.[0] || id;
+  const doc = financeData.expenseDocuments.find(d => 
+    d.id === targetDocId || d.id === id || d.rfpId === id || d.rfpIds?.includes(id)
+  );
 
   console.log("[PrintPage] Found:", { hasRfp: !!rfp, hasDoc: !!doc, docType: doc?.documentType });
 

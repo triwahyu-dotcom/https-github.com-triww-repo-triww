@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readRFPs, saveRFP, readDocuments, saveDocument } from "@/lib/finance/store";
+import { logger } from "@/lib/logger";
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl } = await req.json();
+    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl, verifiedBy } = await req.json();
     const today = new Date().toISOString();
 
     // ── Handle Document (PO/SPK/Kontrak/CA) approval by Director ──
@@ -17,10 +18,22 @@ export async function PATCH(req: NextRequest) {
       if (status === "approved" && digitalSignature) {
         docs[idx].approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
         docs[idx].rejectionReason = ""; // Clear on approval
+      } else if (status === "pending_c_level" && verifiedBy) {
+        docs[idx].verifiedBy = verifiedBy;
+        docs[idx].rejectionReason = ""; // Clear on forwarding
       } else if (rejectionReason) {
         docs[idx].rejectionReason = rejectionReason;
       }
       await saveDocument(docs[idx]);
+      
+      if (status === "approved") {
+        logger.audit("FinanceAPI", "DOCUMENT_APPROVED", { docId, by: "Director", status });
+      } else if (status === "rejected") {
+        logger.audit("FinanceAPI", "DOCUMENT_REJECTED", { docId, reason: rejectionReason, status });
+      } else {
+        logger.audit("FinanceAPI", "DOCUMENT_STATUS_CHANGED", { docId, status });
+      }
+
       return NextResponse.json({ success: true, doc: docs[idx] });
     }
 
@@ -55,14 +68,16 @@ export async function PATCH(req: NextRequest) {
         } else if (status === "paid") {
           doc.status = "paid";
         } else if (status === "pending_finance") {
-          doc.status = "submitted";
+          doc.status = "pending_finance";
         }
         await saveDocument(doc);
       }
     }
 
+    logger.audit("FinanceAPI", "RFP_STATUS_CHANGED", { rfpId, status, rejectionReason });
     return NextResponse.json({ success: true, rfp });
   } catch (error: any) {
+    logger.error("FinanceAPI", "STATUS_UPDATE_FAILED", { error });
     console.error("Status Update Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

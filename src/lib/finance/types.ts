@@ -34,7 +34,7 @@ export interface ExpenseDocument {
   issueDate: string;
   description: string;
   amount: number;
-  status: "draft" | "submitted" | "approved" | "paid";
+  status: "draft" | "pending_finance" | "pending_c_level" | "approved" | "paid";
   rfpId?: string; // Legacy
   rfpIds?: string[]; // Multiple RFPs for termins
   lineItems?: LineItem[];
@@ -53,7 +53,7 @@ export interface ExpenseDocument {
   duration?: string;
   lampiran?: string;
   preparedBy?: { name: string; date: string };
-  verifiedBy?: { name: string; date: string };
+  verifiedBy?: { name: string; date: string; digitalSignature?: string };
   approvedBy?: { name: string; date: string; digitalSignature?: string };
   rejectionReason?: string;
 }

@@ -25,7 +25,7 @@ export function FilterBar<T extends ExpenseDocument | RequestForPayment>({
   const docTypes = ["PO", "SPK", "KONTRAK", "CASH_ADVANCE"];
   
   // Statuses depend on whether we are filtering Docs or RFPs
-  const docStatuses = ["draft", "submitted", "approved", "paid"];
+  const docStatuses = ["draft", "pending_finance", "pending_c_level", "approved", "paid"];
   const rfpStatuses = ["draft", "pending_finance", "pending_c_level", "approved", "paid", "settled"];
   const statuses = type === "docs" ? docStatuses : rfpStatuses;
 

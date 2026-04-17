@@ -558,8 +558,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                 </div>
               )}
 
-                </div>
-              )}
+
 
               {hasPenalty && (
                 <div style={{ marginTop: "24px", padding: "16px", borderRadius: "12px", background: "rgba(220, 38, 38, 0.05)", border: "1px dashed #dc2626" }}>

@@ -1193,6 +1193,12 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                               <strong>{selectedVendor.coverageArea}</strong>
                             </div>
                           )}
+                          {selectedVendor.businessAddress && (
+                            <div style={{ padding: '8px 0', borderTop: '1px solid var(--line)', fontSize: '0.82rem' }}>
+                              <span style={{ color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Alamat Usaha</span>
+                              <p style={{ margin: 0, lineHeight: 1.4, fontSize: '0.78rem' }}>{selectedVendor.businessAddress}</p>
+                            </div>
+                          )}
                         </div>
                       </section>
 
@@ -1229,6 +1235,14 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                           </span>
                         </summary>
                         <div style={{ paddingTop: '10px' }}>
+                          {selectedVendor.documentsFolderUrl && (
+                            <div style={{ marginBottom: '16px', padding: '12px', background: 'var(--panel-soft)', borderRadius: '8px', border: '1px solid var(--line)' }}>
+                              <p style={{ margin: '0 0 8px', fontSize: '0.7rem', fontWeight: 700, color: 'var(--blue)' }}>📁 LINK FOLDER DOKUMEN</p>
+                              <a href={selectedVendor.documentsFolderUrl} target="_blank" rel="noreferrer" className="primary-button" style={{ width: '100%', fontSize: '0.8rem', padding: '8px', textAlign: 'center' }}>
+                                Buka Folder Dokumen
+                              </a>
+                            </div>
+                          )}
                           <div className="compliance-summary">
                             {selectedVendor.compliance.items.map((item) => (
                               <div className="compliance-item" key={item.documentType}>
@@ -1568,6 +1582,16 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
               </div>
 
               <div className="form-group" style={{ marginTop: '20px' }}>
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Business Address</label>
+                <textarea 
+                  className="control-bar-input" 
+                  style={{ width: '100%', minHeight: '60px' }}
+                  value={editVendorFormData.businessAddress || ''} 
+                  onChange={(e) => setEditVendorFormData({ ...editVendorFormData, businessAddress: e.target.value })} 
+                />
+              </div>
+
+              <div className="form-group" style={{ marginTop: '20px' }}>
                 <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Services (Comma-separated)</label>
                 <input 
                   className="control-bar-input" 
@@ -1592,6 +1616,17 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                   value={editVendorFormData.websiteUrl || ''} 
                   onChange={(e) => setEditVendorFormData({ ...editVendorFormData, websiteUrl: e.target.value })} 
                   placeholder="https://..." 
+                />
+              </div>
+
+              <div className="form-group" style={{ marginTop: '20px' }}>
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Documents Folder Link</label>
+                <input 
+                  className="control-bar-input" 
+                  style={{ width: '100%' }}
+                  value={editVendorFormData.documentsFolderUrl || ''} 
+                  onChange={(e) => setEditVendorFormData({ ...editVendorFormData, documentsFolderUrl: e.target.value })} 
+                  placeholder="https://drive.google.com/..." 
                 />
               </div>
             </div>

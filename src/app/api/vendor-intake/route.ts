@@ -27,6 +27,8 @@ export async function POST(request: NextRequest) {
     instagramUrl: String(body.instagramUrl ?? "").trim(),
     tiktokUrl: String(body.tiktokUrl ?? "").trim(),
     linkedinUrl: String(body.linkedinUrl ?? "").trim(),
+    businessAddress: String(body.businessAddress ?? "").trim(),
+    documentsFolderUrl: String(body.documentsFolderUrl ?? "").trim(),
     picName: String(body.picName ?? "").trim(),
     picTitle: String(body.picTitle ?? "").trim(),
     picPhone: String(body.picPhone ?? "").trim(),

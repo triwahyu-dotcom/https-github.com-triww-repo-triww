@@ -1,15 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { Locale, t } from "@/lib/vendor/i18n";
+import { LegalStatus, TaxStatus } from "@/lib/vendor/types";
 
 const INITIAL_FORM = {
   vendorName: "",
   services: "",
   coverageArea: "",
   email: "",
-  legalStatus: "Freelance/Perorangan",
-  taxStatus: "Non-PKP",
+  businessAddress: "",
+  legalStatus: "Freelance/Perorangan" as LegalStatus,
+  taxStatus: "Non-PKP" as TaxStatus,
   bankName: "",
   bankAccountNumber: "",
   bankAccountHolder: "",
@@ -22,15 +24,7 @@ const INITIAL_FORM = {
   picTitle: "",
   picPhone: "",
   picEmail: "",
-  companyProfileUrl: "",
-  catalogUrl: "",
-  npwpScanUrl: "",
-  ownerKtpUrl: "",
-  nibUrl: "",
-  invoiceSampleUrl: "",
-  pkpCertificateUrl: "",
-  ndaUrl: "",
-  picKtpUrl: "",
+  documentsFolderUrl: "",
 };
 
 type RevisionItem = {
@@ -38,44 +32,6 @@ type RevisionItem = {
   label: string;
   note: string;
   section: "identity" | "contact" | "documents" | "finance" | "services";
-};
-
-const SECTION_LABELS: Record<RevisionItem["section"], string> = {
-  identity: "Identity",
-  contact: "Contact",
-  documents: "Documents",
-  finance: "Finance",
-  services: "Services",
-};
-
-const FIELD_LABELS: Record<keyof typeof INITIAL_FORM, string> = {
-  vendorName: "Vendor name",
-  services: "Services",
-  coverageArea: "Coverage area",
-  email: "Business email",
-  legalStatus: "Legal status",
-  taxStatus: "Tax status",
-  bankName: "Bank name",
-  bankAccountNumber: "Bank account number",
-  bankAccountHolder: "Bank account holder",
-  npwpNumber: "NPWP number",
-  websiteUrl: "Website",
-  instagramUrl: "Instagram",
-  tiktokUrl: "TikTok",
-  linkedinUrl: "LinkedIn",
-  picName: "PIC name",
-  picTitle: "PIC title",
-  picPhone: "PIC phone",
-  picEmail: "PIC email",
-  companyProfileUrl: "Company profile",
-  catalogUrl: "Catalog",
-  npwpScanUrl: "NPWP scan",
-  ownerKtpUrl: "Owner KTP",
-  nibUrl: "NIB",
-  invoiceSampleUrl: "Invoice sample",
-  pkpCertificateUrl: "PKP certificate",
-  ndaUrl: "NDA",
-  picKtpUrl: "PIC KTP",
 };
 
 function isValidHttpUrl(value: string) {
@@ -111,21 +67,25 @@ export function VendorIntakeForm({
   revisionItems?: RevisionItem[];
   generalRevisionNote?: string;
 }) {
+  const [locale, setLocale] = useState<Locale>("id");
   const [form, setForm] = useState({ ...INITIAL_FORM, ...initialForm });
   const [message, setMessage] = useState("");
   const [registrationCode, setRegistrationCode] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
-  const groupedRevisionItems = revisionItems.reduce<Record<RevisionItem["section"], RevisionItem[]>>(
+
+  const groupedRevisionItems = useMemo(() => revisionItems.reduce<Record<RevisionItem["section"], RevisionItem[]>>(
     (acc, item) => {
       acc[item.section] = [...(acc[item.section] ?? []), item];
       return acc;
     },
-    { identity: [], contact: [], documents: [], finance: [], services: [] },
-  );
+    { identity: [], contact: [], documents: [], finance: [], services: [] }
+  ), [revisionItems]);
+
   const completedRevisionItems = revisionItems.filter((item) =>
-    Boolean(form[item.fieldKey as keyof typeof INITIAL_FORM]?.trim()),
+    Boolean(form[item.fieldKey as keyof typeof INITIAL_FORM]?.toString().trim())
   ).length;
+
   const revisionProgress = revisionItems.length === 0 ? 100 : Math.round((completedRevisionItems / revisionItems.length) * 100);
 
   function updateField(name: keyof typeof INITIAL_FORM, value: string) {
@@ -134,47 +94,26 @@ export function VendorIntakeForm({
 
   function validateBeforeSubmit() {
     const errors: string[] = [];
-    if (!form.vendorName.trim()) errors.push("Vendor name is required.");
-    if (!form.services.trim()) errors.push("Services are required.");
-    if (!form.picName.trim()) errors.push("PIC name is required.");
-    if (!form.picPhone.trim()) errors.push("PIC phone is required.");
+    if (!form.vendorName.trim()) errors.push(locale === "id" ? "Nama vendor wajib diisi." : "Vendor name is required.");
+    if (!form.services.trim()) errors.push(locale === "id" ? "Layanan wajib diisi." : "Services are required.");
+    if (!form.picName.trim()) errors.push(locale === "id" ? "Nama PIC wajib diisi." : "PIC name is required.");
+    if (!form.picPhone.trim()) errors.push(locale === "id" ? "No. WA PIC wajib diisi." : "PIC phone is required.");
 
     const normalizedPhone = normalizePhoneToWhatsApp(form.picPhone);
     if (!/^62\d{8,14}$/.test(normalizedPhone)) {
-      errors.push("Invalid PIC phone/WhatsApp format.");
+      errors.push(locale === "id" ? "Format No. WA PIC tidak valid." : "Invalid PIC phone/WhatsApp format.");
     }
 
-    const urlKeys: (keyof typeof INITIAL_FORM)[] = [
-      "websiteUrl",
-      "instagramUrl",
-      "tiktokUrl",
-      "linkedinUrl",
-      "companyProfileUrl",
-      "catalogUrl",
-      "npwpScanUrl",
-      "ownerKtpUrl",
-      "nibUrl",
-      "invoiceSampleUrl",
-      "pkpCertificateUrl",
-      "ndaUrl",
-      "picKtpUrl",
-    ];
-    for (const key of urlKeys) {
-      if (form[key].trim() && !isValidHttpUrl(form[key].trim())) {
-        errors.push(`${FIELD_LABELS[key]} must be a valid URL (http/https).`);
-      }
+    if (form.websiteUrl.trim() && !isValidHttpUrl(form.websiteUrl.trim())) {
+      errors.push(locale === "id" ? "Website harus berupa URL valid." : "Website must be a valid URL.");
+    }
+    
+    if (form.documentsFolderUrl.trim() && !isValidHttpUrl(form.documentsFolderUrl.trim())) {
+      errors.push(locale === "id" ? "Link folder dokumen harus berupa URL valid." : "Document folder link must be a valid URL.");
     }
 
-    const requiredDocsByLegalStatus: Record<string, (keyof typeof INITIAL_FORM)[]> = {
-      "PT/CV": ["companyProfileUrl", "npwpScanUrl", "ownerKtpUrl", "nibUrl", "pkpCertificateUrl", "ndaUrl", "picKtpUrl"],
-      "Freelance/Perorangan": ["companyProfileUrl", "npwpScanUrl", "ownerKtpUrl", "ndaUrl", "picKtpUrl"],
-      Lainnya: ["companyProfileUrl", "ndaUrl", "picKtpUrl"],
-    };
-
-    for (const key of requiredDocsByLegalStatus[form.legalStatus] ?? []) {
-      if (!form[key].trim()) {
-        errors.push(`${FIELD_LABELS[key]} is required for ${form.legalStatus}.`);
-      }
+    if (!form.documentsFolderUrl.trim()) {
+      errors.push(locale === "id" ? "Link folder dokumen wajib diisi." : "Document folder link is required.");
     }
 
     return errors;
@@ -203,15 +142,11 @@ export function VendorIntakeForm({
       const payload = (await response.json()) as { error?: string; vendor?: { registrationCode: string; portalUsername: string } };
 
       if (!response.ok) {
-        setError(payload.error ?? "Submission failed.");
+        setError(payload.error ?? (locale === "id" ? "Gagal mengirim data." : "Submission failed."));
         return;
       }
 
-      setMessage(
-        mode === "revision"
-          ? "Revision submitted successfully. Our admin team will review the updated data."
-          : "Submission sent successfully. Our admin team will review your vendor profile and contact you if revisions are needed.",
-      );
+      setMessage(mode === "revision" ? t(locale, "successRevision") : t(locale, "successNew"));
       setRegistrationCode(payload.vendor?.registrationCode ?? "");
       if (mode === "new") {
         setForm(INITIAL_FORM);
@@ -221,6 +156,43 @@ export function VendorIntakeForm({
 
   return (
     <div className="notion-shell vendor-form-shell" style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'var(--panel-soft)', padding: '4px', borderRadius: '12px', border: '1px solid var(--line)' }}>
+          <button 
+            type="button"
+            onClick={() => setLocale("id")}
+            style={{ 
+              padding: '6px 12px', 
+              borderRadius: '8px', 
+              fontSize: '0.75rem', 
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: 'none',
+              background: locale === "id" ? 'var(--blue)' : 'transparent',
+              color: locale === "id" ? 'white' : 'var(--muted)'
+            }}
+          >
+            🇮🇩 ID
+          </button>
+          <button 
+            type="button"
+            onClick={() => setLocale("en")}
+            style={{ 
+              padding: '6px 12px', 
+              borderRadius: '8px', 
+              fontSize: '0.75rem', 
+              fontWeight: 600,
+              cursor: 'pointer',
+              border: 'none',
+              background: locale === "en" ? 'var(--blue)' : 'transparent',
+              color: locale === "en" ? 'white' : 'var(--muted)'
+            }}
+          >
+            🇺🇸 EN
+          </button>
+        </div>
+      </div>
+
       <form 
         className="vendor-form-card" 
         onSubmit={handleSubmit} 
@@ -232,56 +204,41 @@ export function VendorIntakeForm({
           border: '1px solid rgba(255, 255, 255, 0.1)', 
           borderRadius: '32px',
           boxShadow: '0 20px 50px rgba(0,0,0,0.2)',
-          marginTop: '20px'
+          marginTop: '0'
         }}
       >
         {mode === "revision" ? (
           <section className="revision-highlight" style={{ marginBottom: '32px', padding: '20px', background: 'rgba(255, 107, 107, 0.05)', borderRadius: '16px', border: '1px solid rgba(255, 107, 107, 0.2)' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 12px', color: '#ff6b6b' }}>Items to revise</h3>
+            <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 12px', color: '#ff6b6b' }}>{t(locale, "itemsToRevise")}</h3>
             {generalRevisionNote ? <p className="text-muted" style={{ marginBottom: '16px' }}>{generalRevisionNote}</p> : null}
             <div className="revision-progress" style={{ marginBottom: '20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.8rem' }}>
-                <strong>Revision Progress</strong>
+                <strong>{t(locale, "revisionProgress")}</strong>
                 <span>{completedRevisionItems}/{revisionItems.length}</span>
               </div>
               <div style={{ height: '6px', background: 'var(--line)', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${revisionProgress}%`, background: '#ff6b6b', transition: 'width 0.3s' }} />
               </div>
             </div>
-            <div className="revision-items-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-              {(Object.keys(groupedRevisionItems) as RevisionItem["section"][])
-                .filter((section) => groupedRevisionItems[section].length > 0)
-                .map((section) => (
-                  <div key={section} style={{ padding: '12px', background: 'var(--panel-soft)', borderRadius: '12px' }}>
-                    <em className="mini-meta" style={{ display: 'block', marginBottom: '4px' }}>{SECTION_LABELS[section]}</em>
-                    <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.85rem' }}>
-                      {groupedRevisionItems[section].map((item) => (
-                        <li key={`${item.section}-${item.fieldKey}`} style={{ marginBottom: '4px' }}>
-                          <strong className="text-main">{item.label}</strong>: {item.note}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-            </div>
           </section>
         ) : null}
-        <div className="form-section-title">Business Identity</div>
+
+        <div className="form-section-title">{t(locale, "businessIdentity")}</div>
         <section className="form-grid-2" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Vendor Name
+            {t(locale, "vendorName")}
             <input required value={form.vendorName} onChange={(event) => updateField("vendorName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Business Email
+            {t(locale, "businessEmail")}
             <input type="email" value={form.email} onChange={(event) => updateField("email", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
           <label className="full" style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Services Offered
+            {t(locale, "servicesOffered")}
             <input
               required
               list="service-options"
-              placeholder="e.g. Stage Decoration, LED Screen, Catering"
+              placeholder={t(locale, "servicesPlaceholder")}
               value={form.services}
               onChange={(event) => updateField("services", event.target.value)}
               style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}
@@ -292,111 +249,99 @@ export function VendorIntakeForm({
               ))}
             </datalist>
           </label>
+          <label className="full" style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "businessAddress")}
+            <textarea 
+              value={form.businessAddress} 
+              onChange={(event) => updateField("businessAddress", event.target.value)} 
+              rows={2}
+              style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)', fontFamily: 'inherit' }} 
+            />
+          </label>
         </section>
 
         <div className="form-section-title">Legal & Operations</div>
         <section className="form-grid-3" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Legal Status
-            <select value={form.legalStatus} onChange={(event) => updateField("legalStatus", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
-              <option value="Freelance/Perorangan">Freelance / Individual</option>
+            {t(locale, "legalStatus")}
+            <select value={form.legalStatus} onChange={(event) => updateField("legalStatus", event.target.value as LegalStatus)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
+              <option value="Freelance/Perorangan">{locale === "id" ? "Freelance / Perorangan" : "Freelance / Individual"}</option>
               <option value="PT/CV">PT / CV (Company)</option>
-              <option value="Lainnya">Other</option>
+              <option value="Lainnya">{locale === "id" ? "Lainnya" : "Other"}</option>
             </select>
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Tax Status
-            <select value={form.taxStatus} onChange={(event) => updateField("taxStatus", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
+            {t(locale, "taxStatus")}
+            <select value={form.taxStatus} onChange={(event) => updateField("taxStatus", event.target.value as TaxStatus)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
               <option value="Non-PKP">Non-PKP</option>
               <option value="PKP">PKP</option>
             </select>
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Coverage Area
+            {t(locale, "coverageArea")}
             <input value={form.coverageArea} onChange={(event) => updateField("coverageArea", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
         </section>
 
-        <div className="form-section-title">Financial Information</div>
+        <div className="form-section-title">{t(locale, "bankName")} & Tax</div>
         <section className="form-grid-2" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Bank Name
+            {t(locale, "bankName")}
             <input value={form.bankName} onChange={(event) => updateField("bankName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Account Number
+            {t(locale, "bankAccountNumber")}
             <input value={form.bankAccountNumber} onChange={(event) => updateField("bankAccountNumber", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Account Holder
+            {t(locale, "bankAccountHolder")}
             <input value={form.bankAccountHolder} onChange={(event) => updateField("bankAccountHolder", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            NPWP Number
+            {t(locale, "npwpNumber")}
             <input value={form.npwpNumber} onChange={(event) => updateField("npwpNumber", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
         </section>
 
-        <div className="form-section-title">Online Presence</div>
-        <section className="form-grid-3" style={{ marginBottom: '32px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Website
-            <input value={form.websiteUrl} onChange={(event) => updateField("websiteUrl", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Instagram
-            <input value={form.instagramUrl} onChange={(event) => updateField("instagramUrl", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            TikTok
-            <input value={form.tiktokUrl} onChange={(event) => updateField("tiktokUrl", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-        </section>
-
-        <div className="form-section-title">Primary Contact</div>
+        <div className="form-section-title">{t(locale, "primaryContact")}</div>
         <section className="form-grid-2" style={{ marginBottom: '40px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            PIC Name
+            {t(locale, "picName")}
             <input required value={form.picName} onChange={(event) => updateField("picName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            PIC Title
-            <input value={form.picTitle} onChange={(event) => updateField("picTitle", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            PIC Phone / WhatsApp
-            <input required value={form.picPhone} onChange={(event) => updateField("picPhone", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            PIC Email
-            <input type="email" value={form.picEmail} onChange={(event) => updateField("picEmail", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+            {t(locale, "picPhone")}
+            <input required placeholder="6281..." value={form.picPhone} onChange={(event) => updateField("picPhone", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
           </label>
         </section>
 
-        <div className="form-section-title">Documents & Links</div>
-        <p className="mini-meta" style={{ marginBottom: '16px', marginTop: '-16px' }}>Provide accessible links (Google Drive, Dropbox, etc.)</p>
-        <section className="form-grid-3" style={{ marginBottom: '40px' }}>
-          {[
-            { key: "companyProfileUrl", label: "Company Profile" },
-            { key: "catalogUrl", label: "Catalog / Pricelist" },
-            { key: "npwpScanUrl", label: "NPWP Scan" },
-            { key: "ownerKtpUrl", label: "Owner KTP" },
-            { key: "nibUrl", label: "NIB" },
-            { key: "invoiceSampleUrl", label: "Invoice Sample" },
-            { key: "pkpCertificateUrl", label: "PKP/Non-PKP Certificate" },
-            { key: "ndaUrl", label: "NDA" },
-            { key: "picKtpUrl", label: "PIC KTP" }
-          ].map((field) => (
-            <label key={field.key} style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-              {field.label}
-              <input 
-                placeholder="https://..."
-                value={form[field.key as keyof typeof INITIAL_FORM]} 
-                onChange={(event) => updateField(field.key as keyof typeof INITIAL_FORM, event.target.value)} 
-                style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} 
-              />
-            </label>
-          ))}
+        <div className="form-section-title">{t(locale, "documentsAndLinks")}</div>
+        <div style={{ marginBottom: '24px', padding: '20px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '16px', border: '1px solid var(--line)' }}>
+          <h4 style={{ fontSize: '0.85rem', fontWeight: 700, margin: '0 0 12px' }}>{t(locale, "downloadTemplates")}</h4>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+            <a href="/templates/NDA_Template_JUARA.docx" download className="chip" style={{ background: 'var(--panel-soft)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--line)' }}>
+              📄 {t(locale, "downloadNDA")}
+            </a>
+            <a href="/templates/Pernyataan_Non_PKP_JUARA.docx" download className="chip" style={{ background: 'var(--panel-soft)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--line)' }}>
+              📄 {t(locale, "downloadNonPKP")}
+            </a>
+          </div>
+        </div>
+
+        <section style={{ marginBottom: '40px' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "documentsFolderUrl")}
+            <input 
+              required
+              placeholder="https://drive.google.com/..."
+              value={form.documentsFolderUrl} 
+              onChange={(event) => updateField("documentsFolderUrl", event.target.value)} 
+              style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} 
+            />
+            <p className="mini-meta" style={{ marginTop: '4px' }}>
+              {t(locale, "documentsFolderHint")}
+            </p>
+          </label>
         </section>
 
         {message ? (
@@ -404,7 +349,7 @@ export function VendorIntakeForm({
             <p style={{ fontWeight: 600, margin: 0 }}>{message}</p>
             {registrationCode ? (
               <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(52, 199, 89, 0.1)', borderRadius: '12px', display: 'inline-block' }}>
-                <span className="mini-meta" style={{ display: 'block', color: 'inherit', opacity: 0.8, marginBottom: '4px' }}>YOUR REGISTRATION CODE</span>
+                <span className="mini-meta" style={{ display: 'block', color: 'inherit', opacity: 0.8, marginBottom: '4px' }}>{t(locale, "registrationCode")}</span>
                 <strong style={{ fontSize: '1.5rem', letterSpacing: '0.1em' }}>{registrationCode}</strong>
               </div>
             ) : null}
@@ -435,7 +380,7 @@ export function VendorIntakeForm({
               transition: 'transform 0.2s, background 0.2s'
             }}
           >
-            {pending ? "Submitting..." : mode === "revision" ? "Update Profile" : "Create Vendor Profile"}
+            {pending ? t(locale, "submitting") : mode === "revision" ? t(locale, "updateVendorProfile") : t(locale, "submitVendorProfile")}
           </button>
         </div>
       </form>

@@ -94,6 +94,8 @@ export type VendorIntakePayload = {
   picTitle: string;
   picPhone: string;
   picEmail: string;
+  businessAddress: string;
+  documentsFolderUrl: string;
   companyProfileUrl: string;
   catalogUrl: string;
   npwpScanUrl: string;
@@ -817,6 +819,8 @@ function buildRawSourceFromPayload(payload: VendorIntakePayload, timestamp: stri
     "Jabatan PIC": payload.picTitle,
     "Nomor HP/WA PIC": payload.picPhone,
     "Email PIC": payload.picEmail,
+    "Alamat Usaha": payload.businessAddress,
+    "Link Folder Dokumen": payload.documentsFolderUrl,
     "Upload Compro/Item Pricelist/Catalog": payload.companyProfileUrl,
     "Upload Compro/Item Pricelist/Catalog 2": payload.catalogUrl,
     "Upload Scan NPWP (PDF/JPG) ": payload.npwpScanUrl,
@@ -1102,6 +1106,8 @@ export async function updateVendorIdentity(
     coverageArea?: string;
     websiteUrl?: string;
     serviceNames?: string[];
+    businessAddress?: string;
+    documentsFolderUrl?: string;
   },
 ) {
   const state = await ensureSeededState();
@@ -1117,6 +1123,8 @@ export async function updateVendorIdentity(
   if (updates.classification !== undefined) vendor.classification = updates.classification;
   if (updates.coverageArea !== undefined) vendor.coverageArea = updates.coverageArea;
   if (updates.websiteUrl !== undefined) vendor.websiteUrl = updates.websiteUrl;
+  if (updates.businessAddress !== undefined) vendor.businessAddress = updates.businessAddress;
+  if (updates.documentsFolderUrl !== undefined) vendor.documentsFolderUrl = updates.documentsFolderUrl;
 
   if (updates.serviceNames !== undefined) {
     // Replace services
@@ -1177,6 +1185,7 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     taxStatus: payload.taxStatus,
     coverageArea: payload.coverageArea,
     email: payload.email,
+    businessAddress: payload.businessAddress,
     bankName: payload.bankName,
     bankAccountNumber: payload.bankAccountNumber,
     bankAccountHolder: payload.bankAccountHolder,
@@ -1185,6 +1194,7 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     instagramUrl: payload.instagramUrl,
     tiktokUrl: payload.tiktokUrl,
     linkedinUrl: payload.linkedinUrl,
+    documentsFolderUrl: payload.documentsFolderUrl,
     sourceTimestamp: timestamp,
     sourceRowHash: rowHash,
     rawSource,
@@ -1342,6 +1352,7 @@ export async function resubmitVendorRevision(token: string, payload: VendorIntak
   vendor.taxStatus = payload.taxStatus;
   vendor.coverageArea = payload.coverageArea;
   vendor.email = payload.email;
+  vendor.businessAddress = payload.businessAddress;
   vendor.bankName = payload.bankName;
   vendor.bankAccountNumber = payload.bankAccountNumber;
   vendor.bankAccountHolder = payload.bankAccountHolder;
@@ -1350,6 +1361,7 @@ export async function resubmitVendorRevision(token: string, payload: VendorIntak
   vendor.instagramUrl = payload.instagramUrl;
   vendor.tiktokUrl = payload.tiktokUrl;
   vendor.linkedinUrl = payload.linkedinUrl;
+  vendor.documentsFolderUrl = payload.documentsFolderUrl;
   vendor.sourceTimestamp = timestamp;
   vendor.sourceRowHash = rowHash;
   vendor.rawSource = buildRawSourceFromPayload(payload, timestamp, { "Submission Source": "Revision portal" });

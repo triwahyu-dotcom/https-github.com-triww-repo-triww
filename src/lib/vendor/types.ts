@@ -42,6 +42,7 @@ export interface Vendor {
   taxStatus: TaxStatus;
   coverageArea: string;
   email: string;
+  businessAddress: string;
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
@@ -50,6 +51,7 @@ export interface Vendor {
   instagramUrl: string;
   tiktokUrl: string;
   linkedinUrl: string;
+  documentsFolderUrl: string;
   sourceTimestamp: string;
   sourceRowHash: string;
   rawSource: Record<string, string>;
@@ -289,6 +291,8 @@ export interface VendorDetail extends VendorSummary {
   instagramUrl: string;
   tiktokUrl: string;
   linkedinUrl: string;
+  businessAddress: string;
+  documentsFolderUrl: string;
   rawSource: Record<string, string>;
   contacts: VendorContact[];
   documents: VendorDocument[];

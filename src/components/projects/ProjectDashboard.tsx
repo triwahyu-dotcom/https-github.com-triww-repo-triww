@@ -13,8 +13,30 @@ import {
   WorkflowStage,
   CRMClient,
 } from "@/lib/project/types";
-import { WorkspaceShell } from "./layout/workspace-shell";
-import { SummaryCard } from "./ui/summary-card";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { SummaryCard } from "@/components/ui/summary-card";
+import { 
+  Activity, 
+  ListChecks, 
+  Users, 
+  HardHat, 
+  FileText, 
+  PieChart,
+  Calendar,
+  DollarSign,
+  Search,
+  Plus,
+  Trash2,
+  Edit,
+  ArrowRight,
+  ChevronDown,
+  Target,
+  Zap,
+  BarChart3,
+  Coins,
+  FolderOpen,
+  Palette
+} from "lucide-react";
 
 type ViewMode = "overview" | "list" | "table" | "board" | "documents";
 
@@ -200,13 +222,20 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [moveNote, setMoveNote] = useState("");
   const [moveModalOpen, setMoveModalOpen] = useState(false);
   const [dragMoveProjectId, setDragMoveProjectId] = useState<string | null>(null);
+  const [draggingProjectId, setDraggingProjectId] = useState<string | null>(null);
   const [dragMoveTargetStage, setDragMoveTargetStage] = useState<WorkflowStage>("lead");
   const [dragMoveOpen, setDragMoveOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "tasks" | "docs" | "vendors" | "execution" | "manpower">("overview");
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [editMode, setEditMode] = useState(false);
-  const [draggingProjectId, setDraggingProjectId] = useState<string | null>(null);
+  const [showAllMilestones, setShowAllMilestones] = useState(false);
+  const [showAllFocusProjects, setShowAllFocusProjects] = useState(false);
   const [boardZoom, setBoardZoom] = useState(1);
+  const [editMode, setEditMode] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [boardDense, setBoardDense] = useState(true);
   const [assignmentVendorId, setAssignmentVendorId] = useState(initialData.availableVendors[0]?.id ?? "");
   const [shortlistVendorId, setShortlistVendorId] = useState(initialData.availableVendors[0]?.id ?? "");
@@ -797,25 +826,25 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           label="Total Projects"
           value={String(summary.totalProjects)}
           description="Projects in workspace"
-          icon="📊"
+          icon={<BarChart3 size={18} />}
         />
         <SummaryCard
           label="Active Projects"
           value={String(summary.activeProjects)}
           description="In execution/finance"
-          icon="⚡"
+          icon={<Zap size={18} />}
         />
         <SummaryCard
           label="Leads"
           value={String(summary.leadsProjects)}
           description="New opportunities"
-          icon="🎯"
+          icon={<Target size={18} />}
         />
         <SummaryCard
           label="Total Value"
           value={summary.totalValueLabel}
           description="Account worth"
-          icon="💰"
+          icon={<Coins size={18} />}
         />
       </div>
 
@@ -897,13 +926,22 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 </div>
 
                 <article className="feature-panel">
-                  <p className="panel-kicker">Focus Projects</p>
+                  {!mounted ? (
+                    <p className="panel-kicker">Focus Projects</p>
+                  ) : (
+                    <div className="feature-panel-header">
+                      <p className="panel-kicker">Focus Projects</p>
+                      <button className="ghost-button" style={{ fontSize: '0.7rem' }} onClick={() => setShowAllFocusProjects(!showAllFocusProjects)}>
+                        {showAllFocusProjects ? "Show Less" : "View All"}
+                      </button>
+                    </div>
+                  )}
                   <div className="project-list compact-list">
-                    {filteredProjects.slice(0, 8).map((project) => (
+                    {(showAllFocusProjects ? filteredProjects : filteredProjects.slice(0, 5)).map((project) => (
                       <button
                         key={project.id}
                         type="button"
-                        className={project.id === selectedProject?.id ? "project-card active-card" : "project-card"}
+                        className={`${project.id === selectedProject?.id ? "project-card active-card" : "project-card"} focus-project-card`}
                         onClick={() => selectProject(project.id, true)}
                       >
                         <div className="project-card-top">
@@ -922,9 +960,18 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 </article>
 
                 <article className="feature-panel">
-                  <p className="panel-kicker">Upcoming Milestones</p>
+                  {!mounted ? (
+                    <p className="panel-kicker">Upcoming Milestones</p>
+                  ) : (
+                    <div className="feature-panel-header">
+                      <p className="panel-kicker">Upcoming Milestones</p>
+                      <button className="ghost-button" style={{ fontSize: '0.7rem' }} onClick={() => setShowAllMilestones(!showAllMilestones)}>
+                        {showAllMilestones ? "Show Less" : "View All"}
+                      </button>
+                    </div>
+                  )}
                   <div className="timeline-list">
-                    {timelineMilestones.map((milestone) => (
+                    {(showAllMilestones ? timelineMilestones : timelineMilestones.slice(0, 5)).map((milestone) => (
                       <article key={`${milestone.projectId}-${milestone.id}`} className="timeline-item">
                         <span>{milestone.label}</span>
                         <strong>{milestone.value}</strong>
@@ -1006,7 +1053,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                       onClick={() => openEditProjectModal(project)}
                       title="Click to edit project data"
                     >
-                      <span className="table-text" style={{ fontWeight: 500 }}>{project.projectName}</span>
+                      <span className="table-text" style={{ fontWeight: 600, fontSize: '0.95rem' }}>{project.projectName}</span>
                       <span className="table-text">{project.client}</span>
                       <div onClick={(e) => e.stopPropagation()}>
                         <select
@@ -1160,371 +1207,449 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
             </div>
 
-            <div className="move-panel">
-              <div>
-                <p className="panel-kicker">Manual Stage Move</p>
-                <strong>{selectedProject.currentStageLabel || "No Stage"}</strong>
-                <p className="detail-client">Move stage manually with task and document warnings.</p>
-              </div>
-              <div className="action-row">
-                <button
-                  type="button"
-                  className="ghost-button"
-                  onClick={() => openEditProjectModal(selectedProject)}
-                >
-                  Edit Project Data
-                </button>
-                <button type="button" className="primary-button" onClick={() => openMoveModal(selectedProject)}>
-                  Move stage
-                </button>
-              </div>
+            <div className="detail-tabs">
+              <button 
+                className={`detail-tab-item ${activeDetailTab === "overview" ? "is-active" : ""}`}
+                onClick={() => setActiveDetailTab("overview")}
+              >
+                <PieChart size={16} /> Overview
+              </button>
+              <button 
+                className={`detail-tab-item ${activeDetailTab === "tasks" ? "is-active" : ""}`}
+                onClick={() => setActiveDetailTab("tasks")}
+              >
+                <ListChecks size={16} /> Checklist
+              </button>
+              <button 
+                className={`detail-tab-item ${activeDetailTab === "docs" ? "is-active" : ""}`}
+                onClick={() => setActiveDetailTab("docs")}
+              >
+                <FileText size={16} /> Documents
+              </button>
+              <button 
+                className={`detail-tab-item ${activeDetailTab === "vendors" ? "is-active" : ""}`}
+                onClick={() => setActiveDetailTab("vendors")}
+              >
+                <Users size={16} /> Vendors
+              </button>
+              <button 
+                className={`detail-tab-item ${activeDetailTab === "execution" ? "is-active" : ""}`}
+                onClick={() => setActiveDetailTab("execution")}
+              >
+                <Activity size={16} /> Execution
+              </button>
+              <button 
+                className={`detail-tab-item ${activeDetailTab === "manpower" ? "is-active" : ""}`}
+                onClick={() => setActiveDetailTab("manpower")}
+              >
+                <HardHat size={16} /> Manpower
+              </button>
             </div>
 
-            <div className="properties-panel">
-              <div className="detail-block">
-                <h3>Properties</h3>
-                <div className="property-list">
-                  <PropertyRow label="Client" value={selectedProject.client || "-"} />
-                  <PropertyRow label="Project" value={selectedProject.projectName || "-"} />
-                  <PropertyRow label="Stage" value={selectedProject.currentStageLabel || "-"} />
-                  <PropertyRow label="Event Date" value={selectedProject.eventDate || "-"} />
-                  <PropertyRow label="Project Value" value={selectedProject.projectValueLabel || "-"} />
-                  <PropertyRow label="PIC Internal" value={(selectedProject.owners || []).join(", ") || "-"} />
-                </div>
-              </div>
-            </div>
-
-            <div className="detail-columns">
-              <div className="detail-block">
-                <h3>Assigned Vendors</h3>
-                <div className="assignment-stack">
-                  {(selectedProject.assignedVendors || []).length > 0 ? (
-                    (selectedProject.assignedVendors || []).map((vendor) => (
-                      <div className="assignment-row" key={vendor.linkId}>
-                        <div>
-                          <strong>{vendor.vendorName}</strong>
-                          <p className="detail-client">
-                            {vendor.vendorType} • {vendor.businessAddress || "-"} • Score {vendor.averageScore || "-"}
-                          </p>
-                        </div>
-                        <div className="action-row">
-                          {vendor.whatsappPhone ? (
-                            <Link href={`https://wa.me/${vendor.whatsappPhone}`} target="_blank" rel="noreferrer" className="ghost-button">
-                              WhatsApp
-                            </Link>
-                          ) : null}
-                          <button
-                            type="button"
-                            className="ghost-button"
-                            onClick={() => removeAssignedVendor(selectedProject.id, vendor.linkId)}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="empty-inline">No vendors assigned to this project yet.</div>
-                  )}
-                </div>
-
-                <div className="assignment-controls">
-                  <select value={activeAssignmentVendorId} onChange={(event) => setAssignmentVendorId(event.target.value)}>
-                    <option value="">Select vendor</option>
-                    {assignableVendors.map((vendor) => (
-                      <option key={vendor.id} value={vendor.id}>
-                        {vendor.name} • {vendor.serviceNames[0] || "-"}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    className="primary-button"
-                    disabled={!activeAssignmentVendorId}
-                    onClick={() => assignVendor(selectedProject.id)}
-                  >
-                    {assignmentPending ? "Saving..." : "Assign vendor"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="detail-block">
-                <h3>Vendor shortlist</h3>
-                <div className="assignment-stack">
-                  {(selectedProject.vendorShortlist || []).length > 0 ? (
-                    (selectedProject.vendorShortlist || []).map((vendor) => (
-                      <div className="assignment-row" key={vendor.linkId}>
-                        <div>
-                          <strong>{vendor.vendorName}</strong>
-                          <p className="detail-client">
-                            {vendor.vendorType} • {vendor.businessAddress || "-"} • Score {vendor.averageScore || "-"}
-                          </p>
-                          <p className="detail-client">
-                            {vendor.status} • {vendor.quotedPrice ? formatCurrency(vendor.quotedPrice) : "No quote yet"}
-                          </p>
-                        </div>
-                        <div className="action-row">
-                          <select value={vendor.status} onChange={(event) => updateShortlist(vendor.linkId, event.target.value as "shortlisted" | "contacted" | "quoted" | "selected")}>
-                            {["shortlisted", "contacted", "quoted", "selected"].map((status) => (
-                              <option key={status} value={status}>
-                                {status}
-                              </option>
-                            ))}
-                          </select>
-                          {vendor.whatsappPhone ? (
-                            <Link href={`https://wa.me/${vendor.whatsappPhone}`} target="_blank" rel="noreferrer" className="ghost-button">
-                              WhatsApp
-                            </Link>
-                          ) : null}
-                          <button type="button" className="ghost-button" onClick={() => removeShortlist(vendor.linkId)}>
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="empty-inline">No vendor shortlist for this project yet.</div>
-                  )}
-                </div>
-
-                <div className="assignment-controls">
-                  <select value={activeShortlistVendorId} onChange={(event) => setShortlistVendorId(event.target.value)}>
-                    <option value="">Select shortlist vendor</option>
-                    {shortlistableVendors.map((vendor) => (
-                      <option key={vendor.id} value={vendor.id}>
-                        {vendor.name} • {vendor.serviceNames[0] || "-"} • Score {vendor.averageScore || "-"}
-                      </option>
-                    ))}
-                  </select>
-                  <input value={shortlistQuotedPrice} onChange={(event) => setShortlistQuotedPrice(event.target.value)} placeholder="Quoted price (optional)" />
-                  <input value={shortlistNote} onChange={(event) => setShortlistNote(event.target.value)} placeholder="Shortlist note" />
-                  <button type="button" className="primary-button" disabled={!activeShortlistVendorId} onClick={() => shortlistVendor(selectedProject.id)}>
-                    {assignmentPending ? "Saving..." : "Add shortlist"}
-                  </button>
-                </div>
-              </div>
-
-
-
-              <div className="detail-block">
-                <h3>Stage Checklist</h3>
-                <div className="task-stack compact-task-stack">
-                  {activeStageTasks.length > 0 ? (
-                    activeStageTasks.map((task: ProjectTask) => (
-                      <label key={task.id} className="task-row">
-                        <input type="checkbox" checked={task.status === "done"} onChange={() => toggleTask(selectedProject.id, task.id)} />
-                        <span>{task.title}</span>
-                        <small>{task.stage}</small>
-                      </label>
-                    ))
-                  ) : (
-                    <div className="empty-inline">No mandatory checklist for this stage.</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="detail-block">
-                <div className="resource-summary">
-                  <div className="resource-progress-label">
-                    <span>Resource Completion</span>
-                    <span>{
-                      selectedProject.documents.length > 0
-                        ? Math.round((selectedProject.documents.filter(d => d.status === 'available').length / selectedProject.documents.length) * 100)
-                        : 0
-                    }%</span>
+            <div className="detail-body-paginated">
+              {activeDetailTab === "overview" && (
+                <div className="tab-content-fade">
+                  <div className="move-panel">
+                    <div>
+                      <p className="panel-kicker">Manual Stage Move</p>
+                      <strong>{selectedProject.currentStageLabel || "No Stage"}</strong>
+                      <p className="detail-client">Move stage manually with task and document warnings.</p>
+                    </div>
+                    <div className="action-row">
+                      <button
+                        type="button"
+                        className="ghost-button"
+                        onClick={() => openEditProjectModal(selectedProject)}
+                      >
+                        Edit Project Data
+                      </button>
+                      <button type="button" className="primary-button" onClick={() => openMoveModal(selectedProject)}>
+                        Move stage
+                      </button>
+                    </div>
                   </div>
-                  <div className="resource-progress-bg">
-                    <div
-                      className="resource-progress-fill"
-                      style={{
-                        width: `${selectedProject.documents.length > 0
-                          ? (selectedProject.documents.filter(d => d.status === 'available').length / selectedProject.documents.length) * 100
-                          : 0}%`
-                      }}
-                    />
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3>Project Resources</h3>
-                  <button
-                    type="button"
-                    className={editMode ? "primary-button" : "ghost-button"}
-                    style={{ fontSize: '0.75rem', padding: '4px 12px', minHeight: '32px' }}
-                    onClick={() => setEditMode(!editMode)}
-                  >
-                    {editMode ? "Save / Close" : "Edit Links"}
-                  </button>
-                </div>
-
-                {(() => {
-                  const STAGE_VALS: Record<WorkflowStage, number> = {
-                    lead: 0, pitching: 1, negotiation: 2,
-                    execution: 3, reporting: 4, finance: 5, completed: 6, lost: 7
-                  };
-                  const currentStageVal = STAGE_VALS[selectedProject.currentStage] || 0;
-
-                  const groupedDocs = (selectedProject.documents || []).reduce((acc, doc) => {
-                    const docStage = doc.stage || 'General';
-                    const docStageVal = STAGE_VALS[doc.stage] ?? -1;
-
-                    // AUTO-LEGACY: If project is past this document's stage, it's implicitly 'available' (legacy)
-                    const isLegacy = docStageVal !== -1 && currentStageVal > docStageVal;
-                    const effectiveStatus = (isLegacy && doc.status === 'missing') ? 'available' : doc.status;
-                    const effectiveUrl = doc.url || (effectiveStatus === 'available' ? selectedProject.mainFolder : '') || '';
-
-                    // FILTERING: Show if it's the current stage, OR if it's available, OR if we are in Edit Mode
-                    const shouldShow = editMode || doc.stage === selectedProject.currentStage || effectiveStatus === 'available';
-
-                    if (!shouldShow) return acc;
-
-                    if (!acc[docStage]) acc[docStage] = [];
-                    acc[docStage].push({ ...doc, status: effectiveStatus, url: effectiveUrl, isLegacy });
-                    return acc;
-                  }, {} as Record<string, (ProjectDocument & { isLegacy: boolean })[]>);
-
-                  return Object.entries(groupedDocs).map(([stage, docs]) => (
-                    <div key={stage} className="resource-group">
-                      <div className="resource-group-title" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{stage}</span>
-                        {stage === selectedProject.currentStage && <span className="tone-amber" style={{ fontSize: '0.65rem', fontWeight: 600 }}>CURRENT STAGE</span>}
-                      </div>
-                      <div className="resource-stack">
-                        {docs
-                          .map((doc) => (
-                            <div key={doc.id} className="resource-card">
-                              <div style={{ flex: 1 }}>
-                                <div className="resource-info">
-                                  <span className="resource-icon">
-                                    {doc.title.toLowerCase().includes('folder') ? '📂' :
-                                      doc.title.toLowerCase().includes('proposal') ? '📝' :
-                                        doc.title.toLowerCase().includes('contract') ? '📋' : '📄'}
-                                  </span>
-                                  <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                      <span className="resource-name">{doc.title}</span>
-                                      <span className={`resource-status-tag ${doc.status === 'available' ? 'ready' : 'missing'}`}>
-                                        {doc.status === 'available' ? (doc.isLegacy ? 'LEGACY' : 'READY') : 'MISSING'}
-                                      </span>
-                                    </div>
-                                    {!editMode && (doc.value || (doc.isLegacy && selectedProject.mainFolder)) && (
-                                      <div style={{ fontSize: '0.75rem', color: 'var(--muted-soft)', marginTop: '2px', wordBreak: 'break-all' }}>
-                                        {doc.value || "Inherited from Main Folder"}
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-
-                                {editMode && (
-                                  <div className="resource-input-wrapper">
-                                    <input
-                                      className="resource-input"
-                                      value={doc.value}
-                                      onChange={(event) => updateDocument(selectedProject.id, doc.id, event.target.value)}
-                                      placeholder="Paste link or notes..."
-                                    />
-                                  </div>
-                                )}
-                              </div>
-
-                              <div className="resource-actions">
-                                {doc.url && (
-                                  <Link
-                                    href={doc.url}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="resource-action-btn"
-                                    title="Open in new tab"
-                                  >
-                                    ↗
-                                  </Link>
-                                )}
-                                {(doc.value || (doc.isLegacy && selectedProject.mainFolder)) && (
-                                  <button
-                                    className="resource-action-btn"
-                                    title="Copy content"
-                                    onClick={() => {
-                                      navigator.clipboard.writeText(doc.value || selectedProject.mainFolder || '');
-                                    }}
-                                  >
-                                    ✂
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
+                  <div className="properties-panel" style={{ marginTop: '24px' }}>
+                    <div className="detail-block">
+                      <h3>Properties</h3>
+                      <div className="property-list">
+                        <PropertyRow label="Client" value={selectedProject.client || "-"} />
+                        <PropertyRow label="Project" value={selectedProject.projectName || "-"} />
+                        <PropertyRow label="Stage" value={selectedProject.currentStageLabel || "-"} />
+                        <PropertyRow label="Event Date" value={selectedProject.eventDate || "-"} />
+                        <PropertyRow label="Project Value" value={selectedProject.projectValueLabel || "-"} />
+                        <PropertyRow label="PIC Internal" value={(selectedProject.owners || []).join(", ") || "-"} />
                       </div>
                     </div>
-                  ));
-                })()}
-              </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === "tasks" && (
+                <div className="tab-content-fade">
+                  <div className="detail-columns">
+                    <div className="detail-block">
+                      <h3>Stage Checklist</h3>
+                      <div className="task-stack compact-task-stack">
+                        {activeStageTasks.length > 0 ? (
+                          activeStageTasks.map((task: ProjectTask) => (
+                            <label key={task.id} className="task-row">
+                              <input type="checkbox" checked={task.status === "done"} onChange={() => toggleTask(selectedProject.id, task.id)} />
+                              <span>{task.title}</span>
+                              <small>{task.stage}</small>
+                            </label>
+                          ))
+                        ) : (
+                          <div className="empty-inline">No mandatory checklist for this stage.</div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="detail-block">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3>Milestones</h3>
+                        <button
+                          type="button"
+                          className={editMode ? "primary-button" : "ghost-button"}
+                          style={{ fontSize: '0.75rem', padding: '4px 12px', minHeight: '32px' }}
+                          onClick={() => setEditMode(!editMode)}
+                        >
+                          {editMode ? "Save / Close" : "Edit Milestones"}
+                        </button>
+                      </div>
+                      <div className="milestone-list">
+                        {(selectedProject.milestones || []).map((milestone: ProjectMilestone) => (
+                          <label key={milestone.id} className="milestone-row">
+                            <input
+                              type="checkbox"
+                              checked={milestone.done}
+                              onChange={(event) => updateMilestone(selectedProject.id, milestone.id, "done", event.target.checked)}
+                            />
+                            <span>{milestone.label}</span>
+                            {editMode ? (
+                              <input
+                                value={milestone.value}
+                                onChange={(event) => updateMilestone(selectedProject.id, milestone.id, "value", event.target.value)}
+                                placeholder="Enter date, link, or milestone notes"
+                              />
+                            ) : (
+                              <strong>{milestone.value || "-"}</strong>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === "docs" && (
+                <div className="tab-content-fade">
+                  <div className="detail-block">
+                    <h3>Project Documents</h3>
+                    <p className="mini-meta" style={{ marginBottom: '16px' }}>Semua dokumen proyek tersentralisasi dalam satu folder utama.</p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                      {selectedProject.mainFolder ? (
+                        <a 
+                          href={selectedProject.mainFolder} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="activity-card"
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '16px', 
+                            padding: '16px', 
+                            textDecoration: 'none',
+                            background: 'rgba(99, 102, 241, 0.05)',
+                            border: '1px solid var(--line-strong)',
+                            borderRadius: '12px',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '10px', 
+                            background: 'var(--panel-soft)', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            border: '1px solid var(--line)'
+                          }}>
+                            <FolderOpen size={24} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <strong style={{ display: 'block', fontSize: '0.95rem', color: 'var(--text)', marginBottom: '2px' }}>
+                              Google Drive Project Folder
+                            </strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block' }}>
+                              Buka folder untuk mengakses brief, proposal, dan aset lainnya.
+                            </span>
+                          </div>
+                          <div style={{ color: 'var(--blue)', fontSize: '1.2rem' }}>↗</div>
+                        </a>
+                      ) : (
+                        <div className="empty-inline" style={{ padding: '20px', borderRadius: '12px', border: '1px dashed var(--line)' }}>
+                          <p style={{ margin: '0 0 12px 0', fontSize: '0.85rem' }}>Link Google Drive belum diatur.</p>
+                          <button 
+                            onClick={() => openEditProjectModal(selectedProject)}
+                            className="secondary-button" 
+                            style={{ width: '100%', fontSize: '0.8rem', padding: '8px' }}
+                          >
+                            + Tambahkan Link Folder
+                          </button>
+                        </div>
+                      )}
+
+                      {selectedProject.proposalUrl && (
+                        <a 
+                          href={selectedProject.proposalUrl} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="activity-card"
+                          style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '16px', 
+                            padding: '16px', 
+                            textDecoration: 'none',
+                            background: 'rgba(56, 189, 248, 0.05)',
+                            border: '1px solid var(--line-strong)',
+                            borderRadius: '12px',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <div style={{ 
+                            width: '48px', 
+                            height: '48px', 
+                            borderRadius: '10px', 
+                            background: 'var(--panel-soft)', 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            fontSize: '1.5rem',
+                            border: '1px solid var(--line)'
+                          }}>
+                            <Palette size={24} />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <strong style={{ display: 'block', fontSize: '0.95rem', color: 'var(--text)', marginBottom: '2px' }}>
+                              Pitch Deck / Proposal (Canva)
+                            </strong>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--muted)', display: 'block' }}>
+                              Klik untuk melihat progress deck atau proposal.
+                            </span>
+                          </div>
+                          <div style={{ color: 'var(--blue)', fontSize: '1.2rem' }}>↗</div>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === "vendors" && (
+                <div className="tab-content-fade">
+                  <div className="detail-columns">
+                    <div className="detail-block">
+                      <h3>Assigned Vendors</h3>
+                      <div className="assignment-stack">
+                        {(selectedProject.assignedVendors || []).length > 0 ? (
+                          (selectedProject.assignedVendors || []).map((vendor) => (
+                            <div className="assignment-row" key={vendor.linkId}>
+                              <div>
+                                <strong>{vendor.vendorName}</strong>
+                                <p className="detail-client">
+                                  {vendor.vendorType} • {vendor.businessAddress || "-"} • Score {vendor.averageScore || "-"}
+                                </p>
+                              </div>
+                              <div className="action-row">
+                                {vendor.whatsappPhone ? (
+                                  <Link href={`https://wa.me/${vendor.whatsappPhone}`} target="_blank" rel="noreferrer" className="ghost-button">
+                                    WhatsApp
+                                  </Link>
+                                ) : null}
+                                <button
+                                  type="button"
+                                  className="ghost-button"
+                                  onClick={() => removeAssignedVendor(selectedProject.id, vendor.linkId)}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="empty-inline">No vendors assigned to this project yet.</div>
+                        )}
+                      </div>
+
+                      <div className="assignment-controls">
+                        <select value={activeAssignmentVendorId} onChange={(event) => setAssignmentVendorId(event.target.value)}>
+                          <option value="">Select vendor</option>
+                          {assignableVendors.map((vendor) => (
+                            <option key={vendor.id} value={vendor.id}>
+                              {vendor.name} • {vendor.serviceNames[0] || "-"}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          type="button"
+                          className="primary-button"
+                          disabled={!activeAssignmentVendorId}
+                          onClick={() => assignVendor(selectedProject.id)}
+                        >
+                          {assignmentPending ? "Saving..." : "Assign vendor"}
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="detail-block">
+                      <h3>Vendor shortlist</h3>
+                      <div className="assignment-stack">
+                        {(selectedProject.vendorShortlist || []).length > 0 ? (
+                          (selectedProject.vendorShortlist || []).map((vendor) => (
+                            <div className="assignment-row" key={vendor.linkId}>
+                              <div>
+                                <strong>{vendor.vendorName}</strong>
+                                <p className="detail-client">
+                                  {vendor.vendorType} • {vendor.businessAddress || "-"} • Score {vendor.averageScore || "-"}
+                                </p>
+                                <p className="detail-client">
+                                  {vendor.status} • {vendor.quotedPrice ? formatCurrency(vendor.quotedPrice) : "No quote yet"}
+                                </p>
+                              </div>
+                              <div className="action-row">
+                                <select value={vendor.status} onChange={(event) => updateShortlist(vendor.linkId, event.target.value as "shortlisted" | "contacted" | "quoted" | "selected")}>
+                                  {["shortlisted", "contacted", "quoted", "selected"].map((status) => (
+                                    <option key={status} value={status}>
+                                      {status}
+                                    </option>
+                                  ))}
+                                </select>
+                                {vendor.whatsappPhone ? (
+                                  <Link href={`https://wa.me/${vendor.whatsappPhone}`} target="_blank" rel="noreferrer" className="ghost-button">
+                                    WhatsApp
+                                  </Link>
+                                ) : null}
+                                <button type="button" className="ghost-button" onClick={() => removeShortlist(vendor.linkId)}>
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="empty-inline">No vendor shortlist for this project yet.</div>
+                        )}
+                      </div>
+
+                      <div className="assignment-controls">
+                        <select value={activeShortlistVendorId} onChange={(event) => setShortlistVendorId(event.target.value)}>
+                          <option value="">Select shortlist vendor</option>
+                          {shortlistableVendors.map((vendor) => (
+                            <option key={vendor.id} value={vendor.id}>
+                              {vendor.name} • {vendor.serviceNames[0] || "-"} • Score {vendor.averageScore || "-"}
+                            </option>
+                          ))}
+                        </select>
+                        <input value={shortlistQuotedPrice} onChange={(event) => setShortlistQuotedPrice(event.target.value)} placeholder="Quoted price (optional)" />
+                        <input value={shortlistNote} onChange={(event) => setShortlistNote(event.target.value)} placeholder="Shortlist note" />
+                        <button type="button" className="primary-button" disabled={!activeShortlistVendorId} onClick={() => shortlistVendor(selectedProject.id)}>
+                          {assignmentPending ? "Saving..." : "Add shortlist"}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === "execution" && (
+                <div className="tab-content-fade">
+                  <div className="detail-block">
+                    <h3>Phase Progress</h3>
+                    <div className="phase-stack compact-phase-stack">
+                      {(selectedProject.phases || []).map((phase: ProjectPhase) => (
+                        <article key={phase.key} className="phase-card compact-phase-card">
+                          <div className="phase-head">
+                            <strong>{phase.label}</strong>
+                            <span className={`status-pill ${phaseTone(phase)}`}>{phase.completion}%</span>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === "manpower" && (
+                <div className="tab-content-fade">
+                  <div className="detail-columns">
+                    <div className="detail-block">
+                      <h3>Assigned Manpower</h3>
+                      <p className="mini-meta" style={{ marginBottom: '16px' }}>Tim freelancer yang ditugaskan untuk proyek ini.</p>
+                      
+                      <div className="task-stack">
+                        {selectedProject.assignedFreelancers && selectedProject.assignedFreelancers.length > 0 ? (
+                          selectedProject.assignedFreelancers.map((f) => (
+                            <div key={f.id} className="activity-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <strong>{f.name}</strong>
+                                <div className="mini-meta">{f.position}</div>
+                              </div>
+                              <div className="mini-meta">{f.phone}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="empty-inline">Belum ada tim yang ditugaskan.</div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="detail-block">
+                      <h3>Available Resources</h3>
+                      <p className="mini-meta" style={{ marginBottom: '16px' }}>Cari dan pilih freelancer dari database Man Power.</p>
+                      
+                      <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        <div className="project-list" style={{ gap: '8px' }}>
+                          {(initialData.availableFreelancers || []).slice(0, 10).map((f) => (
+                            <div key={f.id} className="document-card" style={{ padding: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <div>
+                                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{f.nama}</div>
+                                <div className="mini-stage">{f.posisi_utama.join(", ")}</div>
+                              </div>
+                              <button className="primary-button" style={{ scale: '0.8' }}>Assign</button>
+                            </div>
+                          ))}
+                          {(initialData.availableFreelancers || []).length > 10 && (
+                            <Link href="/manpower/freelancer" className="ghost-button" style={{ textAlign: 'center', width: '100%', fontSize: '0.8rem' }}>
+                              View all {(initialData.availableFreelancers || []).length} freelancers
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="detail-columns">
-              <div className="detail-block">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <h3>Milestones</h3>
-                  <button
-                    type="button"
-                    className={editMode ? "primary-button" : "ghost-button"}
-                    style={{ fontSize: '0.75rem', padding: '4px 12px', minHeight: '32px' }}
-                    onClick={() => setEditMode(!editMode)}
-                  >
-                    {editMode ? "Save / Close" : "Edit Milestones"}
-                  </button>
-                </div>
-                <div className="milestone-list">
-                  {(selectedProject.milestones || []).map((milestone: ProjectMilestone) => (
-                    <label key={milestone.id} className="milestone-row">
-                      <input
-                        type="checkbox"
-                        checked={milestone.done}
-                        onChange={(event) => updateMilestone(selectedProject.id, milestone.id, "done", event.target.checked)}
-                      />
-                      <span>{milestone.label}</span>
-                      {editMode ? (
-                        <input
-                          value={milestone.value}
-                          onChange={(event) => updateMilestone(selectedProject.id, milestone.id, "value", event.target.value)}
-                          placeholder="Enter date, link, or milestone notes"
-                        />
-                      ) : (
-                        <strong>{milestone.value || "-"}</strong>
-                      )}
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              <div className="detail-block">
-                <h3>Activity</h3>
+              <div className="detail-block" style={{ marginTop: '24px', borderTop: '1px solid var(--line)', paddingTop: '24px', opacity: 0.7 }}>
+                <h3>Activity Log</h3>
                 <div className="activity-stack">
                   {(selectedProject.activity || []).map((item) => (
-                    <article key={item.id} className="activity-card">
-                      <strong>{item.timestampLabel}</strong>
-                      <p>{item.message}</p>
+                    <article key={item.id} className="activity-card" style={{ padding: '8px 0' }}>
+                      <strong style={{ fontSize: '0.7rem' }}>{item.timestampLabel}</strong>
+                      <p style={{ fontSize: '0.85rem' }}>{item.message}</p>
                     </article>
                   ))}
                 </div>
               </div>
             </div>
-
-            <div className="detail-block">
-              <h3>Phase Progress</h3>
-              <div className="phase-stack compact-phase-stack">
-                {(selectedProject.phases || []).map((phase: ProjectPhase) => (
-                  <article key={phase.key} className="phase-card compact-phase-card">
-                    <div className="phase-head">
-                      <strong>{phase.label}</strong>
-                      <span className={`status-pill ${phaseTone(phase)}`}>{phase.completion}%</span>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
       {moveModalOpen && selectedProject ? (
         <div className="modal-backdrop">
@@ -1643,11 +1768,16 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             <h2 style={{ marginBottom: '24px' }}>{projectModalMode === 'add' ? 'Add New Project' : 'Edit Project'}</h2>
             <div className="form-stack">
               <div className="form-section-title">Core Information</div>
-              <div className="form-grid-2">
+              <div className="form-grid-3">
                 <div className="form-group">
                   <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Project Name</label>
                   <input className="control-bar-input" style={{ width: '100%' }}
                     value={projectFormData.projectName || ''} onChange={(e) => setProjectFormData({ ...projectFormData, projectName: e.target.value })} placeholder="Project title..." />
+                </div>
+                <div className="form-group">
+                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Project Initial (for PO)</label>
+                  <input className="control-bar-input" style={{ width: '100%' }}
+                    value={projectFormData.projectInitial || ''} onChange={(e) => setProjectFormData({ ...projectFormData, projectInitial: e.target.value.toUpperCase() })} placeholder="e.g. DM" />
                 </div>
                 <div className="form-group">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -1746,6 +1876,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Main Project Folder (Google Drive / Link)</label>
                 <input className="control-bar-input" style={{ width: '100%' }}
                   value={projectFormData.mainFolder || ''} onChange={(e) => setProjectFormData({ ...projectFormData, mainFolder: e.target.value })} placeholder="https://drive.google.com/..." />
+              </div>
+              <div className="form-group" style={{ marginTop: '16px' }}>
+                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Proposal / Deck Link (Canva / etc)</label>
+                <input className="control-bar-input" style={{ width: '100%' }}
+                  value={projectFormData.proposalUrl || ''} onChange={(e) => setProjectFormData({ ...projectFormData, proposalUrl: e.target.value })} placeholder="https://canva.com/..." />
               </div>
               <div className="form-group" style={{ marginTop: '16px' }}>
                 <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Remark / Notes</label>

@@ -1,6 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { 
+  Printer, 
+  Check, 
+  CheckSquare, 
+  Square, 
+  ArrowLeft 
+} from "lucide-react";
 import { RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 
@@ -121,8 +128,8 @@ export function PrintLayout({ rfp, doc }: Props) {
 
       {/* Floating Action Buttons */}
       <div className="no-print" style={{ position: 'fixed', top: '20px', right: '20px', display: 'flex', gap: '10px', zIndex: 100 }}>
-        <button onClick={() => window.location.href = '/finance'} style={{ background: "white", border: "1px solid #ccc", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>← Back</button>
-        <button onClick={() => window.print()} style={{ background: "#004a99", color: "white", border: "none", padding: "8px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>🖨️ Save / Print Document</button>
+        <button onClick={() => window.location.href = '/finance'} style={{ background: "white", border: "1px solid #ccc", padding: "8px 16px", borderRadius: "6px", cursor: "pointer", boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '8px' }}><ArrowLeft size={16} /> Back</button>
+        <button onClick={() => window.print()} style={{ background: "#004a99", color: "white", border: "none", padding: "8px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: "bold", boxShadow: '0 2px 4px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', gap: '8px' }}><Printer size={16} /> Save / Print Document</button>
       </div>
 
       {/* =========================================================
@@ -166,11 +173,11 @@ export function PrintLayout({ rfp, doc }: Props) {
               <tr>
                 <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold" }}>Payment Type</td>
                 <td colSpan={3} style={{ border: "1px solid #000", padding: "8px" }}>
-                  <span style={{ marginRight: "16px" }}>
-                    {rfp.paymentType === "Transfer" ? "☑" : "☐"} Transfer
+                  <span style={{ marginRight: "16px", display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {rfp.paymentType === "Transfer" ? <CheckSquare size={14} /> : <Square size={14} />} Transfer
                   </span>
-                  <span>
-                    {rfp.paymentType === "Cash" ? "☑" : "☐"} Cash
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                    {rfp.paymentType === "Cash" ? <CheckSquare size={14} /> : <Square size={14} />} Cash
                   </span>
                 </td>
               </tr>
@@ -188,7 +195,7 @@ export function PrintLayout({ rfp, doc }: Props) {
               </tr>
               <tr>
                 <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold" }}>VMS</td>
-                <td colSpan={3} style={{ border: "1px solid #000", padding: "8px" }}>☑ VMS Checked</td>
+                <td colSpan={3} style={{ border: "1px solid #000", padding: "8px", display: 'flex', alignItems: 'center', gap: '8px' }}><CheckSquare size={14} /> VMS Checked</td>
               </tr>
             </tbody>
           </table>
@@ -245,7 +252,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                          <div style={{ fontSize: '5px', fontWeight: 'bold' }}>{rfp.financeApprovedBy.signature}</div>
                       </div>
                    ) : (
-                      <div style={{ color: rfp?.status !== "pending_finance" && rfp?.status !== "draft" ? "green" : "transparent", fontSize: "18px", marginBottom: "10px" }}>{rfp?.status !== "pending_finance" && rfp?.status !== "draft" ? "✔️" : ""}</div>
+                      <div style={{ color: rfp?.status !== "pending_finance" && rfp?.status !== "draft" ? "green" : "transparent", fontSize: "18px", marginBottom: "10px" }}>{rfp?.status !== "pending_finance" && rfp?.status !== "draft" ? "<Check size={24} />" : ""}</div>
                    )}
                   <div style={{ fontWeight: "bold", textDecoration: "underline" }}>{rfpVerifiedByName}</div>
                 </td>

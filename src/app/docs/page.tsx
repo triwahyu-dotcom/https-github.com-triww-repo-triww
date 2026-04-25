@@ -3,6 +3,18 @@
 import React, { useState } from "react";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 import { SummaryCard } from "@/components/ui/summary-card";
+import { 
+  FolderOpen, 
+  Building2, 
+  Coins, 
+  Building, 
+  FileText, 
+  Upload, 
+  Search, 
+  Printer, 
+  CheckCircle2, 
+  X 
+} from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -68,11 +80,15 @@ export default function DocCenterPage() {
           textAlign: "center",
           marginBottom: "32px",
           transition: "all 0.3s ease",
-          cursor: "pointer"
+          cursor: "pointer",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center"
         }}
         onClick={() => document.getElementById('doc-upload')?.click()}
         >
-          <div style={{ fontSize: "48px", marginBottom: "16px" }}>📁</div>
+          <div style={{ color: "var(--blue)", marginBottom: "16px", opacity: 0.8 }}><FolderOpen size={48} /></div>
           <h2 style={{ marginBottom: "8px" }}>Upload Business Document</h2>
           <p style={{ color: "var(--text-secondary)", marginBottom: "24px" }}>
             Drop your Budget (Excel), Invoice (PDF), or RFP (Word) here to extract data automatically.
@@ -110,27 +126,27 @@ export default function DocCenterPage() {
         {results && (
           <div className="results-container animate-in">
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "16px", marginBottom: "32px" }}>
-               {results.projectName && (
-                 <SummaryCard 
-                    label="Project/Source" 
-                    value={results.projectName} 
-                    icon="🏗️"
-                 />
-               )}
-               {results.totalBudget !== undefined && (
-                 <SummaryCard 
-                    label="Total Amount" 
-                    value={new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(results.totalBudget || results.data?.amount || 0)} 
-                    icon="💰"
-                 />
-               )}
-               {results.data?.vendorName && (
-                 <SummaryCard 
-                    label="Vendor Identified" 
-                    value={results.data.vendorName} 
-                    icon="🏢"
-                 />
-               )}
+                {results.projectName && (
+                  <SummaryCard 
+                     label="Project/Source" 
+                     value={results.projectName} 
+                     icon={<Building2 size={18} />}
+                  />
+                )}
+                {results.totalBudget !== undefined && (
+                  <SummaryCard 
+                     label="Total Amount" 
+                     value={new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(results.totalBudget || results.data?.amount || 0)} 
+                     icon={<Coins size={18} />}
+                  />
+                )}
+                {results.data?.vendorName && (
+                  <SummaryCard 
+                     label="Vendor Identified" 
+                     value={results.data.vendorName} 
+                     icon={<Building size={18} />}
+                  />
+                )}
             </div>
 
             {/* Detailed Data View */}

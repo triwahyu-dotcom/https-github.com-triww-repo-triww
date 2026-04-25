@@ -3,6 +3,17 @@
 import { useState, useEffect } from "react";
 import { ProjectRecord } from "@/lib/project/types";
 import { LineItem, PaymentEvent, ExpenseDocument } from "@/lib/finance/types";
+import { 
+  ShoppingBag, 
+  FileSignature, 
+  Scroll, 
+  AlertCircle, 
+  Trash2, 
+  Plus, 
+  Upload, 
+  X,
+  ChevronRight
+} from "lucide-react";
 import { formatCurrencyIDR } from "@/lib/utils/format";
 import { supabase } from "@/lib/supabase";
 
@@ -11,6 +22,7 @@ type DocType = "PO" | "SPK" | "KONTRAK";
 interface Props {
   activeProjects: ProjectRecord[];
   availableVendors?: any[];
+  availableFreelancers?: any[];
   editDoc?: ExpenseDocument;
   onClose: () => void;
   onSuccess: () => void;
@@ -37,7 +49,7 @@ const emptyLine = (): LineItem => ({
   amount: 0,
 });
 
-export function POCreatorModal({ activeProjects, availableVendors = [], editDoc, onClose, onSuccess }: Props) {
+export function POCreatorModal({ activeProjects, availableVendors = [], availableFreelancers = [], editDoc, onClose, onSuccess }: Props) {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
   const [docType, setDocType] = useState<DocType>("PO");
@@ -159,27 +171,31 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
   };
 
   const handleVendorSelect = (vendor: any) => {
-    const raw = vendor.rawSource || {};
-    setVendorName(vendor.name || "");
-    
-    // Address extraction - try more keys
-    setVendorAddress(
-      vendor.businessAddress || 
-      vendor.address || 
-      raw["Alamat :"] || 
-      raw["Alamat Vendor"] || 
-      raw["Alamat Kantor"] || 
-      raw["Domisili"] || 
-      raw["Alamat Lengkap"] || 
-      ""
-    );
-    
-    // NPWP / Tax ID extraction
-    setVendorTaxId(vendor.npwpNumber || raw["Nomor Pokok Wajib Pajak (NPWP)"] || raw["NPWP :"] || "");
-    
-    // Phone extraction
-    const phone = vendor.picPhone || (vendor.contacts && vendor.contacts[0]?.phone) || raw["Nomor HP/WA PIC"] || "";
-    setVendorPhone(phone);
+    if (vendor.type === 'freelancer') {
+      setVendorName(vendor.nama || "");
+      setVendorPhone(vendor.no_hp || "");
+      setVendorAddress(vendor.kota_domisili || "");
+      setVendorTaxId("");
+    } else {
+      const raw = vendor.rawSource || {};
+      setVendorName(vendor.name || "");
+      
+      setVendorAddress(
+        vendor.businessAddress || 
+        vendor.address || 
+        raw["Alamat :"] || 
+        raw["Alamat Vendor"] || 
+        raw["Alamat Kantor"] || 
+        raw["Domisili"] || 
+        raw["Alamat Lengkap"] || 
+        ""
+      );
+      
+      setVendorTaxId(vendor.npwpNumber || raw["Nomor Pokok Wajib Pajak (NPWP)"] || raw["NPWP :"] || "");
+      
+      const phone = vendor.picPhone || (vendor.contacts && vendor.contacts[0]?.phone) || raw["Nomor HP/WA PIC"] || "";
+      setVendorPhone(phone);
+    }
     
     setVendorSearch("");
     setShowVendorSuggestions(false);
@@ -210,10 +226,15 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
     setPaymentKeterangan(bullets);
   };
 
-  const filteredVendors = availableVendors.filter(v => 
-    v.name.toLowerCase().includes(vendorSearch.toLowerCase()) ||
-    (v.serviceNames && v.serviceNames.some((s: string) => s.toLowerCase().includes(vendorSearch.toLowerCase())))
-  ).slice(0, 5);
+  const combinedVendors = [
+    ...availableVendors.map(v => ({ ...v, type: 'vendor', displayName: v.name, displayMeta: v.serviceNames?.join(", ") })),
+    ...availableFreelancers.map(f => ({ ...f, type: 'freelancer', displayName: f.nama, displayMeta: f.posisi_utama?.join(", ") }))
+  ];
+
+  const filteredVendors = combinedVendors.filter(v => 
+    v.displayName.toLowerCase().includes(vendorSearch.toLowerCase()) ||
+    (v.displayMeta && v.displayMeta.toLowerCase().includes(vendorSearch.toLowerCase()))
+  ).slice(0, 10);
 
   const hasPenalty = lineItems.some(item => item.price < 0);
 
@@ -279,6 +300,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
         body: JSON.stringify({
           id: editDoc?.id, // Only for PATCH
           projectId: selectedProject.id,
+          projectInitial: selectedProject.projectInitial,
           documentType: docType,
           vendorName,
           vendorPhone,
@@ -322,9 +344,15 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
   };
 
   const docTypeLabels: Record<DocType, string> = {
-    PO: "Purchase Order (PO)",
-    SPK: "Surat Perintah Kerja (SPK)",
-    KONTRAK: "Surat Perjanjian Kontrak",
+    PO: "Purchase Order",
+    SPK: "SPK / Penugasan",
+    KONTRAK: "Kontrak Kerja",
+  };
+
+  const docTypeIcons: Record<DocType, React.ReactNode> = {
+    PO: <ShoppingBag size={18} />,
+    SPK: <Scroll size={18} />,
+    KONTRAK: <FileSignature size={18} />,
   };
 
   return (
@@ -332,13 +360,18 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
       <div style={{ backgroundColor: "var(--panel)", borderRadius: "16px", width: "100%", maxWidth: "960px", maxHeight: "90vh", border: "1px solid var(--line)", boxShadow: "var(--shadow)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
         
         {/* Header */}
-        <div style={{ padding: "24px 32px", borderBottom: "1px solid var(--line)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <h2 style={{ margin: 0, fontSize: "20px" }}>Buat Dokumen Pengadaan</h2>
-            <p className="mini-meta" style={{ marginTop: "4px" }}>Step {step} of 3 — {step === 1 ? "Pilih Project & Tipe" : step === 2 ? "Detail Vendor & Line Items" : "Syarat & Ketentuan"}</p>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "rgba(91,140,255,0.1)", color: "var(--blue)", display: "grid", placeItems: "center" }}>
+              {step === 1 ? <Plus size={20} /> : step === 2 ? <FileSignature size={20} /> : <AlertCircle size={20} />}
+            </div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>{editDoc ? "Edit Dokumen" : "Buat Dokumen Pengadaan"}</h2>
+              <p className="mini-meta" style={{ margin: 0 }}>Step {step} of 3 — {step === 1 ? "Pilih Project & Tipe" : step === 2 ? "Detail Vendor & Line Items" : "Syarat & Ketentuan"}</p>
+            </div>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "24px", color: "var(--muted)", cursor: "pointer" }}>&times;</button>
-        </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", padding: "8px", color: "var(--muted)", cursor: "pointer", borderRadius: "50%", display: "grid", placeItems: "center", transition: "all 0.2s" }} className="ghost-button">
+            <X size={20} />
+          </button>
 
         <div style={{ padding: "32px", overflowY: "auto", flex: 1 }}>
 
@@ -355,13 +388,33 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                 ))}
               </div>
 
+              {selectedProject && (
+                <div style={{ marginBottom: "28px", padding: "12px", background: "rgba(91,140,255,0.04)", borderRadius: "8px", border: "1px solid var(--line)" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span className="mini-meta">Inisial Event</span>
+                    <span style={{ fontWeight: 700, color: "var(--blue)" }}>{selectedProject.projectInitial || "BELUM DISET"}</span>
+                  </div>
+                  {selectedProject.projectInitial ? (
+                    <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>
+                      Nomor PO otomatis: {`00x/JBBS/${docType}/${selectedProject.projectInitial}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`}
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: "10px", color: "var(--red)", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
+                      <AlertCircle size={10} /> Inisial belum diatur di Project Tracker. Nomor PO akan menggunakan format standar.
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="form-section-title" style={{ marginBottom: "16px" }}>Tipe Dokumen</div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
                 {(["PO", "SPK", "KONTRAK"] as DocType[]).map(t => (
-                  <label key={t} onClick={() => setDocType(t)} style={{ padding: "16px", borderRadius: "10px", border: `2px solid ${docType === t ? "var(--blue)" : "var(--line)"}`, background: docType === t ? "rgba(91,140,255,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <input type="radio" name="doctype" checked={docType === t} onChange={() => setDocType(t)} style={{ marginTop: "3px" }} />
+                  <label key={t} onClick={() => setDocType(t)} style={{ padding: "16px", borderRadius: "12px", border: `2px solid ${docType === t ? "var(--blue)" : "var(--line)"}`, background: docType === t ? "rgba(91,140,255,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "flex-start", gap: "12px", transition: "all 0.2s ease" }}>
+                    <div style={{ color: docType === t ? "var(--blue)" : "var(--muted-soft)", marginTop: "2px" }}>
+                      {docTypeIcons[t]}
+                    </div>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: "13px" }}>{docTypeLabels[t]}</div>
+                      <div style={{ fontWeight: 600, fontSize: "13px", color: docType === t ? "var(--text)" : "var(--muted)" }}>{docTypeLabels[t]}</div>
                       <div className="mini-meta">{t === "PO" ? "Pembelian barang/jasa" : t === "SPK" ? "Penugasan tenaga/jasa" : "Perjanjian jangka panjang"}</div>
                     </div>
                   </label>
@@ -413,12 +466,14 @@ export function POCreatorModal({ activeProjects, availableVendors = [], editDoc,
                             onMouseEnter={e => e.currentTarget.style.background = "var(--panel-soft)"}
                             onMouseLeave={e => e.currentTarget.style.background = "transparent"}
                           >
-                            <div style={{ fontWeight: 600, fontSize: "13px" }}>{v.name}</div>
+                            <div style={{ fontWeight: 600, fontSize: "13px" }}>{v.displayName}</div>
                             <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
-                              <span className="chip" style={{ fontSize: "10px", background: "rgba(91,140,255,0.1)", color: "var(--blue)" }}>{v.classification}</span>
-                              {v.serviceNames && v.serviceNames.slice(0, 2).map((s: string) => (
-                                <span key={s} className="mini-meta" style={{ fontSize: "10px" }}>• {s}</span>
-                              ))}
+                              <span className="chip" style={{ fontSize: "10px", background: v.type === 'freelancer' ? "rgba(34,197,94,0.1)" : "rgba(91,140,255,0.1)", color: v.type === 'freelancer' ? "#22c55e" : "var(--blue)" }}>
+                                {v.type === 'freelancer' ? 'Manpower' : (v.classification || 'Vendor')}
+                              </span>
+                              {v.displayMeta && (
+                                <span className="mini-meta" style={{ fontSize: "10px" }}>• {v.displayMeta}</span>
+                              )}
                             </div>
                           </div>
                         ))

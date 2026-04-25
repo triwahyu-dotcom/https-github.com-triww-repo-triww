@@ -1,6 +1,14 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { 
+  FileText, 
+  Languages, 
+  Upload, 
+  CheckCircle2, 
+  AlertCircle, 
+  Download 
+} from "lucide-react";
 import { Locale, t } from "@/lib/vendor/i18n";
 import { LegalStatus, TaxStatus } from "@/lib/vendor/types";
 
@@ -168,10 +176,13 @@ export function VendorIntakeForm({
               cursor: 'pointer',
               border: 'none',
               background: locale === "id" ? 'var(--blue)' : 'transparent',
-              color: locale === "id" ? 'white' : 'var(--muted)'
+              color: locale === "id" ? 'white' : 'var(--muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            🇮🇩 ID
+            ID
           </button>
           <button 
             type="button"
@@ -184,10 +195,13 @@ export function VendorIntakeForm({
               cursor: 'pointer',
               border: 'none',
               background: locale === "en" ? 'var(--blue)' : 'transparent',
-              color: locale === "en" ? 'white' : 'var(--muted)'
+              color: locale === "en" ? 'white' : 'var(--muted)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
             }}
           >
-            🇺🇸 EN
+            EN
           </button>
         </div>
       </div>
@@ -314,11 +328,11 @@ export function VendorIntakeForm({
         <div style={{ marginBottom: '24px', padding: '20px', background: 'rgba(255, 255, 255, 0.03)', borderRadius: '16px', border: '1px solid var(--line)' }}>
           <h4 style={{ fontSize: '0.85rem', fontWeight: 700, margin: '0 0 12px' }}>{t(locale, "downloadTemplates")}</h4>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-            <a href="/templates/NDA_Template_JUARA.docx" download className="chip" style={{ background: 'var(--panel-soft)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--line)' }}>
-              📄 {t(locale, "downloadNDA")}
+            <a href="/templates/NDA_Template_JUARA.docx" download className="chip" style={{ background: 'var(--panel-soft)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Download size={14} /> {t(locale, "downloadNDA")}
             </a>
-            <a href="/templates/Pernyataan_Non_PKP_JUARA.docx" download className="chip" style={{ background: 'var(--panel-soft)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--line)' }}>
-              📄 {t(locale, "downloadNonPKP")}
+            <a href="/templates/Pernyataan_Non_PKP_JUARA.docx" download className="chip" style={{ background: 'var(--panel-soft)', textDecoration: 'none', color: 'var(--text)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Download size={14} /> {t(locale, "downloadNonPKP")}
             </a>
           </div>
         </div>
@@ -341,6 +355,7 @@ export function VendorIntakeForm({
 
         {message ? (
           <div className="form-message success" style={{ padding: '20px', borderRadius: '16px', background: 'rgba(52, 199, 89, 0.1)', border: '1px solid rgba(52, 199, 89, 0.2)', color: '#34c759', marginBottom: '24px', textAlign: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '8px' }}><CheckCircle2 size={24} /></div>
             <p style={{ fontWeight: 600, margin: 0 }}>{message}</p>
             {registrationCode ? (
               <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(52, 199, 89, 0.1)', borderRadius: '12px', display: 'inline-block' }}>
@@ -352,8 +367,8 @@ export function VendorIntakeForm({
         ) : null}
         
         {error ? (
-          <div className="form-message error" style={{ padding: '16px', borderRadius: '12px', background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.2)', color: '#ff6b6b', marginBottom: '24px', fontSize: '0.9rem' }}>
-            {error}
+          <div className="form-message error" style={{ padding: '16px', borderRadius: '12px', background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.2)', color: '#ff6b6b', marginBottom: '24px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <AlertCircle size={20} /> {error}
           </div>
         ) : null}
 

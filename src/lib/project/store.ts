@@ -145,7 +145,8 @@ export function normalizeProject(project: Partial<ProjectRecord>): ProjectRecord
     assignedVendors: project.assignedVendors || [],
     vendorShortlist: project.vendorShortlist || [],
     vendorRequirements: project.vendorRequirements || [],
-    mainFolder: project.mainFolder || ""
+    mainFolder: project.mainFolder || "",
+    projectInitial: project.projectInitial || ""
   };
 
   normalized.searchableText = [

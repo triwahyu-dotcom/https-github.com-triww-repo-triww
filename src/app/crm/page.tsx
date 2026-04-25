@@ -1,4 +1,4 @@
-import { CRMDashboard } from "@/components/crm-dashboard";
+import { CRMDashboard } from "@/components/crm/CrmDashboard";
 import { getProjectDashboardData } from "@/lib/project/store";
 import { getCRMDashboardData } from "@/lib/crm/store";
 

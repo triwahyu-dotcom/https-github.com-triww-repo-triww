@@ -5,9 +5,37 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 
 import { Locale, reviewStatusLabel, t } from "@/lib/vendor/i18n";
 import { DashboardData, ReviewStatus, VendorClassification, VendorDetail, VendorLifecycleStatus, VendorSummary } from "@/lib/vendor/types";
-import { WorkspaceShell } from "./layout/workspace-shell";
-import { Drawer } from "./ui/drawer";
-import { SummaryCard } from "./ui/summary-card";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { SummaryCard } from "@/components/ui/summary-card";
+import { 
+  Users, 
+  Wrench, 
+  Package, 
+  CheckCircle, 
+  Star, 
+  Search, 
+  Settings, 
+  Gavel, 
+  LayoutGrid, 
+  List, 
+  BookOpen, 
+  ArrowUpDown, 
+  Mail,
+  Activity,
+  PieChart,
+  ShieldCheck,
+  CreditCard,
+  FileText,
+  Files,
+  History,
+  User,
+  Tag,
+  Landmark,
+  FolderOpen,
+  TrendingUp,
+  BarChart3,
+  MapPin
+} from "lucide-react";
 
 type ViewId =
   | "by_status"
@@ -17,7 +45,7 @@ type ViewId =
   | "sync_log"
   | "outbox";
 
-type DetailMode = "summary" | "operations";
+type DetailMode = "overview" | "finance" | "docs" | "ops" | "audit";
 
 type SortKey = "name" | "date" | "status" | "score";
 type SortOrder = "asc" | "desc";
@@ -107,13 +135,13 @@ const VIEW_ORDER: { id: ViewId; label: string }[] = [
   { id: "vendor_directory", label: "Vendor Directory" },
 ];
 
-const VIEW_ICONS: Record<ViewId, string> = {
-  by_status: "✺",
-  by_type: "▦",
-  vendor_directory: "◫",
-  all_vendors: "☰",
-  sync_log: "⇵",
-  outbox: "✉",
+const VIEW_ICONS: Record<ViewId, React.ReactNode> = {
+  by_status: <PieChart size={14} />,
+  by_type: <LayoutGrid size={14} />,
+  vendor_directory: <BookOpen size={14} />,
+  all_vendors: <List size={14} />,
+  sync_log: <ArrowUpDown size={14} />,
+  outbox: <Mail size={14} />,
 };
 
 const VIEW_TITLES: Record<ViewId, string> = {
@@ -277,6 +305,7 @@ function lifecycleTone(status: VendorLifecycleStatus) {
 function complianceTone(status: VendorSummary["compliance"]["status"]) {
   if (status === "ok") return "approved";
   if (status === "attention") return "review";
+  if (status === "critical") return "critical";
   return "rejected";
 }
 
@@ -335,7 +364,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const initialVendor = initialData.vendorDetails[0] ?? null;
   const [locale, setLocale] = useState<Locale>("id");
   const [view, setView] = useState<ViewId>("all_vendors");
-  const [detailMode, setDetailMode] = useState<DetailMode>("summary");
+  const [detailMode, setDetailMode] = useState<DetailMode>("overview");
   const [dashboard, setDashboard] = useState(initialData);
   const [selectedVendorId, setSelectedVendorId] = useState(initialData.vendors[0]?.id ?? "");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -390,6 +419,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       return {};
     }
   });
+  const [density, setDensity] = useState<"compact" | "spacious">("spacious");
   const [filters, setFilters] = useState<Filters>(() => {
     if (typeof window === "undefined") {
       return { 
@@ -586,6 +616,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
 
   function openVendor(vendor: VendorSummary) {
     setIsDrawerOpen(true);
+    setDetailMode("overview");
     setSelectedVendorId(vendor.id);
     setReviewStatus(vendor.reviewStatus);
     setReviewNote(vendor.latestReviewNote);
@@ -879,31 +910,31 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
           label="Total Vendors" 
           value={String(vendorSummary.total)} 
           description="Registered suppliers"
-          icon="⌘" 
+          icon={<Users size={18} />} 
         />
         <SummaryCard 
           label="Penyedia Jasa" 
           value={String(vendorSummary.jasaCount)} 
           description="Service providers"
-          icon="🛠️" 
+          icon={<Wrench size={18} />} 
         />
         <SummaryCard 
           label="Penyedia Barang" 
           value={String(vendorSummary.barangCount)} 
           description="Equipment/Goods"
-          icon="📦" 
+          icon={<Package size={18} />} 
         />
         <SummaryCard 
           label="Approved" 
           value={String(vendorSummary.approved)} 
           description="Verified and ready"
-          icon="✅" 
+          icon={<CheckCircle size={18} />} 
         />
         <SummaryCard 
           label="Top Rated" 
           value={String(vendorSummary.highPerformance)} 
           description="Score >= 4.5"
-          icon="⭐" 
+          icon={<Star size={18} />} 
         />
       </div>
       <div className="unified-toolbar" style={{ position: 'relative' }}>
@@ -916,7 +947,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
               type="button"
               style={{ padding: '4px 10px', fontSize: '0.75rem' }}
             >
-              <span style={{ marginRight: '4px' }}>{VIEW_ICONS[item.id]}</span>
+              <span style={{ marginRight: '6px', display: 'flex', alignItems: 'center' }}>{VIEW_ICONS[item.id]}</span>
               {VIEW_TITLES[item.id]}
             </button>
           ))}
@@ -930,7 +961,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
             placeholder="Search vendor..."
             onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
           />
-          <span className="search-icon">🔍</span>
+          <span className="search-icon" style={{ display: 'flex', alignItems: 'center' }}><Search size={14} /></span>
         </div>
 
         <div className="toolbar-divider"></div>
@@ -1000,6 +1031,20 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                 ))}
               </select>
             </div>
+            <div className="density-toggle" style={{ display: 'flex', background: 'var(--panel-soft)', padding: '2px', borderRadius: '6px', border: '1px solid var(--line)' }}>
+              <button 
+                onClick={() => setDensity("compact")} 
+                style={{ padding: '2px 8px', fontSize: '0.7rem', borderRadius: '4px', border: 'none', cursor: 'pointer', background: density === "compact" ? "var(--panel)" : "transparent", color: density === "compact" ? "var(--text)" : "var(--muted)" }}
+              >
+                Compact
+              </button>
+              <button 
+                onClick={() => setDensity("spacious")} 
+                style={{ padding: '2px 8px', fontSize: '0.7rem', borderRadius: '4px', border: 'none', cursor: 'pointer', background: density === "spacious" ? "var(--panel)" : "transparent", color: density === "spacious" ? "var(--text)" : "var(--muted)" }}
+              >
+                Normal
+              </button>
+            </div>
             <div className="saved-filter-buttons" style={{ display: 'flex', gap: '8px' }}>
               <button className="ghost-button" style={{ fontSize: '0.75rem' }} onClick={() => saveCurrentFilter("slot1")}>Save Filter</button>
               <button className="ghost-button" style={{ fontSize: '0.75rem' }} onClick={handleExportFiltered}>Export CSV</button>
@@ -1050,7 +1095,7 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
               {view === "all_vendors" &&
                 filteredVendors.map((vendor) => (
                   <button
-                    className={`notion-item project-card ${selectedVendorId === vendor.id ? "active" : ""}`}
+                    className={`notion-item project-card ${selectedVendorId === vendor.id ? "active" : ""} ${density === "compact" ? "density-compact" : ""}`}
                     key={vendor.id}
                     onClick={() => openVendor(vendor)}
                     type="button"
@@ -1138,38 +1183,224 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
             </div>
           </div>
           
-          <Drawer 
-            isOpen={isDrawerOpen} 
-            onClose={() => setIsDrawerOpen(false)} 
-            title={view === "outbox" ? "Outbox Summary" : (selectedVendor ? formatVendorName(selectedVendor.name) : "Vendor Detail")}
-            width="500px"
-          >
-            <aside className="notion-detail" style={{ border: 'none', height: '100%', padding: '0 24px 40px' }}>
-              {view === "outbox" ? (
-                <p className="empty-state" style={{ marginTop: '20px' }}>Outbox displays email/WhatsApp notification logs for admins and vendors.</p>
-              ) : null}
-              {view !== "outbox" && selectedVendor ? (
-                <>
-                  <div className="drawer-tabs">
-                    <button 
-                      className={`drawer-tab ${detailMode === "summary" ? "active" : ""}`} 
-                      onClick={() => setDetailMode("summary")}
+          {isDrawerOpen && selectedVendor && (
+            <div className="detail-modal-backdrop" onClick={() => setIsDrawerOpen(false)}>
+              <div className="panel detail-panel detail-modal-card" onClick={(event) => event.stopPropagation()}>
+                <div className="detail-head">
+                  <div>
+                    <p className="panel-kicker">{primaryType(selectedVendor)}</p>
+                    <h2>{formatVendorName(selectedVendor.name)}</h2>
+                    <p className="detail-client">{selectedVendor.classification} · Score {vendorScore(selectedVendor)}</p>
+                  </div>
+                  <div className="action-row">
+                    <div className={`status-pill tone-${statusTone(selectedVendor.reviewStatus)}`}>
+                      {reviewStatusLabel(locale, selectedVendor.reviewStatus)}
+                    </div>
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() => {
+                        setEditVendorFormData(selectedVendor);
+                        setIsEditVendorModalOpen(true);
+                      }}
                     >
-                      Summary
+                      Edit Vendor
                     </button>
-                    <button 
-                      className={`drawer-tab ${detailMode === "operations" ? "active" : ""}`} 
-                      onClick={() => setDetailMode("operations")}
-                    >
-                      Operations
+                    <button type="button" className="ghost-button" onClick={() => setIsDrawerOpen(false)}>
+                      Close
                     </button>
                   </div>
+                </div>
 
-                  {detailMode === "operations" && (
-                    <div className="detail-scroll-area">
+                <div className="detail-tabs">
+                  <button 
+                    className={`detail-tab-item ${detailMode === "overview" ? "is-active" : ""}`}
+                    onClick={() => setDetailMode("overview")}
+                  >
+                    <span>👤</span> Profile
+                  </button>
+                  <button 
+                    className={`detail-tab-item ${detailMode === "finance" ? "is-active" : ""}`}
+                    onClick={() => setDetailMode("finance")}
+                  >
+                    <span>🏦</span> Finance
+                  </button>
+                  <button 
+                    className={`detail-tab-item ${detailMode === "docs" ? "is-active" : ""}`}
+                    onClick={() => setDetailMode("docs")}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}><Files size={14} /></span> Docs
+                  </button>
+                  <button 
+                    className={`detail-tab-item ${detailMode === "ops" ? "is-active" : ""}`}
+                    onClick={() => setDetailMode("ops")}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}><Settings size={14} /></span> Operations
+                  </button>
+                  <button 
+                    className={`detail-tab-item ${detailMode === "audit" ? "is-active" : ""}`}
+                    onClick={() => setDetailMode("audit")}
+                  >
+                    <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}><History size={14} /></span> Audit
+                  </button>
+                </div>
+
+                <div className="detail-body-paginated">
+                  {detailMode === "overview" && (
+                    <div className="tab-content-fade">
                       <section className="detail-card">
                         <div className="detail-card-header">
-                          <h3>📈 Performance & Rating</h3>
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={18} /> Kontak & Identitas</h3>
+                        </div>
+                        <div className="detail-card-content">
+                          <div className="detail-row">
+                            <span className="detail-label">Nama PIC</span>
+                            <span className="detail-value">{selectedVendor.contacts?.[0]?.name || "-"}</span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">WhatsApp PIC</span>
+                            <span className="detail-value">
+                              {selectedVendor.contacts?.[0]?.phone ? (
+                                <a href={`https://wa.me/${normalizePhoneToWhatsApp(selectedVendor.contacts[0].phone)}`} target="_blank" rel="noreferrer" style={{ color: 'var(--green)', fontWeight: 700 }}>
+                                  {selectedVendor.contacts[0].phone}
+                                </a>
+                              ) : "-"}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Business Email</span>
+                            <span className="detail-value">{selectedVendor.email || "-"}</span>
+                          </div>
+                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px' }}>
+                            <div style={{ width: '100%' }}>
+                              <span className="detail-label" style={{ marginBottom: '8px', display: 'block' }}>Alamat Usaha</span>
+                              <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--muted)' }}>{selectedVendor.businessAddress || "-"}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                      <section className="detail-card" style={{ marginTop: '16px' }}>
+                        <div className="detail-card-header">
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><BarChart3 size={18} /> Klasifikasi</h3>
+                        </div>
+                        <div className="detail-card-content">
+                          <div className="detail-row">
+                            <span className="detail-label">Tipe Bisnis</span>
+                            <span className={`category-pill tone-${classificationTone(selectedVendor.classification)}`}>
+                              {classificationLabel(selectedVendor.classification)}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Registration Date</span>
+                            <span className="detail-value">{formatDate(selectedVendor.sourceTimestamp, locale)}</span>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  )}
+
+                  {detailMode === "finance" && (
+                    <div className="tab-content-fade">
+                      {selectedVendor.bankName || selectedVendor.bankAccountNumber ? (
+                        <div className="banking-gradient-card">
+                          <div className="banking-header">
+                            <Landmark size={20} color="rgba(255,255,255,0.6)" />
+                            <span>PERBANKAN VENDOR</span>
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: '20px' }}>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>BANK</span>
+                              <strong style={{ fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.01em' }}>{selectedVendor.bankName || "-"}</strong>
+                            </div>
+                            <div>
+                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>NO. REKENING</span>
+                              <strong style={{ fontSize: '1.1rem', color: 'var(--blue)', fontFamily: 'var(--font-mono)' }}>{formatBankAccount(selectedVendor.bankAccountNumber!)}</strong>
+                            </div>
+                          </div>
+                          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                            <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>ATAS NAMA REKENING</span>
+                            <strong style={{ fontSize: '0.94rem', color: '#fff' }}>{selectedVendor.bankAccountHolder || "-"}</strong>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="detail-card" style={{ padding: '24px', textAlign: 'center', opacity: 0.5 }}>
+                          <p style={{ margin: 0, fontSize: '0.8rem' }}>Data rekening belum tersedia</p>
+                        </div>
+                      )}
+
+                      <section className="detail-card" style={{ marginTop: '24px' }}>
+                        <div className="detail-card-header">
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Gavel size={18} /> Legal & Pajak</h3>
+                        </div>
+                        <div className="detail-card-content">
+                          <div className="detail-row">
+                            <span className="detail-label">Status Pajak</span>
+                            <span className={`status-pill tone-${selectedVendor.taxStatus === "PKP" ? "green" : "amber"}`}>
+                              {selectedVendor.taxStatus}
+                            </span>
+                          </div>
+                          <div className="detail-row">
+                            <span className="detail-label">Legalitas Utama</span>
+                            <span className="detail-value">{selectedVendor.legalStatus}</span>
+                          </div>
+                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px' }}>
+                            <span className="detail-label">NPWP (Tax ID)</span>
+                            <span className="detail-value mono" style={{ fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
+                              {formatNPWP(selectedVendor.npwpNumber!)}
+                            </span>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  )}
+
+                  {detailMode === "docs" && (
+                    <div className="tab-content-fade">
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Files size={18} /> Dokumen & Compliance</h3>
+                          <span className={`status-pill tone-${complianceTone(selectedVendor.compliance.status)}`}>
+                            {selectedVendor.compliance.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <div className="detail-card-content">
+                          {selectedVendor.documentsFolderUrl ? (
+                            <div style={{ marginBottom: '24px' }}>
+                              <a href={selectedVendor.documentsFolderUrl} target="_blank" rel="noreferrer" className="primary-button" style={{ width: '100%', borderRadius: '12px', justifyContent: 'center', height: '42px', fontWeight: 600 }}>
+                                <FolderOpen size={16} style={{ marginRight: '8px' }} /> Buka Folder Dokumen
+                              </a>
+                            </div>
+                          ) : (
+                            <div style={{ marginBottom: '24px', padding: '16px', border: '1px dashed var(--line-strong)', borderRadius: '12px', textAlign: 'center' }}>
+                              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)' }}>Link folder dokumen belum diatur.</p>
+                            </div>
+                          )}
+
+                          <div className="detail-block">
+                            <p className="mini-meta" style={{ marginBottom: '16px' }}>Detail Checklist Dokumen:</p>
+                            <div className="task-stack compact-task-stack">
+                              {selectedVendor.compliance.items.map((item) => (
+                                <div key={item.documentType} className="task-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <span style={{ fontSize: '0.85rem' }}>{documentTypeLabel(item.documentType)}</span>
+                                  </div>
+                                  <span className={`status-pill tone-${complianceItemTone(item.status)}`} style={{ fontSize: '0.65rem' }}>
+                                    {item.status.toUpperCase()}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </section>
+                    </div>
+                  )}
+
+                  {detailMode === "ops" && (
+                    <div className="tab-content-fade">
+                      <section className="detail-card">
+                        <div className="detail-card-header">
+                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={18} /> Performance & Rating</h3>
                           <button 
                             className="primary-button" 
                             onClick={handleScorecardSave} 
@@ -1201,12 +1432,11 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                         </div>
                       </section>
                       
-                      <section className="detail-card">
+                      <section className="detail-card" style={{ marginTop: '16px' }}>
                         <div className="detail-card-header">
-                          <h3>📋 Internal Admin & Review</h3>
+                          <h3>📋 Review Status</h3>
                         </div>
                         <div className="detail-card-content">
-                          {/* Review Controls */}
                           <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
                             <select 
                               value={reviewStatus} 
@@ -1218,26 +1448,23 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                               ))}
                             </select>
                             <button className="primary-button" onClick={handleReviewSave} disabled={reviewPending} style={{ borderRadius: '8px' }}>
-                              {reviewPending ? "..." : "Update Status"}
+                              {reviewPending ? "..." : "Update"}
                             </button>
                           </div>
                           <textarea 
                             value={reviewNote} 
                             onChange={(event) => setReviewNote(event.target.value)} 
                             placeholder="Tinggalkan catatan review internal..." 
-                            style={{ width: '100%', minHeight: '80px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '12px', fontSize: '0.82rem', marginBottom: '16px' }}
+                            style={{ width: '100%', minHeight: '80px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '12px', fontSize: '0.82rem' }}
                           />
-
-                          {/* Revision Request Section is still handled inside here or separately, but we keep it inside for now based on previous structure */}
-                          {/* Note: I'll actually keep the original revision logic but style it as a sub-section if possible, or just style the cards around it. */}
                         </div>
                       </section>
 
-                      <section className="detail-card" style={{ marginBottom: '40px' }}>
+                      <section className="detail-card" style={{ marginTop: '16px' }}>
                         <div className="detail-card-header">
-                          <h3>📒 Catatan Internal & Capacity</h3>
+                          <h3>📒 Internal Notes & Capacity</h3>
                           <button className="ghost-button" onClick={handleOpsProfileSave} disabled={opsPending} style={{ fontSize: '0.65rem', padding: '4px 10px', height: 'auto' }}>
-                            {opsPending ? "..." : "Save Notes"}
+                            {opsPending ? "..." : "Save"}
                           </button>
                         </div>
                         <div className="detail-card-content">
@@ -1250,174 +1477,52 @@ const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filte
                       </section>
                     </div>
                   )}
-                  
-                  {detailMode === "summary" && (
-                    <div className="detail-scroll-area" style={{ display: 'grid', gap: '8px' }}>
 
-                      {/* ══ PREMIUM CARD: PERBANKAN ══ */}
-                      {selectedVendor.bankName || selectedVendor.bankAccountNumber ? (
-                        <div className="banking-gradient-card">
-                          <div className="banking-header">
-                            <span style={{ fontSize: '1.2rem' }}>🏦</span>
-                            <span>PERBANKAN VENDOR</span>
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: '20px' }}>
-                            <div>
-                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>BANK</span>
-                              <strong style={{ fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.01em' }}>{selectedVendor.bankName || "-"}</strong>
-                            </div>
-                            <div>
-                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>NO. REKENING</span>
-                              <strong style={{ fontSize: '1.1rem', color: 'var(--blue)', fontFamily: 'var(--font-mono)' }}>{formatBankAccount(selectedVendor.bankAccountNumber!)}</strong>
-                            </div>
-                          </div>
-                          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                            <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>ATAS NAMA REKENING</span>
-                            <strong style={{ fontSize: '0.94rem', color: '#fff' }}>{selectedVendor.bankAccountHolder || "-"}</strong>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="detail-card" style={{ padding: '24px', textAlign: 'center', opacity: 0.5 }}>
-                          <p style={{ margin: 0, fontSize: '0.8rem' }}>Data rekening belum tersedia</p>
-                        </div>
-                      )}
-
-                      {/* ══ CARD: KONTAK & IDENTITAS ══ */}
+                  {detailMode === "audit" && (
+                    <div className="tab-content-fade">
                       <section className="detail-card">
                         <div className="detail-card-header">
-                          <h3>👤 Kontak & Identitas</h3>
+                          <h3>📝 Audit Trail</h3>
                         </div>
                         <div className="detail-card-content">
-                          <div className="detail-row">
-                            <span className="detail-label">Nama PIC</span>
-                            <span className="detail-value">{selectedVendor.contacts?.[0]?.name || "-"}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">WhatsApp PIC</span>
-                            <span className="detail-value">
-                              {selectedVendor.contacts?.[0]?.phone ? (
-                                <a href={`https://wa.me/${normalizePhoneToWhatsApp(selectedVendor.contacts[0].phone)}`} target="_blank" rel="noreferrer" style={{ color: 'var(--green)', fontWeight: 700 }}>
-                                  {selectedVendor.contacts[0].phone}
-                                </a>
-                              ) : "-"}
-                            </span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Business Email</span>
-                            <span className="detail-value">{selectedVendor.email || "-"}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">NPWP (Tax ID)</span>
-                            <span className="detail-value mono" style={{ fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
-                              {formatNPWP(selectedVendor.npwpNumber!)}
-                            </span>
-                          </div>
-                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px' }}>
-                            <div style={{ width: '100%' }}>
-                              <span className="detail-label" style={{ marginBottom: '8px', display: 'block' }}>Alamat Usaha</span>
-                              <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--muted)' }}>{selectedVendor.businessAddress || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
-
-                      {/* ══ CARD: KLASIFIKASI ══ */}
-                      <section className="detail-card">
-                        <div className="detail-card-header">
-                          <h3>📊 Klasifikasi & Status</h3>
-                          <em className={`category-pill tone-${classificationTone(selectedVendor.classification)}`}>
-                            {classificationLabel(selectedVendor.classification)}
-                          </em>
-                        </div>
-                        <div className="detail-card-content">
-                          <div className="detail-row">
-                            <span className="detail-label">Status Pajak</span>
-                            <span className={`status-pill tone-${selectedVendor.taxStatus === "PKP" ? "green" : "amber"}`}>
-                              {selectedVendor.taxStatus}
-                            </span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Legalitas Utama</span>
-                            <span className="detail-value">{selectedVendor.legalStatus}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Registration Date</span>
-                            <span className="detail-value">{formatDate(selectedVendor.sourceTimestamp, locale)}</span>
-                          </div>
-                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span className="detail-label">Review Status</span>
-                            <span className={`status-pill tone-${statusTone(selectedVendor.reviewStatus)}`}>
-                              {reviewStatusLabel(locale, selectedVendor.reviewStatus)}
-                            </span>
-                          </div>
-                        </div>
-                      </section>
-
-                      {/* ══ CARD: DOKUMEN ══ */}
-                      <section className="detail-card">
-                        <div className="detail-card-header">
-                          <h3>📁 Dokumen & Compliance</h3>
-                          <span className={`status-pill tone-${complianceTone(selectedVendor.compliance.status)}`}>
-                            {selectedVendor.compliance.status.toUpperCase()}
-                          </span>
-                        </div>
-                        <div className="detail-card-content">
-                          {selectedVendor.documentsFolderUrl ? (
-                            <div style={{ marginBottom: '20px' }}>
-                              <a href={selectedVendor.documentsFolderUrl} target="_blank" rel="noreferrer" className="primary-button" style={{ width: '100%', borderRadius: '12px', justifyContent: 'center', height: '42px', fontWeight: 600 }}>
-                                📂 Buka Folder Dokumen
-                              </a>
-                            </div>
-                          ) : (
-                            <div style={{ marginBottom: '16px', padding: '12px', border: '1px dashed var(--line-strong)', borderRadius: '12px', textAlign: 'center' }}>
-                              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)' }}>Link folder dokumen tidak dilampirkan</p>
-                            </div>
-                          )}
-                          {/* Compliance items list removed as per user request */}
-                        </div>
-                      </section>
-
-                      {/* ══ AUDIT & SOCIAL ══ */}
-                      <section className="detail-card" style={{ marginBottom: '40px' }}>
-                        <div className="detail-card-header" onClick={() => setShowAuditLog(!showAuditLog)} style={{ cursor: 'pointer' }}>
-                          <h3>📝 Audit Trail & Medsos</h3>
-                          <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>{showAuditLog ? '▼' : '▶'}</span>
-                        </div>
-                        {showAuditLog && (
-                          <div className="detail-card-content">
-                            {socialLinks.length > 0 && (
-                              <div className="notion-links" style={{ marginBottom: '20px' }}>
-                                {socialLinks.map((item) => (
-                                  <a href={item.url} key={item.label} rel="noreferrer" target="_blank" className="detail-row" style={{ textDecoration: 'none' }}>
-                                    <span className="detail-label">{item.label}</span>
-                                    <strong className="detail-value" style={{ color: 'var(--blue)' }}>{shortLinkLabel(item.url)}</strong>
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-                            <div className="audit-list" style={{ display: 'grid', gap: '12px' }}>
-                              {selectedVendor.auditLog.map((entry) => (
-                                <div key={entry.id} style={{ padding: '10px', background: 'var(--panel-soft)', borderRadius: '8px', fontSize: '0.75rem' }}>
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                    <strong>{entry.action}</strong>
-                                    <span style={{ color: 'var(--muted-soft)' }}>{formatDate(entry.createdAt, locale)}</span>
-                                  </div>
-                                  <p style={{ margin: 0, color: 'var(--muted)' }}>{entry.message}</p>
-                                  <small style={{ marginTop: '4px', display: 'block', opacity: 0.6 }}>Oleh: {entry.actor}</small>
+                          <div className="audit-list" style={{ display: 'grid', gap: '12px' }}>
+                            {selectedVendor.auditLog.map((entry) => (
+                              <div key={entry.id} style={{ padding: '10px', background: 'var(--panel-soft)', borderRadius: '8px', fontSize: '0.75rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                                  <strong>{entry.action}</strong>
+                                  <span style={{ color: 'var(--muted-soft)' }}>{formatDate(entry.createdAt, locale)}</span>
                                 </div>
+                                <p style={{ margin: 0, color: 'var(--muted)' }}>{entry.message}</p>
+                                <small style={{ marginTop: '4px', display: 'block', opacity: 0.6 }}>Oleh: {entry.actor}</small>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </section>
+
+                      {socialLinks.length > 0 && (
+                        <section className="detail-card" style={{ marginTop: '16px' }}>
+                          <div className="detail-card-header">
+                            <h3>🌐 Social Media & Links</h3>
+                          </div>
+                          <div className="detail-card-content">
+                            <div className="notion-links">
+                              {socialLinks.map((item) => (
+                                <a href={item.url} key={item.label} rel="noreferrer" target="_blank" className="detail-row" style={{ textDecoration: 'none' }}>
+                                  <span className="detail-label">{item.label}</span>
+                                  <strong className="detail-value" style={{ color: 'var(--blue)' }}>{shortLinkLabel(item.url)}</strong>
+                                </a>
                               ))}
                             </div>
                           </div>
-                        )}
-                      </section>
+                        </section>
+                      )}
                     </div>
                   )}
-                </>
-              ) : (
-                <p className="empty-state" style={{ marginTop: '40px' }}>{view === "outbox" ? "Pilih vendor view lain untuk melihat detail." : t(locale, "selectVendor")}</p>
-              )}
-            </aside>
-          </Drawer>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

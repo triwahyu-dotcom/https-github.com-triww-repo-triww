@@ -1,6 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { 
+  X, 
+  Trash2, 
+  ArrowRight, 
+  ArrowLeft, 
+  AlertTriangle, 
+  Plus 
+} from "lucide-react";
 import { ProjectRecord } from "@/lib/project/types";
 import { ExpenseDocument } from "@/lib/finance/types";
 import { formatCurrencyIDR } from "@/lib/utils/format";
@@ -140,7 +148,7 @@ export function CashAdvanceModal({ activeProjects, availableVendors = [], editDo
             <h2 style={{ margin: 0, fontSize: "20px" }}>Permohonan Cash Advance</h2>
             <p className="mini-meta" style={{ marginTop: "4px" }}>Pengajuan uang muka operasional untuk kegiatan/event</p>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", fontSize: "24px", color: "var(--muted)", cursor: "pointer" }}>&times;</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--muted)", cursor: "pointer", display: 'flex', alignItems: 'center' }}><X size={24} /></button>
         </div>
 
         <div style={{ padding: "32px" }}>
@@ -158,7 +166,7 @@ export function CashAdvanceModal({ activeProjects, availableVendors = [], editDo
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px" }}>
                 <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
-                <button onClick={() => setStep(2)} disabled={!selectedProject} className="primary-button">Lanjut →</button>
+                <button onClick={() => setStep(2)} disabled={!selectedProject} className="primary-button" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>Lanjut <ArrowRight size={16} /></button>
               </div>
             </div>
           )}
@@ -247,11 +255,11 @@ export function CashAdvanceModal({ activeProjects, availableVendors = [], editDo
                   <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr auto auto", gap: "8px", alignItems: "center" }}>
                     <input value={line.description} onChange={e => updateLine(idx, "description", e.target.value)} placeholder={`Kebutuhan ${idx + 1}...`} style={{ background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "9px 12px", color: "var(--text)", borderRadius: "8px" }} />
                     <input type="number" value={line.amount || ""} onChange={e => updateLine(idx, "amount", e.target.value)} placeholder="Nominal" style={{ width: "140px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "9px 12px", color: "var(--text)", borderRadius: "8px" }} />
-                    <button onClick={() => removeLine(idx)} style={{ background: "rgba(239,68,68,0.1)", border: "none", borderRadius: "6px", color: "#f87171", cursor: "pointer", padding: "9px 12px" }}>✕</button>
+                    <button onClick={() => removeLine(idx)} style={{ background: "rgba(239,68,68,0.1)", border: "none", borderRadius: "6px", color: "#f87171", cursor: "pointer", padding: "9px 12px", display: 'flex', alignItems: 'center' }}><Trash2 size={16} /></button>
                   </div>
                 ))}
               </div>
-              <button onClick={addLine} style={{ background: "rgba(91,140,255,0.1)", border: "1px dashed var(--blue)", borderRadius: "8px", color: "var(--blue)", cursor: "pointer", padding: "8px 20px", width: "100%", fontSize: "12px", marginBottom: "20px" }}>+ Tambah Item</button>
+              <button onClick={addLine} style={{ background: "rgba(91,140,255,0.1)", border: "1px dashed var(--blue)", borderRadius: "8px", color: "var(--blue)", cursor: "pointer", padding: "8px 20px", width: "100%", fontSize: "12px", marginBottom: "20px", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}><Plus size={14} /> Tambah Item</button>
 
               {/* Total */}
               <div style={{ padding: "16px 20px", background: "rgba(91,140,255,0.06)", border: "1px solid rgba(91,140,255,0.2)", borderRadius: "10px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
@@ -262,12 +270,13 @@ export function CashAdvanceModal({ activeProjects, availableVendors = [], editDo
                 <div style={{ fontSize: "24px", fontWeight: 700, color: "var(--blue)" }}>{formatCurrencyIDR(total)}</div>
               </div>
 
-              <div style={{ padding: "10px 14px", background: "rgba(234,179,8,0.08)", borderRadius: "8px", border: "1px solid rgba(234,179,8,0.2)", fontSize: "12px", color: "#ca8a04", marginBottom: "24px" }}>
-                ⚠️ Cash Advance perlu persetujuan Director. Penyelesaian (settlement) wajib dilakukan maksimal <strong>5 hari setelah event</strong> disertai nota/kwitansi.
+              <div style={{ padding: "10px 14px", background: "rgba(234,179,8,0.08)", borderRadius: "8px", border: "1px solid rgba(234,179,8,0.2)", fontSize: "12px", color: "#ca8a04", marginBottom: "24px", display: 'flex', gap: '10px' }}>
+                <AlertTriangle size={18} style={{ flexShrink: 0 }} />
+                <span>Cash Advance perlu persetujuan Director. Penyelesaian (settlement) wajib dilakukan maksimal <strong>5 hari setelah event</strong> disertai nota/kwitansi.</span>
               </div>
 
               <div style={{ display: "flex", justifyContent: "space-between", gap: "12px" }}>
-                <button onClick={() => setStep(1)} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>← Kembali</button>
+                <button onClick={() => setStep(1)} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer", display: 'flex', alignItems: 'center', gap: '8px' }}><ArrowLeft size={16} /> Kembali</button>
                 <div style={{ display: "flex", gap: "12px" }}>
                   <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
                   <button onClick={handleSubmit} disabled={isSubmitting || total === 0 || !payTo} className="primary-button">

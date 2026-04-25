@@ -7,6 +7,21 @@ import { WorkspaceShell } from "../layout/workspace-shell";
 import { SummaryCard } from "../ui/summary-card";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 
+import { 
+  ClipboardList, 
+  Clock, 
+  CheckCircle2, 
+  Wallet, 
+  FileText, 
+  CreditCard, 
+  AlertTriangle, 
+  Eye, 
+  Undo2,
+  Plus,
+  Printer,
+  Edit
+} from "lucide-react";
+
 import { POCreatorModal } from "./po-creator-modal";
 import { CashAdvanceModal } from "./cash-advance-modal";
 import { RfpFromDocModal } from "./rfp-from-doc-modal";
@@ -18,6 +33,7 @@ interface Props {
   initialData: FinanceDashboardData;
   activeProjects: ProjectRecord[];
   availableVendors?: any[];
+  availableFreelancers?: any[];
 }
 
 const docTypeLabel: Record<string, string> = {
@@ -46,7 +62,7 @@ const statusLabels: Record<string, string> = {
   settled: "SETTLED",
 };
 
-export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [] }: Props) {
+export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [], availableFreelancers = [] }: Props) {
   const [activeTab, setActiveTab] = useState<"docs" | "rfps">("docs");
   const [showPOModal, setShowPOModal] = useState(false);
   const [showCAModal, setShowCAModal] = useState(false);
@@ -90,8 +106,12 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
 
   const headerActions = (
     <div className="workspace-actions" style={{ display: "flex", gap: "10px" }}>
-      <button className="secondary-button" onClick={() => setShowCAModal(true)}>+ Cash Advance</button>
-      <button className="primary-button" onClick={() => setShowPOModal(true)}>+ New PO / SPK / Kontrak</button>
+      <button className="secondary-button" onClick={() => setShowCAModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <Plus size={16} /> Cash Advance
+      </button>
+      <button className="primary-button" onClick={() => setShowPOModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <Plus size={16} /> New PO / SPK / Kontrak
+      </button>
     </div>
   );
 
@@ -103,19 +123,19 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
     >
       {/* Summary Cards */}
       <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px" }}>
-        <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon="📋" />
-        <SummaryCard label="Menunggu Approve" value={String(pendingApprovalDocs.length)} description="Belum ditandatangani Director" icon="⏳" />
-        <SummaryCard label="Siap Buat RFP" value={String(readyForRfpDocs.length)} description="Submitted/Approved, belum ada RFP" icon="✅" />
-        <SummaryCard label="Total Nilai Dokumen" value={formatCurrencyIDR(totalDocValue)} description="Semua dokumen aktif" icon="💰" />
+        <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon={<ClipboardList size={18} />} />
+        <SummaryCard label="Menunggu Approve" value={String(pendingApprovalDocs.length)} description="Belum ditandatangani Director" icon={<Clock size={18} />} />
+        <SummaryCard label="Siap Buat RFP" value={String(readyForRfpDocs.length)} description="Submitted/Approved, belum ada RFP" icon={<CheckCircle2 size={18} />} />
+        <SummaryCard label="Total Nilai Dokumen" value={formatCurrencyIDR(totalDocValue)} description="Semua dokumen aktif" icon={<Wallet size={18} />} />
       </section>
 
       {/* Tabs */}
       <div style={{ display: "flex", gap: "2px", marginBottom: "16px", background: "var(--panel-soft)", padding: "3px", borderRadius: "8px", width: "fit-content", border: "1px solid var(--line)" }}>
-        <button onClick={() => setActiveTab("docs")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)" }}>
-          📄 Dokumen Pengadaan ({docs.length})
+        <button onClick={() => setActiveTab("docs")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)", display: "flex", alignItems: "center", gap: "8px" }}>
+          <FileText size={16} /> Dokumen Pengadaan ({docs.length})
         </button>
-        <button onClick={() => setActiveTab("rfps")} style={{ padding: "8px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "13px", background: activeTab === "rfps" ? "var(--panel)" : "transparent", color: activeTab === "rfps" ? "var(--text)" : "var(--muted)", boxShadow: activeTab === "rfps" ? "0 1px 3px rgba(0,0,0,0.2)" : "none" }}>
-          💳 RFP Tracking ({rfps.length})
+        <button onClick={() => setActiveTab("rfps")} style={{ padding: "8px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "13px", background: activeTab === "rfps" ? "var(--panel)" : "transparent", color: activeTab === "rfps" ? "var(--text)" : "var(--muted)", boxShadow: activeTab === "rfps" ? "0 1px 3px rgba(0,0,0,0.2)" : "none", display: "flex", alignItems: "center", gap: "8px" }}>
+          <CreditCard size={16} /> RFP Tracking ({rfps.length})
         </button>
       </div>
 
@@ -123,11 +143,9 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
       {activeTab === "docs" && (
         <div className="panel">
           <div className="panel-kicker">Semua Dokumen Pengadaan</div>
-          {pendingApprovalDocs.length > 0 && (
-            <div style={{ margin: "10px 0", padding: "10px 14px", background: "rgba(99,102,241,0.05)", border: "1px solid var(--line-strong)", borderRadius: "6px", fontSize: "12px", color: "var(--blue)" }}>
-              ⏳ {pendingApprovalDocs.length} dokumen menunggu approval dari Director
+            <div style={{ margin: "10px 0", padding: "10px 14px", background: "rgba(99,102,241,0.05)", border: "1px solid var(--line-strong)", borderRadius: "6px", fontSize: "12px", color: "var(--blue)", display: "flex", alignItems: "center", gap: "8px" }}>
+              <Clock size={14} /> <span>{pendingApprovalDocs.length} dokumen menunggu approval dari Director</span>
             </div>
-          )}
           <FilterBar items={docs} type="docs" onFilter={handleFilterDocs} />
 
           <div className="table-shell" style={{ marginTop: "16px" }}>
@@ -142,7 +160,9 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
               </div>
               {filteredDocs.length === 0 ? (
                 <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-                  <div style={{ fontSize: "24px", marginBottom: "12px" }}>📄</div>
+                  <div style={{ display: "grid", placeItems: "center", marginBottom: "12px", opacity: 0.2 }}>
+                    <FileText size={48} />
+                  </div>
                   Tidak ada dokumen yang sesuai dengan filter.
                 </div>
               ) : filteredDocs.map(doc => (
@@ -161,11 +181,9 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                     <span className={`status-pill ${statusColors[doc.status] || "tone-amber"}`}>
                       {statusLabels[doc.status] || doc.status.toUpperCase()}
                     </span>
-                    {doc.rejectionReason && (
                       <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
-                        ⚠️ {doc.rejectionReason}
+                        <AlertTriangle size={10} /> {doc.rejectionReason}
                       </div>
-                    )}
                     {doc.status === "draft" && (
                       <button
                         onClick={() => {
@@ -176,7 +194,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         className="secondary-button"
                         style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
                       >
-                        Edit & Fix
+                        <Edit size={12} /> Edit & Fix
                       </button>
                     )}
                     {(doc.status === "pending_finance" || doc.status === "pending_c_level") && (
@@ -190,7 +208,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         className="secondary-button"
                         style={{ fontSize: "10px", height: "24px", padding: "0 8px" }}
                       >
-                        ↩ Tarik
+                        <Undo2 size={12} /> Tarik
                       </button>
                     )}
                     {(doc.status === "approved" || doc.status === "pending_finance" || doc.status === "pending_c_level") && (() => {
@@ -201,8 +219,8 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       return (
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
                           {docRfps.length > 0 && (
-                            <span className="mini-meta" style={{ color: isFullyRequested ? "var(--green)" : "var(--blue)" }}>
-                              {isFullyRequested ? "✓ Lunas" : `${docRfps.length} RFP Dibuat`}
+                            <span className="mini-meta" style={{ color: isFullyRequested ? "var(--green)" : "var(--blue)", display: "flex", alignItems: "center", gap: "4px" }}>
+                              {isFullyRequested ? <><CheckCircle2 size={12} /> Lunas</> : <><FileText size={12} /> {docRfps.length} RFP Dibuat</>}
                             </span>
                           )}
                           {!isFullyRequested && (
@@ -219,10 +237,10 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                     })()}
                     <button
                       className="secondary-button"
-                      style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto" }}
+                      style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: "flex", alignItems: "center", gap: "4px" }}
                       onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")}
                     >
-                      Print
+                      <Printer size={12} /> Print
                     </button>
                   </div>
                 </div>
@@ -249,7 +267,9 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
               </div>
               {filteredRfps.length === 0 ? (
                 <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-                  <div style={{ fontSize: "24px", marginBottom: "12px" }}>💳</div>
+                  <div style={{ display: "grid", placeItems: "center", marginBottom: "12px", opacity: 0.2 }}>
+                    <CreditCard size={48} />
+                  </div>
                   Tidak ada RFP yang sesuai dengan filter.
                 </div>
               ) : filteredRfps.map(rfp => (
@@ -267,18 +287,16 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       }`}>
                       {statusLabels[rfp.status] || rfp.status.replace(/_/g, " ").toUpperCase()}
                     </span>
-                    {rfp.rejectionReason && (
                       <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
-                        ⚠️ {rfp.rejectionReason}
+                        <AlertTriangle size={10} /> {rfp.rejectionReason}
                       </div>
-                    )}
                     {rfp.status === "draft" && (
                       <button
                         onClick={() => setEditRfpData(rfp)}
                         className="secondary-button"
                         style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
                       >
-                        Edit & Fix
+                        <Edit size={12} /> Edit & Fix
                       </button>
                     )}
                     {(rfp.status === "pending_c_level" || rfp.status === "pending_finance") && (
@@ -292,7 +310,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         className="secondary-button"
                         style={{ fontSize: "10px", height: "24px", padding: "0 8px" }}
                       >
-                        ↩ Tarik
+                        <Undo2 size={12} /> Tarik
                       </button>
                     )}
                     {rfp.paymentProofUrl && (
@@ -301,12 +319,12 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)" }}
                         onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
                       >
-                        👁️ Bukti
+                        <Eye size={12} /> Bukti
                       </button>
                     )}
 
-                    <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto" }} onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")}>
-                      Print
+                    <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: "flex", alignItems: "center", gap: "4px" }} onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")}>
+                      <Printer size={12} /> Print
                     </button>
                   </div>
                 </div>
@@ -321,6 +339,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
         <POCreatorModal
           activeProjects={activeProjects}
           availableVendors={availableVendors}
+          availableFreelancers={availableFreelancers}
           editDoc={editDocData && editDocData.documentType !== "CASH_ADVANCE" ? editDocData : undefined}
           onClose={() => { setShowPOModal(false); setEditDocData(null); }}
           onSuccess={() => { setShowPOModal(false); setEditDocData(null); reload(); }}

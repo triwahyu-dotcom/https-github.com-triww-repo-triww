@@ -1,0 +1,25 @@
+export const POSISI_LIST = [
+  "Project Manager",
+  "Project Officer",
+  "Production Head",
+  "Production",
+  "Logistic Head",
+  "Logistik Team",
+  "Operator",
+  "Show Management",
+  "Design",
+  "Talent LO PIC",
+  "Talent LO Team",
+  "Aksi & Runner",
+  "VIP Handling Coordinator",
+  "Floor Crew",
+  "Kepesertaan",
+  "Crowd Control",
+  "Crew Gate",
+  "Parkir",
+  "Kebersihan",
+  "Usher",
+  "Other",
+] as const;
+
+export type Posisi = typeof POSISI_LIST[number];

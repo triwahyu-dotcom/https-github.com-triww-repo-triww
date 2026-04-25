@@ -1,6 +1,25 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { 
+  FileText, 
+  CreditCard, 
+  CheckCircle2, 
+  History, 
+  PenTool, 
+  Check, 
+  AlertCircle, 
+  Sparkles, 
+  Eye, 
+  ArrowRight, 
+  ShieldCheck,
+  ChevronRight,
+  Printer,
+  FileDown,
+  X,
+  Receipt,
+  XCircle
+} from "lucide-react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
 import { SummaryCard } from "../ui/summary-card";
@@ -51,6 +70,15 @@ export function DirectorApprovals({ initialData }: Props) {
   const handleFilterRfps = useCallback((items: RequestForPayment[]) => {
     setFilteredRfps(items);
   }, []);
+
+  const historyItems = useMemo(() => [...historyDocs, ...historyRfps], [historyDocs, historyRfps]);
+
+  const handleFilterHistory = useCallback((items: (ExpenseDocument | RequestForPayment)[]) => {
+    const d = items.filter(i => 'issueDate' in i) as ExpenseDocument[];
+    const r = items.filter(i => !('issueDate' in i)) as RequestForPayment[];
+    handleFilterDocs(d);
+    handleFilterRfps(r);
+  }, [handleFilterDocs, handleFilterRfps]);
 
   const handleApproveDoc = async () => {
     if (!selectedDoc) return;
@@ -112,7 +140,7 @@ export function DirectorApprovals({ initialData }: Props) {
         </p>
       </div>
       <div style={{ flex: 1, border: "2px dashed var(--line-strong)", borderRadius: "12px", background: "var(--panel-soft)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px", minHeight: "240px" }}>
-        <div style={{ fontSize: "36px", opacity: 0.1, marginBottom: "12px" }}>🖋️</div>
+        <div style={{ opacity: 0.1, marginBottom: "12px" }}><PenTool size={48} /></div>
         <div style={{ color: "var(--blue)", fontSize: "28px", fontFamily: "Georgia, serif", fontStyle: "italic", textAlign: "center" }}>
           Eka Marutha Yuswardana
         </div>
@@ -124,8 +152,8 @@ export function DirectorApprovals({ initialData }: Props) {
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-        <button onClick={onSign} disabled={isSigning} className="primary-button" style={{ width: "100%", height: "46px", fontSize: "14px", fontWeight: 600 }}>
-          {isSigning ? "Memproses..." : `✓ Tanda Tangan & Setujui ${label}`}
+        <button onClick={onSign} disabled={isSigning} className="primary-button" style={{ width: "100%", height: "46px", fontSize: "14px", fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          {isSigning ? "Memproses..." : <><Check size={18} /> Tanda Tangan & Setujui {label}</>}
         </button>
         <button onClick={onReject} style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.2)", height: "40px", borderRadius: "8px", color: "#f87171", fontSize: "13px", cursor: "pointer" }}>
           Tolak / Kembalikan
@@ -140,21 +168,21 @@ export function DirectorApprovals({ initialData }: Props) {
       eyebrow="C-Level Workspace"
       actions={null}
     >
-      <section className="summary-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "24px" }}>
-        <SummaryCard label="Dokumen Menunggu" value={String(pendingDocs.length)} description="PO/SPK/Kontrak/CA perlu tanda tangan" icon="📄" />
-        <SummaryCard label="RFP Menunggu" value={String(pendingRfps.length)} description="Permintaan pembayaran perlu otorisasi" icon="💳" />
-        <SummaryCard label="Riwayat Otorisasi" value={String(historyDocs.length + historyRfps.length)} description="Dokumen yang telah dirilis" icon="✅" />
+      <section className="summary-grid" style={{ gridTemplateColumns: "repeat(3, 1fr)", marginBottom: "24px", display: 'grid', gap: '16px' }}>
+        <SummaryCard label="Dokumen Menunggu" value={String(pendingDocs.length)} description="PO/SPK/Kontrak/CA perlu tanda tangan" icon={<FileText size={18} />} />
+        <SummaryCard label="RFP Menunggu" value={String(pendingRfps.length)} description="Permintaan pembayaran perlu otorisasi" icon={<CreditCard size={18} />} />
+        <SummaryCard label="Riwayat Otorisasi" value={String(historyDocs.length + historyRfps.length)} description="Dokumen yang telah dirilis" icon={<CheckCircle2 size={18} />} />
       </section>
 
       <div style={{ display: "flex", gap: "2px", marginBottom: "16px", background: "var(--panel-soft)", padding: "3px", borderRadius: "8px", width: "fit-content", border: "1px solid var(--line)" }}>
-        <button onClick={() => setActiveTab("docs")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)" }}>
-          📄 Approve Dokumen {pendingDocs.length > 0 && <span style={{ background: "var(--blue)", color: "white", borderRadius: "99px", padding: "1px 6px", fontSize: "10px", marginLeft: "6px" }}>{pendingDocs.length}</span>}
+        <button onClick={() => setActiveTab("docs")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)", display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <FileText size={14} /> Approve Dokumen {pendingDocs.length > 0 && <span style={{ background: "var(--blue)", color: "white", borderRadius: "99px", padding: "1px 6px", fontSize: "10px", marginLeft: "6px" }}>{pendingDocs.length}</span>}
         </button>
-        <button onClick={() => setActiveTab("rfps")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "rfps" ? "var(--panel)" : "transparent", color: activeTab === "rfps" ? "var(--text)" : "var(--muted)" }}>
-          💳 Otorisasi RFP {pendingRfps.length > 0 && <span style={{ background: "var(--blue)", color: "white", borderRadius: "99px", padding: "1px 6px", fontSize: "10px", marginLeft: "6px" }}>{pendingRfps.length}</span>}
+        <button onClick={() => setActiveTab("rfps")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "rfps" ? "var(--panel)" : "transparent", color: activeTab === "rfps" ? "var(--text)" : "var(--muted)", display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <CreditCard size={14} /> Otorisasi RFP {pendingRfps.length > 0 && <span style={{ background: "var(--blue)", color: "white", borderRadius: "99px", padding: "1px 6px", fontSize: "10px", marginLeft: "6px" }}>{pendingRfps.length}</span>}
         </button>
-        <button onClick={() => setActiveTab("history")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "history" ? "var(--panel)" : "transparent", color: activeTab === "history" ? "var(--text)" : "var(--muted)" }}>
-          🕒 History Otorisasi
+        <button onClick={() => setActiveTab("history")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "history" ? "var(--panel)" : "transparent", color: activeTab === "history" ? "var(--text)" : "var(--muted)", display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <History size={14} /> History Otorisasi
         </button>
       </div>
 
@@ -176,7 +204,7 @@ export function DirectorApprovals({ initialData }: Props) {
               </div>
               {filteredDocs.length === 0 ? (
                 <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-                  <div style={{ fontSize: "24px", marginBottom: "12px" }}>🎉</div>
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px', opacity: 0.3 }}><Sparkles size={32} /></div>
                   Tidak ada dokumen yang sesuai filter.
                 </div>
               ) : filteredDocs.map(doc => (
@@ -221,7 +249,7 @@ export function DirectorApprovals({ initialData }: Props) {
                </div>
                {filteredRfps.length === 0 ? (
                  <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-                   <div style={{ fontSize: "24px", marginBottom: "12px" }}>🎉</div>
+                   <div style={{ fontSize: "24px", marginBottom: "12px" }}><Sparkles size={32} /></div>
                    Tidak ada RFP yang sesuai filter.
                  </div>
                ) : filteredRfps.map(rfp => (
@@ -304,8 +332,8 @@ export function DirectorApprovals({ initialData }: Props) {
                 {selectedDoc.documentType === "CASH_ADVANCE" && (() => {
                   const linkedRfp = initialData.rfps?.find(r => r.documentIds?.includes(selectedDoc.id));
                   if (!linkedRfp) return (
-                    <div style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "12px", padding: "12px", marginTop: "16px", color: "#f87171", fontSize: "12px", textAlign: "center" }}>
-                      ⚠️ RFP belum dibuat untuk Cash Advance ini.
+                    <div style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "12px", padding: "12px", marginTop: "16px", color: "#f87171", fontSize: "12px", textAlign: "center", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <AlertCircle size={14} /> RFP belum dibuat untuk Cash Advance ini.
                     </div>
                   );
 
@@ -383,12 +411,12 @@ export function DirectorApprovals({ initialData }: Props) {
                   <div style={{ padding: "12px", background: "rgba(91,140,255,0.05)", borderRadius: "8px", border: "1px solid rgba(91,140,255,0.1)" }}>
                     <label className="eyebrow" style={{ color: "var(--blue)" }}>Audit Documents (Tiga Dokumen Khusus)</label>
                     <div style={{ marginTop: "12px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
-                      <button onClick={() => window.open(`/finance/print/${selectedRfp.documentIds?.[0] || selectedRfp.id}?only=po`, "_blank")} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", border: "1px solid var(--blue)", color: "var(--blue)", background: "white" }}>📄 Buka PO/Kontrak</button>
-                      <button onClick={() => window.open(`/finance/print/${selectedRfp.id}?only=rfp`, "_blank")} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", border: "1px solid var(--green)", color: "var(--green)", background: "white" }}>💳 Buka RFP</button>
+                      <button onClick={() => window.open(`/finance/print/${selectedRfp.documentIds?.[0] || selectedRfp.id}?only=po`, "_blank")} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", border: "1px solid var(--blue)", color: "var(--blue)", background: "white", display: 'flex', alignItems: 'center', gap: '6px' }}><FileText size={12} /> Buka PO/Kontrak</button>
+                      <button onClick={() => window.open(`/finance/print/${selectedRfp.id}?only=rfp`, "_blank")} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", border: "1px solid var(--green)", color: "var(--green)", background: "white", display: 'flex', alignItems: 'center', gap: '6px' }}><CreditCard size={12} /> Buka RFP</button>
                       {selectedRfp.vendorInvoiceUrl ? (
-                         <button onClick={() => setViewProofUrl(selectedRfp.vendorInvoiceUrl!)} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", gridColumn: "span 2", border: "1px solid #f59e0b", color: "#d97706", background: "white" }}>🧾 Buka Invoice Vendor</button>
+                         <button onClick={() => setViewProofUrl(selectedRfp.vendorInvoiceUrl!)} className="secondary-button" style={{ fontSize: "11px", padding: "6px 12px", width: "100%", justifyContent: "center", gridColumn: "span 2", border: "1px solid #f59e0b", color: "#d97706", background: "white" }}><Receipt size={12} /> Buka Invoice Vendor</button>
                       ) : (
-                         <div style={{ fontSize: "11px", color: "#f87171", gridColumn: "span 2", textAlign: "center", padding: "6px" }}>❌ Invoice Vendor Tidak Dilampirkan</div>
+                         <div style={{ fontSize: "11px", color: "#f87171", gridColumn: "span 2", textAlign: "center", padding: "6px" }}><XCircle size={12} /> Invoice Vendor Tidak Dilampirkan</div>
                       )}
                     </div>
                   </div>
@@ -405,12 +433,11 @@ export function DirectorApprovals({ initialData }: Props) {
         <div className="panel">
           <div className="panel-kicker">Riwayat Otorisasi — Dokumen & RFP yang telah disetujui</div>
           <div style={{ marginTop: "12px" }}>
-            <FilterBar items={[...historyDocs, ...historyRfps]} type="docs" onFilter={(items) => {
-              const d = items.filter(i => 'issueDate' in i) as ExpenseDocument[];
-              const r = items.filter(i => !('issueDate' in i)) as RequestForPayment[];
-              handleFilterDocs(d);
-              handleFilterRfps(r);
-            }} />
+            <FilterBar 
+              items={historyItems} 
+              type="docs" 
+              onFilter={handleFilterHistory} 
+            />
           </div>
           <div className="table-shell" style={{ marginTop: "16px" }}>
             <div className="project-table" style={{ minWidth: "800px" }}>
@@ -432,7 +459,7 @@ export function DirectorApprovals({ initialData }: Props) {
                    <div><span className={`status-pill tone-${(item.status === 'paid' || item.status === 'approved') ? 'green' : 'blue'}`}>{item.status.toUpperCase()}</span></div>
                    <div style={{ fontWeight: 600 }}>{formatCurrencyIDR("amount" in item ? item.amount : item.totalAmount)}</div>
                    <div style={{ textAlign: "right" }}>
-                     <a href={`/finance/print/${item.id}`} target="_blank" className="secondary-button" style={{ fontSize: "11px", padding: "4px 10px" }}>👁️ View Audit</a>
+                     <a href={`/finance/print/${item.id}`} target="_blank" className="secondary-button" style={{ fontSize: "11px", padding: "4px 10px" }}><Eye size={12} /> View Audit</a>
                    </div>
                 </div>
               ))}

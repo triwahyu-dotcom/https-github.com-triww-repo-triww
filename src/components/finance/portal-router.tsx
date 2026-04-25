@@ -12,6 +12,7 @@ interface Props {
   initialData: FinanceDashboardData;
   activeProjects: ProjectRecord[];
   availableVendors?: any[];
+  availableFreelancers?: any[];
 }
 
 export function FinancePortalRouter(props: Props) {

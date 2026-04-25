@@ -14,6 +14,7 @@ export async function POST(request: Request) {
       notes, preparedBy, venue, duration, workScope, lampiran, paymentSchedule,
       paymentKeterangan, penaltyMemoUrl,
       usePPh21, pph21Mode, grossAmount, taxAmount, netAmount,
+      projectInitial,
     } = body;
     if (!projectId || !documentType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -34,7 +35,8 @@ export async function POST(request: Request) {
       const allDocs = await readDocuments();
       const typeDocs = allDocs.filter(d => d.documentType === documentType && new Date(d.issueDate).getFullYear() === year);
       const sequence = String(typeDocs.length + 1).padStart(3, '0');
-      docId = `${sequence}/JBBS/${documentType}/${month}/${year}`;
+      const initialPart = projectInitial ? `/${projectInitial}` : "";
+      docId = `${sequence}/JBBS/${documentType}${initialPart}/${month}/${year}`;
     }
     const subtotalItems = lineItems?.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0) ?? 0;
     

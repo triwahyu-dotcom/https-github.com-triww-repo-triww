@@ -6,7 +6,7 @@ interface SummaryCardProps {
   label: string;
   value: string | number;
   description?: string;
-  icon?: string;
+  icon?: React.ReactNode;
 }
 
 export function SummaryCard({ label, value, description, icon }: SummaryCardProps) {

@@ -4,6 +4,18 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { 
+  LayoutDashboard, 
+  Users, 
+  Building2, 
+  HardHat, 
+  Receipt,
+  ChevronLeft,
+  ChevronRight,
+  FolderSearch,
+  Home
+} from "lucide-react";
+
 interface WorkspaceShellProps {
   children: React.ReactNode;
   title: string;
@@ -36,10 +48,13 @@ export function WorkspaceShell({
   };
 
   const navItems = [
-    { label: "Projects", href: "/projects", icon: "📊" },
-    { label: "CRM", href: "/crm", icon: "🤝" },
-    { label: "Vendors", href: "/vendors", icon: "⌘" },
-    { label: "Finance & RFP", href: "/finance", icon: "💳" },
+    { label: "Workspace Hub", href: "/", icon: <Home size={18} /> },
+    { label: "Projects", href: "/projects", icon: <LayoutDashboard size={18} /> },
+    { label: "CRM", href: "/crm", icon: <Users size={18} /> },
+    { label: "Vendors", href: "/vendors", icon: <Building2 size={18} /> },
+    { label: "Man Power", href: "/manpower/freelancer", icon: <HardHat size={18} /> },
+    { label: "Finance & RFP", href: "/finance", icon: <Receipt size={18} /> },
+    { label: "Document Center", href: "/docs", icon: <FolderSearch size={18} /> },
   ];
 
   return (
@@ -53,9 +68,7 @@ export function WorkspaceShell({
           }}
           title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
         >
-          <span style={{ transform: isCollapsed ? 'rotate(180deg)' : 'none', display: 'inline-block' }}>
-            ←
-          </span>
+          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
         <div className="pm-logo">J</div>
          <div className="pm-sidebar-group">

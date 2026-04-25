@@ -1,4 +1,4 @@
-import { VendorDashboard } from "@/components/vendor-dashboard";
+import { VendorDashboard } from "@/components/vendors/VendorDashboard";
 import { buildIntegratedDashboards } from "@/lib/integration/view-models";
 import { getProjectDashboardData } from "@/lib/project/store";
 import { getDashboardData } from "@/lib/vendor/store";

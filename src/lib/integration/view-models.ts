@@ -1,6 +1,7 @@
 import { getProjectVendorLinks, getProjectVendorShortlists } from "@/lib/integration/store";
 import { ProjectDashboardData } from "@/lib/project/types";
 import { DashboardData } from "@/lib/vendor/types";
+import { Freelancer } from "@/app/manpower/freelancer/_types/freelancer";
 
 function normalizePhoneToWhatsApp(phone: string) {
   const digits = phone.replace(/[^\d]/g, "");
@@ -10,7 +11,7 @@ function normalizePhoneToWhatsApp(phone: string) {
   return digits;
 }
 
-export async function buildIntegratedDashboards(projectData: ProjectDashboardData, vendorData: DashboardData) {
+export async function buildIntegratedDashboards(projectData: ProjectDashboardData, vendorData: DashboardData, freelancerData: Freelancer[] = []) {
   const [links, shortlists] = await Promise.all([getProjectVendorLinks(), getProjectVendorShortlists()]);
 
   function projectVendorRequirements(project: ProjectDashboardData["projects"][number]) {
@@ -38,6 +39,14 @@ export async function buildIntegratedDashboards(projectData: ProjectDashboardDat
     whatsappPhone: normalizePhoneToWhatsApp(vendor.contacts[0]?.phone || ""),
     averageScore: vendor.performance.average,
     lifecycleStatus: vendor.lifecycleStatus,
+  }));
+
+  const availableFreelancers = freelancerData.map((f) => ({
+    id: f.id,
+    nama: f.nama,
+    posisi_utama: f.posisi_utama,
+    no_hp: f.no_hp,
+    kota_domisili: f.kota_domisili,
   }));
 
   const projects = projectData.projects.map((project) => ({
@@ -119,6 +128,7 @@ export async function buildIntegratedDashboards(projectData: ProjectDashboardDat
       ...projectData,
       projects,
       availableVendors,
+      availableFreelancers,
     },
     vendorData: {
       ...vendorData,

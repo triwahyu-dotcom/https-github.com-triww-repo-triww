@@ -1,6 +1,25 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
+import { 
+  FileText, 
+  Search, 
+  CreditCard, 
+  Coins, 
+  Eye, 
+  AlertCircle, 
+  Check, 
+  CheckCircle2, 
+  History, 
+  ShieldCheck, 
+  ChevronRight,
+  Printer,
+  FileDown,
+  X,
+  Plus,
+  ArrowRight,
+  Receipt
+} from "lucide-react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
 import { SummaryCard } from "../ui/summary-card";
@@ -200,13 +219,13 @@ export function FinanceOpsDashboard({ initialData }: Props) {
 
   return (
     <WorkspaceShell title="Finance Operations" eyebrow="Finance Admin View">
-      <section className="summary-grid" style={{ gridTemplateColumns: 'repeat(6, 1fr)', marginBottom: '24px' }}>
-         <SummaryCard label="Docs Verify" value={String(docVerificationQueue.length)} description="PO/SPK pending check" icon="📄" />
-         <SummaryCard label="RFP In Review" value={String(verificationQueue.length)} description="Awaiting audit" icon="🔍" />
-         <SummaryCard label="Ready to Pay" value={String(paymentQueue.length)} description="C-Level approved" icon="💳" />
-         <SummaryCard label="Pending Settlement" value={String(settlementQueue.length)} description="Waiting for approval" icon="🧾" />
-         <SummaryCard label="Outstanding" value={formatCurrencyIDR(initialData.summary?.totalOutstandingAmount || 0)} description="Unpaid commitment" icon="💰" />
-         <SummaryCard label="Processed" value={String((initialData.rfps || []).filter(r => r.status === 'paid' || r.status === 'settled').length)} description="Completed payments" icon="✅" />
+      <section className="summary-grid" style={{ gridTemplateColumns: 'repeat(6, 1fr)', marginBottom: '24px', display: 'grid', gap: '12px' }}>
+         <SummaryCard label="Docs Verify" value={String(docVerificationQueue.length)} description="PO/SPK pending check" icon={<FileText size={18} />} />
+         <SummaryCard label="RFP In Review" value={String(verificationQueue.length)} description="Awaiting audit" icon={<Search size={18} />} />
+         <SummaryCard label="Ready to Pay" value={String(paymentQueue.length)} description="C-Level approved" icon={<CreditCard size={18} />} />
+         <SummaryCard label="Pending Settlement" value={String(settlementQueue.length)} description="Waiting for approval" icon={<Receipt size={18} />} />
+         <SummaryCard label="Outstanding" value={formatCurrencyIDR(initialData.summary?.totalOutstandingAmount || 0)} description="Unpaid commitment" icon={<Coins size={18} />} />
+         <SummaryCard label="Processed" value={String((initialData.rfps || []).filter(r => r.status === 'paid' || r.status === 'settled').length)} description="Completed payments" icon={<CheckCircle2 size={18} />} />
       </section>
 
       <div className="toolbar-panel">
@@ -261,7 +280,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                           <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(doc.amount)}</div>
                           <div className="mini-meta">{formatDateFullID(doc.issueDate)}</div>
                           <div style={{ textAlign: "right", display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                             <a href={`/finance/print/${doc.id}`} className="secondary-button" style={{ fontSize: "11px", padding: '4px 12px' }}>👁️ Audit Docs</a>
+                             <a href={`/finance/print/${doc.id}`} className="secondary-button" style={{ fontSize: "11px", padding: '4px 12px' }}><Eye size={12} /> Audit Docs</a>
                              <button onClick={() => handleRejectDoc(doc.id)} className="secondary-button" style={{ fontSize: "11px", padding: '4px 12px', color: '#f87171', borderColor: 'rgba(239,68,68,0.2)' }}>Return</button>
                              <button onClick={() => setSelectedReviewDoc(doc)} className="primary-button" style={{ fontSize: "11px", padding: '4px 16px', background: 'var(--blue)' }}>Sign & Forward</button>
                           </div>
@@ -319,7 +338,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                           <button onClick={() => setSelectedRfpForSettlement(rfp)} className="primary-button" style={{ fontSize: "11px", padding: '4px 16px', background: 'var(--amber)', border: '1px solid var(--amber)' }}>Submit Settlement</button>
                        )}
                        {rfp.paymentProofUrl && (
-                          <button onClick={() => setViewProofUrl(rfp.paymentProofUrl!)} className="secondary-button" style={{ fontSize: "11px", padding: '4px 12px', borderColor: 'var(--green)', color: 'var(--green)' }}>👁️ Bukti</button>
+                          <button onClick={() => setViewProofUrl(rfp.paymentProofUrl!)} className="secondary-button" style={{ fontSize: "11px", padding: '4px 12px', borderColor: 'var(--green)', color: 'var(--green)' }}><Eye size={12} /> Bukti</button>
                        )}
                     </div>
                  </div>
@@ -343,43 +362,43 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                  {/* Card 1: PO */}
                  <div style={{ padding: "16px", borderRadius: "10px", background: "var(--panel-soft)", border: "1px solid var(--line)", display: "flex", flexDirection: "column" }}>
                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                     <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(99,102,241,0.1)", color: "var(--blue)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>📄</div>
+                     <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(99,102,241,0.1)", color: "var(--blue)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}><FileText size={14} /></div>
                      <div>
                        <div className="mini-meta" style={{ margin: 0, fontWeight: 600 }}>Dokumen 1</div>
                        <div style={{ fontSize: "13px", fontWeight: 700 }}>PO / Kontrak</div>
                      </div>
                    </div>
                    <div style={{ flex: 1, fontSize: "12px", color: "var(--muted)", marginBottom: "16px", wordBreak: "break-word" }}>{selectedReviewRfp.documentIds?.[0] || "-"}</div>
-                   <button onClick={() => window.open(`/finance/print/${selectedReviewRfp.documentIds?.[0] || selectedReviewRfp.id}?only=po`, "_blank")} className="secondary-button" style={{ width: "100%", justifyContent: "center", border: "1px solid var(--blue)", color: "var(--blue)" }}>👁️ Buka PO</button>
+                   <button onClick={() => window.open(`/finance/print/${selectedReviewRfp.documentIds?.[0] || selectedReviewRfp.id}?only=po`, "_blank")} className="secondary-button" style={{ width: "100%", justifyContent: "center", border: "1px solid var(--blue)", color: "var(--blue)" }}><Eye size={12} /> Buka PO</button>
                  </div>
 
                  {/* Card 2: RFP */}
                  <div style={{ padding: "16px", borderRadius: "10px", background: "var(--panel-soft)", border: "1px solid var(--line)", display: "flex", flexDirection: "column" }}>
                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                     <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(34,197,94,0.1)", color: "var(--green)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>💳</div>
+                     <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(34,197,94,0.1)", color: "var(--green)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}><CreditCard size={14} /></div>
                      <div>
                        <div className="mini-meta" style={{ margin: 0, fontWeight: 600 }}>Dokumen 2</div>
                        <div style={{ fontSize: "13px", fontWeight: 700 }}>RFP Terbit</div>
                      </div>
                    </div>
                    <div style={{ flex: 1, fontSize: "12px", color: "var(--muted)", marginBottom: "16px", wordBreak: "break-word" }}>RFP-{selectedReviewRfp.id.substring(0,6)}</div>
-                   <button onClick={() => window.open(`/finance/print/${selectedReviewRfp.id}?only=rfp`, "_blank")} className="secondary-button" style={{ width: "100%", justifyContent: "center", border: "1px solid var(--green)", color: "var(--green)" }}>👁️ Buka RFP</button>
+                   <button onClick={() => window.open(`/finance/print/${selectedReviewRfp.id}?only=rfp`, "_blank")} className="secondary-button" style={{ width: "100%", justifyContent: "center", border: "1px solid var(--green)", color: "var(--green)" }}><Eye size={12} /> Buka RFP</button>
                  </div>
 
                  {/* Card 3: Invoice */}
                  <div style={{ padding: "16px", borderRadius: "10px", background: "var(--panel-soft)", border: "1px solid var(--line)", display: "flex", flexDirection: "column" }}>
                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-                     <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(245,158,11,0.1)", color: "#f59e0b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}>🧾</div>
+                     <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "rgba(245,158,11,0.1)", color: "#f59e0b", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "16px" }}><Receipt size={14} /></div>
                      <div>
                        <div className="mini-meta" style={{ margin: 0, fontWeight: 600 }}>Dokumen 3</div>
                        <div style={{ fontSize: "13px", fontWeight: 700 }}>Invoice Vendor</div>
                      </div>
                    </div>
                    <div style={{ flex: 1, fontSize: "12px", marginBottom: "16px" }}>
-                     {selectedReviewRfp.vendorInvoiceUrl ? <span style={{ color: "var(--green)", fontWeight: 600 }}>✅ Terlampir</span> : <span style={{ color: "#f87171" }}>❌ Tidak dilampirkan</span>}
+                     {selectedReviewRfp.vendorInvoiceUrl ? <span style={{ color: "var(--green)", fontWeight: 600 }}><CheckCircle2 size={14} /> Terlampir</span> : <span style={{ color: "#f87171" }}><XCircle size={14} /> Tidak dilampirkan</span>}
                    </div>
                    {selectedReviewRfp.vendorInvoiceUrl ? (
-                     <button onClick={() => setViewProofUrl(selectedReviewRfp.vendorInvoiceUrl!)} className="secondary-button" style={{ width: "100%", justifyContent: "center", color: "#d97706", borderColor: "#f59e0b" }}>👁️ Buka Invoice</button>
+                     <button onClick={() => setViewProofUrl(selectedReviewRfp.vendorInvoiceUrl!)} className="secondary-button" style={{ width: "100%", justifyContent: "center", color: "#d97706", borderColor: "#f59e0b" }}><Eye size={12} /> Buka Invoice</button>
                    ) : (
                      <button disabled className="secondary-button" style={{ width: "100%", justifyContent: "center", opacity: 0.5 }}>Tidak Ada Invoice</button>
                    )}
@@ -393,7 +412,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                   className="primary-button" 
                   style={{ background: "var(--blue)" }}
                 >
-                  Sign & Forward to Director →
+                  Sign & Forward to Director <ArrowRight size={14} />
                 </button>
              </div>
           </div>
@@ -445,7 +464,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
 
               {selectedReviewDoc.documentType === "CASH_ADVANCE" && !linkedRfp && (
                 <div style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", borderRadius: "12px", padding: "12px", marginBottom: "24px", color: "#f87171", fontSize: "12px" }}>
-                  ⚠️ RFP belum dibuat untuk Cash Advance ini.
+                  <AlertCircle size={12} /> RFP belum dibuat untuk Cash Advance ini.
                 </div>
               )}
               

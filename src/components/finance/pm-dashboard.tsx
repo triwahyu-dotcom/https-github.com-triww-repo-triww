@@ -1,6 +1,19 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
+import { 
+  FolderOpen, 
+  FileText, 
+  Clock, 
+  CheckCircle2, 
+  Check, 
+  AlertCircle, 
+  Eye, 
+  Printer, 
+  FileDown,
+  ChevronRight,
+  ShieldCheck
+} from "lucide-react";
 import { FinanceDashboardData, ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
@@ -20,10 +33,10 @@ const docTypeLabel: Record<string, string> = {
   CASH_ADVANCE: "Cash Advance",
 };
 
-const statusLabel: Record<string, { text: string; tone: string }> = {
+const statusLabel: Record<string, { text: string; tone: string; icon?: React.ReactNode }> = {
   draft:      { text: "Draft",       tone: "tone-amber" },
   submitted:  { text: "Submitted",   tone: "tone-amber" },
-  approved:   { text: "Approved ✓",  tone: "tone-blue" },
+  approved:   { text: "Approved",  tone: "tone-blue", icon: <Check size={12} /> },
   paid:       { text: "Paid",        tone: "tone-green" },
   settled:    { text: "Settled",     tone: "tone-green" },
   pending_c_level: { text: "Pending Director", tone: "tone-amber" },
@@ -60,8 +73,8 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
 
   const headerActions = (
     <div className="workspace-actions">
-      <button className="secondary-button" onClick={() => window.print()}>
-        Export Report
+      <button className="secondary-button" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => window.print()}>
+        <Printer size={16} /> Export Report
       </button>
     </div>
   );
@@ -72,11 +85,11 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
       eyebrow="PM Workspace (Read-Only)"
       actions={headerActions}
     >
-      <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px" }}>
-        <SummaryCard label="My Projects" value={String(activeProjects.length)} description="Active executions" icon="📂" />
-        <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon="📄" />
-        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description="Belum terbayar" icon="⏳" />
-        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description="Nilai terotorisasi" icon="✅" />
+      <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px", display: 'grid', gap: '16px' }}>
+        <SummaryCard label="My Projects" value={String(activeProjects.length)} description="Active executions" icon={<FolderOpen size={18} />} />
+        <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon={<FileText size={18} />} />
+        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description="Belum terbayar" icon={<Clock size={18} />} />
+        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description="Nilai terotorisasi" icon={<CheckCircle2 size={18} />} />
       </section>
 
       <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "20px", alignItems: "start" }}>
@@ -167,19 +180,21 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                           <div><span className="status-pill" style={{ background: "rgba(91,140,255,0.15)", color: "var(--blue)", fontSize: "10px" }}>{docTypeLabel[doc.documentType]}</span></div>
                           <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(doc.amount)}</div>
                           <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
-                            <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px" }}>{s.text}</span>
+                            <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px", display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              {s.icon && s.icon} {s.text}
+                            </span>
                             {doc.rejectionReason && (
-                              <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600 }}>
-                                ⚠️ {doc.rejectionReason}
-                              </div>
+                                <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  <AlertCircle size={10} /> {doc.rejectionReason}
+                                </div>
                             )}
                             {(doc.status === "approved" || doc.status === "paid") && (
                               <button
                                 className="secondary-button"
-                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto" }}
+                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: 'flex', alignItems: 'center', gap: '6px' }}
                                 onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")}
                               >
-                                View / Print
+                                <Printer size={10} /> View / Print
                               </button>
                             )}
                           </div>
@@ -214,28 +229,30 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                           <div style={{ fontSize: "12px" }}>{rfp.paymentType}</div>
                           <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
                           <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
-                            <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px" }}>{s.text}</span>
+                            <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px", display: 'flex', alignItems: 'center', gap: '4px' }}>
+                              {s.icon && s.icon} {s.text}
+                            </span>
                             {rfp.rejectionReason && (
-                              <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600 }}>
-                                ⚠️ {rfp.rejectionReason}
+                              <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <AlertCircle size={10} /> {rfp.rejectionReason}
                               </div>
                             )}
                             {rfp.paymentProofUrl && (
                               <button 
                                 className="secondary-button" 
-                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)" }}
+                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)", display: 'flex', alignItems: 'center', gap: '6px' }}
                                 onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
                               >
-                                👁️ Bukti
+                                <Eye size={10} /> Bukti
                               </button>
                             )}
                             {(rfp.status === "approved" || rfp.status === "paid") && (
                               <button
                                 className="secondary-button"
-                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto" }}
+                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: 'flex', alignItems: 'center', gap: '6px' }}
                                 onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")}
                               >
-                                Download RFP
+                                <FileDown size={10} /> Download RFP
                               </button>
                             )}
                           </div>

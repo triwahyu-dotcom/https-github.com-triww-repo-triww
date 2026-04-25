@@ -1,10 +1,27 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
+import { 
+  Users, 
+  CheckCircle2, 
+  LineChart, 
+  Flame, 
+  Search, 
+  Plus, 
+  MapPin, 
+  Globe, 
+  AlertCircle,
+  Coins,
+  ChevronRight,
+  TrendingUp,
+  Activity,
+  Heart,
+  Diamond
+} from "lucide-react";
 import Link from "next/link";
 import { CRMDashboardData, CRMClient } from "@/lib/project/types";
-import { WorkspaceShell } from "./layout/workspace-shell";
-import { SummaryCard } from "./ui/summary-card";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { SummaryCard } from "@/components/ui/summary-card";
 
 interface Props {
   initialData: CRMDashboardData;
@@ -85,8 +102,8 @@ export function CRMDashboard({ initialData }: Props) {
       <div className="workspace-actions" style={{ marginRight: '16px' }}>
         <span className="mini-meta">{filteredClients.length} Clients found</span>
       </div>
-      <button className="primary-button" style={{ borderRadius: '8px', padding: '0 16px', height: '36px' }} onClick={openAddModal}>
-        + Add New Lead
+      <button className="primary-button" style={{ borderRadius: '8px', padding: '0 16px', height: '36px', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={openAddModal}>
+        <Plus size={16} /> Add New Lead
       </button>
     </>
   );
@@ -102,31 +119,31 @@ export function CRMDashboard({ initialData }: Props) {
           label="Total Accounts" 
           value={String(initialData.summary.totalClients + initialData.summary.totalLeads)} 
           description="Active and leads combined"
-          icon="👥" 
+          icon={<Users size={18} />} 
         />
         <SummaryCard 
           label="Active Clients" 
           value={String(initialData.summary.activeClients)} 
           description="Working on projects"
-          icon="✅" 
+          icon={<CheckCircle2 size={18} />} 
         />
         <SummaryCard 
           label="Relationship Value" 
           value={initialData.summary.totalPortfolioValueLabel} 
           description="Lifetime project value"
-          icon="💎" 
+          icon={<Diamond size={18} />} 
         />
         <SummaryCard 
           label="Potential Leads" 
           value={String(initialData.summary.totalLeads)} 
           description="In pipeline stage"
-          icon="📈" 
+          icon={<TrendingUp size={18} />} 
         />
         <SummaryCard 
           label="Engagement" 
           value="High" 
           description="Based on activity"
-          icon="🔥" 
+          icon={<Flame size={18} />} 
         />
       </section>
 
@@ -150,7 +167,7 @@ export function CRMDashboard({ initialData }: Props) {
             <option value="CO. PARTNER">Co. Partner</option>
             <option value="EVENT ORGANIZER">Event Organizer</option>
           </select>
-          <button className="primary-button" onClick={openAddModal}>+ Add New Lead</button>
+          <button className="primary-button" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={openAddModal}><Plus size={16} /> Add New Lead</button>
         </div>
       </div>
 
@@ -186,8 +203,8 @@ export function CRMDashboard({ initialData }: Props) {
                   </div>
                   <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{client.totalProjectValueLabel}</div>
                   <div>
-                    <span className={`status-pill tone-${client.health === "on_track" ? "green" : client.health === "watch" ? "amber" : "red"}`}>
-                      ●
+                    <span className={`status-pill tone-${client.health === "on_track" ? "green" : client.health === "watch" ? "amber" : "red"}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
+                      <Activity size={10} />
                     </span>
                   </div>
                 </button>
@@ -210,8 +227,8 @@ export function CRMDashboard({ initialData }: Props) {
                     <button className="primary-button" style={{ scale: "0.8", background: "none", color: "var(--accent)" }} onClick={() => openEditModal(selectedClient)}>Edit Profile</button>
                   </div>
                   {selectedClient.website && (
-                    <a href={selectedClient.website} target="_blank" className="mini-stage" style={{ marginTop: "4px" }}>
-                      🔗 {selectedClient.website.replace("https://", "")}
+                    <a href={selectedClient.website} target="_blank" className="mini-stage" style={{ marginTop: "4px", display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Globe size={12} /> {selectedClient.website.replace("https://", "")}
                     </a>
                   )}
                 </div>
@@ -221,8 +238,8 @@ export function CRMDashboard({ initialData }: Props) {
               </div>
 
               {selectedClient.address && (
-                <div style={{ marginTop: "12px", fontSize: "0.8rem", color: "var(--muted-soft)", display: "flex", gap: "6px" }}>
-                  📍 <span>{selectedClient.address}</span>
+                <div style={{ marginTop: "12px", fontSize: "0.8rem", color: "var(--muted-soft)", display: "flex", gap: "8px", alignItems: 'flex-start' }}>
+                  <MapPin size={14} style={{ flexShrink: 0, marginTop: '2px' }} /> <span>{selectedClient.address}</span>
                 </div>
               )}
 
@@ -270,7 +287,9 @@ export function CRMDashboard({ initialData }: Props) {
             </>
           ) : (
             <div className="empty-state" style={{ textAlign: "center", padding: "60px 20px" }}>
-              <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🔍</div>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', opacity: 0.2 }}>
+                <Search size={48} />
+              </div>
               <h3>Select a client</h3>
               <p>Select a client from the list to see their relationship history and portfolio details.</p>
             </div>
@@ -283,8 +302,8 @@ export function CRMDashboard({ initialData }: Props) {
             <h2 style={{ marginBottom: '24px' }}>{modalMode === 'add' ? 'Add New Lead' : 'Edit Client Profile'}</h2>
             
             {error && (
-              <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem' }}>
-                ⚠️ {error}
+              <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AlertCircle size={16} /> {error}
               </div>
             )}
 

@@ -128,6 +128,15 @@ export interface ProjectRecord {
   partnerClient?: string; // e.g., "WE DO", "SATOE"
   billingClient?: string; // Who gets the invoice
   mainFolder?: string; // Link to the root project folder
+  proposalUrl?: string; // Link to the pitch deck or proposal (e.g., Canva)
+  projectInitial?: string; // New field for PO numbering
+  assignedFreelancers?: {
+    id: string;
+    name: string;
+    position: string;
+    phone: string;
+    rate?: number;
+  }[];
 }
 
 export type CRMClientType = "brand" | "agency" | "government" | "partner";
@@ -208,6 +217,13 @@ export interface ProjectDashboardData {
     whatsappPhone: string;
     averageScore: number;
     lifecycleStatus: string;
+  }[];
+  availableFreelancers: {
+    id: string;
+    nama: string;
+    posisi_utama: string[];
+    no_hp: string;
+    kota_domisili: string;
   }[];
 }
 

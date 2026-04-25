@@ -1,4 +1,4 @@
-import { VendorIntakeForm } from "@/components/vendor-intake-form";
+import { VendorIntakeForm } from "@/components/vendors/VendorIntakeForm";
 import { getDashboardData, getVendorByRevisionToken } from "@/lib/vendor/store";
 
 export const dynamic = "force-dynamic";

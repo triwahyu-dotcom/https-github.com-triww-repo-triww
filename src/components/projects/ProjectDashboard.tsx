@@ -92,6 +92,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [vendorToAssign, setVendorToAssign] = useState<string>("");
   const [isAssignManpowerOpen, setIsAssignManpowerOpen] = useState(false);
   const [manpowerToAssign, setManpowerToAssign] = useState<string>("");
+  const [selectedPositionToAssign, setSelectedPositionToAssign] = useState<string>("");
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectClient, setNewProjectClient] = useState("");
@@ -232,8 +233,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
     setProjects(prev => prev.map(p => {
       if (p.id !== projectId) return p;
-      const alreadyAssigned = (p.assignedFreelancers || []).some(f => f.id === manpowerToAssign);
-      if (alreadyAssigned) return p;
+      // Allow multiple assignments of the same person if the position is different
+      const alreadyAssignedSamePosition = (p.assignedFreelancers || []).some(f => f.id === manpowerToAssign && f.position === selectedPositionToAssign);
+      if (alreadyAssignedSamePosition) return p;
       
       return {
         ...p,
@@ -242,7 +244,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           {
             id: mpObj.id,
             name: mpObj.nama,
-            position: mpObj.posisi_utama[0] || "Crew",
+            position: selectedPositionToAssign || mpObj.posisi_utama[0] || "Crew",
             phone: mpObj.no_hp
           }
         ]
@@ -250,6 +252,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     }));
     setIsAssignManpowerOpen(false);
     setManpowerToAssign("");
+    setSelectedPositionToAssign("");
   };
 
   const handleRemoveManpower = (projectId: string, freelancerId: string) => {
@@ -941,13 +944,33 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                             className="mini-input" 
                             style={{ height: '28px', fontSize: '11px', width: '140px', background: '#111113' }}
                             value={manpowerToAssign}
-                            onChange={(e) => setManpowerToAssign(e.target.value)}
+                            onChange={(e) => {
+                              const id = e.target.value;
+                              setManpowerToAssign(id);
+                              const mp = (initialData.availableFreelancers || []).find(f => f.id === id);
+                              if (mp) setSelectedPositionToAssign(mp.posisi_utama?.[0] || "Crew");
+                            }}
                           >
                             <option value="">Select member...</option>
                             {(initialData.availableFreelancers || []).map(f => (
-                              <option key={f.id} value={f.id}>{(f as any).nama || (f as any).name} ({f.posisi_utama?.[0] || 'Unknown'})</option>
+                              <option key={f.id} value={f.id}>{(f as any).nama || (f as any).name}</option>
                             ))}
                           </select>
+
+                          {manpowerToAssign && (
+                            <select 
+                              className="mini-input" 
+                              style={{ height: '28px', fontSize: '11px', width: '120px', background: '#111113', border: '0.5px solid #378ADD' }}
+                              value={selectedPositionToAssign}
+                              onChange={(e) => setSelectedPositionToAssign(e.target.value)}
+                            >
+                              {((initialData.availableFreelancers || []).find(f => f.id === manpowerToAssign)?.posisi_utama || ["Crew"]).map(pos => (
+                                <option key={pos} value={pos}>{pos}</option>
+                              ))}
+                              <option value="Custom">Other Role...</option>
+                            </select>
+                          )}
+
                           <button 
                             className="primary-button" 
                             style={{ fontSize: '10px', padding: '2px 8px', height: '28px' }}

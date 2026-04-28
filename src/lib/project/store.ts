@@ -875,16 +875,13 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
       .sort(),
     categories: [...new Set(projects.map((project) => project.category).filter(Boolean))].sort(),
     availableVendors: [
-      { id: 'v1', name: '69 Show Management', category: 'PENYEDIA JASA' },
-      { id: 'v2', name: 'PT. Abhinaya Visual Radhikasakti', category: 'PENYEDIA BARANG' },
-      { id: 'v3', name: 'Adam Pratama', category: 'PENYEDIA JASA' },
-      { id: 'v4', name: 'Addiksi Kreatif Imagi', category: 'PENYEDIA JASA' },
-      { id: 'v5', name: 'CV Afifah Kreatif', category: 'PENYEDIA JASA' },
+      { id: 'v1', name: '69 Show Management', serviceNames: ['PENYEDIA JASA'], businessAddress: 'Jakarta', whatsappPhone: '0812...', averageScore: 5.0, lifecycleStatus: 'ACTIVE' },
+      { id: 'v2', name: 'PT. Abhinaya Visual Radhikasakti', serviceNames: ['PENYEDIA BARANG'], businessAddress: 'Jakarta', whatsappPhone: '0812...', averageScore: 5.0, lifecycleStatus: 'ACTIVE' },
+      { id: 'v3', name: 'Adam Pratama', serviceNames: ['PENYEDIA JASA'], businessAddress: 'Jakarta', whatsappPhone: '0812...', averageScore: 5.0, lifecycleStatus: 'ACTIVE' },
     ],
     availableFreelancers: [
-      { id: 'f1', nama: 'Dixie', posisi_utama: ['Project Officer'], no_hp: '089505761056', kota_domisili: 'Jakarta' },
-      { id: 'f2', nama: 'Shafa', posisi_utama: ['Project Officer'], no_hp: '', kota_domisili: 'Jakarta' },
-      { id: 'f3', nama: 'Jimi', posisi_utama: ['Runner'], no_hp: '08119095656', kota_domisili: 'Bandung' },
+      { id: 'f1', nama: 'Budi Santoso', posisi_utama: ['Runner'], no_hp: '0812...', kota_domisili: 'Jakarta' },
+      { id: 'f2', nama: 'Siti Aminah', posisi_utama: ['Admin'], no_hp: '0812...', kota_domisili: 'Tangerang' }
     ],
   };
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { LineItem } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { formatCurrencyIDR } from "@/lib/utils/format";
+import { FileText, ChevronRight, Projector, Building2, CreditCard, Calendar, X, Check } from "lucide-react";
 
 interface Props {
   activeProjects: ProjectRecord[];
@@ -17,20 +18,15 @@ export function RfpGeneratorModal({ activeProjects, availableVendors = [], onClo
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
   const [docType, setDocType] = useState<"PO" | "SPK" | "KONTRAK" | "CASH_ADVANCE">("PO");
   
-  // Form state
   const [vendorName, setVendorName] = useState("");
   const [vendorAddress, setVendorAddress] = useState("");
   const [vendorTaxId, setVendorTaxId] = useState("");
   const [documentTotal, setDocumentTotal] = useState<number | "">(""); 
   const [description, setDescription] = useState("");
-  
-  // Payment terms
   const [paymentTerms, setPaymentTerms] = useState("Full Payment");
   const [selectedTermRatio, setSelectedTermRatio] = useState<"100" | "50" | "30" | "20" | "custom">("100");
   const [rfpAmount, setRfpAmount] = useState<number | "">(""); 
   const [nextPaymentDate, setNextPaymentDate] = useState("");
-  
-  // Payment state
   const [paymentType, setPaymentType] = useState<"Transfer" | "Cash">("Transfer");
   const [bankName, setBankName] = useState("");
   const [accountNo, setAccountNo] = useState("");
@@ -38,21 +34,12 @@ export function RfpGeneratorModal({ activeProjects, availableVendors = [], onClo
 
   const handleVendorSelect = (vendor: any) => {
     setVendorName(vendor.name);
-    // basic heuristics
     const raw = vendor.rawSource || {};
-    
-    const vAddr = vendor.address || raw["Alamat :"] || raw["Address"] || "";
-    const vTax = vendor.taxId || raw["NPWP :"] || raw["NPWP"] || "";
-    const bName = vendor.bankName || raw["Nama Bank"] || raw["Bank Name"] || "";
-    const bAcc = vendor.bankAccountNumber || raw["Nomor Rekening : "] || raw["Nomor Rekening"] || raw["Account Number"] || "";
-    const bHolder = vendor.bankAccountHolder || raw["Nama Rekening :"] || raw["Account Holder"] || "";
-
-    setVendorAddress(vAddr);
-    setVendorTaxId(vTax);
-    
-    if (bName) setBankName(bName);
-    if (bAcc) setAccountNo(String(bAcc));
-    if (bHolder) setAccountName(bHolder);
+    setVendorAddress(vendor.address || raw["Alamat :"] || raw["Address"] || "");
+    setVendorTaxId(vendor.taxId || raw["NPWP :"] || raw["NPWP"] || "");
+    setBankName(vendor.bankName || raw["Nama Bank"] || raw["Bank Name"] || "");
+    setAccountNo(String(vendor.bankAccountNumber || raw["Nomor Rekening : "] || raw["Nomor Rekening"] || raw["Account Number"] || ""));
+    setAccountName(vendor.bankAccountHolder || raw["Nama Rekening :"] || raw["Account Holder"] || "");
   };
 
   const handleTermRatioChange = (ratio: "100" | "50" | "30" | "20" | "custom") => {
@@ -66,254 +53,213 @@ export function RfpGeneratorModal({ activeProjects, availableVendors = [], onClo
   };
 
   const handleGenerate = async () => {
-    if (!documentTotal || documentTotal === 0 || !rfpAmount || rfpAmount === 0) {
-      alert("Please enter valid amounts.");
-      return;
-    }
-
-    const payload = {
-      projectId: selectedProject?.id,
-      documentType: docType,
-      vendorName,
-      vendorAddress,
-      vendorTaxId,
-      documentTotal: Number(documentTotal),
-      rfpAmount: Number(rfpAmount),
-      nextPaymentDate,
-      description,
-      paymentType,
-      bankAccount: { bankName, accountNo, accountName },
-      paymentTerms
-    };
-    
+    if (!documentTotal || !rfpAmount) return;
     try {
       const res = await fetch("/api/finance/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          projectId: selectedProject?.id, documentType: docType, vendorName, vendorAddress, vendorTaxId,
+          documentTotal: Number(documentTotal), rfpAmount: Number(rfpAmount), nextPaymentDate,
+          description, paymentType, bankAccount: { bankName, accountNo, accountName }, paymentTerms
+        })
       });
-      if (res.ok) {
-        onSuccess();
-      } else {
-        alert("Failed to generate payment request");
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Error generating payment request");
-    }
+      if (res.ok) onSuccess();
+    } catch (e) {}
   };
 
   return (
-    <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="modal-content wide-modal" style={{ backgroundColor: 'var(--panel)', padding: '32px', borderRadius: '16px', width: '100%', maxWidth: '800px', border: '1px solid var(--line)', boxShadow: 'var(--shadow)', maxHeight: '90vh', overflowY: 'auto' }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(12px)", zIndex: 3000, display: "grid", placeItems: "center", padding: "20px" }}>
+      <div style={{ background: "#1f1f23", borderRadius: "24px", width: "100%", maxWidth: "880px", border: "0.5px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 60px rgba(0,0,0,0.6)", overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '92vh' }}>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h2 style={{ margin: 0 }}>Request For Payment (RFP) Generator</h2>
-          <div className="mini-meta">Step {generatorStep} of 3</div>
+        {/* Header with Progress */}
+        <div style={{ padding: '24px 32px', background: '#111113', borderBottom: '0.5px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(55,138,221,0.1)', color: '#378ADD', display: 'grid', placeItems: 'center' }}>
+              <FileText size={22} />
+            </div>
+            <div>
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: 700, color: "#f4f4f5" }}>Generate Payment Request</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                {[1,2,3].map(s => (
+                  <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ width: '18px', height: '18px', borderRadius: '50%', background: generatorStep >= s ? '#378ADD' : '#27272a', color: '#fff', fontSize: '10px', fontWeight: 800, display: 'grid', placeItems: 'center' }}>
+                      {generatorStep > s ? <Check size={10} strokeWidth={4} /> : s}
+                    </div>
+                    {s < 3 && <div style={{ width: '20px', height: '1px', background: generatorStep > s ? '#378ADD' : '#27272a' }} />}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#52525b', cursor: 'pointer' }}><X size={20} /></button>
         </div>
 
-        {generatorStep === 1 && (
-           <div>
-             <div className="form-section-title">Step 1: Select Active Project</div>
-             <div style={{ maxHeight: "300px", overflowY: "auto", display: "grid", gap: "8px" }}>
-               {activeProjects.map(p => (
-                 <div 
-                   key={p.id} 
-                   onClick={() => { setSelectedProject(p); setGeneratorStep(2); }}
-                   className="document-card" 
-                   style={{ cursor: "pointer", border: "1px solid var(--line)", background: selectedProject?.id === p.id ? "var(--blue-soft)" : "transparent" }}
-                 >
-                   <div style={{ fontWeight: 600 }}>{p.projectName}</div>
-                   <div className="mini-meta">{p.client} • {p.currentStageLabel}</div>
-                 </div>
-               ))}
-             </div>
-             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'flex-end' }}>
-                <button className="secondary-button" onClick={onClose} style={{ marginLeft: '12px' }}>Cancel</button>
-             </div>
-           </div>
-        )}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '40px' }}>
+          {generatorStep === 1 && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                <Projector size={18} color="#378ADD" />
+                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: '#f4f4f5' }}>Select Active Project</h4>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {activeProjects.map(p => (
+                  <div 
+                    key={p.id} 
+                    onClick={() => { setSelectedProject(p); setGeneratorStep(2); }}
+                    style={{ 
+                      padding: '20px', borderRadius: '16px', background: '#18181b', border: '1px solid rgba(255,255,255,0.06)', 
+                      cursor: 'pointer', transition: 'all 0.2s', position: 'relative', overflow: 'hidden'
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = '#378ADD'; e.currentTarget.style.background = 'rgba(55,138,221,0.03)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'; e.currentTarget.style.background = '#18181b'; }}
+                  >
+                    <div style={{ fontWeight: 700, color: '#f4f4f5', fontSize: '14px', marginBottom: '4px' }}>{p.projectName}</div>
+                    <div style={{ fontSize: '12px', color: '#71717a' }}>{p.client} • {p.currentStageLabel}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {generatorStep === 2 && (
-           <div>
-             <div className="form-section-title">Step 2: Underlying Document Type</div>
-             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginTop: "16px" }}>
-                <label className={`document-card ${docType === 'PO' ? 'active' : ''}`} style={{ cursor: "pointer", display: 'flex', alignItems: 'flex-start', gap: '12px', border: docType === 'PO' ? '2px solid var(--blue)' : '1px solid var(--line)' }}>
-                   <input type="radio" name="doctype" value="PO" checked={docType === 'PO'} onChange={() => setDocType('PO')} style={{ marginTop: '4px' }} />
-                   <div>
-                     <div style={{ fontWeight: 600 }}>Purchase Order (PO)</div>
-                     <div className="mini-meta">Standard procurement for goods/services.</div>
-                   </div>
-                </label>
-                <label className={`document-card ${docType === 'SPK' ? 'active' : ''}`} style={{ cursor: "pointer", display: 'flex', alignItems: 'flex-start', gap: '12px', border: docType === 'SPK' ? '2px solid var(--blue)' : '1px solid var(--line)' }}>
-                   <input type="radio" name="doctype" value="SPK" checked={docType === 'SPK'} onChange={() => setDocType('SPK')} style={{ marginTop: '4px' }} />
-                   <div>
-                     <div style={{ fontWeight: 600 }}>Surat Perintah Kerja (SPK)</div>
-                     <div className="mini-meta">For manpower or specific task execution.</div>
-                   </div>
-                </label>
-                <label className={`document-card ${docType === 'KONTRAK' ? 'active' : ''}`} style={{ cursor: "pointer", display: 'flex', alignItems: 'flex-start', gap: '12px', border: docType === 'KONTRAK' ? '2px solid var(--blue)' : '1px solid var(--line)' }}>
-                   <input type="radio" name="doctype" value="KONTRAK" checked={docType === 'KONTRAK'} onChange={() => setDocType('KONTRAK')} style={{ marginTop: '4px' }} />
-                   <div>
-                     <div style={{ fontWeight: 600 }}>Surat Perjanjian Kontrak</div>
-                     <div className="mini-meta">For formal long-term vendor agreements.</div>
-                   </div>
-                </label>
-                <label className={`document-card ${docType === 'CASH_ADVANCE' ? 'active' : ''}`} style={{ cursor: "pointer", display: 'flex', alignItems: 'flex-start', gap: '12px', border: docType === 'CASH_ADVANCE' ? '2px solid var(--blue)' : '1px solid var(--line)' }}>
-                   <input type="radio" name="doctype" value="CASH_ADVANCE" checked={docType === 'CASH_ADVANCE'} onChange={() => setDocType('CASH_ADVANCE')} style={{ marginTop: '4px' }} />
-                   <div>
-                     <div style={{ fontWeight: 600 }}>Cash Advance</div>
-                     <div className="mini-meta">Internal rapid cash request.</div>
-                   </div>
-                </label>
-             </div>
-             
-             <div style={{ marginTop: "24px", display: 'flex', justifyContent: 'space-between' }}>
-               <button className="primary-button" style={{ background: 'none', border: '1px solid var(--line)' }} onClick={() => setGeneratorStep(1)}>← Back</button>
-               <div>
-                  <button className="secondary-button" style={{ marginRight: '12px' }} onClick={onClose}>Cancel</button>
-                  <button className="primary-button" onClick={() => setGeneratorStep(3)}>Continue →</button>
-               </div>
-             </div>
-           </div>
-        )}
-
-        {generatorStep === 3 && (
-           <div>
-              <div className="form-section-title">Step 3: Document & Payment Details</div>
-              
-              <div className="form-grid-2">
-                <div className="form-group">
-                  <label className="mini-meta">Vendor Name (Optional: Search Database)</label>
-                  <input style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} value={vendorName} onChange={(e) => setVendorName(e.target.value)} placeholder="Type or select below..." />
-                  {availableVendors && availableVendors.length > 0 && (
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                      {availableVendors.slice(0, 5).map(v => (
-                        <button key={v.id} onClick={() => handleVendorSelect(v)} className="chip" style={{ fontSize: '10px', padding: '4px 8px' }}>{v.name}</button>
-                      ))}
+          {generatorStep === 2 && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                <FileText size={18} color="#378ADD" />
+                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: '#f4f4f5' }}>Document Context</h4>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                {[
+                  { id: 'PO', title: 'Purchase Order', desc: 'Standard procurement of goods/services.' },
+                  { id: 'SPK', title: 'Surat Perintah Kerja', desc: 'For task execution or manpower.' },
+                  { id: 'KONTRAK', title: 'Contract Agreement', desc: 'Formal long-term vendor agreements.' },
+                  { id: 'CASH_ADVANCE', title: 'Cash Advance', desc: 'Internal rapid cash requests.' }
+                ].map(type => (
+                  <div 
+                    key={type.id}
+                    onClick={() => setDocType(type.id as any)}
+                    style={{ 
+                      padding: '24px', borderRadius: '20px', background: docType === type.id ? 'rgba(55,138,221,0.05)' : '#18181b', 
+                      border: docType === type.id ? '2px solid #378ADD' : '1px solid rgba(255,255,255,0.06)', 
+                      cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                       <div style={{ fontWeight: 700, color: docType === type.id ? '#378ADD' : '#f4f4f5', fontSize: '15px', marginBottom: '6px' }}>{type.title}</div>
+                       <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '2px solid #378ADD', background: docType === type.id ? '#378ADD' : 'transparent', display: 'grid', placeItems: 'center' }}>
+                         {docType === type.id && <Check size={12} color="#fff" strokeWidth={4} />}
+                       </div>
                     </div>
-                  )}
-                </div>
-                <div className="form-group">
-                  <label className="mini-meta">Total PO/SPK Value (100% Amount)</label>
-                  <input type="number" style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} value={documentTotal} onChange={(e) => { const v = e.target.value; setDocumentTotal(v ? Number(v) : ""); }} placeholder="e.g. 50000000" />
-                </div>
-              </div>
-
-              <div style={{ background: "var(--panel)", border: "1px solid var(--blue)", borderRadius: "8px", overflow: "hidden", marginTop: '24px' }}>
-                <div style={{ padding: "12px 16px", background: "rgba(91, 140, 255, 0.1)", borderBottom: "1px solid var(--blue)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                   <div style={{ fontWeight: 600, color: "var(--blue)" }}>Amount to Request Now (RFP)</div>
-                </div>
-                <div style={{ padding: "16px" }}>
-                   <div style={{ display: "flex", gap: "8px", marginBottom: "16px", flexWrap: "wrap" }}>
-                     {(["100", "50", "30", "20", "custom"] as const).map(ratio => (
-                       <button
-                         key={ratio}
-                         onClick={() => handleTermRatioChange(ratio)}
-                         style={{ 
-                           padding: "6px 12px", 
-                           borderRadius: "99px", 
-                           fontSize: "12px", 
-                           cursor: "pointer",
-                           background: selectedTermRatio === ratio ? "var(--blue)" : "transparent",
-                           color: selectedTermRatio === ratio ? "white" : "var(--text)",
-                           border: `1px solid ${selectedTermRatio === ratio ? "var(--blue)" : "var(--line)"}`
-                         }}
-                       >
-                         {ratio === "100" ? "Full payment" : ratio === "custom" ? "Custom Amount" : `${ratio}% DP/Term`}
-                       </button>
-                     ))}
-                   </div>
-                   
-                   <div className="form-grid-2">
-                     <div>
-                       <label className="mini-meta">Requested Transfer / Cash Amount</label>
-                       <input 
-                         type="number"
-                         style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--blue)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px', fontSize: '18px', fontWeight: 600 }} 
-                         value={rfpAmount} 
-                         disabled={selectedTermRatio !== "custom"}
-                         onChange={(e) => {
-                           const val = e.target.value;
-                           setRfpAmount(val === "" ? "" : Number(val));
-                         }} 
-                         placeholder="Requested Amount" 
-                       />
-                     </div>
-                     <div>
-                       <label className="mini-meta">Term Description</label>
-                       <input 
-                         style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} 
-                         value={paymentTerms} 
-                         onChange={(e) => setPaymentTerms(e.target.value)} 
-                         placeholder="e.g. DP 50%" 
-                       />
-                     </div>
-                   </div>
-
-                   <div className="form-grid-2" style={{ marginTop: '16px' }}>
-                     <div>
-                       <label className="mini-meta">Note / Reference</label>
-                       <input 
-                         style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} 
-                         value={description} 
-                         onChange={(e) => setDescription(e.target.value)} 
-                         placeholder="e.g. Pembayaran DP Talent Dance" 
-                       />
-                     </div>
-                     <div>
-                       <label className="mini-meta">Next Payment Date (Optional)</label>
-                       <input 
-                         type="date"
-                         style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} 
-                         value={nextPaymentDate} 
-                         onChange={(e) => setNextPaymentDate(e.target.value)} 
-                       />
-                     </div>
-                   </div>
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: "24px" }}>
-                <label className="mini-meta">Payment Method</label>
-                <div style={{ display: "flex", gap: "16px", marginTop: "8px" }}>
-                   <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                     <input type="radio" name="paymentType" value="Transfer" checked={paymentType === "Transfer"} onChange={() => setPaymentType("Transfer")} /> Transfer
-                   </label>
-                   <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                     <input type="radio" name="paymentType" value="Cash" checked={paymentType === "Cash"} onChange={() => setPaymentType("Cash")} /> Cash
-                   </label>
-                </div>
-              </div>
-
-              {paymentType === "Transfer" && (
-                <div className="form-grid-2" style={{ marginTop: "16px", background: "var(--panel-soft)", padding: "16px", borderRadius: "8px", border: "1px solid var(--line)" }}>
-                  <div className="form-group">
-                    <label className="mini-meta">Bank Name</label>
-                    <input style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} value={bankName} onChange={(e) => setBankName(e.target.value)} placeholder="e.g. BCA" />
+                    <div style={{ fontSize: '12px', color: '#71717a', lineHeight: 1.5 }}>{type.desc}</div>
                   </div>
-                  <div className="form-group"></div>
-                  <div className="form-group" style={{ marginTop: "12px" }}>
-                    <label className="mini-meta">Account No</label>
-                    <input style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} value={accountNo} onChange={(e) => setAccountNo(e.target.value)} placeholder="..." />
-                  </div>
-                  <div className="form-group" style={{ marginTop: "12px" }}>
-                    <label className="mini-meta">Account Holder Name</label>
-                    <input style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', padding: '10px', color: 'var(--text)', borderRadius: '8px', marginTop: '4px' }} value={accountName} onChange={(e) => setAccountName(e.target.value)} placeholder="..." />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {generatorStep === 3 && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              {/* Vendor & Amount Panel */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '40px' }}>
+                <div className="p-input-group">
+                  <label>Vendor Entity</label>
+                  <input className="p-input" value={vendorName} onChange={(e) => setVendorName(e.target.value)} placeholder="Type vendor name..." />
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '10px' }}>
+                    {availableVendors.slice(0, 4).map(v => (
+                      <button key={v.id} onClick={() => handleVendorSelect(v)} style={{ background: '#27272a', color: '#a1a1aa', border: 'none', borderRadius: '6px', padding: '4px 10px', fontSize: '10px', fontWeight: 600, cursor: 'pointer' }}>{v.name}</button>
+                    ))}
                   </div>
                 </div>
-              )}
-
-              <div style={{ marginTop: '32px', display: 'flex', gap: '12px', justifyContent: 'space-between' }}>
-                <button className="primary-button" style={{ background: 'none', border: '1px solid var(--line)' }} onClick={() => setGeneratorStep(2)}>← Back</button>
-                <div>
-                  <button className="secondary-button" style={{ background: 'none', border: '1px solid var(--line)', marginRight: '12px' }} onClick={onClose}>Cancel</button>
-                  <button className="primary-button" onClick={handleGenerate}>Submit Request For Payment</button>
+                <div className="p-input-group">
+                  <label>Total Value (100%)</label>
+                  <input type="number" className="p-input" value={documentTotal} onChange={(e) => { const v = e.target.value; setDocumentTotal(v ? Number(v) : ""); }} placeholder="0" />
                 </div>
               </div>
-           </div>
-        )}
-        
+
+              {/* RFP Allocation */}
+              <div style={{ background: 'rgba(55,138,221,0.03)', borderRadius: '24px', border: '1px solid rgba(55,138,221,0.1)', padding: '32px', marginBottom: '40px' }}>
+                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                    <div style={{ fontSize: '11px', color: '#378ADD', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Payment Allocation</div>
+                    <div style={{ display: 'flex', background: '#111113', padding: '4px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                       {(["100", "50", "30", "20", "custom"] as const).map(ratio => (
+                         <button 
+                           key={ratio} 
+                           onClick={() => handleTermRatioChange(ratio)}
+                           style={{ padding: '6px 12px', border: 'none', borderRadius: '8px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', background: selectedTermRatio === ratio ? '#378ADD' : 'transparent', color: selectedTermRatio === ratio ? '#fff' : '#52525b', transition: 'all 0.2s' }}
+                         >
+                           {ratio === 'custom' ? 'Custom' : `${ratio}%`}
+                         </button>
+                       ))}
+                    </div>
+                 </div>
+
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                    <div className="p-input-group">
+                       <label>Requested Amount</label>
+                       <input 
+                         type="number" className="p-input" style={{ fontSize: '20px', fontWeight: 700, color: '#378ADD' }} 
+                         value={rfpAmount} disabled={selectedTermRatio !== "custom"} 
+                         onChange={(e) => setRfpAmount(e.target.value === "" ? "" : Number(e.target.value))} 
+                       />
+                    </div>
+                    <div className="p-input-group">
+                       <label>Payment Terms</label>
+                       <input className="p-input" value={paymentTerms} onChange={(e) => setPaymentTerms(e.target.value)} />
+                    </div>
+                 </div>
+
+                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginTop: '20px' }}>
+                    <div className="p-input-group">
+                       <label>Payment Description</label>
+                       <input className="p-input" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g. Talent DP Payment" />
+                    </div>
+                    <div className="p-input-group">
+                       <label>Target Date</label>
+                       <input type="date" className="p-input" value={nextPaymentDate} onChange={(e) => setNextPaymentDate(e.target.value)} />
+                    </div>
+                 </div>
+              </div>
+
+              {/* Method & Bank */}
+              <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '32px' }}>
+                 <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#52525b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Payment Method</label>
+                    <div style={{ display: 'flex', gap: '8px', background: '#111113', padding: '4px', borderRadius: '10px' }}>
+                       {['Transfer', 'Cash'].map(m => (
+                         <button key={m} onClick={() => setPaymentType(m as any)} style={{ flex: 1, padding: '10px', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', background: paymentType === m ? '#27272a' : 'transparent', color: paymentType === m ? '#f4f4f5' : '#52525b' }}>{m}</button>
+                       ))}
+                    </div>
+                 </div>
+                 {paymentType === "Transfer" && (
+                   <div style={{ background: '#18181b', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.06)', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                      <div className="p-input-group"><label>Bank</label><input className="p-input" value={bankName} onChange={(e) => setBankName(e.target.value)} /></div>
+                      <div className="p-input-group"><label>Account No</label><input className="p-input" value={accountNo} onChange={(e) => setAccountNo(e.target.value)} /></div>
+                      <div className="p-input-group" style={{ gridColumn: 'span 2' }}><label>Account Holder</label><input className="p-input" value={accountName} onChange={(e) => setAccountName(e.target.value)} /></div>
+                   </div>
+                 )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div style={{ padding: '24px 32px', background: '#111113', borderTop: '0.5px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between' }}>
+          <button onClick={() => generatorStep > 1 && setGeneratorStep((generatorStep - 1) as any)} style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '13px', fontWeight: 600, cursor: 'pointer', visibility: generatorStep === 1 ? 'hidden' : 'visible' }}>← Back</button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+             <button onClick={onClose} style={{ padding: '12px 24px', background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+             {generatorStep < 3 ? (
+               <button onClick={() => generatorStep === 1 ? selectedProject && setGeneratorStep(2) : setGeneratorStep(3)} disabled={generatorStep === 1 && !selectedProject} style={{ padding: '12px 32px', background: '#378ADD', border: 'none', borderRadius: '10px', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (generatorStep === 1 && !selectedProject) ? 0.5 : 1 }}>Continue</button>
+             ) : (
+               <button onClick={handleGenerate} style={{ padding: '12px 32px', background: '#378ADD', border: 'none', borderRadius: '10px', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Submit RFP</button>
+             )}
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          .p-input-group label { display: block; font-size: 11px; color: #52525b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+          .p-input { width: 100%; background: #111113; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; color: #e4e4e7; outline: none; transition: border-color 0.2s; }
+          .p-input:focus { border-color: #378ADD; }
+        `}</style>
       </div>
     </div>
   );

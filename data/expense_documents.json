@@ -1,909 +1,878 @@
 [
   {
-    "id": "po-mock-1",
-    "projectId": "mock-project-1",
-    "projectName": "Annual Gathering 2026",
-    "vendorName": "PT. Sentosa Event",
+    "id": "doc-b8689015",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "Andy raharjo",
     "documentType": "PO",
-    "issueDate": "2026-04-10",
-    "description": "Sewa Lighting & Sound System",
-    "amount": 50000000,
-    "status": "paid",
-    "rfpId": "rfp-mock-1",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-10T07:48:43.914Z",
-      "digitalSignature": "SIG-A1B2C3"
-    }
-  },
-  {
-    "id": "spk-mock-1",
-    "projectId": "mock-project-1",
-    "projectName": "Annual Gathering 2026",
-    "vendorName": "Catering Bu Anis",
-    "documentType": "SPK",
-    "issueDate": "2026-04-10",
-    "description": "Catering untuk 500 pax",
-    "amount": 25000000,
-    "status": "paid"
-  },
-  {
-    "id": "kontrak-mock-1",
-    "projectId": "mock-project-2",
-    "projectName": "Exhibition Tech Expo",
-    "vendorName": "Digital Display Solusindo",
-    "documentType": "KONTRAK",
-    "issueDate": "2026-04-09",
-    "description": "Sewa LED Videotron 4x3m",
-    "amount": 75000000,
-    "status": "submitted"
-  },
-  {
-    "id": "PO-5NGZD5",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "Addiksi Kreatif Imagi",
-    "documentType": "PO",
-    "issueDate": "2026-04-10T04:49:12.466Z",
-    "description": "Design 3d",
-    "amount": 3000000,
-    "status": "paid",
-    "rfpId": "RFP-S3GM8O",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-10T08:47:32.249Z",
-      "digitalSignature": "SIG-F9G8H7"
-    }
-  },
-  {
-    "id": "003/JBBS/PO/04/2026",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "Aldo Printing",
-    "vendorAddress": "DKI Jakarta",
-    "vendorTaxId": "095397915017000",
-    "documentType": "PO",
-    "issueDate": "2026-04-10T06:03:43.977Z",
-    "description": "",
-    "amount": 840000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "tese",
-        "specification": "gfhg",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": 1,
-        "volUnit": "Event",
-        "price": "500000",
-        "amount": 500000
-      },
-      {
-        "no": 2,
-        "description": "asdfa",
-        "specification": "dfad",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": 1,
-        "freqUnit": "Time",
-        "vol": 1,
-        "volUnit": "Event",
-        "price": "340000",
-        "amount": 340000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-1DSDMT",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-10T09:21:57.856Z",
-      "digitalSignature": "SIG-Z5X4Y3"
-    }
-  },
-  {
-    "id": "002/JBBS/SPK/04/2026",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "fatma nabila",
-    "vendorAddress": "DKI Jakarta",
-    "vendorTaxId": "3173054905030001",
-    "documentType": "SPK",
-    "issueDate": "2026-04-10T06:19:42.913Z",
-    "description": "",
-    "amount": 1250000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "adfa",
-        "specification": "df",
-        "qty": 1,
-        "unit": "pckg",
-        "freq": 1,
-        "freqUnit": "Time",
-        "vol": 1,
-        "volUnit": "Event",
-        "price": "1250000",
-        "amount": 1250000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-0YRFD1",
-    "verifiedBy": {
-      "name": "Finance Admin",
-      "date": "2026-04-10T07:21:23.204Z"
-    },
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-10T07:21:36.688Z",
-      "digitalSignature": "SIG-L9M8K7"
-    }
-  },
-  {
-    "id": "004/JBBS/PO/04/2026",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "Addiksi Kreatif Imagi",
-    "vendorAddress": "Jawa Timur",
-    "vendorTaxId": "45 435.083.6-643 000",
-    "documentType": "PO",
-    "issueDate": "2026-04-10T19:57:59.662Z",
-    "description": "",
-    "amount": 10000000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "adfafd",
-        "specification": "xfadf",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "1",
-        "volUnit": "Event",
-        "price": "10000000",
-        "amount": 10000000
-      }
-    ],
-    "paymentTerms": "DP 50%",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-0JQWBB",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-10T20:02:12.479Z",
-      "digitalSignature": "SIG-L2YI4J"
-    }
-  },
-  {
-    "id": "005/JBBS/PO/04/2026",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "Dodo",
-    "vendorAddress": "DKI Jakarta",
-    "vendorTaxId": "085643925825",
-    "documentType": "PO",
-    "issueDate": "2026-04-10T20:12:47.583Z",
-    "description": "",
-    "amount": 40000000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "dance",
-        "specification": "1",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "1",
-        "volUnit": "Event",
-        "price": "40000000",
-        "amount": 40000000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-Z8RGUK",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-11T03:56:13.491Z",
-      "digitalSignature": "SIG-QV3IWJ"
-    }
-  },
-  {
-    "id": "006/JBBS/PO/04/2026",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "CV Afifah Kreatif",
-    "vendorAddress": "DKI Jakarta",
-    "vendorTaxId": "0055521322009000",
-    "documentType": "PO",
-    "issueDate": "2026-04-11T05:45:45.005Z",
-    "description": "pembayaran Tes",
-    "amount": 400000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "",
-        "specification": "",
-        "qty": "",
-        "unit": "pckg",
-        "freq": "",
-        "freqUnit": "Time",
-        "vol": "",
-        "volUnit": "Event",
-        "price": "",
-        "amount": 0
-      },
-      {
-        "no": 2,
-        "description": "tes",
-        "specification": "",
-        "qty": 1,
-        "unit": "pckg",
-        "freq": 1,
-        "freqUnit": "Time",
-        "vol": 1,
-        "volUnit": "Event",
-        "price": "400000",
-        "amount": 400000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-0WXV1B",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-11T05:48:13.340Z",
-      "digitalSignature": "SIG-GDB024"
-    }
-  },
-  {
-    "id": "CA-QZSRUD",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "daxo",
-    "vendorAddress": "",
-    "vendorTaxId": "",
-    "documentType": "CASH_ADVANCE",
-    "issueDate": "2026-04-11T08:35:27.178Z",
-    "description": "Belanja Logistik ",
-    "amount": 4333000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "jhgjhg",
-        "specification": "",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "1",
-        "volUnit": "Event",
-        "price": "2000000",
-        "amount": 2000000
-      },
-      {
-        "no": 2,
-        "description": "2332123",
-        "specification": "",
-        "qty": 1,
-        "unit": "pckg",
-        "freq": 1,
-        "freqUnit": "Time",
-        "vol": 1,
-        "volUnit": "Event",
-        "price": "2333000",
-        "amount": 2333000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-NAD5JX",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-11T09:04:21.944Z",
-      "digitalSignature": "SIG-OSP0GA"
-    }
-  },
-  {
-    "id": "007/JBBS/PO/04/2026",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "GEOMETRIX (CV KARUNIA BUMI)",
-    "vendorAddress": "DIY dan Jawa Tengah",
-    "vendorTaxId": "53.022.278.5-542.000",
-    "documentType": "PO",
-    "issueDate": "2026-04-11T10:45:12.090Z",
-    "description": "",
-    "amount": 35000000,
-    "status": "paid",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "Booth ",
-        "specification": "5x5",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "1",
-        "volUnit": "Event",
-        "price": "35000000",
-        "amount": 35000000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "rfpId": "RFP-FAYA5D",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-11T10:46:42.475Z",
-      "digitalSignature": "SIG-9350FX"
-    }
-  },
-  {
-    "id": "008/JBBS/PO/04/2026",
-    "projectId": "1773806241580",
-    "projectName": "Digital Activation Rockin' Surabaya",
-    "vendorName": "TestVendor",
-    "vendorAddress": "",
-    "vendorTaxId": "",
-    "documentType": "PO",
-    "issueDate": "2026-04-12T18:58:56.197Z",
-    "description": "No description",
-    "amount": 1000000,
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO Andy  - Deck Proposal (M",
+    "amount": 6000000.0,
     "status": "approved",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "Test Item",
-        "specification": "",
-        "qty": "1",
-        "unit": "pc1kg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "",
-        "volUnit": "Event",
-        "price": "1000000",
-        "amount": 0
-      }
-    ],
-    "paymentTerms": "Full PaymentFull Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice"
-    ],
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-12T18:59:55.784Z",
-      "digitalSignature": "SIG-LALHLN"
-    }
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO Andy  - Deck Proposal (M"
   },
   {
-    "id": "009/JBBS/PO/04/2026",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "PT. PERFORMA MAHAKARYA INDONESIA",
-    "vendorAddress": "Indonesia",
-    "vendorTaxId": "20.553.546.1-017.000",
+    "id": "doc-934284e3",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "Bima Nazuardi",
     "documentType": "PO",
-    "issueDate": "2026-04-13T05:33:18.608Z",
-    "description": "No description",
-    "amount": 10000000,
+    "issueDate": "2026-01-15",
+    "description": "PO for 002 PO Bima  - Beautify Deck (M",
+    "amount": 3076923.0,
     "status": "approved",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "booth ",
-        "specification": "5x5",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "1",
-        "volUnit": "Event",
-        "price": "10000000",
-        "amount": 10000000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "2026-04-14",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice"
-    ],
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-13T05:33:35.742Z",
-      "digitalSignature": "SIG-T9D3KH"
-    }
+    "notes": "Imported from Excel PO 2026. Sheet: 002 PO Bima  - Beautify Deck (M"
   },
   {
-    "id": "010/JBBS/PO/04/2026",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "Gudang Production",
-    "vendorAddress": "Banten",
-    "vendorTaxId": "44.038.947.6-001.000",
+    "id": "doc-3ffa7d4c",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "RASA NUSANTARA",
     "documentType": "PO",
-    "issueDate": "2026-04-13T05:52:32.231Z",
-    "description": "No description",
-    "amount": 4000000,
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO Rasa Nusantara - Rapat M",
+    "amount": 9375543.0,
     "status": "approved",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "test sdfadfadfa",
-        "specification": "dfadfadf",
-        "qty": "1",
-        "unit": "pckg",
-        "freq": "1",
-        "freqUnit": "Time",
-        "vol": "1",
-        "volUnit": "Event",
-        "price": "4000000",
-        "amount": 4000000
-      }
-    ],
-    "paymentTerms": "Full Payment",
-    "deliveryInstruction": "",
-    "deliveryDate": "2026-05-12",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice"
-    ],
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-13T05:53:25.794Z",
-      "digitalSignature": "SIG-MQ6577"
-    }
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO Rasa Nusantara - Rapat M"
   },
   {
-    "id": "CA-PUY01F",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "Internal User (Cash Advance)",
-    "vendorAddress": "",
-    "vendorTaxId": "",
-    "documentType": "CASH_ADVANCE",
-    "issueDate": "2026-04-13T06:07:28.036Z",
-    "description": "Operasional",
-    "amount": 5000000,
-    "status": "paid",
-    "paymentTerms": "Full Payment",
-    "rfpId": "RFP-90V013",
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-13T06:08:15.258Z",
-      "digitalSignature": "SIG-T4MPQM"
-    }
-  },
-  {
-    "id": "011/JBBS/PO/04/2026",
-    "projectId": "1773806241580",
-    "projectName": "Digital Activation Rockin' Surabaya",
-    "vendorName": "PT. Abhinaya Visual Radhikasakti",
-    "vendorAddress": "Banten",
-    "vendorTaxId": "41.488.027.8-452.000",
+    "id": "doc-054c5fa5",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "Bima Nazuardi",
     "documentType": "PO",
-    "issueDate": "2026-04-13T10:24:09.337Z",
-    "description": "",
-    "amount": 35456454,
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO Bima (Design2D) - Bersin",
+    "amount": 4000000.0,
     "status": "approved",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "dfadf",
-        "specification": "dfadfa",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Ha",
-        "price": "1222220",
-        "amount": 1222220
-      },
-      {
-        "no": 2,
-        "description": "dfad",
-        "specification": "fdafd",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Ha",
-        "price": "34234234",
-        "amount": 34234234
-      }
-    ],
-    "paymentTerms": "DP 50%",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "preparedBy": {
-      "name": "Purchasing Division",
-      "date": "2026-04-13T10:24:08.364Z"
-    },
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-13T10:25:07.487Z",
-      "digitalSignature": "SIG-8HUDIF"
-    }
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO Bima (Design2D) - Bersin"
   },
   {
-    "id": "012/JBBS/PO/04/2026",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "Addiksi Kreatif Imagi",
-    "vendorAddress": "Jawa Timur",
-    "vendorTaxId": "45 435.083.6-643 000",
+    "id": "doc-0d93aa62",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "WIDIA W. NURSANTY (3D DESIGNER)",
     "documentType": "PO",
-    "issueDate": "2026-04-13T10:33:54.906Z",
-    "description": "",
-    "amount": 10000000,
+    "issueDate": "2026-01-15",
+    "description": "PO for 002 PO Widia (Design3D) - Bersi",
+    "amount": 3500000.0,
     "status": "approved",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "Design Booth ",
-        "specification": "3x3 meter",
-        "qty": "1",
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Ha",
-        "price": "2500000",
-        "amount": 2500000
-      },
-      {
-        "no": 2,
-        "description": "Booth ",
-        "specification": "3x3 m, fin vinyl, kerangka besi",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Ha",
-        "price": "7500000",
-        "amount": 7500000
-      }
-    ],
-    "paymentTerms": "DP 30%",
-    "deliveryDate": "2026-05-02",
-    "shipTo": "PPKPI Jakarta",
-    "billingInstruction": "admin@juaraevent.id",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "preparedBy": {
-      "name": "Purchasing Division",
-      "date": "2026-04-13T10:33:54.314Z"
-    },
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-13T16:18:19.424Z",
-      "digitalSignature": "SIG-IC9DF1"
-    }
+    "notes": "Imported from Excel PO 2026. Sheet: 002 PO Widia (Design3D) - Bersi"
   },
   {
-    "id": "013/JBBS/PO/04/2026",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "Addiksi Kreatif Imagi",
-    "vendorAddress": "Jawa Timur",
-    "vendorTaxId": "45 435.083.6-643 000",
+    "id": "doc-1b9c21d1",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": ": BLACK RENDER",
     "documentType": "PO",
-    "issueDate": "2026-04-13T10:42:59.883Z",
-    "description": "",
-    "amount": 40000000,
+    "issueDate": "2026-01-15",
+    "description": "PO for 003 PO BLCK RNDR. (Motion) - MU",
+    "amount": 10000000.0,
     "status": "approved",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "dfadf",
-        "specification": "df",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Ha",
-        "price": "40000000",
-        "amount": 40000000
-      }
-    ],
-    "paymentTerms": "DP 30%",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "preparedBy": {
-      "name": "Purchasing Division",
-      "date": "2026-04-13T10:42:58.906Z"
-    },
-    "approvedBy": {
-      "name": "Eka Marutha Yuswardana",
-      "date": "2026-04-13T11:05:11.042Z",
-      "digitalSignature": "SIG-S9N6DB"
-    },
-    "rfpId": "RFP-5HDKUW",
-    "rfpIds": [
-      "RFP-5HDKUW"
-    ]
+    "notes": "Imported from Excel PO 2026. Sheet: 003 PO BLCK RNDR. (Motion) - MU"
   },
   {
-    "id": "014/JBBS/PO/04/2026",
-    "projectId": "daikin-center-of-excellence-ppkpi-pasar-rebo-88173f31",
-    "projectName": "Center of Excellence PPKPI Pasar Rebo",
-    "vendorName": "Gudang Production",
-    "vendorAddress": "Banten",
-    "vendorTaxId": "44.038.947.6-001.000",
+    "id": "doc-47b7c0d1",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": ": BLACK RENDER",
     "documentType": "PO",
-    "issueDate": "2026-04-13T11:16:36.601Z",
-    "description": "",
-    "amount": 12000000,
-    "status": "draft",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "dfadf",
-        "specification": "dffa",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Hari",
-        "price": "12000000",
-        "amount": 12000000
-      }
-    ],
-    "paymentTerms": "Custom Schedule",
-    "deliveryDate": "2026-04-18",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "preparedBy": {
-      "name": "Purchasing Division",
-      "date": "2026-04-13T11:16:36.073Z"
-    },
-    "rejectionReason": "salah nominal"
+    "issueDate": "2026-01-15",
+    "description": "PO for 004 PO BLCK RNDR. (Motion) - HA",
+    "amount": 10000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 004 PO BLCK RNDR. (Motion) - HA"
   },
   {
-    "id": "003/JBBS/SPK/04/2026",
-    "projectId": "1773806241580",
-    "projectName": "Digital Activation Rockin' Surabaya",
-    "vendorName": "69 Show Management",
-    "vendorAddress": "Jawa Timur",
-    "vendorTaxId": "8.96822E+14",
-    "documentType": "SPK",
-    "issueDate": "2026-04-13T12:07:46.484Z",
-    "description": "",
-    "amount": 10000000,
-    "status": "draft",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "hgfjhgf",
-        "specification": "jhgjh",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Hari",
-        "price": "10000000",
-        "amount": 10000000
-      }
-    ],
-    "paymentTerms": "Custom Schedule",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "preparedBy": {
-      "name": "Purchasing Division",
-      "date": "2026-04-13T12:07:45.839Z"
-    }
-  },
-  {
-    "id": "CA-003-04/2026",
-    "projectId": "1773801941114",
-    "projectName": "Pelantikan Dan Pengukuhan Ketua Umum GPN Periode 2026-2031",
-    "vendorName": "EL BRAMO",
-    "vendorAddress": "",
-    "vendorTaxId": "",
-    "documentType": "CASH_ADVANCE",
-    "issueDate": "2026-04-13T17:37:19.805Z",
-    "description": "Operasional ",
-    "amount": 30000000,
-    "status": "draft",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "dfasdf",
-        "specification": "",
-        "qty": 1,
-        "unit": "Paket",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "",
-        "price": 10000000,
-        "amount": 10000000
-      },
-      {
-        "no": 2,
-        "description": "dfasdf23",
-        "specification": "",
-        "qty": 1,
-        "unit": "Paket",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "",
-        "price": 20000000,
-        "amount": 20000000
-      }
-    ],
-    "paymentTerms": "Full",
-    "itemTotal": 30000000,
-    "preparedBy": {
-      "name": "EL BRAMO",
-      "date": "2026-04-13T17:37:18.768Z"
-    },
-    "rejectionReason": "salah nominal"
-  },
-  {
-    "id": "015/JBBS/PO/04/2026",
-    "projectId": "mui-gus-nw-doa-bersama-untuk-keselamatan-indonesia-dan-pengukuhan-dewan-pimpinan-mui-pusat-periode-2025-2030-22b17b58",
-    "projectName": "Doa Bersama Untuk Keselamatan Indonesia dan Pengukuhan Dewan Pimpinan MUI Pusat Periode 2025 - 2030",
-    "vendorName": "PT. Abhinaya Visual Radhikasakti",
-    "vendorAddress": "Banten",
-    "vendorTaxId": "41.488.027.8-452.000",
+    "id": "doc-05ec4e19",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "MATA VISUAL",
     "documentType": "PO",
-    "issueDate": "2026-04-16T07:48:26.993Z",
-    "description": "asdfaf",
-    "amount": 100000000,
-    "status": "draft",
-    "lineItems": [
-      {
-        "no": 1,
-        "description": "asdfaf",
-        "specification": "",
-        "qty": 1,
-        "unit": "Unit",
-        "freq": 1,
-        "freqUnit": "Kali",
-        "vol": 1,
-        "volUnit": "Hari",
-        "price": "100000000",
-        "amount": 100000000
-      }
-    ],
-    "paymentTerms": "Custom Schedule",
-    "deliveryDate": "",
-    "shipTo": "",
-    "billingInstruction": "",
-    "billingTerms": [
-      "Invoice",
-      "BAST",
-      "Report Dokumentasi"
-    ],
-    "preparedBy": {
-      "name": "Procurement Division",
-      "date": "2026-04-16T07:48:24.688Z"
-    },
-    "venue": "",
-    "duration": "",
-    "workScope": [
-      "Penerima kerja wajib mengikuti meeting online dan offline, selama persiapan event.",
-      "Wajib hadir pada kegiatan Gladi Resik (GR) pada tanggal event.",
-      "Menampilkan pertunjukan sesuai dengan konsep dan rundown acara.",
-      "Mendukung kelancaran jalannya program acara selama penampilan berlangsung."
-    ],
-    "lampiran": "1 (satu) set",
-    "paymentSchedule": [
-      {
-        "label": "Termin 1",
-        "percentage": 50,
-        "amount": 50000000,
-        "date": "2026-02-11"
-      }
-    ]
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO Mata Visual - MUI",
+    "amount": 30000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO Mata Visual - MUI"
+  },
+  {
+    "id": "doc-d2688f17",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PT.Kontraktor Booth Indonesia",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 002 PO Kobindo (Production) - M",
+    "amount": 150000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 002 PO Kobindo (Production) - M"
+  },
+  {
+    "id": "doc-583d9fbb",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PRAMUKA DIGITAL",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 003 PO Undangan - MUI",
+    "amount": 9000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 003 PO Undangan - MUI"
+  },
+  {
+    "id": "doc-7b4369b1",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "Kolaboratix",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 004 PO Kolaboratix - MUI",
+    "amount": 45631000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 004 PO Kolaboratix - MUI"
+  },
+  {
+    "id": "doc-12e2eee0",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PRAMUKA DIGITAL",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 005 PO Undangan - MUI",
+    "amount": 11820000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 005 PO Undangan - MUI"
+  },
+  {
+    "id": "doc-8a53e344",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "RASA NUSANTARA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 006 PO Snack Box - MUI",
+    "amount": 4635000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 006 PO Snack Box - MUI"
+  },
+  {
+    "id": "doc-c6a73e02",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SELARAS EQUIPMENT",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 007 PO Selaras (Bendera &St Bus",
+    "amount": 21700800.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 007 PO Selaras (Bendera &St Bus"
+  },
+  {
+    "id": "doc-25ea60d4",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "S NET",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 008 PO SNet  (Lanyard)  - MUI",
+    "amount": 27288800.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 008 PO SNet  (Lanyard)  - MUI"
+  },
+  {
+    "id": "doc-5ee1855c",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "JAGATERS STUDIO",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 009 PO Jagaters Studio (Live St",
+    "amount": 25000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 009 PO Jagaters Studio (Live St"
+  },
+  {
+    "id": "doc-b6a89264",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ASAMULTI",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 010 PO Asamulti   - MUI",
+    "amount": 85850000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 010 PO Asamulti   - MUI"
+  },
+  {
+    "id": "doc-abeca32c",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "KARINDO",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 011 PO Karindo   - MUI",
+    "amount": 147140000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 011 PO Karindo   - MUI"
+  },
+  {
+    "id": "doc-a27c27cc",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SG PRODUCTION (T-BANNER)",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for  012 PO SG Production (T-Banner",
+    "amount": 27500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet:  012 PO SG Production (T-Banner"
+  },
+  {
+    "id": "doc-eb2772f9",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PT.Kontraktor Booth Indonesia",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 013 PO KOBINDO ADD- MUI",
+    "amount": 63850000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 013 PO KOBINDO ADD- MUI"
+  },
+  {
+    "id": "doc-6daffb3f",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "COLONY",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 014 PO Colony (HT Satelite)- MU",
+    "amount": 1800000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 014 PO Colony (HT Satelite)- MU"
+  },
+  {
+    "id": "doc-f63541b3",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "RA HANDY TALKIE",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 015 PO RA HT (HT Icom)- MUI",
+    "amount": 7020000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 015 PO RA HT (HT Icom)- MUI"
+  },
+  {
+    "id": "doc-cd6c7a19",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "Kolaboratix",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 016 PO KOLABORATIX (Gate System",
+    "amount": 40000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 016 PO KOLABORATIX (Gate System"
+  },
+  {
+    "id": "doc-dd02604f",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ROSE ART",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 017 PO Rose Art (Centerpiece) -",
+    "amount": 3750000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 017 PO Rose Art (Centerpiece) -"
+  },
+  {
+    "id": "doc-c2cc7369",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "DAPUR SOLO",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 018 PO Dapur Solo (Meals OC) - ",
+    "amount": 7480000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 018 PO Dapur Solo (Meals OC) - "
+  },
+  {
+    "id": "doc-50db7211",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "BEKAH JAYA ADVERTISING",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 019 PO Pataka - MUI",
+    "amount": 2400000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 019 PO Pataka - MUI"
+  },
+  {
+    "id": "doc-5a92fabe",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SARI RASA CATERING",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 020 PO Sari Rasa (Meals Team)- ",
+    "amount": 17820000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 020 PO Sari Rasa (Meals Team)- "
+  },
+  {
+    "id": "doc-681c52d8",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "Kolaboratix",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 021 PO Kolaboratix (Gelang, ID ",
+    "amount": 86619000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 021 PO Kolaboratix (Gelang, ID "
+  },
+  {
+    "id": "doc-06b513dd",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SERASA SNACK BOX",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 022 PO Serasa (Snack Box Talent",
+    "amount": 1316150.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 022 PO Serasa (Snack Box Talent"
+  },
+  {
+    "id": "doc-bdca1aff",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "INDO MEDIA IKLAN",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 023 PO Tripod Signage - MUI",
+    "amount": 1350000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 023 PO Tripod Signage - MUI"
+  },
+  {
+    "id": "doc-37616886",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "TOKO PLASTIK",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 024 PO Steven Plastik - MUI",
+    "amount": 23857000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 024 PO Steven Plastik - MUI"
+  },
+  {
+    "id": "doc-92644270",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "TOILET KITA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 025 PO TOILET KITA - MUI",
+    "amount": 66000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 025 PO TOILET KITA - MUI"
+  },
+  {
+    "id": "doc-35a906a3",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ASAMULTI",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for  026 PO ASAMULTI (Addcost) - MU",
+    "amount": 28750000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet:  026 PO ASAMULTI (Addcost) - MU"
+  },
+  {
+    "id": "doc-4ebd3acf",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "3PASS",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 027 PO Pasukan Pashe (Listrik) ",
+    "amount": 3500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 027 PO Pasukan Pashe (Listrik) "
+  },
+  {
+    "id": "doc-090c53e3",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "S NET",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 028 PO SNet (Lanyard Tambahan) ",
+    "amount": 5120500.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 028 PO SNet (Lanyard Tambahan) "
+  },
+  {
+    "id": "doc-98521c8a",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "3PASS",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 029 PO 3PASS (tambahan) - MUI",
+    "amount": 2000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 029 PO 3PASS (tambahan) - MUI"
+  },
+  {
+    "id": "doc-cbb56092",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "YMEDIA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 030 PO YMedia(TV Promter) - MUI",
+    "amount": 15000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 030 PO YMedia(TV Promter) - MUI"
+  },
+  {
+    "id": "doc-0244a094",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ARTHUR TECH",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 031 PO ARTHUR TECH(Genset)- MUI",
+    "amount": 18310321.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 031 PO ARTHUR TECH(Genset)- MUI"
+  },
+  {
+    "id": "doc-3c09cbd8",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "AKASYA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 032 PO AKASYA(CAT VIP VVIP)- MU",
+    "amount": 159296500.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 032 PO AKASYA(CAT VIP VVIP)- MU"
+  },
+  {
+    "id": "doc-a4b85615",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SARI RASA CATERING",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 033 PO Sari Rasa (Meals Tambaha",
+    "amount": 29900000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 033 PO Sari Rasa (Meals Tambaha"
+  },
+  {
+    "id": "doc-5e5d98c3",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "BBS",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 034 PO BBS (Intrepeter) - MUI",
+    "amount": 1125000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 034 PO BBS (Intrepeter) - MUI"
+  },
+  {
+    "id": "doc-774f712f",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SG PRODUCTION (T-BANNER)",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 035 PO SG Prod (TBanner Rev)- M",
+    "amount": 6000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 035 PO SG Prod (TBanner Rev)- M"
+  },
+  {
+    "id": "doc-2ae86692",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "TV NU",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 036 PO TV NU (Internet) - MUI",
+    "amount": 10000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 036 PO TV NU (Internet) - MUI"
+  },
+  {
+    "id": "doc-cf6b35a5",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "DAPUR SOLO",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 037 PO DAPUR SOLO (MEALS TALENT",
+    "amount": 2692800.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 037 PO DAPUR SOLO (MEALS TALENT"
+  },
+  {
+    "id": "doc-f1dcaa5b",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "S NET",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 038 PO SNet (Mockup Cetak) - MU",
+    "amount": 5821062.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 038 PO SNet (Mockup Cetak) - MU"
+  },
+  {
+    "id": "doc-880e72f0",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ROSE ART",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 039 PO Rose Art (Centerpiece) -",
+    "amount": 1500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 039 PO Rose Art (Centerpiece) -"
+  },
+  {
+    "id": "doc-5ce2fe12",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "INIEVENT LANCAR JAYA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO Inievent.id  - DAIKIN Co",
+    "amount": 3850000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO Inievent.id  - DAIKIN Co"
+  },
+  {
+    "id": "doc-42fd41aa",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "DHARMA ASHA MEDIKA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO AMBULANCE - KEMENDIKDASM",
+    "amount": 15000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO AMBULANCE - KEMENDIKDASM"
+  },
+  {
+    "id": "doc-ea532f46",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ADDIKSI IMAGI",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO  - ADDIKSI IMAGI (3D DES",
+    "amount": 19000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO  - ADDIKSI IMAGI (3D DES"
+  },
+  {
+    "id": "doc-0edf4a20",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "KRIHNA COMMUNICATION CENTER",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO  - KRISHNA-DJARUM MLBB 2",
+    "amount": 12500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO  - KRISHNA-DJARUM MLBB 2"
+  },
+  {
+    "id": "doc-77f51a97",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "KRIHNA COMMUNICATION CENTER",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 002 PO  - KRISHNA-DJARUM MLBB 2",
+    "amount": 24348000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 002 PO  - KRISHNA-DJARUM MLBB 2"
+  },
+  {
+    "id": "doc-ed550b3b",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "INGE MILASARI SANJAYA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for  001 PO INGE - PGN",
+    "amount": 71249500.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet:  001 PO INGE - PGN"
+  },
+  {
+    "id": "doc-e3bf5a8d",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PT MULTI VISUAL KREASINDO",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for  002 PO MULTI VISUAL  - PGN",
+    "amount": 50000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet:  002 PO MULTI VISUAL  - PGN"
+  },
+  {
+    "id": "doc-f529305e",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "WIDIA W. NURSANTY (3D DESIGNER)",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 003 PO WIDIA (3D)  - PGN",
+    "amount": 1500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 003 PO WIDIA (3D)  - PGN"
+  },
+  {
+    "id": "doc-1e718987",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "INGE MILASARI SANJAYA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 004 PO INGE - PGN",
+    "amount": 6324000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 004 PO INGE - PGN"
+  },
+  {
+    "id": "doc-41308b1d",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "IPRINTING INDONESIA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO iPrinting-GAPEMPI",
+    "amount": 5950000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO iPrinting-GAPEMPI"
+  },
+  {
+    "id": "doc-346e16b7",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "MATA VISUAL",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 002 PO Mata Visual-GAPEMPI",
+    "amount": 15000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 002 PO Mata Visual-GAPEMPI"
+  },
+  {
+    "id": "doc-9f01ec9d",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "JX - ONE",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 003 PO JX One -GAPEMPI",
+    "amount": 2000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 003 PO JX One -GAPEMPI"
+  },
+  {
+    "id": "doc-bdccafdd",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PT.Kontraktor Booth Indonesia",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 004 PO KOBINDO -GAPEMPI",
+    "amount": 53000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 004 PO KOBINDO -GAPEMPI"
+  },
+  {
+    "id": "doc-5e1a7a1c",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "FLAT PRODUCTION",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 005 PO Flat Pro -GAPEMPI",
+    "amount": 54000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 005 PO Flat Pro -GAPEMPI"
+  },
+  {
+    "id": "doc-140e39ee",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SG PRODUCTION",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 006 PO SG T-Banner -GAPEMPI",
+    "amount": 2750000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 006 PO SG T-Banner -GAPEMPI"
+  },
+  {
+    "id": "doc-6887fce9",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "ARTA ADVERTISING",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 007 PO PLAKAT  -GAPEMPI",
+    "amount": 5500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 007 PO PLAKAT  -GAPEMPI"
+  },
+  {
+    "id": "doc-9f818c66",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "DAPUR YUMYUM",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 008 PO Yum Yum Catering  -GAPEM",
+    "amount": 9380000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 008 PO Yum Yum Catering  -GAPEM"
+  },
+  {
+    "id": "doc-3ac8e0f8",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PK3D",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 009 PO Ambulance-GAPEMPI",
+    "amount": 1650000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 009 PO Ambulance-GAPEMPI"
+  },
+  {
+    "id": "doc-0820e2c7",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PRAMUKA DIGITAL",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 010 PO Pramuka Digital (Buku Mu",
+    "amount": 9900000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 010 PO Pramuka Digital (Buku Mu"
+  },
+  {
+    "id": "doc-7098172f",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SELARAS EQUIPMENT",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 011 PO Selaras (ID Card,Lanyard",
+    "amount": 4914700.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 011 PO Selaras (ID Card,Lanyard"
+  },
+  {
+    "id": "doc-a29ae15e",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "IPRINTING INDONESIA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 012 PO iPrinting(Booklet) -GAPE",
+    "amount": 3237500.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 012 PO iPrinting(Booklet) -GAPE"
+  },
+  {
+    "id": "doc-f3a73dee",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "EL PRODUKSI",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 013 PO EL Prod -GAPEMPI",
+    "amount": 1500000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 013 PO EL Prod -GAPEMPI"
+  },
+  {
+    "id": "doc-d7848914",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "WIDIA W. NURSANTY (3D DESIGNER)",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 014 PO WIDIA (3D)  - GAPEMPI",
+    "amount": 5000000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 014 PO WIDIA (3D)  - GAPEMPI"
+  },
+  {
+    "id": "doc-ec562336",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SG PRODUCTION",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 015 PO SG Prod -GAPEMPI",
+    "amount": 150000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 015 PO SG Prod -GAPEMPI"
+  },
+  {
+    "id": "doc-04662164",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "SELARAS EQUIPMENT",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 016 PO Selaras (TV MATADOR)-GAP",
+    "amount": 750000.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 016 PO Selaras (TV MATADOR)-GAP"
+  },
+  {
+    "id": "doc-e06176fd",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "PRADIA DESIGN",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 001 PO PRADIA - DAIKIN PS REBO",
+    "amount": 0.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 001 PO PRADIA - DAIKIN PS REBO"
+  },
+  {
+    "id": "doc-dec5dcd4",
+    "projectId": "proj-jbbs-2026",
+    "projectName": "JBBS 2026",
+    "vendorName": "MANUNGGAL SUMBER DAYA",
+    "documentType": "PO",
+    "issueDate": "2026-01-15",
+    "description": "PO for 002 PO MANUNGGAL SD - DAIKIN PS",
+    "amount": 116632800.0,
+    "status": "approved",
+    "notes": "Imported from Excel PO 2026. Sheet: 002 PO MANUNGGAL SD - DAIKIN PS"
   }
 ]

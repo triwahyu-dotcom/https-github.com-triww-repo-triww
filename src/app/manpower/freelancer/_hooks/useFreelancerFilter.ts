@@ -49,8 +49,8 @@ export const useFreelancerFilter = (initialData: Freelancer[]) => {
       const matchesKota = selectedKota === "Semua" || f.kota_domisili === selectedKota;
       
       // Status
-      const statusValue = selectedStatus.toLowerCase().replace(/ /g, "_");
-      const matchesStatus = selectedStatus === "Semua" || f.status === statusValue;
+      const statusValue = selectedStatus === "Pendaftar Baru" ? "new" : selectedStatus.toLowerCase().replace(/ /g, "_");
+      const matchesStatus = selectedStatus === "Semua" || f.status === (statusValue as any);
       
       // Bank
       const hasBank = !!f.rekening_bank;

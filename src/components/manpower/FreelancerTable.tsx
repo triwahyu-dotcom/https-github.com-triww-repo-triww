@@ -164,7 +164,7 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                           <div className="tooltip-premium">Profil belum lengkap</div>
                         </div>
                       )}
-                      <span style={{ fontWeight: 500, color: '#e4e4e7' }}>{f.nama || (f as any).name || "Tanpa Nama"}</span>
+                      <span style={{ fontWeight: 500, color: '#e4e4e7' }}>{f.nama}</span>
                     </div>
                   </td>
                   <td>
@@ -197,7 +197,7 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                     {lastEvent ? (
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ color: '#a1a1aa', fontSize: '12px' }}>{lastEvent.nama_event}</span>
-                        <span style={{ color: '#52525b', fontSize: '11px' }}>{lastEvent.tanggal_mulai ? new Date(lastEvent.tanggal_mulai).getFullYear() : "–"}</span>
+                        <span style={{ color: '#52525b', fontSize: '11px' }}>{new Date(lastEvent.tanggal_mulai).getFullYear()}</span>
                       </div>
                     ) : "–"}
                   </td>
@@ -249,7 +249,7 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
           </button>
           <div style={{ display: 'flex', gap: '4px' }}>
             {[...Array(Math.min(5, totalPages))].map((_, i) => {
-              const p = i + 1;
+              const p = i + 1; // Simplistic pagination for demo
               return (
                 <button 
                   key={p} 

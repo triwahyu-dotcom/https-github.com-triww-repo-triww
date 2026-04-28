@@ -10,7 +10,7 @@ const signature = Cedarville_Cursive({
 });
 
 export const metadata: Metadata = {
-  title: "Project Tracker JUARAEVENT",
+  title: "JUARA Workspace",
   description: "Dashboard internal untuk monitoring project JUARAEVENT",
 };
 

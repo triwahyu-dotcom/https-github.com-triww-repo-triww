@@ -40,6 +40,8 @@ export interface ProjectTask {
   stage: WorkflowStage;
   status: TaskStatus;
   required: boolean;
+  dueDate?: string;
+  assignee?: string;
 }
 
 export interface ProjectDocument {
@@ -64,6 +66,8 @@ export interface ProjectMilestone {
   label: string;
   value: string;
   done: boolean;
+  dueDate?: string;
+  assignee?: string;
 }
 
 export interface ProjectRecord {
@@ -85,7 +89,7 @@ export interface ProjectRecord {
   remark: string;
   section: ProjectSection;
   sectionLabel: string;
-  health: "on_track" | "watch" | "stuck";
+  health: "on_track" | "watch" | "stuck" | "urgent" | "critical" | "low_priority";
   currentStage: WorkflowStage;
   currentStageLabel: string;
   financeStatus: string;
@@ -166,7 +170,7 @@ export interface CRMClient {
   lastContactDate?: string;
   contacts: CRMContact[];
   projects: ProjectRecord[];
-  health: "on_track" | "watch" | "stuck";
+  health: "on_track" | "watch" | "stuck" | "urgent" | "critical" | "low_priority";
   status: "active" | "lead" | "inactive";
 }
 

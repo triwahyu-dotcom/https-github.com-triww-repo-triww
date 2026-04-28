@@ -2104,7 +2104,7 @@
       "id": "f3b380c3-da96-4b0d-aa3d-19f7d7fe74b7",
       "vendorKey": "cv-duta-raya-makmur-umdatul-dutarayamakmur-net",
       "name": "CV Duta Raya Makmur",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "Jawa Timur",
@@ -2158,13 +2158,16 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "1070548549"
+      "bankAccountNumber": "1070548549",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "6b15c95b-1b40-4743-8abb-f44ff122625d",
       "vendorKey": "kusuma-dekorasi-kusumadekorasi31-gmail-com",
       "name": "kusuma dekorasi",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "DKI Jakarta",
@@ -2218,7 +2221,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "6870701142"
+      "bankAccountNumber": "6870701142",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "aa77376b-0263-4c5d-a2a2-8c5bfe290599",
@@ -2404,7 +2410,7 @@
       "id": "c44e7c27-ea93-49d5-98b7-f862678705a8",
       "vendorKey": "pt-surya-tirta-nanggala-m-qua-ptsuryatirtananggala-gmail-com",
       "name": "PT SURYA TIRTA NANGGALA (M-QUA)",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "DKI Jakarta",
@@ -2458,7 +2464,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "042001000897304"
+      "bankAccountNumber": "042001000897304",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "b21b7116-d885-462f-a1ff-9417e1e86e19",
@@ -2524,7 +2533,7 @@
       "id": "38295f88-4108-4343-ab72-ddc1ed7849ff",
       "vendorKey": "cv-gemar-jaya-admiin-gemarjaya-gmail-com",
       "name": "CV. GEMAR JAYA",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "Jawa Timur",
@@ -2578,7 +2587,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "0111756987"
+      "bankAccountNumber": "0111756987",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "17089906-6ac2-4f0b-ae44-ee6caa15bc0f",
@@ -2944,7 +2956,7 @@
       "id": "a5e62ba6-e94d-4991-a514-bc34226c364a",
       "vendorKey": "sri-lestari-rent-car-tonipurwantosn7769-gmail-com",
       "name": "SRI LESTARI RENT CAR",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "Jawa Timur",
@@ -2998,7 +3010,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "8220471277"
+      "bankAccountNumber": "8220471277",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "444b808a-4a55-4963-8f69-b21c2600e95c",
@@ -3244,7 +3259,7 @@
       "id": "b29f510a-97f9-42c7-860e-831d1653add2",
       "vendorKey": "cv-afifah-kreatif-kreatifafifah-gmail-com",
       "name": "CV Afifah Kreatif",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "DKI Jakarta",
@@ -3298,13 +3313,16 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "1915749261"
+      "bankAccountNumber": "1915749261",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "3a4c9154-bcf0-4d65-8c10-dfa98855795e",
       "vendorKey": "pt-sahabat-prima-abadi-ysabarbud-gmail-com",
       "name": "PT. Sahabat Prima Abadi",
-      "displayType": "Lain Lain",
+      "displayType": "Communication Services",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "Jawa Barat",
@@ -3358,7 +3376,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "1340087212"
+      "bankAccountNumber": "1340087212",
+      "serviceNames": [
+        "Communication Services"
+      ]
     },
     {
       "id": "22a6822d-7966-4f09-8976-a81746306601",
@@ -3484,7 +3505,7 @@
       "id": "e044b0e9-b737-4c17-a350-26ec14fe994a",
       "vendorKey": "genset-lukmangensetbgr-gmail-com",
       "name": "Genset",
-      "displayType": "Lain Lain",
+      "displayType": "Equipment / Technical",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "Jawa Barat",
@@ -3538,7 +3559,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "0970493786"
+      "bankAccountNumber": "0970493786",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
     },
     {
       "id": "5f0835b2-8f26-44d8-9d96-8f7a4360ec96",
@@ -3724,7 +3748,7 @@
       "id": "4713fd2b-4ecb-4b81-a659-d5a63bd12d11",
       "vendorKey": "ardhi-rosanto-ardhi-rosanto611-gmail-com",
       "name": "Ardhi Rosanto",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "Jawa Barat",
@@ -3778,7 +3802,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "0700298591"
+      "bankAccountNumber": "0700298591",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "2933b785-b6ff-4f10-ae0c-3aae2737066c",
@@ -4204,7 +4231,7 @@
       "id": "d743eaf8-aada-4642-9f52-9346cee7b50f",
       "vendorKey": "laskar-communication-laskarcommunication-gmail-com",
       "name": "Laskar communication",
-      "displayType": "Lain Lain",
+      "displayType": "Communication Services",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "DKI Jakarta",
@@ -4258,7 +4285,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "4960234630"
+      "bankAccountNumber": "4960234630",
+      "serviceNames": [
+        "Communication Services"
+      ]
     },
     {
       "id": "93e070b5-a34f-4c5a-afa3-402009279dce",
@@ -4444,7 +4474,7 @@
       "id": "eeded6d1-0771-4bab-b983-72a1a0f3fcc3",
       "vendorKey": "deri-permana-freelance-deripermanafoto-gmail-com",
       "name": "Deri Permana freelance",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "DKI Jakarta",
@@ -4498,13 +4528,16 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "2190186159"
+      "bankAccountNumber": "2190186159",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "3c3c3e9c-0f5d-4aed-85b6-dee7296cf46d",
       "vendorKey": "lezhico-putra-lezhicoputra30-gmail-com",
       "name": "Lezhico Putra",
-      "displayType": "Lain Lain",
+      "displayType": "Others",
       "legalStatus": "Unknown",
       "taxStatus": "Unknown",
       "coverageArea": "DKI Jakarta",
@@ -4558,7 +4591,10 @@
       "createdAt": "2026-03-09T16:16:22.967Z",
       "updatedAt": "2026-03-09T16:16:22.967Z",
       "classification": "Penyedia Jasa",
-      "bankAccountNumber": "5860584311"
+      "bankAccountNumber": "5860584311",
+      "serviceNames": [
+        "Others"
+      ]
     },
     {
       "id": "7f9cadde-0a05-497d-a021-d816f97e39a7",
@@ -4733,6 +4769,479 @@
       "createdAt": "2026-03-10T15:44:45.774Z",
       "updatedAt": "2026-03-10T15:44:48.247Z",
       "classification": "Penyedia Barang"
+    },
+    {
+      "id": "e7d7c894-9f32-4499-8da2-72a44632da4b",
+      "name": "RASA NUSANTARA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:38.035627",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "06755abc-8d48-4a4b-97fd-c634476a3ae9",
+      "name": "WIDIA W. NURSANTY (3D DESIGNER)",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:38.390699",
+      "displayType": "Designer 3D Motion Graphic",
+      "serviceNames": [
+        "Designer 3D Motion Graphic"
+      ]
+    },
+    {
+      "id": "a0556fab-0316-4ab1-aef5-17353cc6f080",
+      "name": ": BLACK RENDER",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:38.583908",
+      "displayType": "Designer 3D Motion Graphic",
+      "serviceNames": [
+        "Designer 3D Motion Graphic"
+      ]
+    },
+    {
+      "id": "a74007af-5340-4aa6-9614-ba1ed850f552",
+      "name": "MATA VISUAL",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:38.953033",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "88e48180-c9d8-43a0-983b-4aaa692a9d51",
+      "name": "PRAMUKA DIGITAL",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:39.310432",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "0dc3f1ae-83c2-44fc-a2a5-49e1cd5d9adf",
+      "name": "SELARAS EQUIPMENT",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:40.018866",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "d546b9bf-7dfa-4e3c-9bb7-0eb7ac464457",
+      "name": "S NET",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:40.196889",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "3eb40e90-6a05-4934-99b7-bfb0a30a3b11",
+      "name": "JAGATERS STUDIO",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:40.379147",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "0e31cb86-ffc6-4490-ae66-1977a73909f7",
+      "name": "ASAMULTI",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:40.564600",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "e76bab4b-db8f-445f-afb7-716adb7c84f3",
+      "name": "KARINDO",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:40.746005",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "a7b16712-ea87-45da-91cb-b2e2b81f73b9",
+      "name": "SG PRODUCTION (T-BANNER)",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:40.926358",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "f2c6d429-79d6-4892-bf75-6acd898d540a",
+      "name": "COLONY",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:41.279991",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "06e550ad-9d21-426b-983e-6af087f1dfbc",
+      "name": "RA HANDY TALKIE",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:41.457034",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "861ec488-e555-4b44-8335-7ab3331ed5fd",
+      "name": "ROSE ART",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:41.841674",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "87eb9c0a-3043-4135-bebf-36be2509b418",
+      "name": "DAPUR SOLO",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:42.061726",
+      "displayType": "Catering",
+      "serviceNames": [
+        "Catering"
+      ]
+    },
+    {
+      "id": "cdd15d56-23ff-43f4-8d2a-34764253a1ff",
+      "name": "BEKAH JAYA ADVERTISING",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:42.246271",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "9df7385d-15aa-4352-bc54-13651b82b560",
+      "name": "SARI RASA CATERING",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:42.425817",
+      "displayType": "Catering",
+      "serviceNames": [
+        "Catering"
+      ]
+    },
+    {
+      "id": "fbc945bd-4bb7-4295-82c4-ae58f235bde2",
+      "name": "SERASA SNACK BOX",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:42.793506",
+      "displayType": "Catering",
+      "serviceNames": [
+        "Catering"
+      ]
+    },
+    {
+      "id": "24151ea9-109e-4887-a843-6317b2cb820c",
+      "name": "INDO MEDIA IKLAN",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:42.973435",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "1be97e1d-92a3-48fb-a3d0-708e0f4fe245",
+      "name": "TOKO PLASTIK",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:43.155995",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "569a41cc-72b6-48db-afcc-8c861dacfea5",
+      "name": "TOILET KITA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:43.335239",
+      "displayType": "General Affair",
+      "serviceNames": [
+        "General Affair"
+      ]
+    },
+    {
+      "id": "74b4a78c-03c0-482e-8f7c-cf96e82454c5",
+      "name": "3PASS",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:43.715321",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "3304628b-c21b-433c-a0f4-279a0f67a6af",
+      "name": "YMEDIA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:44.253995",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "61d9fbec-f10f-4272-a332-6b6b508be0ee",
+      "name": "ARTHUR TECH",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:44.423139",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "e84f8d0a-c34a-4c35-bcf6-5da00c1c6f63",
+      "name": "AKASYA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:44.607375",
+      "displayType": "Stage, Rigging & Booth Construction",
+      "serviceNames": [
+        "Stage, Rigging & Booth Construction"
+      ]
+    },
+    {
+      "id": "4b9c4584-bfb1-4575-a0ed-be8a52316fab",
+      "name": "BBS",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:44.977385",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "cf5897c1-528b-4bf7-b884-7de4c2645116",
+      "name": "TV NU",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:45.331123",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "96baf463-1a3e-4640-bbb0-4bdf7b97aa09",
+      "name": "INIEVENT LANCAR JAYA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:46.057078",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "dee92611-4c9d-4d1d-a61d-96a80647046e",
+      "name": "DHARMA ASHA MEDIKA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:46.470831",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "555edf21-b8ee-4d3e-9c1e-ee7b840149bc",
+      "name": "ADDIKSI IMAGI",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:46.652926",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "db4879b6-b97d-4c3b-8ac2-59231ebe922e",
+      "name": "KRIHNA COMMUNICATION CENTER",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:46.841259",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "06e58f51-11d8-4db8-8004-53096661729b",
+      "name": "INGE MILASARI SANJAYA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:47.219920",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "86d1fc58-10d7-4ecd-8552-fedd99cd8108",
+      "name": "PT MULTI VISUAL KREASINDO",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:47.407064",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "55d30356-898b-46a7-acbc-5a0503444831",
+      "name": "IPRINTING INDONESIA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:47.952608",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "de6c1563-adb6-417b-a9b2-8c5bfbe601ed",
+      "name": "JX - ONE",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:48.326728",
+      "displayType": "Others",
+      "serviceNames": [
+        "Others"
+      ]
+    },
+    {
+      "id": "586f06e9-250c-4079-be62-3015c538d3f9",
+      "name": "FLAT PRODUCTION",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:48.700064",
+      "displayType": "Stage, Rigging & Booth Construction",
+      "serviceNames": [
+        "Stage, Rigging & Booth Construction"
+      ]
+    },
+    {
+      "id": "b0a7f507-2601-46a2-af03-9bb6a9cbb71b",
+      "name": "SG PRODUCTION",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:48.890560",
+      "displayType": "Equipment / Technical",
+      "serviceNames": [
+        "Equipment / Technical"
+      ]
+    },
+    {
+      "id": "f96aaa66-e779-4bf0-990e-55e530f86b7b",
+      "name": "ARTA ADVERTISING",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:49.072326",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "330de162-8bc2-4fb0-89cd-abdeba95ff99",
+      "name": "DAPUR YUMYUM",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:49.260136",
+      "displayType": "Catering",
+      "serviceNames": [
+        "Catering"
+      ]
+    },
+    {
+      "id": "10328cd9-e3a7-4a49-bea3-d8ea5afa3727",
+      "name": "PK3D",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:49.447597",
+      "displayType": "Designer 3D Motion Graphic",
+      "serviceNames": [
+        "Designer 3D Motion Graphic"
+      ]
+    },
+    {
+      "id": "793b5d4e-c2f1-41c6-94b6-9b3bd3d49545",
+      "name": "EL PRODUKSI",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:50.179291",
+      "displayType": "Communication Services",
+      "serviceNames": [
+        "Communication Services"
+      ]
+    },
+    {
+      "id": "861e812f-fcf6-493a-a03d-b5d51f367e13",
+      "name": "PRADIA DESIGN",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:50.902824",
+      "displayType": "Designer 3D Motion Graphic",
+      "serviceNames": [
+        "Designer 3D Motion Graphic"
+      ]
+    },
+    {
+      "id": "15008836-1dbd-4097-bff7-f67e0d17e4d6",
+      "name": "MANUNGGAL SUMBER DAYA",
+      "classification": "Penyedia Jasa",
+      "reviewStatus": "approved",
+      "createdAt": "2026-04-27T03:01:51.218758",
+      "displayType": "Floor Team",
+      "serviceNames": [
+        "Floor Team"
+      ]
     }
   ],
   "vendorContacts": [

@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("admin@juara.local");
-  const [password, setPassword] = useState("juaraadmin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
@@ -34,7 +34,7 @@ export default function LoginPage() {
       <section className="hub-hero">
         <p className="hub-kicker">Admin Login</p>
         <h1>Masuk ke workspace vendor dan projects</h1>
-        <p>Default lokal: `admin@juara.local` / `juaraadmin`. Ganti dengan `ADMIN_EMAIL` dan `ADMIN_PASSWORD` saat deploy.</p>
+        <p>Gunakan kredensial admin Anda untuk mengakses JUARA Workspace.</p>
       </section>
 
       <form className="panel vendor-form-card" onSubmit={handleSubmit}>

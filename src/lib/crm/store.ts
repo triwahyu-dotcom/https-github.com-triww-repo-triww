@@ -34,13 +34,14 @@ export async function getCRMDashboardData(projects: ProjectRecord[]): Promise<CR
       activeProjectCount: 0,
       contacts: official.contacts || [],
       projects: [],
-      relation: official.relation || "Brand",
+      relation: official.relation || "",
     });
   });
 
   const getOrCreateClient = (name: string, project: ProjectRecord): CRMClient => {
-    const official = getOfficialClient(name, officialClients);
-    const key = official ? official.id : name;
+    const normalizedName = name.trim();
+    const official = getOfficialClient(normalizedName, officialClients);
+    const key = official ? official.id : normalizedName.toLowerCase();
 
     const existing = clientsMap.get(key);
     if (existing) return existing;
@@ -58,8 +59,8 @@ export async function getCRMDashboardData(projects: ProjectRecord[]): Promise<CR
       projects: [],
       relation: official.relation || project.relation,
     } : {
-      id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-      name: name,
+      id: `${normalizedName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Math.random().toString(36).substring(2, 6)}`,
+      name: normalizedName,
       type: "brand",
       category: project.category,
       relation: project.relation,

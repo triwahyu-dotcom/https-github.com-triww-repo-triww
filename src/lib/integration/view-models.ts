@@ -1,7 +1,9 @@
 import { getProjectVendorLinks, getProjectVendorShortlists } from "@/lib/integration/store";
-import { ProjectDashboardData } from "@/lib/project/types";
+import { ProjectDashboardData, CRMClient } from "@/lib/project/types";
 import { DashboardData } from "@/lib/vendor/types";
 import { Freelancer } from "@/app/manpower/freelancer/_types/freelancer";
+import { readDocuments } from "@/lib/finance/store";
+
 
 function normalizePhoneToWhatsApp(phone: string) {
   const digits = phone.replace(/[^\d]/g, "");
@@ -11,8 +13,18 @@ function normalizePhoneToWhatsApp(phone: string) {
   return digits;
 }
 
-export async function buildIntegratedDashboards(projectData: ProjectDashboardData, vendorData: DashboardData, freelancerData: Freelancer[] = []) {
-  const [links, shortlists] = await Promise.all([getProjectVendorLinks(), getProjectVendorShortlists()]);
+export async function buildIntegratedDashboards(
+  projectData: ProjectDashboardData, 
+  vendorData: DashboardData, 
+  freelancerData: Freelancer[] = [],
+  clients: CRMClient[] = []
+) {
+  const [links, shortlists, financeDocs] = await Promise.all([
+    getProjectVendorLinks(), 
+    getProjectVendorShortlists(),
+    readDocuments()
+  ]);
+
 
   function projectVendorRequirements(project: ProjectDashboardData["projects"][number]) {
     return [
@@ -118,10 +130,31 @@ export async function buildIntegratedDashboards(projectData: ProjectDashboardDat
     linkedProjects: linkedProjectsByVendor.get(vendor.id) ?? [],
   }));
 
-  const vendorDetails = vendorData.vendorDetails.map((vendor) => ({
-    ...vendor,
-    linkedProjects: linkedProjectsByVendor.get(vendor.id) ?? [],
-  }));
+  const vendorDetails = vendorData.vendorDetails.map((vendor) => {
+    const vendorProjects = linkedProjectsByVendor.get(vendor.id) ?? [];
+    
+    // Attach real finance documents from PO 2026 Excel
+    const vendorPOs = financeDocs.filter(doc => 
+      doc.vendorName.toLowerCase().trim() === vendor.name.toLowerCase().trim()
+    );
+
+    const totalPOAmount = vendorPOs.reduce((sum, po) => sum + po.amount, 0);
+
+    return {
+      ...vendor,
+      linkedProjects: vendorProjects,
+      totalTransactionAmount: totalPOAmount,
+      transactionCount: vendorPOs.length,
+      auditLog: vendorPOs.map(po => ({
+        id: po.id,
+        action: 'PO_ISSUED',
+        actor: 'Finance System',
+        message: `Purchase Order ${po.id.slice(-6).toUpperCase()} issued for amount Rp ${po.amount.toLocaleString('id-ID')}`,
+        createdAt: po.issueDate
+      }))
+    };
+  });
+
 
   return {
     projectData: {
@@ -129,6 +162,7 @@ export async function buildIntegratedDashboards(projectData: ProjectDashboardDat
       projects,
       availableVendors,
       availableFreelancers,
+      clients,
     },
     vendorData: {
       ...vendorData,

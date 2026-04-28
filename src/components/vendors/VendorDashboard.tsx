@@ -1,1763 +1,999 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
-
-import { Locale, reviewStatusLabel, t } from "@/lib/vendor/i18n";
-import { DashboardData, ReviewStatus, VendorClassification, VendorDetail, VendorLifecycleStatus, VendorSummary } from "@/lib/vendor/types";
-import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { SummaryCard } from "@/components/ui/summary-card";
+import { useEffect, useState, useMemo } from "react";
 import { 
   Users, 
-  Wrench, 
   Package, 
   CheckCircle, 
   Star, 
   Search, 
-  Settings, 
-  Gavel, 
-  LayoutGrid, 
-  List, 
-  BookOpen, 
-  ArrowUpDown, 
-  Mail,
-  Activity,
-  PieChart,
-  ShieldCheck,
-  CreditCard,
-  FileText,
-  Files,
-  History,
+  Plus, 
+  Trash2, 
+  Edit, 
+  ChevronDown, 
+  ChevronRight,
+  Filter,
+  LogOut,
+  ArrowRight,
+  Building2,
+  Home,
+  Grid,
   User,
-  Tag,
-  Landmark,
+  Layout,
+  Briefcase,
+  FileBarChart,
   FolderOpen,
-  TrendingUp,
+  ArrowUpDown,
+  Mail,
+  Zap,
   BarChart3,
-  MapPin
+  MapPin,
+  Clock,
+  ExternalLink,
+  Check,
+  MoreVertical,
+  X,
+  PlusCircle,
+  TrendingUp,
+  FileText
 } from "lucide-react";
+import { DashboardData, VendorSummary, ReviewStatus, VendorClassification } from "@/lib/vendor/types";
 
-type ViewId =
-  | "by_status"
-  | "by_type"
-  | "vendor_directory"
-  | "all_vendors"
-  | "sync_log"
-  | "outbox";
-
-type DetailMode = "overview" | "finance" | "docs" | "ops" | "audit";
-
-type SortKey = "name" | "date" | "status" | "score";
-type SortOrder = "asc" | "desc";
-
-type Filters = {
-  search: string;
-  service: string;
-  location: string;
-  reviewStatus: string;
-  classification: string;
-  sortKey: SortKey;
-  sortOrder: SortOrder;
-  showOnlyNew: boolean;
-};
-
-
-const REVIEW_STATUSES: ReviewStatus[] = [
-  "new",
-  "in_review",
-  "approved",
-  "rejected",
-  "needs_revision",
-];
-
-const LIFECYCLE_STATUSES: VendorLifecycleStatus[] = [
-  "submitted",
-  "screening",
-  "verified",
-  "approved",
-  "blacklisted",
-  "inactive",
-];
-
-type RevisionSection = "identity" | "contact" | "documents" | "finance" | "services";
-
-const REVISION_FIELD_OPTIONS: { fieldKey: string; label: string; section: RevisionSection }[] = [
-  { fieldKey: "vendorName", label: "Vendor name", section: "identity" },
-  { fieldKey: "services", label: "Services", section: "services" },
-  { fieldKey: "businessAddress", label: "Business address", section: "identity" },
-  { fieldKey: "email", label: "Business email", section: "identity" },
-  { fieldKey: "picName", label: "PIC name", section: "contact" },
-  { fieldKey: "picPhone", label: "PIC phone", section: "contact" },
-  { fieldKey: "bankAccountHolder", label: "Bank account holder", section: "finance" },
-  { fieldKey: "documentsFolderUrl", label: "Link Folder Dokumen", section: "documents" },
-];
-
-const REVISION_TEMPLATES: {
-  id: string;
-  label: string;
-  generalNote: string;
-  items: { fieldKey: string; note: string }[];
-}[] = [
-  {
-    id: "docs_basic",
-    label: "Basic documents",
-    generalNote: "Please complete the primary legality documents in your folder before we proceed with the review process.",
-    items: [
-      { fieldKey: "documentsFolderUrl", note: "Upload or update all required documents (Compro, NPWP, NIB, etc.) in the provided folder link." },
-    ],
-  },
-  {
-    id: "contact_identity",
-    label: "Contact & identity",
-    generalNote: "Please update identity information and PIC so our procurement team can contact you correctly.",
-    items: [
-      { fieldKey: "vendorName", note: "Match vendor name with legal documents." },
-      { fieldKey: "email", note: "Use an active business email for official communication." },
-      { fieldKey: "picName", note: "Fill in the name of the main PIC in charge." },
-      { fieldKey: "picPhone", note: "Ensure the PIC's WhatsApp number is active." },
-    ],
-  },
-  {
-    id: "service_scope",
-    label: "Services & area",
-    generalNote: "Please update service classification so project placement is not incorrect.",
-    items: [
-      { fieldKey: "services", note: "Select primary services that are truly available." },
-      { fieldKey: "businessAddress", note: "Provide the detailed business address for administrative purposes." },
-    ],
-  },
-];
-
-const VIEW_ORDER: { id: ViewId; label: string }[] = [
-  { id: "all_vendors", label: "All Vendors" },
-  { id: "by_status", label: "By Status" },
-  { id: "by_type", label: "By Type" },
-  { id: "vendor_directory", label: "Vendor Directory" },
-];
-
-const VIEW_ICONS: Record<ViewId, React.ReactNode> = {
-  by_status: <PieChart size={14} />,
-  by_type: <LayoutGrid size={14} />,
-  vendor_directory: <BookOpen size={14} />,
-  all_vendors: <List size={14} />,
-  sync_log: <ArrowUpDown size={14} />,
-  outbox: <Mail size={14} />,
-};
-
-const VIEW_TITLES: Record<ViewId, string> = {
-  by_status: "Status",
-  by_type: "Type",
-  vendor_directory: "Directory",
-  all_vendors: "All Vendors",
-  sync_log: "Sync Log",
-  outbox: "Outbox",
-};
-
-const STORAGE_KEY = "juara-vendor-management-dashboard-v1";
-
-function isRecent(value: string | undefined) {
-  if (!value) return false;
-  try {
-    const date = new Date(value);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    return diff < 48 * 60 * 60 * 1000; // 48 hours
-  } catch {
-    return false;
-  }
-}
-
-function formatDate(value: string, locale: Locale) {
-  if (!value) {
-    return "-";
-  }
-
-  return new Intl.DateTimeFormat(locale === "id" ? "id-ID" : "en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  }).format(new Date(value));
-}
-
-function formatNPWP(value: string) {
-  if (!value) return "-";
-  // Remove non-digits
-  const digits = value.replace(/\D/g, "");
-  if (digits.length !== 15) return value; // Return as is if not standard length
-  // Format: 00.000.000.0-000.000
-  return `${digits.slice(0, 2)}.${digits.slice(2, 5)}.${digits.slice(5, 8)}.${digits.slice(8, 9)}-${digits.slice(9, 12)}.${digits.slice(12, 15)}`;
-}
-
-function formatBankAccount(value: string) {
-  if (!value) return "-";
-  const digits = value.replace(/\D/g, "");
-  if (digits.length < 5) return value;
-  // Basic grouping for readability
-  return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
-}
-
-function normalizePhoneToWhatsApp(value: string) {
-  const digits = value.replace(/[^\d]/g, "");
-  if (!digits) return "";
-  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
-  if (digits.startsWith("62")) return digits;
-  return digits;
-}
-
-
-function primaryType(vendor: VendorSummary) {
-  return vendor.serviceNames[0] || "General";
-}
-
-function splitBusinessPrefix(value: string) {
-  const normalized = value.trim().replace(/\s+/g, " ");
-  const match = normalized.match(/^(PT|CV)\.?\s*(.+)$/i);
-
-  if (!match) {
-    return { name: normalized, suffix: "" };
-  }
-
-  return {
-    name: match[2].trim(),
-    suffix: match[1].toUpperCase(),
-  };
-}
-
-function toTitleCase(value: string) {
-  return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
-function formatVendorName(value: string) {
-  const { name, suffix } = splitBusinessPrefix(value);
-  const formatted = toTitleCase(name);
-
-  return suffix ? `${formatted}, ${suffix}` : formatted;
-}
-
-function vendorScore(vendor: VendorSummary) {
-  const completionRatio =
-    vendor.documentCompletion.required === 0
-      ? 0
-      : vendor.documentCompletion.complete / vendor.documentCompletion.required;
-  const reviewBonus =
-    vendor.reviewStatus === "approved"
-      ? 1.2
-      : vendor.reviewStatus === "in_review"
-        ? 0.75
-        : vendor.reviewStatus === "needs_revision"
-          ? 0.45
-          : vendor.reviewStatus === "new"
-            ? 0.55
-            : 0.2;
-
-  return Number((completionRatio * 4 + reviewBonus).toFixed(1));
-}
-
-function shortLinkLabel(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return "Open";
-  }
-}
-
-function truncateText(value: string, max = 72) {
-  if (value.length <= max) return value;
-  return `${value.slice(0, max - 1)}…`;
-}
-
-function toQueryString(params: Record<string, string>) {
-  const query = new URLSearchParams();
-  Object.entries(params).forEach(([key, value]) => {
-    if (value.trim()) {
-      query.set(key, value);
-    }
-  });
-  return query.toString();
-}
-
-function statusGroupLabel(locale: Locale, status: ReviewStatus) {
-  return reviewStatusLabel(locale, status);
-}
-
-function statusTone(status: ReviewStatus) {
-  if (status === "approved") return "approved";
-  if (status === "rejected") return "rejected";
-  if (status === "in_review") return "review";
-  return "pending";
-}
-
-function lifecycleLabel(status: VendorLifecycleStatus) {
-  if (status === "submitted") return "Submitted";
-  if (status === "screening") return "Screening";
-  if (status === "verified") return "Verified";
-  if (status === "approved") return "Approved";
-  if (status === "blacklisted") return "Blacklisted";
-  return "Inactive";
-}
-
-function lifecycleTone(status: VendorLifecycleStatus) {
-  if (status === "approved" || status === "verified") return "approved";
-  if (status === "blacklisted") return "rejected";
-  if (status === "screening") return "review";
-  return "pending";
-}
-
-function complianceTone(status: VendorSummary["compliance"]["status"]) {
-  if (status === "ok") return "approved";
-  if (status === "attention") return "review";
-  if (status === "critical") return "critical";
-  return "rejected";
-}
-
-function complianceItemTone(status: "valid" | "expiring" | "expired" | "missing") {
-  if (status === "valid") return "approved";
-  if (status === "expiring") return "review";
-  return "rejected";
-}
-
-function documentTypeLabel(type: string) {
-  const labels: Record<string, string> = {
-    company_profile: "Company Profile",
-    catalog: "Catalog / Pricelist",
-    npwp_scan: "NPWP",
-    owner_ktp: "Owner KTP",
-    nib: "NIB",
-    invoice_sample: "Invoice Sample",
-    pkp_certificate: "PKP / Non-PKP Letter",
-    nda: "NDA",
-    pic_ktp: "PIC KTP",
-  };
-
-  return labels[type] ?? type.replace(/_/g, " ");
-}
-
-function clampPaneWidth(value: number) {
-  return Math.min(58, Math.max(28, value));
-}
-
-
-function classificationLabel(classification: VendorClassification | string) {
-  if (classification === "Penyedia Barang") return "Goods / Equipment";
-  if (classification === "Penyedia Jasa") return "Services / Specialist";
-  return classification;
-}
-
-function classificationTone(classification: VendorClassification | string) {
-  if (classification === "Penyedia Barang") return "amber";
-  if (classification === "Penyedia Jasa") return "blue";
-  return "stone";
-}
-
-function categoryTone(type: string) {
-  const key = type.toLowerCase();
-  if (key.includes("stage") || key.includes("rigging")) return "rose";
-  if (key.includes("security") || key.includes("crowd")) return "green";
-  if (key.includes("photo") || key.includes("video") || key.includes("design")) return "purple";
-  if (key.includes("floor")) return "blue";
-  if (key.includes("logistic")) return "amber";
-  if (key.includes("project") || key.includes("management")) return "blue";
-  return "stone";
-}
+type ViewMode = "all" | "status" | "type" | "directory";
 
 export function VendorDashboard({ initialData }: { initialData: DashboardData }) {
-  const layoutRef = useRef<HTMLElement | null>(null);
-  const initialVendor = initialData.vendorDetails[0] ?? null;
-  const [locale, setLocale] = useState<Locale>("id");
-  const [view, setView] = useState<ViewId>("all_vendors");
-  const [detailMode, setDetailMode] = useState<DetailMode>("overview");
-  const [dashboard, setDashboard] = useState(initialData);
-  const [selectedVendorId, setSelectedVendorId] = useState(initialData.vendors[0]?.id ?? "");
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [reviewStatus, setReviewStatus] = useState<ReviewStatus>(initialVendor?.reviewStatus ?? "new");
-  const [reviewNote, setReviewNote] = useState(initialVendor?.latestReviewNote ?? "");
-  const [lifecycleStatus, setLifecycleStatus] = useState<VendorLifecycleStatus>(initialVendor?.lifecycleStatus ?? "submitted");
-  const [rateCardNotes, setRateCardNotes] = useState(initialVendor?.rateCardNotes ?? "");
-  const [availabilityNotes, setAvailabilityNotes] = useState(initialVendor?.availabilityNotes ?? "");
-  const [cities, setCities] = useState(initialVendor?.cities.join(", ") ?? "");
-  const [accountManager, setAccountManager] = useState(initialVendor?.accountManager ?? "");
-  const [scorecard, setScorecard] = useState({
-    projectId: "",
-    quality: "4",
-    reliability: "4",
-    pricing: "4",
-    communication: "4",
-    onTime: "4",
-    note: "",
-  });
-  const [complianceDrafts, setComplianceDrafts] = useState<Record<string, { status: string; expiresAt: string; note: string }>>(
-    initialVendor
-      ? Object.fromEntries(
-          initialVendor.compliance.items.map((item) => [
-            item.documentType,
-            { status: item.status, expiresAt: item.expiresAt, note: item.note },
-          ]),
-        )
-      : {},
-  );
-  const [syncPending, startSyncTransition] = useTransition();
-  const [reviewPending, startReviewTransition] = useTransition();
-  const [opsPending, startOpsTransition] = useTransition();
-  const [revisionGeneralNote, setRevisionGeneralNote] = useState("");
-  const [revisionSelections, setRevisionSelections] = useState<Record<string, string>>({});
-  const [revisionTemplateId, setRevisionTemplateId] = useState("");
+  const [viewMode, setViewMode] = useState<ViewMode>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [scoreFilter, setScoreFilter] = useState<string>("all");
+  const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "docs" | "projects" | "history">("overview");
   const [selectedVendorIds, setSelectedVendorIds] = useState<string[]>([]);
-  const [bulkStatus, setBulkStatus] = useState<ReviewStatus>("in_review");
-  const [bulkNote, setBulkNote] = useState("");
-  const [bulkRevisionTemplateId, setBulkRevisionTemplateId] = useState("docs_basic");
-  const [showAdvanced, setShowAdvanced] = useState(false);
-  const [isEditVendorModalOpen, setIsEditVendorModalOpen] = useState(false);
-  const [showAuditLog, setShowAuditLog] = useState(false);
-  const [editVendorFormData, setEditVendorFormData] = useState<Partial<VendorDetail>>({});
-  const [savedFilters, setSavedFilters] = useState<Record<string, Filters>>(() => {
-    if (typeof window === "undefined") {
-      return {};
-    }
-    try {
-      const raw = localStorage.getItem("vendor_filters_v1");
-      return raw ? (JSON.parse(raw) as Record<string, Filters>) : {};
-    } catch {
-      return {};
-    }
-  });
-  const [density, setDensity] = useState<"compact" | "spacious">("spacious");
-  const [filters, setFilters] = useState<Filters>(() => {
-    if (typeof window === "undefined") {
-      return { 
-        search: "", service: "", location: "", reviewStatus: "", classification: "",
-        sortKey: "date", sortOrder: "desc", showOnlyNew: false 
+  const [lang, setLang] = useState<"ID" | "EN">("ID");
+  
+  // Collapsible sections for "Type" view
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+
+  const [sortKey, setSortKey] = useState<string>("registered");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState<any>(null);
+
+  const [vendors, setVendors] = useState<any[]>([]);
+
+  useEffect(() => {
+    // Rely ONLY on real production data from initialData
+    const processed = initialData.vendorDetails.map((v) => {
+      return {
+        ...v,
+        category: v.classification === "Penyedia Barang" ? "PENYEDIA BARANG" : "PENYEDIA JASA",
+        type: v.serviceNames?.[0] || "Others",
+        classification: v.classification === "Penyedia Barang" ? "Goods / Equipment" : "Services / Specialist",
+        status: v.reviewStatus === "approved" ? "Disetujui" : (v.reviewStatus === "in_review" ? "Sedang direview" : "Baru"),
+        score: v.performance?.average || null,
+        location: v.businessAddress || "–",
+        docs: { done: v.documentCompletion?.complete || 0, total: v.documentCompletion?.required || 3 },
+        compliance: v.compliance?.status === "ok" ? "OK" : "Pending",
+        registered: v.createdAt ? v.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
       };
-    }
-    const currentView = new URLSearchParams(window.location.search).get("view") || "all_vendors";
-    const saved = savedFilters[currentView] ?? { 
-      search: "", service: "", location: "", reviewStatus: "", classification: "",
-      sortKey: "date", sortOrder: "desc", showOnlyNew: false 
-    };
-    return saved;
-  });
+    });
+    setVendors(processed);
+  }, [initialData.vendorDetails]);
 
-const matchesFilters = useCallback((vendor: VendorSummary, currentFilters: Filters) => {
-    const keyword = currentFilters.search.trim().toLowerCase();
 
-    if (keyword) {
-      const detail = dashboard.vendorDetails.find((d: VendorDetail) => d.id === vendor.id);
-      const picInfo = detail ? `${detail.contacts[0]?.name || ""} ${detail.contacts[0]?.phone || ""}` : "";
-      const searchStr = `${vendor.name} ${vendor.email} ${vendor.serviceNames.join(" ")} ${vendor.businessAddress || ""} ${picInfo}`.toLowerCase();
+  const handleSync = () => {
+    setIsSyncing(true);
+    setTimeout(() => {
+      setIsSyncing(false);
+      alert("Sinkronisasi database vendor berhasil!");
+    }, 1500);
+  };
 
-      if (!searchStr.includes(keyword)) {
-        return false;
-      }
-    }
+  const handleLogout = () => {
+    window.location.href = "/login";
+  };
 
-    if (currentFilters.service && !vendor.serviceNames.includes(currentFilters.service)) {
-      return false;
-    }
 
-    if (currentFilters.location && !vendor.businessAddress?.toLowerCase().includes(currentFilters.location.toLowerCase())) {
-      return false;
-    }
 
-    if (currentFilters.reviewStatus && vendor.reviewStatus !== currentFilters.reviewStatus) {
-      return false;
-    }
+  const [classificationFilter, setClassificationFilter] = useState<string>("all");
+  const [servicesFilter, setServicesFilter] = useState<string>("all");
+  const [showClassDropdown, setShowClassDropdown] = useState(false);
+  const [showServiceDropdown, setShowServiceDropdown] = useState(false);
 
-    if (currentFilters.classification && vendor.classification !== currentFilters.classification) {
-      return false;
-    }
+  // Get dynamic unique services for the filter
+  const allServiceTypes = useMemo(() => {
+    const types = new Set<string>();
+    vendors.forEach(v => {
+      if (v.type && v.type !== "Others") types.add(v.type);
+    });
+    return Array.from(types).sort();
+  }, [vendors]);
 
-    if (currentFilters.showOnlyNew && !isRecent(vendor.sourceTimestamp)) {
-      return false;
-    }
 
-    return true;
-  }, [dashboard.vendorDetails]);
 
   const filteredVendors = useMemo(() => {
-    const list = dashboard.vendors.filter((vendor) => matchesFilters(vendor, filters));
-    
-    return list.sort((a, b) => {
-      const order = filters.sortOrder === "asc" ? 1 : -1;
+    return vendors.filter(v => {
+      const matchScore = 
+        scoreFilter === 'all' ? true :
+        scoreFilter === 'top' ? (v.score !== null && v.score >= 4.5) :
+        scoreFilter === 'mid' ? (v.score !== null && v.score >= 3.5 && v.score < 4.5) :
+        scoreFilter === 'low' ? (v.score !== null && v.score < 3.5) :
+        scoreFilter === 'unrated' ? v.score === null : true;
       
-      switch (filters.sortKey) {
-        case "name":
-          return a.name.localeCompare(b.name) * order;
-        case "date": {
-          const dA = new Date(a.sourceTimestamp || 0).getTime();
-          const dB = new Date(b.sourceTimestamp || 0).getTime();
-          return (dA - dB) * order;
-        }
-        case "status":
-          return a.reviewStatus.localeCompare(b.reviewStatus) * order;
-        case "score":
-          return (vendorScore(a) - vendorScore(b)) * order;
-        default:
-          return 0;
+      const matchClass = 
+        classificationFilter === 'all' ? true :
+        v.classification === classificationFilter;
+      
+      const matchService = 
+        servicesFilter === 'all' ? true :
+        v.type === servicesFilter;
+      
+      const matchSearch = searchQuery === '' ? true :
+        v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        v.category.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchScore && matchClass && matchService && matchSearch;
+    }).sort((a, b) => {
+      const order = sortOrder === "asc" ? 1 : -1;
+      if (sortKey === "registered") {
+        return (new Date(a.registered).getTime() - new Date(b.registered).getTime()) * order;
       }
+      return 0;
     });
-  }, [dashboard.vendors, filters, matchesFilters]);
-  const selectedVendors = useMemo(
-    () => filteredVendors.filter((vendor) => selectedVendorIds.includes(vendor.id)),
-    [filteredVendors, selectedVendorIds],
-  );
+  }, [vendors, scoreFilter, searchQuery, sortKey, sortOrder, classificationFilter, servicesFilter]);
 
-  const vendorSummary = useMemo(() => ({
-    total: dashboard.vendors.length,
-    approved: dashboard.vendors.filter(v => v.reviewStatus === 'approved').length,
-    inReview: dashboard.vendors.filter(v => v.reviewStatus === 'in_review').length,
-    jasaCount: dashboard.vendors.filter(v => v.classification === 'Penyedia Jasa').length,
-    barangCount: dashboard.vendors.filter(v => v.classification === 'Penyedia Barang').length,
-    highPerformance: dashboard.vendors.filter(v => vendorScore(v) >= 4.5).length,
-  }), [dashboard.vendors]);
-
-  const selectedVendor =
-    dashboard.vendorDetails.find((vendor) => vendor.id === selectedVendorId) ??
-    dashboard.vendorDetails[0] ??
-    null;
-
-  const vendorsByStatus = useMemo(
-    () =>
-      REVIEW_STATUSES.map((status) => ({
-        status,
-        items: filteredVendors.filter((vendor) => vendor.reviewStatus === status),
-      })),
-    [filteredVendors],
-  );
-
-  const vendorsByType = useMemo(() => {
-    const grouped = new Map<string, VendorSummary[]>();
-
-    filteredVendors.forEach((vendor) => {
-      const type = primaryType(vendor);
-      grouped.set(type, [...(grouped.get(type) ?? []), vendor]);
-    });
-
-    return [...grouped.entries()]
-      .sort((a, b) => b[1].length - a[1].length)
-      .map(([type, items]) => ({ type, items }));
-  }, [filteredVendors]);
-
-  const directorySections = useMemo(
-    () =>
-      vendorsByStatus.map((group) => ({
-        title: statusGroupLabel(locale, group.status),
-        status: group.status,
-        items: group.items,
-      })),
-    [locale, vendorsByStatus],
-  );
-  const activeListCount =
-    view === "sync_log"
-      ? dashboard.importRuns.length
-      : view === "outbox"
-        ? dashboard.notificationFeed.length
-        : filteredVendors.length;
-  const isVendorListView = view === "all_vendors";
-
-  const toggleSort = (key: SortKey) => {
-    setFilters(curr => ({
-      ...curr,
-      sortKey: key,
-      sortOrder: curr.sortKey === key && curr.sortOrder === "desc" ? "asc" : "desc"
-    }));
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Disetujui": return { bg: "rgba(99,153,34,0.15)", text: "#97C459", label: "Disetujui" };
+      case "Sedang direview": return { bg: "rgba(239,159,39,0.15)", text: "#EF9F27", label: "Sedang direview" };
+      case "Baru": return { bg: "rgba(55,138,221,0.15)", text: "#85B7EB", label: "Baru" };
+      case "Ditolak": return { bg: "rgba(226,75,74,0.15)", text: "#F09595", label: "Ditolak" };
+      default: return { bg: "rgba(255,255,255,0.05)", text: "#71717a", label: status };
+    }
   };
 
-  const renderSortIcon = (key: SortKey) => {
-    if (filters.sortKey !== key) return null;
-    return filters.sortOrder === "asc" ? " ↑" : " ↓";
+  const getClassificationColor = (classification: string) => {
+    if (classification === "Goods / Equipment" || classification === "Equipment") {
+      return { bg: "rgba(15,110,86,0.15)", text: "#5DCAA5" };
+    }
+    return { bg: "rgba(83,74,183,0.15)", text: "#AFA9EC" };
   };
 
-  async function handleSync() {
-    startSyncTransition(async () => {
-      const response = await fetch("/api/vendors/sync", { method: "POST" });
-      const payload = (await response.json()) as { dashboard: DashboardData };
-      setDashboard(payload.dashboard);
-    });
-  }
+  const getScoreColor = (score: number | null) => {
+    if (score === null) return "#52525b";
+    if (score >= 4.5) return "#97C459";
+    if (score >= 3.5) return "#85B7EB";
+    return "#EF9F27";
+  };
 
-  async function handleReviewSave() {
-    if (!selectedVendor) return;
-
-    startReviewTransition(async () => {
-      const response = await fetch(`/api/vendors/${selectedVendor.id}/review`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: reviewStatus, note: reviewNote }),
-      });
-      const payload = (await response.json()) as { vendorDetail: VendorDetail };
-
-      setDashboard((current) => {
-        const vendorDetails = current.vendorDetails.map((item) =>
-          item.id === payload.vendorDetail.id
-            ? { ...payload.vendorDetail, linkedProjects: item.linkedProjects ?? [] }
-            : item,
-        );
-        const vendors = current.vendors.map((item) =>
-          item.id === payload.vendorDetail.id
-            ? {
-                ...item,
-                reviewStatus: payload.vendorDetail.reviewStatus,
-                latestReviewNote: payload.vendorDetail.latestReviewNote,
-                documentCompletion: payload.vendorDetail.documentCompletion,
-                linkedProjects: item.linkedProjects ?? [],
-              }
-            : item,
-        );
-
-        return {
-          ...current,
-          vendorDetails,
-          vendors,
-          reviewQueue: vendors.filter(
-            (vendor) => vendor.reviewStatus === "new" || vendor.reviewStatus === "needs_revision",
-          ),
-        };
-      });
-    });
-  }
-
-  function openVendor(vendor: VendorSummary) {
-    setIsDrawerOpen(true);
-    setDetailMode("overview");
-    setSelectedVendorId(vendor.id);
-    setReviewStatus(vendor.reviewStatus);
-    setReviewNote(vendor.latestReviewNote);
-    const detail = dashboard.vendorDetails.find((item) => item.id === vendor.id);
-    if (!detail) return;
-    setLifecycleStatus(detail.lifecycleStatus);
-    setRateCardNotes(detail.rateCardNotes);
-    setAvailabilityNotes(detail.availabilityNotes);
-    setCities(detail.cities.join(", "));
-    setAccountManager(detail.accountManager);
-    setComplianceDrafts(
-      Object.fromEntries(
-        detail.compliance.items.map((item) => [
-          item.documentType,
-          { status: item.status, expiresAt: item.expiresAt, note: item.note },
-        ]),
-      ),
-    );
-    setRevisionGeneralNote(detail.activeRevisionRequest?.generalNote ?? "");
-    setRevisionTemplateId("");
-    setRevisionSelections(
-      Object.fromEntries(
-        (detail.activeRevisionRequest?.items ?? []).map((item) => [item.fieldKey, item.note]),
-      ),
-    );
-  }
-
-  function refreshAfterMutation() {
-    window.location.reload();
-  }
-
-  async function handleLifecycleSave() {
-    if (!selectedVendor) return;
-
-    startOpsTransition(async () => {
-      await fetch(`/api/vendors/${selectedVendor.id}/lifecycle`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lifecycleStatus }),
-      });
-      refreshAfterMutation();
-    });
-  }
-
-  async function handleOpsProfileSave() {
-    if (!selectedVendor) return;
-
-    startOpsTransition(async () => {
-      await fetch(`/api/vendors/${selectedVendor.id}/profile`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rateCardNotes, availabilityNotes, cities, accountManager }),
-      });
-      refreshAfterMutation();
-    });
-  }
-
-  async function handleScorecardSave() {
-    if (!selectedVendor) return;
-
-    startOpsTransition(async () => {
-      await fetch(`/api/vendors/${selectedVendor.id}/scorecards`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          projectId: scorecard.projectId,
-          quality: Number(scorecard.quality),
-          reliability: Number(scorecard.reliability),
-          pricing: Number(scorecard.pricing),
-          communication: Number(scorecard.communication),
-          onTime: Number(scorecard.onTime),
-          note: scorecard.note,
-        }),
-      });
-      refreshAfterMutation();
-    });
-  }
-
-  async function handleComplianceSave(documentType: string) {
-    if (!selectedVendor) return;
-    const draft = complianceDrafts[documentType];
-    if (!draft) return;
-
-    startOpsTransition(async () => {
-      await fetch(`/api/vendors/${selectedVendor.id}/compliance`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentType,
-          status: draft.status,
-          expiresAt: draft.expiresAt,
-          note: draft.note,
-        }),
-      });
-      refreshAfterMutation();
-    });
-  }
-
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
-  }
-
-  async function handleRequestRevision() {
-    if (!selectedVendor) return;
-    const items = Object.entries(revisionSelections)
-      .filter(([, note]) => note.trim())
-      .map(([fieldKey, note]) => {
-        const option = REVISION_FIELD_OPTIONS.find((item) => item.fieldKey === fieldKey);
-        return option
-          ? {
-              fieldKey,
-              label: option.label,
-              note: note.trim(),
-              section: option.section,
-            }
-          : null;
-      })
-      .filter(Boolean) as { fieldKey: string; label: string; note: string; section: RevisionSection }[];
-
-    if (items.length === 0) return;
-
-    startOpsTransition(async () => {
-      await fetch(`/api/vendors/${selectedVendor.id}/revision`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          generalNote: revisionGeneralNote,
-          items,
-        }),
-      });
-      refreshAfterMutation();
-    });
-  }
-
-  function applyRevisionTemplate(templateId: string) {
-    setRevisionTemplateId(templateId);
-    if (!templateId) {
-      return;
-    }
-
-    const template = REVISION_TEMPLATES.find((item) => item.id === templateId);
-    if (!template) {
-      return;
-    }
-
-    setRevisionGeneralNote(template.generalNote);
-    setRevisionSelections(
-      Object.fromEntries(template.items.map((item) => [item.fieldKey, item.note])),
-    );
-  }
-
-  function clearRevisionDraft() {
-    setRevisionTemplateId("");
-    setRevisionGeneralNote("");
-    setRevisionSelections({});
-  }
-
-  function toggleVendorSelection(vendorId: string) {
-    setSelectedVendorIds((current) =>
-      current.includes(vendorId) ? current.filter((item) => item !== vendorId) : [...current, vendorId],
-    );
-  }
-
-  function toggleSelectAllFiltered() {
-    setSelectedVendorIds((current) => {
-      const filteredIds = filteredVendors.map((vendor) => vendor.id);
-      const allFilteredSelected = filteredIds.every((id) => current.includes(id));
-      if (allFilteredSelected) {
-        return current.filter((id) => !filteredIds.includes(id));
-      }
-      return Array.from(new Set([...current, ...filteredIds]));
-    });
-  }
-
-  function handleExportFiltered() {
-    const query = toQueryString({
-      search: filters.search,
-      service: filters.service,
-      location: filters.location,
-      reviewStatus: filters.reviewStatus,
-      classification: filters.classification,
-    });
-    window.location.href = `/api/vendors/export${query ? `?${query}` : ""}`;
-  }
-
-  async function handleBulkReviewSave() {
-    const targetIds = selectedVendors.map((item) => item.id);
-    if (targetIds.length === 0) return;
-    startOpsTransition(async () => {
-      for (const vendorId of targetIds) {
-        await fetch(`/api/vendors/${vendorId}/review`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status: bulkStatus, note: bulkNote }),
-        });
-      }
-      refreshAfterMutation();
-    });
-  }
-
-  async function handleBulkRequestRevision() {
-    const targetIds = selectedVendors.map((item) => item.id);
-    if (targetIds.length === 0) return;
-    const template = REVISION_TEMPLATES.find((item) => item.id === bulkRevisionTemplateId) ?? REVISION_TEMPLATES[0];
-    const items = template.items
-      .map((item) => {
-        const option = REVISION_FIELD_OPTIONS.find((opt) => opt.fieldKey === item.fieldKey);
-        if (!option) return null;
-        return {
-          fieldKey: option.fieldKey,
-          label: option.label,
-          note: item.note,
-          section: option.section,
-        };
-      })
-      .filter(Boolean) as { fieldKey: string; label: string; note: string; section: RevisionSection }[];
-    if (items.length === 0) return;
-
-    startOpsTransition(async () => {
-      for (const vendorId of targetIds) {
-        await fetch(`/api/vendors/${vendorId}/revision`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            generalNote: template.generalNote,
-            items,
-          }),
-        });
-      }
-      refreshAfterMutation();
-    });
-  }
-
-  function saveCurrentFilter(slot: "slot1" | "slot2" | "slot3") {
-    const next = { ...savedFilters, [slot]: filters };
-    setSavedFilters(next);
-    localStorage.setItem("vendor_filters_v1", JSON.stringify(next));
-  }
-
-  const whatsappNumber = normalizePhoneToWhatsApp(selectedVendor?.contacts[0]?.phone || "");
-  const socialLinks = selectedVendor
-    ? [
-        { label: "Website", url: selectedVendor.websiteUrl },
-        { label: "Instagram", url: selectedVendor.instagramUrl },
-        { label: "TikTok", url: selectedVendor.tiktokUrl },
-        { label: "LinkedIn", url: selectedVendor.linkedinUrl },
-      ].filter((item) => item.url)
-    : [];
-
-  // Theme handled by WorkspaceShell
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dashboard));
-  }, [dashboard]);
-
-
-
-  const headerActions = (
-    <>
-      <div className="locale-switch locale-dark">
-        <button className={locale === "id" ? "active" : ""} onClick={() => setLocale("id")} type="button">
-          ID
-        </button>
-        <button className={locale === "en" ? "active" : ""} onClick={() => setLocale("en")} type="button">
-          EN
-        </button>
+  const renderStarBar = (score: number | null, size = 8, gap = 4) => {
+    const color = getScoreColor(score);
+    const filledCount = score === null ? 0 : Math.round(score);
+    return (
+      <div className="star-dot-bar" style={{ gap: `${gap}px` }}>
+        {[1,2,3,4,5].map(i => (
+          <div 
+            key={i} 
+            className="star-dot" 
+            style={{ 
+              width: `${size}px`, 
+              height: `${size}px`,
+              background: i <= filledCount ? color : 'rgba(255,255,255,0.12)' 
+            }} 
+          />
+        ))}
       </div>
-      <button className="ghost-button" onClick={() => setView("sync_log")} type="button">
-        Sync Log
-      </button>
-      <button className="ghost-button" onClick={() => setView("outbox")} type="button">
-        Outbox
-      </button>
-      <button className="primary-button" style={{ borderRadius: '8px', padding: '0 16px', height: '36px' }} onClick={handleSync} type="button">
-        {syncPending ? "..." : t(locale, "syncNow")}
-      </button>
-      <button className="ghost-button" onClick={handleLogout} type="button">
-        Logout
-      </button>
-    </>
-  );
+    );
+  };
+
+  const openVendor = (id: number) => {
+    setSelectedVendorId(id.toString());
+    setIsDetailOpen(true);
+    setIsEditing(false);
+  };
+
+  const startEditing = () => {
+    if (!selectedVendorDetail) return;
+    setEditFormData({ ...selectedVendorDetail });
+    setIsEditing(true);
+  };
+
+  const handleSaveVendor = async () => {
+    try {
+      const response = await fetch(`/api/vendors/${editFormData.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editFormData.name,
+          classification: editFormData.classification,
+          businessAddress: editFormData.location,
+        })
+      });
+
+      if (response.ok) {
+        setVendors(prev => prev.map(v => v.id === editFormData.id ? editFormData : v));
+        setIsEditing(false);
+        alert("Profil vendor berhasil diperbarui!");
+      } else {
+        alert("Gagal memperbarui profil vendor.");
+      }
+    } catch (error) {
+      console.error("Error saving vendor:", error);
+      alert("Terjadi kesalahan saat menyimpan.");
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedVendorIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const selectedVendorDetail = vendors.find(v => v.id.toString() === selectedVendorId);
 
   return (
-    <WorkspaceShell
-      title="Supplier/Vendor Management"
-      eyebrow={dashboard.sourceAvailable ? "DATABASE READY" : "SOURCE MISSING"}
-      actions={headerActions}
-    >
-      <div className="summary-deck" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '24px' }}>
-        <SummaryCard 
-          label="Total Vendors" 
-          value={String(vendorSummary.total)} 
-          description="Registered suppliers"
-          icon={<Users size={18} />} 
-        />
-        <SummaryCard 
-          label="Penyedia Jasa" 
-          value={String(vendorSummary.jasaCount)} 
-          description="Service providers"
-          icon={<Wrench size={18} />} 
-        />
-        <SummaryCard 
-          label="Penyedia Barang" 
-          value={String(vendorSummary.barangCount)} 
-          description="Equipment/Goods"
-          icon={<Package size={18} />} 
-        />
-        <SummaryCard 
-          label="Approved" 
-          value={String(vendorSummary.approved)} 
-          description="Verified and ready"
-          icon={<CheckCircle size={18} />} 
-        />
-        <SummaryCard 
-          label="Top Rated" 
-          value={String(vendorSummary.highPerformance)} 
-          description="Score >= 4.5"
-          icon={<Star size={18} />} 
-        />
-      </div>
-      <div className="unified-toolbar" style={{ position: 'relative' }}>
-        <div className="database-tabs" style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-          {VIEW_ORDER.map((item) => (
-            <button
-              key={item.id}
-              className={`chip ${view === item.id ? "active" : ""}`}
-              onClick={() => setView(item.id)}
-              type="button"
-              style={{ padding: '4px 10px', fontSize: '0.75rem' }}
-            >
-              <span style={{ marginRight: '6px', display: 'flex', alignItems: 'center' }}>{VIEW_ICONS[item.id]}</span>
-              {VIEW_TITLES[item.id]}
-            </button>
-          ))}
+    <div className="app-layout-premium">
+      {/* Sidebar Navigation */}
+      <aside className="sidebar-premium">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '32px', padding: '0 4px' }}>
+          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>J</div>
+          <span style={{ fontSize: '11px', fontWeight: 500, color: '#a1a1aa', letterSpacing: '0.06em' }}>JUARA WORKSPACE</span>
         </div>
 
-        <div className="toolbar-divider"></div>
+        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+          <Link href="/" className="sidebar-item-premium"><Home size={18} /> Workspace Hub</Link>
+          <Link href="/projects" className="sidebar-item-premium"><Grid size={18} /> Projects</Link>
+          <Link href="/crm" className="sidebar-item-premium"><User size={18} /> CRM</Link>
+          <Link href="/vendors" className="sidebar-item-premium active"><Building2 size={18} /> Vendors</Link>
+          <Link href="/manpower/freelancer" className="sidebar-item-premium"><Users size={18} /> Man Power</Link>
+          <Link href="/finance" className="sidebar-item-premium"><FileText size={18} /> Finance & RFP</Link>
+          <Link href="/docs" className="sidebar-item-premium"><FolderOpen size={18} /> Document Center</Link>
 
-        <div className="search-wrapper">
-          <input
-            value={filters.search}
-            placeholder="Search vendor..."
-            onChange={(event) => setFilters((current) => ({ ...current, search: event.target.value }))}
-          />
-          <span className="search-icon" style={{ display: 'flex', alignItems: 'center' }}><Search size={14} /></span>
-        </div>
+          <div style={{ marginTop: '32px', marginBottom: '8px', padding: '0 12px' }}>
+            <span style={{ fontSize: '10px', color: '#3f3f46', letterSpacing: '0.08em' }}>ACTIVE IDENTITY</span>
+          </div>
+          <div style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', color: '#a1a1aa', display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 4px' }}>
+            Vendor Manager (Full Access) <ChevronDown size={14} />
+          </div>
+        </nav>
+      </aside>
 
-        <div className="toolbar-divider"></div>
+      {/* Main Content Area */}
+      <main className="main-premium">
+        {/* Fixed Top Header */}
+        <header className="top-header-premium">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(99,153,34,0.1)', color: '#639922', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>DATABASE READY</div>
+              <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>Supplier/Vendor Management</h1>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div style={{ display: 'flex', background: '#111113', borderRadius: '8px', padding: '2px', border: '0.5px solid rgba(255,255,255,0.08)' }}>
+                <button onClick={() => setLang("ID")} style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px', background: lang === "ID" ? "#1f1f23" : "transparent", color: lang === "ID" ? "#f4f4f5" : "#52525b", border: 'none' }}>ID</button>
+                <button onClick={() => setLang("EN")} style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px', background: lang === "EN" ? "#1f1f23" : "transparent", color: lang === "EN" ? "#f4f4f5" : "#52525b", border: 'none' }}>EN</button>
+              </div>
+              <button className="ghost-button" style={{ fontSize: '12px', padding: '6px 14px', border: '0.5px solid rgba(255,255,255,0.12)', color: '#a1a1aa' }} onClick={() => alert("Membuka log sinkronisasi vendor...")}>Sync Log</button>
+              <button className="ghost-button" style={{ fontSize: '12px', padding: '6px 14px', border: '0.5px solid rgba(255,255,255,0.12)', color: '#a1a1aa' }} onClick={() => alert("Membuka outbox email vendor...")}>Outbox</button>
+              <button 
+                className="primary-button" 
+                style={{ fontSize: '12px', padding: '6px 16px', background: isSyncing ? '#1f2937' : '#378ADD', opacity: isSyncing ? 0.7 : 1 }}
+                onClick={handleSync}
+                disabled={isSyncing}
+              >
+                {isSyncing ? "Menyinkronkan..." : "Sinkronkan sekarang"}
+              </button>
+              <button className="ghost-button" style={{ fontSize: '12px', color: '#71717a' }} onClick={handleLogout}>Logout</button>
+            </div>
+          </div>
+        </header>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
-          <select
-            className="filter-select"
-            value={filters.classification}
-            onChange={(event) => setFilters((current) => ({ ...current, classification: event.target.value }))}
-            style={{ fontSize: '0.7rem' }}
-          >
-            <option value="">Classification</option>
-            <option value="Penyedia Jasa">Jasa</option>
-            <option value="Penyedia Barang">Barang</option>
-          </select>
-          <select
-            className="filter-select"
-            value={filters.service}
-            onChange={(event) => setFilters((current) => ({ ...current, service: event.target.value }))}
-            style={{ fontSize: '0.7rem', maxWidth: '100px' }}
-          >
-            <option value="">Services</option>
-            {dashboard.services.map((service) => (
-              <option key={service} value={service}>{service}</option>
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {/* Stat Cards Row */}
+          <div className="vendor-grid-premium">
+            {[
+              { label: "Total Vendors", value: vendors.length, sub: "Registered suppliers", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <Users size={16} /> },
+              { label: "Penyedia Jasa", value: vendors.filter(v => v.category === "PENYEDIA JASA").length, sub: "Service providers", trend: "↑ 2 dari bulan lalu", trendType: 'up', icon: <User size={16} /> },
+              { label: "Penyedia Barang", value: vendors.filter(v => v.category === "PENYEDIA BARANG").length, sub: "Equipment/Goods", trend: "sama", trendType: 'neutral', icon: <Package size={16} /> },
+              { label: "Approved", value: vendors.filter(v => v.status === "Disetujui").length, sub: "Verified and ready", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <CheckCircle size={16} /> },
+              { label: "Top Rated", value: vendors.filter(v => v.score && v.score >= 4.5).length, sub: "Score >= 4.5", trend: "↑ 3 dari bulan lalu", trendType: 'up', icon: <Star size={16} /> },
+            ].map((s, idx) => (
+              <div key={idx} className="section-card-premium" style={{ padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '12px', color: '#71717a' }}>{s.label}</span>
+                  <div style={{ color: '#52525b' }}>{s.icon}</div>
+                </div>
+                <div style={{ fontSize: '24px', fontWeight: 500, color: '#f4f4f5' }}>{s.value}</div>
+                <div style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>{s.sub}</div>
+                <div className={`trend-pill trend-neutral`}>
+                  Real-time
+                </div>
+              </div>
             ))}
-          </select>
-          <button 
-            className={`ghost-button ${showAdvanced ? "active-ghost" : ""}`} 
-            onClick={() => setShowAdvanced((current) => !current)}
-            style={{ fontSize: '0.7rem', padding: '0 8px', height: '26px', borderRadius: '6px' }}
-          >
-            Options
-          </button>
-        </div>
-
-        <div className="toolbar-divider"></div>
-
-        <div className="workspace-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
-          <div style={{ textAlign: 'right', marginRight: '4px' }}>
-            <div style={{ fontSize: '0.65rem', opacity: 0.5, fontWeight: 700, lineHeight: 1 }}>{activeListCount}</div>
-            <div style={{ fontSize: '0.55rem', opacity: 0.4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Items</div>
           </div>
-          <button 
-            className={`ghost-button ${filters.showOnlyNew ? "active-ghost" : ""}`} 
-            onClick={() => setFilters(curr => ({ ...curr, showOnlyNew: !curr.showOnlyNew }))}
-            style={{ fontSize: '0.7rem', borderRadius: '8px', padding: '0 10px', height: '28px' }}
-          >
-            🆕 Baru
-          </button>
-          <button className="primary-button" style={{ borderRadius: '8px', height: '28px', fontSize: '0.7rem', padding: '0 12px' }} onClick={() => {/* TODO: Add Vendor Logic */}} type="button">
-            + New
-          </button>
-        </div>
 
-        {showAdvanced && (
-          <div className="advanced-panel" style={{ position: 'absolute', top: '100%', right: '16px', marginTop: '8px', padding: '16px', background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '12px', display: 'flex', gap: '16px', alignItems: 'center', zIndex: 100, boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-              <span className="mini-meta" style={{ marginTop: 0 }}>Review:</span>
-              <select
-                value={filters.reviewStatus}
-                onChange={(event) => setFilters((current) => ({ ...current, reviewStatus: event.target.value }))}
-                style={{ background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '4px 8px', fontSize: '0.8rem' }}
-              >
-                <option value="">Any Status</option>
-                {REVIEW_STATUSES.map((status) => (
-                  <option key={status} value={status}>{reviewStatusLabel(locale, status)}</option>
+          {/* Sticky Toolbar */}
+          <div className="view-toolbar-premium">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {(["all", "status", "type", "directory"] as const).map(m => (
+                  <button 
+                    key={m}
+                    onClick={() => setViewMode(m)}
+                    style={{ 
+                      padding: '6px 14px', 
+                      fontSize: '13px', 
+                      borderRadius: '8px',
+                      background: viewMode === m ? '#378ADD' : 'transparent',
+                      color: viewMode === m ? 'white' : '#71717a',
+                      border: viewMode === m ? 'none' : '0.5px solid rgba(255,255,255,0.08)',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {m === "all" ? "All Vendors" : m.charAt(0).toUpperCase() + m.slice(1)}
+                  </button>
                 ))}
-              </select>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ position: 'relative' }}>
+                  <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: '#52525b' }} />
+                  <input 
+                    className="mini-input"
+                    style={{ width: '220px', paddingLeft: '32px', height: '32px', background: '#111113' }}
+                    placeholder="Search vendor..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    className="mini-input" 
+                    style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: classificationFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
+                    onClick={() => { setShowClassDropdown(!showClassDropdown); setShowServiceDropdown(false); }}
+                  >
+                    {classificationFilter === 'all' ? 'Classification' : classificationFilter} <ChevronDown size={14} />
+                  </button>
+                  {showClassDropdown && (
+                    <div className="dropdown-panel-premium">
+                      {['all', 'Services / Specialist', 'Goods / Equipment'].map(opt => (
+                        <div 
+                          key={opt} 
+                          className={`dropdown-item-premium ${classificationFilter === opt ? 'active' : ''}`}
+                          onClick={() => { setClassificationFilter(opt); setShowClassDropdown(false); }}
+                        >
+                          {opt === 'all' ? 'All Classifications' : opt}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ position: 'relative' }}>
+                  <button 
+                    className="mini-input" 
+                    style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: servicesFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
+                    onClick={() => { setShowServiceDropdown(!showServiceDropdown); setShowClassDropdown(false); }}
+                  >
+                    {servicesFilter === 'all' ? 'Services' : servicesFilter} <ChevronDown size={14} />
+                  </button>
+                  {showServiceDropdown && (
+                    <div className="dropdown-panel-premium" style={{ width: '240px' }}>
+                      {['all', ...allServiceTypes, 'Others'].map(opt => (
+                        <div 
+                          key={opt} 
+                          className={`dropdown-item-premium ${servicesFilter === opt ? 'active' : ''}`}
+                          onClick={() => { setServicesFilter(opt); setShowServiceDropdown(false); }}
+                        >
+                          {opt === 'all' ? 'All Services' : opt}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <button className="ghost-button" style={{ padding: '4px' }} onClick={() => alert("Opsi lanjutan.")}><MoreVertical size={16} /></button>
+                <div style={{ background: 'rgba(255,255,255,0.05)', color: '#52525b', fontSize: '11px', padding: '3px 10px', borderRadius: '20px' }}>{filteredVendors.length} ITEMS</div>
+                <div style={{ background: '#378ADD', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>Baru</div>
+                <button 
+                  className="primary-button" 
+                  style={{ height: '32px', background: '#378ADD', borderRadius: '8px' }}
+                  onClick={() => alert("Form pendaftaran vendor baru akan segera dibuka.")}
+                >
+                  + New
+                </button>
+              </div>
             </div>
-            <div className="density-toggle" style={{ display: 'flex', background: 'var(--panel-soft)', padding: '2px', borderRadius: '6px', border: '1px solid var(--line)' }}>
-              <button 
-                onClick={() => setDensity("compact")} 
-                style={{ padding: '2px 8px', fontSize: '0.7rem', borderRadius: '4px', border: 'none', cursor: 'pointer', background: density === "compact" ? "var(--panel)" : "transparent", color: density === "compact" ? "var(--text)" : "var(--muted)" }}
-              >
-                Compact
-              </button>
-              <button 
-                onClick={() => setDensity("spacious")} 
-                style={{ padding: '2px 8px', fontSize: '0.7rem', borderRadius: '4px', border: 'none', cursor: 'pointer', background: density === "spacious" ? "var(--panel)" : "transparent", color: density === "spacious" ? "var(--text)" : "var(--muted)" }}
-              >
-                Normal
-              </button>
-            </div>
-            <div className="saved-filter-buttons" style={{ display: 'flex', gap: '8px' }}>
-              <button className="ghost-button" style={{ fontSize: '0.75rem' }} onClick={() => saveCurrentFilter("slot1")}>Save Filter</button>
-              <button className="ghost-button" style={{ fontSize: '0.75rem' }} onClick={handleExportFiltered}>Export CSV</button>
+
+            {/* Score Filter Row */}
+            <div className="score-chip-row" style={{ marginTop: '8px' }}>
+              {[
+                { id: 'all', label: 'All scores' },
+                { id: 'top', label: '4.5 – 5.0 (Top Rated)' },
+                { id: 'mid', label: '3.5 – 4.4' },
+                { id: 'low', label: 'Below 3.5' },
+                { id: 'unrated', label: 'Not yet rated' }
+              ].map(chip => (
+                <button 
+                  key={chip.id}
+                  className={`score-chip ${scoreFilter === chip.id ? 'active' : ''}`}
+                  onClick={() => setScoreFilter(chip.id)}
+                >
+                  {chip.label}
+                </button>
+              ))}
             </div>
           </div>
-        )}
-      </div>
 
-      {(view === "all_vendors" || view === "sync_log" || view === "outbox") && (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden', marginTop: '16px' }}>
-          <div className={`notion-list ${isVendorListView ? "vendor-list-view" : ""}`} style={{ width: '100%', flex: 1, overflow: 'auto' }}>
-            
-            {view === "all_vendors" && (
-              <div className="finder-sort-header">
-                <div style={{ width: '56px' }}></div> {/* Checkbox spacer */}
-                <button 
-                  onClick={() => toggleSort('name')} 
-                  className={`sort-column ${filters.sortKey === 'name' ? 'active' : ''}`}
-                  style={{ flex: 1 }}
-                >
-                  Nama Vendor {renderSortIcon('name')}
-                </button>
-                <button 
-                  onClick={() => toggleSort('status')} 
-                  className={`sort-column ${filters.sortKey === 'status' ? 'active' : ''}`}
-                  style={{ width: '120px' }}
-                >
-                  Status {renderSortIcon('status')}
-                </button>
-                <button 
-                  onClick={() => toggleSort('date')} 
-                  className={`sort-column ${filters.sortKey === 'date' ? 'active' : ''}`}
-                  style={{ width: '140px' }}
-                >
-                  Tanggal Daftar {renderSortIcon('date')}
-                </button>
-                <button 
-                  onClick={() => toggleSort('score')} 
-                  className={`sort-column ${filters.sortKey === 'score' ? 'active' : ''}`}
-                  style={{ width: '60px', textAlign: 'right', paddingRight: '12px' }}
-                >
-                  Score {renderSortIcon('score')}
-                </button>
+          {/* View Renderers */}
+          <div style={{ padding: '0 24px 80px 24px' }}>
+            {viewMode === "all" && (
+              <div className="tab-content-fade">
+                <div className="vendor-table-header" style={{ gridTemplateColumns: '32px 1fr 120px 120px 80px', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center' }}><input type="checkbox" /></div>
+                  <div>NAMA VENDOR</div>
+                  <div>STATUS</div>
+                  <div 
+                    style={{ textAlign: 'center', cursor: 'pointer', color: sortKey === 'registered' ? '#378ADD' : '#52525b' }}
+                    onClick={() => {
+                      if (sortKey === 'registered') setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+                      else { setSortKey('registered'); setSortOrder('desc'); }
+                    }}
+                  >
+                    TANGGAL DAFTAR {sortKey === 'registered' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                  </div>
+                  <div style={{ textAlign: 'right' }}>SCORE</div>
+                </div>
+                {filteredVendors.map(v => {
+                  const status = getStatusColor(v.status);
+                  const classification = getClassificationColor(v.classification);
+                  const scoreColor = getScoreColor(v.score);
+                  return (
+                    <div key={v.id} className="vendor-list-row" style={{ gridTemplateColumns: '32px 1fr 120px 120px 80px', gap: '16px' }} onClick={() => openVendor(v.id)}>
+                      <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedVendorIds.includes(v.id.toString())}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            const id = v.id.toString();
+                            setSelectedVendorIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+                          }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '11px', fontWeight: 500, color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>{v.category}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7' }}>{v.name}</div>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+                          <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text }}>{v.classification}</span>
+                        </div>
+                      </div>
+                      <div>
+                        <span className="stage-pill-premium" style={{ background: status.bg, color: status.text }}>{status.label}</span>
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>
+                        {new Date(v.registered).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                      </div>
+                      <div style={{ textAlign: 'right', width: '80px' }}>
+                        <div style={{ fontSize: '15px', fontWeight: 500, color: scoreColor }}>{v.score === null ? '–' : v.score.toFixed(1)}</div>
+                        <div style={{ display: 'flex', gap: '3px', marginTop: '4px', justifyContent: 'flex-end' }}>
+                          {[1,2,3,4,5].map(i => (
+                            <div key={i} style={{
+                              width: '7px', height: '7px',
+                              borderRadius: '50%',
+                              background: i <= (v.score === null ? 0 : Math.round(v.score)) 
+                                ? scoreColor 
+                                : 'rgba(255,255,255,0.12)'
+                            }} />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            <div className="notion-items">
-              {view === "all_vendors" &&
-                filteredVendors.map((vendor) => (
-                  <button
-                    className={`notion-item project-card ${selectedVendorId === vendor.id ? "active" : ""} ${density === "compact" ? "density-compact" : ""}`}
-                    key={vendor.id}
-                    onClick={() => openVendor(vendor)}
-                    type="button"
-                    style={{ textAlign: 'left', width: '100%' }}
-                  >
-                    <div className="notion-item-checkbox" onClick={(e) => { e.stopPropagation(); toggleVendorSelection(vendor.id); }}>
-                      <input type="checkbox" checked={selectedVendorIds.includes(vendor.id)} readOnly />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <em className="eyebrow">{primaryType(vendor)}</em>
-                            {isRecent(vendor.sourceTimestamp) && (
-                              <span className="badge-new-pulsing">BARU</span>
-                            )}
-                          </div>
-                          <h3>{formatVendorName(vendor.name)}</h3>
-                        </div>
-                        <strong className="text-main">{vendorScore(vendor)}</strong>
+            {viewMode === "status" && (
+              <div className="tab-content-fade">
+                {["Disetujui", "Sedang direview", "Baru"].map(statusKey => {
+                  const statusInfo = getStatusColor(statusKey);
+                  const statusVendors = filteredVendors.filter(v => v.status === statusKey);
+                  const totalInCategory = vendors.filter(v => v.status === statusKey).length;
+
+                  return (
+                    <div key={statusKey} style={{ marginBottom: '32px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 500, color: '#71717a' }}>{statusInfo.label}</span>
+                        <span style={{ background: 'rgba(255,255,255,0.05)', color: '#52525b', fontSize: '11px', padding: '2px 8px', borderRadius: '20px' }}>{statusVendors.length}</span>
                       </div>
-                      <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
-                        <span className={`status-dot tone-${statusTone(vendor.reviewStatus)}`}>
-                          {reviewStatusLabel(locale, vendor.reviewStatus)}
-                        </span>
-                        <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>
-                          {classificationLabel(vendor.classification)}
-                        </em>
-                        {vendor.businessAddress && (
-                          <span className="text-dim" title={vendor.businessAddress}>
-                            · {truncateText(vendor.businessAddress, 25)}
-                          </span>
-                        )}
-                      </div>
-                      <div style={{ marginTop: "12px", display: "flex", gap: "12px", fontSize: "0.75rem" }}>
-                        <span>
-                          Docs: <strong>{vendor.documentCompletion.complete}/{vendor.documentCompletion.required}</strong>
-                        </span>
-                        <span>
-                          Compliance: <strong className={`tone-${complianceTone(vendor.compliance.status)}`}>{vendor.compliance.status.toUpperCase()}</strong>
-                        </span>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-
-              {view === "sync_log" &&
-                dashboard.importRuns.map((run) => (
-                  <article className="log-item" key={run.id}>
-                    <div className="log-header">
-                      <strong>{formatDate(run.finishedAt, locale)}</strong>
-                      <span className={`status-dot tone-${run.createdVendors > 0 ? "approved" : "rejected"}`}>
-                        {run.createdVendors > 0 ? "Success" : "Checked"}
-                      </span>
-                    </div>
-                    <p>Imported {run.createdVendors} new vendors, updated {run.updatedVendors}.</p>
-                    <small>Provider: {run.sourceLabel} · Skipped: {run.skippedRows}</small>
-                  </article>
-                ))}
-
-              {view === "outbox" &&
-                dashboard.notificationFeed.map((item) => (
-                  <article
-                    className={`notion-item outbox-item ${selectedVendorId === item.vendorId ? "active" : ""}`}
-                    key={item.id}
-                    onClick={() => {
-                      const v = dashboard.vendors.find((v) => v.id === item.vendorId);
-                      if (v) openVendor(v);
-                    }}
-                  >
-                    <span>{item.registrationCode}</span>
-                    <span>{item.audience} · {item.channel} · {formatDate(item.createdAt, locale)}</span>
-                    <p>{truncateText(item.subject, 90)}</p>
-                    <p>{truncateText(item.message, 160)}</p>
-                    <small>To: {item.recipient}</small>
-                  </article>
-                ))}
-
-              {view !== "sync_log" && view !== "outbox" && filteredVendors.length === 0 && (
-                <p className="empty-state">{t(locale, "noData")}</p>
-              )}
-              {view === "outbox" && dashboard.notificationFeed.length === 0 && (
-                <p className="empty-state">No notifications yet.</p>
-              )}
-            </div>
-          </div>
-          
-          {isDrawerOpen && selectedVendor && (
-            <div className="detail-modal-backdrop" onClick={() => setIsDrawerOpen(false)}>
-              <div className="panel detail-panel detail-modal-card" onClick={(event) => event.stopPropagation()}>
-                <div className="detail-head">
-                  <div>
-                    <p className="panel-kicker">{primaryType(selectedVendor)}</p>
-                    <h2>{formatVendorName(selectedVendor.name)}</h2>
-                    <p className="detail-client">{selectedVendor.classification} · Score {vendorScore(selectedVendor)}</p>
-                  </div>
-                  <div className="action-row">
-                    <div className={`status-pill tone-${statusTone(selectedVendor.reviewStatus)}`}>
-                      {reviewStatusLabel(locale, selectedVendor.reviewStatus)}
-                    </div>
-                    <button
-                      type="button"
-                      className="ghost-button"
-                      onClick={() => {
-                        setEditVendorFormData(selectedVendor);
-                        setIsEditVendorModalOpen(true);
-                      }}
-                    >
-                      Edit Vendor
-                    </button>
-                    <button type="button" className="ghost-button" onClick={() => setIsDrawerOpen(false)}>
-                      Close
-                    </button>
-                  </div>
-                </div>
-
-                <div className="detail-tabs">
-                  <button 
-                    className={`detail-tab-item ${detailMode === "overview" ? "is-active" : ""}`}
-                    onClick={() => setDetailMode("overview")}
-                  >
-                    <span>👤</span> Profile
-                  </button>
-                  <button 
-                    className={`detail-tab-item ${detailMode === "finance" ? "is-active" : ""}`}
-                    onClick={() => setDetailMode("finance")}
-                  >
-                    <span>🏦</span> Finance
-                  </button>
-                  <button 
-                    className={`detail-tab-item ${detailMode === "docs" ? "is-active" : ""}`}
-                    onClick={() => setDetailMode("docs")}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}><Files size={14} /></span> Docs
-                  </button>
-                  <button 
-                    className={`detail-tab-item ${detailMode === "ops" ? "is-active" : ""}`}
-                    onClick={() => setDetailMode("ops")}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}><Settings size={14} /></span> Operations
-                  </button>
-                  <button 
-                    className={`detail-tab-item ${detailMode === "audit" ? "is-active" : ""}`}
-                    onClick={() => setDetailMode("audit")}
-                  >
-                    <span style={{ display: 'inline-flex', alignItems: 'center', marginRight: '8px' }}><History size={14} /></span> Audit
-                  </button>
-                </div>
-
-                <div className="detail-body-paginated">
-                  {detailMode === "overview" && (
-                    <div className="tab-content-fade">
-                      <section className="detail-card">
-                        <div className="detail-card-header">
-                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={18} /> Kontak & Identitas</h3>
-                        </div>
-                        <div className="detail-card-content">
-                          <div className="detail-row">
-                            <span className="detail-label">Nama PIC</span>
-                            <span className="detail-value">{selectedVendor.contacts?.[0]?.name || "-"}</span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">WhatsApp PIC</span>
-                            <span className="detail-value">
-                              {selectedVendor.contacts?.[0]?.phone ? (
-                                <a href={`https://wa.me/${normalizePhoneToWhatsApp(selectedVendor.contacts[0].phone)}`} target="_blank" rel="noreferrer" style={{ color: 'var(--green)', fontWeight: 700 }}>
-                                  {selectedVendor.contacts[0].phone}
-                                </a>
-                              ) : "-"}
-                            </span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Business Email</span>
-                            <span className="detail-value">{selectedVendor.email || "-"}</span>
-                          </div>
-                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px' }}>
-                            <div style={{ width: '100%' }}>
-                              <span className="detail-label" style={{ marginBottom: '8px', display: 'block' }}>Alamat Usaha</span>
-                              <p style={{ margin: 0, fontSize: '0.8rem', lineHeight: 1.5, color: 'var(--muted)' }}>{selectedVendor.businessAddress || "-"}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </section>
-                      <section className="detail-card" style={{ marginTop: '16px' }}>
-                        <div className="detail-card-header">
-                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><BarChart3 size={18} /> Klasifikasi</h3>
-                        </div>
-                        <div className="detail-card-content">
-                          <div className="detail-row">
-                            <span className="detail-label">Tipe Bisnis</span>
-                            <span className={`category-pill tone-${classificationTone(selectedVendor.classification)}`}>
-                              {classificationLabel(selectedVendor.classification)}
-                            </span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Registration Date</span>
-                            <span className="detail-value">{formatDate(selectedVendor.sourceTimestamp, locale)}</span>
-                          </div>
-                        </div>
-                      </section>
-                    </div>
-                  )}
-
-                  {detailMode === "finance" && (
-                    <div className="tab-content-fade">
-                      {selectedVendor.bankName || selectedVendor.bankAccountNumber ? (
-                        <div className="banking-gradient-card">
-                          <div className="banking-header">
-                            <Landmark size={20} color="rgba(255,255,255,0.6)" />
-                            <span>PERBANKAN VENDOR</span>
-                          </div>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.25fr', gap: '20px' }}>
-                            <div>
-                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>BANK</span>
-                              <strong style={{ fontSize: '1.1rem', color: '#fff', letterSpacing: '-0.01em' }}>{selectedVendor.bankName || "-"}</strong>
-                            </div>
-                            <div>
-                              <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>NO. REKENING</span>
-                              <strong style={{ fontSize: '1.1rem', color: 'var(--blue)', fontFamily: 'var(--font-mono)' }}>{formatBankAccount(selectedVendor.bankAccountNumber!)}</strong>
-                            </div>
-                          </div>
-                          <div style={{ marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-                            <span style={{ display: 'block', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', fontWeight: 700, marginBottom: '6px', textTransform: 'uppercase' }}>ATAS NAMA REKENING</span>
-                            <strong style={{ fontSize: '0.94rem', color: '#fff' }}>{selectedVendor.bankAccountHolder || "-"}</strong>
-                          </div>
+                      
+                      {statusVendors.length > 0 ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                          {statusVendors.map(v => {
+                            const classification = getClassificationColor(v.classification);
+                            const scoreColor = getScoreColor(v.score);
+                            return (
+                              <div key={v.id} className="section-card-premium" style={{ padding: '16px', cursor: 'pointer' }} onClick={() => openVendor(v.id)}>
+                                <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>{v.category}</div>
+                                <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '12px' }}>{v.name}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                                  <div style={{ display: 'flex', gap: '6px' }}>
+                                    <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text, fontSize: '10px' }}>{v.classification}</span>
+                                    <span className="stage-pill-premium" style={{ background: statusInfo.bg, color: statusInfo.text, fontSize: '10px' }}>{statusInfo.label}</span>
+                                  </div>
+                                  <div style={{ fontSize: '14px', fontWeight: 600, color: scoreColor }}>{v.score === null ? '–' : v.score.toFixed(1)}</div>
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#52525b', marginBottom: '12px' }}><MapPin size={10} style={{ marginRight: '4px' }} /> {v.location}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '0.5px solid rgba(255,255,255,0.05)' }}>
+                                  <div style={{ fontSize: '11px', background: 'rgba(255,255,255,0.06)', color: '#a1a1aa', padding: '2px 8px', borderRadius: '4px' }}>Docs {v.docs.done}/{v.docs.total}</div>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: v.compliance === 'OK' ? '#97C459' : '#EF9F27' }}>
+                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: v.compliance === 'OK' ? '#97C459' : '#EF9F27' }} /> {v.compliance === 'OK' ? 'Compliant' : 'Pending'}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
-                        <div className="detail-card" style={{ padding: '24px', textAlign: 'center', opacity: 0.5 }}>
-                          <p style={{ margin: 0, fontSize: '0.8rem' }}>Data rekening belum tersedia</p>
+                        <div style={{ padding: '14px 16px', fontSize: '13px', color: '#3f3f46', fontStyle: totalInCategory === 0 ? 'italic' : 'normal' }}>
+                          {totalInCategory === 0 ? "Tidak ada vendor dalam kategori ini" : "Tidak ada vendor yang sesuai filter"}
                         </div>
                       )}
-
-                      <section className="detail-card" style={{ marginTop: '24px' }}>
-                        <div className="detail-card-header">
-                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Gavel size={18} /> Legal & Pajak</h3>
-                        </div>
-                        <div className="detail-card-content">
-                          <div className="detail-row">
-                            <span className="detail-label">Status Pajak</span>
-                            <span className={`status-pill tone-${selectedVendor.taxStatus === "PKP" ? "green" : "amber"}`}>
-                              {selectedVendor.taxStatus}
-                            </span>
-                          </div>
-                          <div className="detail-row">
-                            <span className="detail-label">Legalitas Utama</span>
-                            <span className="detail-value">{selectedVendor.legalStatus}</span>
-                          </div>
-                          <div className="detail-row" style={{ borderBottom: 'none', paddingTop: '12px' }}>
-                            <span className="detail-label">NPWP (Tax ID)</span>
-                            <span className="detail-value mono" style={{ fontWeight: 700, color: 'rgba(255,255,255,0.9)' }}>
-                              {formatNPWP(selectedVendor.npwpNumber!)}
-                            </span>
-                          </div>
-                        </div>
-                      </section>
                     </div>
-                  )}
+                  );
+                })}
+              </div>
+            )}
 
-                  {detailMode === "docs" && (
-                    <div className="tab-content-fade">
-                      <section className="detail-card">
-                        <div className="detail-card-header">
-                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><Files size={18} /> Dokumen & Compliance</h3>
-                          <span className={`status-pill tone-${complianceTone(selectedVendor.compliance.status)}`}>
-                            {selectedVendor.compliance.status.toUpperCase()}
-                          </span>
+            {viewMode === "type" && (
+              <div className="tab-content-fade">
+                {["Production Floor Team", "Equipment / Technical", "Designer 3D Motion Graphics", "Others"].map(type => {
+                  const typeVendors = filteredVendors.filter(v => v.type === type);
+                  const isCollapsed = collapsedSections[type];
+                  return (
+                    <div key={type} style={{ marginBottom: '8px', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '12px', overflow: 'hidden' }}>
+                      <div className="collapsible-header-premium" style={{ background: '#111113', padding: '12px 16px', marginBottom: '4px' }} onClick={() => setCollapsedSections(prev => ({ ...prev, [type]: !isCollapsed }))}>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                          <span style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{type}</span>
+                          <span style={{ background: 'rgba(255,255,255,0.06)', color: '#71717a', fontSize: '11px', padding: '2px 8px', borderRadius: '20px', marginLeft: '8px' }}>{typeVendors.length}</span>
                         </div>
-                        <div className="detail-card-content">
-                          {selectedVendor.documentsFolderUrl ? (
-                            <div style={{ marginBottom: '24px' }}>
-                              <a href={selectedVendor.documentsFolderUrl} target="_blank" rel="noreferrer" className="primary-button" style={{ width: '100%', borderRadius: '12px', justifyContent: 'center', height: '42px', fontWeight: 600 }}>
-                                <FolderOpen size={16} style={{ marginRight: '8px' }} /> Buka Folder Dokumen
-                              </a>
-                            </div>
-                          ) : (
-                            <div style={{ marginBottom: '24px', padding: '16px', border: '1px dashed var(--line-strong)', borderRadius: '12px', textAlign: 'center' }}>
-                              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--muted)' }}>Link folder dokumen belum diatur.</p>
-                            </div>
-                          )}
-
-                          <div className="detail-block">
-                            <p className="mini-meta" style={{ marginBottom: '16px' }}>Detail Checklist Dokumen:</p>
-                            <div className="task-stack compact-task-stack">
-                              {selectedVendor.compliance.items.map((item) => (
-                                <div key={item.documentType} className="task-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    <span style={{ fontSize: '0.85rem' }}>{documentTypeLabel(item.documentType)}</span>
-                                  </div>
-                                  <span className={`status-pill tone-${complianceItemTone(item.status)}`} style={{ fontSize: '0.65rem' }}>
-                                    {item.status.toUpperCase()}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                        <div style={{ transition: '0.2s', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)', display: 'flex', alignItems: 'center' }}>
+                          <ChevronDown size={16} color="#52525b" />
                         </div>
-                      </section>
-                    </div>
-                  )}
-
-                  {detailMode === "ops" && (
-                    <div className="tab-content-fade">
-                      <section className="detail-card">
-                        <div className="detail-card-header">
-                          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><TrendingUp size={18} /> Performance & Rating</h3>
-                          <button 
-                            className="primary-button" 
-                            onClick={handleScorecardSave} 
-                            disabled={opsPending} 
-                            style={{ fontSize: '0.65rem', padding: '4px 10px', height: 'auto', borderRadius: '6px' }}
+                      </div>
+                      {!isCollapsed && typeVendors.map(v => {
+                        const status = getStatusColor(v.status);
+                        const classification = getClassificationColor(v.classification);
+                        const scoreColor = getScoreColor(v.score);
+                        return (
+                          <div 
+                            key={v.id} 
+                            className="vendor-list-row" 
+                            style={{ 
+                              display: 'grid',
+                              gridTemplateColumns: '130px 1fr 140px 80px 60px',
+                              alignItems: 'center',
+                              gap: '12px',
+                              padding: '10px 16px',
+                              borderBottom: '0.5px solid rgba(255,255,255,0.05)'
+                            }} 
+                            onClick={() => openVendor(v.id)}
                           >
-                            {opsPending ? "..." : "Save Scores"}
-                          </button>
-                        </div>
-                        <div className="detail-card-content">
-                          <div className="scorecard-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div className="score-input">
-                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Quality</label>
-                              <input type="number" min="1" max="5" value={scorecard.quality} onChange={e => setScorecard(s => ({ ...s, quality: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                              {v.category}
                             </div>
-                            <div className="score-input">
-                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Reliability</label>
-                              <input type="number" min="1" max="5" value={scorecard.reliability} onChange={e => setScorecard(s => ({ ...s, reliability: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>
+                              {v.name}
                             </div>
-                            <div className="score-input">
-                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Pricing</label>
-                              <input type="number" min="1" max="5" value={scorecard.pricing} onChange={e => setScorecard(s => ({ ...s, pricing: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                              <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text }}>{v.classification}</span>
+                              <span className="stage-pill-premium" style={{ background: status.bg, color: status.text }}>{status.label}</span>
                             </div>
-                            <div className="score-input">
-                              <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Communication</label>
-                              <input type="number" min="1" max="5" value={scorecard.communication} onChange={e => setScorecard(s => ({ ...s, communication: e.target.value }))} style={{ width: '100%', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px', padding: '6px' }} />
+                            <div style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>
+                              {v.docs.done}/{v.docs.total}
+                            </div>
+                            <div style={{ fontSize: '14px', fontWeight: 500, color: scoreColor, textAlign: 'right' }}>
+                               {v.score === null ? '–' : v.score.toFixed(1)}
                             </div>
                           </div>
-                        </div>
-                      </section>
-                      
-                      <section className="detail-card" style={{ marginTop: '16px' }}>
-                        <div className="detail-card-header">
-                          <h3>📋 Review Status</h3>
-                        </div>
-                        <div className="detail-card-content">
-                          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
-                            <select 
-                              value={reviewStatus} 
-                              onChange={(event) => setReviewStatus(event.target.value as ReviewStatus)} 
-                              style={{ flex: 1, background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '8px', fontSize: '0.8rem' }}
-                            >
-                              {REVIEW_STATUSES.map((status) => (
-                                <option key={status} value={status}>{reviewStatusLabel(locale, status)}</option>
-                              ))}
-                            </select>
-                            <button className="primary-button" onClick={handleReviewSave} disabled={reviewPending} style={{ borderRadius: '8px' }}>
-                              {reviewPending ? "..." : "Update"}
-                            </button>
-                          </div>
-                          <textarea 
-                            value={reviewNote} 
-                            onChange={(event) => setReviewNote(event.target.value)} 
-                            placeholder="Tinggalkan catatan review internal..." 
-                            style={{ width: '100%', minHeight: '80px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '12px', fontSize: '0.82rem' }}
-                          />
-                        </div>
-                      </section>
-
-                      <section className="detail-card" style={{ marginTop: '16px' }}>
-                        <div className="detail-card-header">
-                          <h3>📒 Internal Notes & Capacity</h3>
-                          <button className="ghost-button" onClick={handleOpsProfileSave} disabled={opsPending} style={{ fontSize: '0.65rem', padding: '4px 10px', height: 'auto' }}>
-                            {opsPending ? "..." : "Save"}
-                          </button>
-                        </div>
-                        <div className="detail-card-content">
-                          <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Availability Details</label>
-                          <textarea value={availabilityNotes} onChange={e => setAvailabilityNotes(e.target.value)} placeholder="e.g. Tidak tersedia di bulan Agustus..." style={{ width: '100%', minHeight: '60px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px', fontSize: '0.82rem', marginBottom: '12px' }} />
-                          
-                          <label style={{ fontSize: '0.72rem', color: 'var(--muted-soft)', display: 'block', marginBottom: '4px' }}>Pricing Insight</label>
-                          <textarea value={rateCardNotes} onChange={e => setRateCardNotes(e.target.value)} placeholder="e.g. Harga spesial untuk repeat order..." style={{ width: '100%', minHeight: '60px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '8px', padding: '10px', fontSize: '0.82rem' }} />
-                        </div>
-                      </section>
+                        );
+                      })}
                     </div>
-                  )}
+                  );
+                })}
+              </div>
+            )}
 
-                  {detailMode === "audit" && (
-                    <div className="tab-content-fade">
-                      <section className="detail-card">
-                        <div className="detail-card-header">
-                          <h3>📝 Audit Trail</h3>
-                        </div>
-                        <div className="detail-card-content">
-                          <div className="audit-list" style={{ display: 'grid', gap: '12px' }}>
-                            {selectedVendor.auditLog.map((entry) => (
-                              <div key={entry.id} style={{ padding: '10px', background: 'var(--panel-soft)', borderRadius: '8px', fontSize: '0.75rem' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                  <strong>{entry.action}</strong>
-                                  <span style={{ color: 'var(--muted-soft)' }}>{formatDate(entry.createdAt, locale)}</span>
-                                </div>
-                                <p style={{ margin: 0, color: 'var(--muted)' }}>{entry.message}</p>
-                                <small style={{ marginTop: '4px', display: 'block', opacity: 0.6 }}>Oleh: {entry.actor}</small>
-                              </div>
-                            ))}
+            {viewMode === "directory" && (
+              <div className="tab-content-fade">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                  {filteredVendors.map(v => {
+                    const status = getStatusColor(v.status);
+                    const classification = getClassificationColor(v.classification);
+                    const scoreColor = getScoreColor(v.score);
+                    return (
+                      <div key={v.id} className="section-card-premium" style={{ padding: '16px', cursor: 'pointer' }} onClick={() => openVendor(v.id)}>
+                        <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>{v.category}</div>
+                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '12px' }}>{v.name}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                          <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text, fontSize: '10px' }}>{v.classification}</span>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '14px', fontWeight: 600, color: scoreColor }}>{v.score === null ? '–' : v.score.toFixed(1)}</div>
                           </div>
                         </div>
-                      </section>
-
-                      {socialLinks.length > 0 && (
-                        <section className="detail-card" style={{ marginTop: '16px' }}>
-                          <div className="detail-card-header">
-                            <h3>🌐 Social Media & Links</h3>
-                          </div>
-                          <div className="detail-card-content">
-                            <div className="notion-links">
-                              {socialLinks.map((item) => (
-                                <a href={item.url} key={item.label} rel="noreferrer" target="_blank" className="detail-row" style={{ textDecoration: 'none' }}>
-                                  <span className="detail-label">{item.label}</span>
-                                  <strong className="detail-value" style={{ color: 'var(--blue)' }}>{shortLinkLabel(item.url)}</strong>
-                                </a>
-                              ))}
-                            </div>
-                          </div>
-                        </section>
-                      )}
-                    </div>
-                  )}
+                        <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '12px' }}><MapPin size={10} style={{ marginRight: '4px' }} /> {v.location}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                           {renderStarBar(v.score)}
+                           <span className="stage-pill-premium" style={{ background: status.bg, color: status.text, fontSize: '10px' }}>{status.label}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        </div>
+      </main>
+
+      {/* Bulk Action Bar */}
+      {selectedVendorIds.length > 0 && (
+        <div className="bulk-action-bar">
+          <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{selectedVendorIds.length} vendor terpilih</div>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <button 
+              className="primary-button" 
+              style={{ background: '#97C459', padding: '6px 16px', fontSize: '12px' }}
+              onClick={() => {
+                alert(`${selectedVendorIds.length} vendor berhasil disetujui!`);
+                setSelectedVendorIds([]);
+              }}
+            >
+              Approve semua
+            </button>
+            <button className="ghost-button" style={{ border: '0.5px solid rgba(255,255,255,0.15)', fontSize: '12px', padding: '6px 14px' }} onClick={() => alert("Mengekspor data vendor...")}>Export</button>
+            <button onClick={() => setSelectedVendorIds([])} style={{ background: 'none', border: 'none', color: '#71717a', fontSize: '12px', cursor: 'pointer' }}>Batalkan</button>
+          </div>
         </div>
       )}
 
-      {view === "by_type" && (
-        <section className="type-board">
-          {vendorsByType.map((group) => (
-            <div className="type-column" key={group.type}>
-              <div className="type-column-header">{group.type}</div>
-              <div className="type-card-list">
-                {group.items.map((vendor) => (
-                  <button className="project-card" key={vendor.id} onClick={() => openVendor(vendor)} type="button" style={{ textAlign: 'left', width: '100%', border: '1px solid var(--line)' }}>
-                    <div style={{ marginBottom: '12px' }}>
-                      <em className="eyebrow" style={{ display: 'block', marginBottom: '4px' }}>{vendor.serviceNames[0]}</em>
-                      <h3 style={{ margin: 0, fontSize: '1rem' }}>{formatVendorName(vendor.name)}</h3>
-                    </div>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>{classificationLabel(vendor.classification)}</em>
-                        <span className={`status-dot tone-${statusTone(vendor.reviewStatus)}`}>
-                          {reviewStatusLabel(locale, vendor.reviewStatus)}
-                        </span>
-                      </div>
-                      <strong className="text-main">{vendorScore(vendor)}</strong>
-                    </div>
-                    <div style={{ marginTop: '8px', opacity: 0.6, fontSize: '0.75rem' }}>
-                      Documents: {vendor.documentCompletion.complete}/{vendor.documentCompletion.required}
-                    </div>
-                  </button>
-                ))}
+      {/* Detail Panel Overlay */}
+      {isDetailOpen && selectedVendorDetail && (
+        <div 
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          onClick={() => setIsDetailOpen(false)}
+        >
+          <div 
+            className="vendor-detail-panel-premium" 
+            style={{ 
+              width: '900px', 
+              maxHeight: '85vh', 
+              background: '#0f0f11', 
+              borderRadius: '16px', 
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div style={{ padding: '24px 32px', borderBottom: '1px solid rgba(255,255,255,0.05)', position: 'relative' }}>
+              <div style={{ fontSize: '10px', color: '#71717a', fontWeight: 600, letterSpacing: '0.1em', marginBottom: '8px' }}>
+                {(selectedVendorDetail.type || selectedVendorDetail.category).toUpperCase()}
               </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {view === "by_status" && (
-        <section className="status-sections">
-          {directorySections.map((section) => (
-            <div className="status-section" key={section.status}>
-              <div className="status-section-header">
-                <span className={`status-dot tone-${statusTone(section.status)}`}>{section.title}</span>
-              </div>
-              <div className="directory-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                {section.items.map((vendor) => (
-                  <button className="project-card" key={vendor.id} onClick={() => openVendor(vendor)} type="button" style={{ textAlign: 'left', width: '100%', border: '1px solid var(--line)' }}>
-                    <div style={{ marginBottom: '12px' }}>
-                      <em className="eyebrow" style={{ display: 'block', marginBottom: '4px' }}>{primaryType(vendor)}</em>
-                      <h3 style={{ margin: 0, fontSize: '1rem' }}>{formatVendorName(vendor.name)}</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f4f4f5', margin: 0 }}>{selectedVendorDetail.name}</h2>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  <span className="stage-pill-premium" style={{ background: getStatusColor(selectedVendorDetail.status).bg, color: getStatusColor(selectedVendorDetail.status).text, padding: '4px 12px' }}>
+                    {getStatusColor(selectedVendorDetail.status).label}
+                  </span>
+                  {!isEditing ? (
+                    <button className="ghost-button" style={{ background: '#1f1f23', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', fontSize: '13px' }} onClick={startEditing}>Edit Vendor</button>
+                  ) : (
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button className="primary-button" style={{ background: '#22c55e', padding: '6px 16px', fontSize: '13px' }} onClick={handleSaveVendor}>Save Changes</button>
+                      <button className="ghost-button" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', fontSize: '13px' }} onClick={() => setIsEditing(false)}>Cancel</button>
                     </div>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>{classificationLabel(vendor.classification)}</em>
-                        <span className={`status-dot tone-${statusTone(vendor.reviewStatus)}`}>
-                          {reviewStatusLabel(locale, vendor.reviewStatus)}
-                        </span>
-                      </div>
-                      <strong className="text-main">{vendorScore(vendor)}</strong>
-                    </div>
-                    <div style={{ marginTop: '8px', opacity: 0.6, fontSize: '0.75rem' }}>
-                      {vendor.businessAddress || "No address data"}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-
-      {view === "vendor_directory" && (
-        <section className="status-sections">
-          {directorySections.map((section) => (
-            <div className="status-section" key={section.status}>
-              <div className="status-section-header">
-                <span className={`status-dot tone-${statusTone(section.status)}`}>{section.title}</span>
-              </div>
-              <div className="directory-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
-                {section.items.slice(0, 8).map((vendor) => (
-                  <button className="project-card" key={vendor.id} onClick={() => openVendor(vendor)} type="button" style={{ textAlign: 'left', width: '100%', border: '1px solid var(--line)' }}>
-                    <div style={{ marginBottom: '12px' }}>
-                      <em className="eyebrow" style={{ display: 'block', marginBottom: '4px' }}>{vendor.serviceNames[0]}</em>
-                      <h3 style={{ margin: 0, fontSize: '1rem' }}>{formatVendorName(vendor.name)}</h3>
-                    </div>
-                    
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                      <div style={{ display: 'flex', gap: '6px' }}>
-                        <em className={`category-pill tone-${classificationTone(vendor.classification)}`}>{classificationLabel(vendor.classification)}</em>
-                        <span className={`status-dot tone-${statusTone(vendor.reviewStatus)}`}>
-                          {reviewStatusLabel(locale, vendor.reviewStatus)}
-                        </span>
-                      </div>
-                      <strong className="text-main">{vendorScore(vendor)}</strong>
-                    </div>
-                    <div style={{ marginTop: '8px', opacity: 0.6, fontSize: '0.75rem' }}>
-                      {vendor.businessAddress || "No address data"}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </section>
-      )}
-      {isEditVendorModalOpen && selectedVendor && (
-        <div className="modal-overlay modal-backdrop">
-          <div className="modal-content wide-modal modal-card">
-            <h2 style={{ marginBottom: '24px' }}>Adjust Vendor Information</h2>
-            <div className="form-stack">
-              <div className="form-section-title">Identity & Contact</div>
-              <div className="form-grid-2">
-                <div className="form-group">
-                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Vendor Name</label>
-                  <input 
-                    className="control-bar-input" 
-                    style={{ width: '100%' }}
-                    value={editVendorFormData.name || ''} 
-                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, name: e.target.value })} 
-                    placeholder="Legal name..." 
-                  />
-                </div>
-                <div className="form-group">
-                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Business Email</label>
-                  <input 
-                    className="control-bar-input" 
-                    style={{ width: '100%' }}
-                    value={editVendorFormData.email || ''} 
-                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, email: e.target.value })} 
-                    placeholder="official@company.com" 
-                  />
+                  )}
+                  <button className="ghost-button" style={{ background: '#1f1f23', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 16px', fontSize: '13px' }} onClick={() => setIsDetailOpen(false)}>Close</button>
                 </div>
               </div>
 
-              <div className="form-grid-2" style={{ marginTop: '20px' }}>
-                <div className="form-group">
-                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Classification</label>
-                  <select 
-                    className="control-bar-select" 
-                    style={{ width: '100%' }}
-                    value={editVendorFormData.classification || ''} 
-                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, classification: e.target.value as VendorClassification })}
+              <div style={{ fontSize: '13px', color: '#a1a1aa', marginTop: '8px' }}>
+                {selectedVendorDetail.classification === 'Services / Specialist' ? 'Penyedia Jasa' : 'Penyedia Barang'} · Score {selectedVendorDetail.score || '–'}
+              </div>
+            </div>
+
+            {/* Premium Tab Bar */}
+            <div style={{ padding: '0 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ display: 'flex', gap: '8px', padding: '8px 0' }}>
+                {[
+                  { id: 'profile', label: 'Profile', icon: <User size={16} /> },
+                  { id: 'finance', label: 'Finance', icon: <Building2 size={16} /> },
+                  { id: 'docs', label: 'Docs', icon: <FileText size={16} /> },
+                  { id: 'ops', label: 'Operations', icon: <Zap size={16} /> },
+                  { id: 'audit', label: 'Audit', icon: <Clock size={16} /> }
+                ].map(t => (
+                  <button 
+                    key={t.id}
+                    onClick={() => setActiveDetailTab(t.id as any)}
+                    style={{ 
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 24px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      borderRadius: '8px',
+                      background: activeDetailTab === t.id ? '#1f1f23' : 'transparent',
+                      color: activeDetailTab === t.id ? '#f4f4f5' : '#71717a',
+                      border: activeDetailTab === t.id ? '1px solid rgba(255,255,255,0.1)' : '1px solid transparent',
+                      cursor: 'pointer',
+                      transition: '0.2s'
+                    }}
                   >
-                    <option value="Penyedia Barang">Penyedia Barang (Goods/Equipment)</option>
-                    <option value="Penyedia Jasa">Penyedia Jasa (Services/Specialist)</option>
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Coverage Area</label>
-                  <input 
-                    className="control-bar-input" 
-                    style={{ width: '100%' }}
-                    value={editVendorFormData.businessAddress || ''} 
-                    onChange={(e) => setEditVendorFormData({ ...editVendorFormData, businessAddress: e.target.value })} 
-                    placeholder="e.g. Nasional, Jakarta, etc." 
-                  />
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: '20px' }}>
-                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Business Address</label>
-                <textarea 
-                  className="control-bar-input" 
-                  style={{ width: '100%', minHeight: '60px' }}
-                  value={editVendorFormData.businessAddress || ''} 
-                  onChange={(e) => setEditVendorFormData({ ...editVendorFormData, businessAddress: e.target.value })} 
-                />
-              </div>
-
-              <div className="form-group" style={{ marginTop: '20px' }}>
-                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Services (Comma-separated)</label>
-                <input 
-                  className="control-bar-input" 
-                  style={{ width: '100%' }}
-                  value={(editVendorFormData as { serviceNames?: string[] }).serviceNames?.join(', ') || ''} 
-                  onChange={(e) => {
-                    const serviceNames = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                    setEditVendorFormData({ ...editVendorFormData, serviceNames } as typeof editVendorFormData);
-                  }} 
-                  placeholder="e.g. Advertising, Stage Show Management..." 
-                />
-                <div style={{ fontSize: '0.7rem', opacity: 0.5, marginTop: '4px' }}>
-                  Typos like &quot;ADVERTISTING&quot; will be automatically corrected on save.
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: '20px' }}>
-                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Website / Profile URL</label>
-                <input 
-                  className="control-bar-input" 
-                  style={{ width: '100%' }}
-                  value={editVendorFormData.websiteUrl || ''} 
-                  onChange={(e) => setEditVendorFormData({ ...editVendorFormData, websiteUrl: e.target.value })} 
-                  placeholder="https://..." 
-                />
-              </div>
-
-              <div className="form-group" style={{ marginTop: '20px' }}>
-                <label className="eyebrow" style={{ display: 'block', marginBottom: '6px' }}>Documents Folder Link</label>
-                <input 
-                  className="control-bar-input" 
-                  style={{ width: '100%' }}
-                  value={editVendorFormData.documentsFolderUrl || ''} 
-                  onChange={(e) => setEditVendorFormData({ ...editVendorFormData, documentsFolderUrl: e.target.value })} 
-                  placeholder="https://drive.google.com/..." 
-                />
+                    {t.icon} {t.label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            <div style={{ marginTop: '32px', display: 'flex', gap: '16px', justifyContent: 'flex-end', alignItems: 'center' }}>
-              <button className="ghost-button" onClick={() => setIsEditVendorModalOpen(false)}>Cancel</button>
-              <button 
-                className="primary-button" 
-                onClick={async () => {
-                  startOpsTransition(async () => {
-                    const response = await fetch(`/api/vendors/${selectedVendor.id}`, {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(editVendorFormData),
-                    });
-                    if (response.ok) {
-                      setIsEditVendorModalOpen(false);
-                      window.location.reload();
-                    } else {
-                      alert("Gagal menyimpan perubahan.");
-                    }
-                  });
-                }}
-              >
-                {opsPending ? "Saving..." : "Save Changes"}
-              </button>
+            {/* Modal Body Content */}
+            <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
+              {activeDetailTab === 'profile' && (
+                <div className="tab-content-fade" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Kontak & Identitas Section */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <User size={16} color="#71717a" />
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>KONTAK & IDENTITAS</span>
+                    </div>
+                    <div style={{ padding: '0 24px' }}>
+                      {[
+                        { key: 'picName', label: 'Nama PIC', value: editFormData?.contacts?.[0]?.name || selectedVendorDetail.contacts?.[0]?.name || '–' },
+                        { key: 'phone', label: 'WhatsApp PIC', value: editFormData?.contacts?.[0]?.phone || selectedVendorDetail.contacts?.[0]?.phone || '–', color: '#22c55e' },
+                        { key: 'email', label: 'Business Email', value: editFormData?.email || selectedVendorDetail.email || '–' },
+                        { key: 'location', label: 'Alamat Usaha', value: editFormData?.location || selectedVendorDetail.location || '–' },
+                      ].map((row, idx, arr) => (
+                        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
+                          <span style={{ color: '#71717a' }}>{row.label}</span>
+                          {!isEditing ? (
+                            <span style={{ color: row.color || '#f4f4f5', textAlign: 'right' }}>{row.value}</span>
+                          ) : (
+                            <input 
+                              className="mini-input"
+                              style={{ background: '#111113', width: '280px', height: '32px', textAlign: 'right', border: '1px solid rgba(255,255,255,0.1)' }}
+                              value={row.value === '–' ? '' : row.value}
+                              onChange={(e) => {
+                                if (row.key === 'picName' || row.key === 'phone') {
+                                  const contacts = [...(editFormData?.contacts || selectedVendorDetail.contacts || [{ name: '', phone: '' }])];
+                                  if (row.key === 'picName') contacts[0].name = e.target.value;
+                                  else contacts[0].phone = e.target.value;
+                                  setEditFormData({ ...editFormData, contacts });
+                                } else {
+                                  setEditFormData({ ...editFormData, [row.key]: e.target.value });
+                                }
+                              }}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+
+                  </div>
+
+                  {/* Klasifikasi Section */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <BarChart3 size={16} color="#71717a" />
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>KLASIFIKASI</span>
+                    </div>
+                    <div style={{ padding: '0 24px' }}>
+                      {[
+                        { label: 'Tipe Bisnis', value: selectedVendorDetail.classification || '–' },
+                        { label: 'Registration Date', value: new Date(selectedVendorDetail.registered).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace('.', ':') },
+                      ].map((row, idx, arr) => (
+                        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
+                          <span style={{ color: '#71717a' }}>{row.label}</span>
+                          <span style={{ color: '#f4f4f5', textAlign: 'right' }}>{row.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === 'finance' && (
+                <div className="tab-content-fade" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Perbankan & Perpajakan Section */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Building2 size={16} color="#71717a" />
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>PERBANKAN & PERPAJAKAN</span>
+                    </div>
+                    <div style={{ padding: '0 24px' }}>
+                      {[
+                        { key: 'bankName', label: 'Nama Bank', value: editFormData?.bankName || selectedVendorDetail.bankName || '–' },
+                        { key: 'bankAccountNumber', label: 'Nomor Rekening', value: editFormData?.bankAccountNumber || selectedVendorDetail.bankAccountNumber || '–', color: '#378ADD' },
+                        { key: 'bankAccountHolder', label: 'Atas Nama', value: editFormData?.bankAccountHolder || selectedVendorDetail.bankAccountHolder || '–' },
+                        { key: 'npwpNumber', label: 'Nomor NPWP', value: editFormData?.npwpNumber || selectedVendorDetail.npwpNumber || '–' },
+                        { key: 'taxStatus', label: 'Tax Status', value: editFormData?.taxStatus || selectedVendorDetail.taxStatus || 'Unknown' },
+                        { key: 'legalStatus', label: 'Legal Status', value: editFormData?.legalStatus || selectedVendorDetail.legalStatus || 'Unknown' },
+                      ].map((row, idx, arr) => (
+                        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
+                          <span style={{ color: '#71717a' }}>{row.label}</span>
+                          {!isEditing ? (
+                            <span style={{ color: row.color || '#f4f4f5', textAlign: 'right' }}>{row.value}</span>
+                          ) : (
+                            <input 
+                              className="mini-input"
+                              style={{ background: '#111113', width: '280px', height: '32px', textAlign: 'right', border: '1px solid rgba(255,255,255,0.1)' }}
+                              value={row.value === '–' ? '' : row.value}
+                              onChange={(e) => setEditFormData({ ...editFormData, [row.key]: e.target.value })}
+                            />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === 'docs' && (
+                <div className="tab-content-fade" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
+                   {(selectedVendorDetail.documents && selectedVendorDetail.documents.length > 0) ? selectedVendorDetail.documents.map((doc: any) => (
+                     <div key={doc.id} className="section-card-premium" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                         <div style={{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(55,138,221,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <FileText size={20} color="#378ADD" />
+                         </div>
+                         <div>
+                           <div style={{ fontSize: '13px', fontWeight: 500, color: '#f4f4f5' }}>{doc.label}</div>
+                           <div style={{ fontSize: '11px', color: doc.isVerified ? '#97C459' : '#71717a' }}>
+                             {doc.isVerified ? '✓ Verified' : 'Pending Verification'}
+                           </div>
+                         </div>
+                       </div>
+                       <a href={doc.url} target="_blank" rel="noopener noreferrer" className="ghost-button" style={{ padding: '6px 12px', fontSize: '11px', border: '1px solid rgba(255,255,255,0.1)' }}>View</a>
+                     </div>
+                   )) : (
+                     <div style={{ gridColumn: 'span 2', padding: '40px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <FolderOpen size={32} color="#3f3f46" style={{ marginBottom: '12px' }} />
+                        <div style={{ color: '#71717a', fontSize: '13px' }}>Belum ada dokumen digital yang diunggah.</div>
+                     </div>
+                   )}
+                </div>
+              )}
+
+              {activeDetailTab === 'ops' && (
+                <div className="tab-content-fade" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                  {/* Performance Metrics */}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    {[
+                      { key: 'quality', label: 'Quality', score: editFormData?.performance?.quality || selectedVendorDetail.performance?.quality || 4.5 },
+                      { key: 'reliability', label: 'Reliability', score: editFormData?.performance?.reliability || selectedVendorDetail.performance?.reliability || 4.8 },
+                      { key: 'communication', label: 'Communication', score: editFormData?.performance?.communication || selectedVendorDetail.performance?.communication || 4.2 },
+                    ].map(m => (
+                      <div key={m.label} className="section-card-premium" style={{ padding: '16px' }}>
+                        <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '8px' }}>{m.label.toUpperCase()}</div>
+                        {!isEditing ? (
+                          <>
+                            <div style={{ fontSize: '20px', fontWeight: 600, color: getScoreColor(m.score) }}>{m.score.toFixed(1)}</div>
+                            {renderStarBar(m.score, 6, 3)}
+                          </>
+                        ) : (
+                          <input 
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="5"
+                            className="mini-input"
+                            style={{ background: '#111113', width: '100%', height: '32px', color: getScoreColor(m.score) }}
+                            value={m.score}
+                            onChange={(e) => {
+                              const performance = { ...(editFormData?.performance || selectedVendorDetail.performance || {}) };
+                              performance[m.key as keyof typeof performance] = parseFloat(e.target.value);
+                              setEditFormData({ ...editFormData, performance });
+                            }}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+
+                  {/* Active Projects */}
+                  <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <Grid size={16} color="#71717a" />
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>ACTIVE PROJECTS</span>
+                    </div>
+                    <div style={{ padding: '0 24px' }}>
+                      {selectedVendorDetail.linkedProjects?.length > 0 ? selectedVendorDetail.linkedProjects.map((p: any, idx: number, arr: any[]) => (
+                        <div key={p.linkId} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
+                          <div>
+                            <div style={{ color: '#f4f4f5', fontWeight: 500 }}>{p.projectName}</div>
+                            <div style={{ fontSize: '11px', color: '#71717a', marginTop: '2px' }}>{p.client}</div>
+                          </div>
+                          <span className="stage-pill-premium" style={{ alignSelf: 'center' }}>{p.stageLabel}</span>
+                        </div>
+                      )) : (
+                        <div style={{ padding: '24px 0', color: '#52525b', fontSize: '13px', textAlign: 'center' }}>Tidak ada project aktif saat ini.</div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Account Management */}
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div className="section-card-premium" style={{ padding: '16px' }}>
+                       <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '8px' }}>ACCOUNT MANAGER</div>
+                       {!isEditing ? (
+                         <div style={{ fontSize: '14px', color: '#f4f4f5' }}>{selectedVendorDetail.accountManager || 'Juara Internal Staff'}</div>
+                       ) : (
+                         <input 
+                           className="mini-input"
+                           style={{ background: '#111113', width: '100%', height: '32px' }}
+                           value={editFormData?.accountManager || selectedVendorDetail.accountManager || ''}
+                           onChange={(e) => setEditFormData({ ...editFormData, accountManager: e.target.value })}
+                           placeholder="Enter account manager name"
+                         />
+                       )}
+                    </div>
+                    <div className="section-card-premium" style={{ padding: '16px' }}>
+                       <div style={{ fontSize: '11px', color: '#71717a', marginBottom: '8px' }}>AVAILABILITY NOTES</div>
+                       {!isEditing ? (
+                         <div style={{ fontSize: '14px', color: '#f4f4f5' }}>{selectedVendorDetail.availabilityNotes || 'Ready for nationwide deployment.'}</div>
+                       ) : (
+                         <input 
+                           className="mini-input"
+                           style={{ background: '#111113', width: '100%', height: '32px' }}
+                           value={editFormData?.availabilityNotes || selectedVendorDetail.availabilityNotes || ''}
+                           onChange={(e) => setEditFormData({ ...editFormData, availabilityNotes: e.target.value })}
+                           placeholder="Enter availability notes"
+                         />
+                       )}
+                    </div>
+                  </div>
+
+                </div>
+              )}
+
+              {activeDetailTab === 'audit' && (
+                <div className="tab-content-fade" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>SYSTEM AUDIT LOG</span>
+                    </div>
+                    <div style={{ padding: '8px 24px' }}>
+                      {(selectedVendorDetail.auditLog && selectedVendorDetail.auditLog.length > 0) ? selectedVendorDetail.auditLog.map((log: any, idx: number, arr: any[]) => (
+                        <div key={log.id} style={{ display: 'flex', gap: '16px', padding: '16px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)' }}>
+                          <div style={{ minWidth: '80px', fontSize: '11px', color: '#52525b' }}>
+                            {new Date(log.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' })}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '13px', color: '#e4e4e7' }}>{log.message}</div>
+                            <div style={{ fontSize: '11px', color: '#71717a', marginTop: '4px' }}>Action by <span style={{ color: '#378ADD' }}>{log.actor}</span></div>
+                          </div>
+                        </div>
+                      )) : (
+                        <div style={{ padding: '24px 0', textAlign: 'center', color: '#52525b', fontSize: '13px' }}>
+                          Belum ada riwayat aktivitas untuk vendor ini.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
-    </WorkspaceShell>
+
+    </div>
   );
 }

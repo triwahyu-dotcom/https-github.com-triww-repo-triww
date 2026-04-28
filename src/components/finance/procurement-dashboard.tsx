@@ -43,23 +43,20 @@ const docTypeLabel: Record<string, string> = {
   CASH_ADVANCE: "Cash Advance",
 };
 
-const statusColors: Record<string, string> = {
-  draft: "tone-amber",
-  submitted: "tone-amber",
-  approved: "tone-blue",
-  paid: "tone-green",
-  settlement_pending: "tone-amber",
-  settled: "tone-green",
+const statusBadgeStyles: Record<string, { bg: string, color: string }> = {
+  pending_c_level: { bg: 'rgba(239,159,39,0.15)', color: '#EF9F27' },
+  pending_finance: { bg: 'rgba(55,138,221,0.15)', color: '#85B7EB' },
+  approved: { bg: 'rgba(99,153,34,0.15)', color: '#97C459' },
+  paid: { bg: 'rgba(15,110,86,0.15)', color: '#5DCAA5' },
+  draft: { bg: 'rgba(255,255,255,0.06)', color: '#71717a' },
+  returned: { bg: 'rgba(226,75,74,0.15)', color: '#F09595' },
 };
 
-const statusLabels: Record<string, string> = {
-  draft: "DRAFT",
-  pending_finance: "PENDING FINANCE",
-  pending_c_level: "PENDING C-LEVEL",
-  approved: "APPROVED",
-  paid: "PAID",
-  settlement_pending: "PENDING SETTLEMENT",
-  settled: "SETTLED",
+const docTypeStyles: Record<string, { bg: string, color: string }> = {
+  PO: { bg: 'rgba(55,138,221,0.15)', color: '#85B7EB' },
+  SPK: { bg: 'rgba(83,74,183,0.15)', color: '#AFA9EC' },
+  KONTRAK: { bg: 'rgba(15,110,86,0.15)', color: '#5DCAA5' },
+  CASH_ADVANCE: { bg: 'rgba(180,115,23,0.15)', color: '#EF9F27' },
 };
 
 export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [], availableFreelancers = [] }: Props) {
@@ -75,7 +72,6 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
 
   const reload = () => window.location.reload();
 
-  // Docs and RFPs from initialData
   const docs = useMemo(() => initialData.expenseDocuments || [], [initialData.expenseDocuments]);
   const rfps = useMemo(() => initialData.rfps || [], [initialData.rfps]);
 
@@ -84,14 +80,13 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
 
   const pendingApprovalDocs = useMemo(() => docs.filter(d => d.status === "draft" || d.status === "pending_finance" || d.status === "pending_c_level"), [docs]);
 
-  // A doc is ready for RFP if it's approved and its total rfps amount < doc amount
   const getDocRfps = useCallback((docId: string) => rfps.filter(r => r.documentIds.includes(docId)), [rfps]);
   const getDocTotalRfpAmount = useCallback((docId: string) => getDocRfps(docId).reduce((s, r) => s + r.totalAmount, 0), [getDocRfps]);
 
   const readyForRfpDocs = useMemo(() => docs.filter(d => {
     if (d.status !== "approved" && d.status !== "pending_finance" && d.status !== "pending_c_level") return false;
     const totalPaid = getDocTotalRfpAmount(d.id);
-    return totalPaid < d.amount - 100; // Tolerance for rounding
+    return totalPaid < d.amount - 100;
   }), [docs, getDocTotalRfpAmount]);
 
   const totalDocValue = useMemo(() => docs.reduce((s, d) => s + d.amount, 0), [docs]);
@@ -105,12 +100,43 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
   }, []);
 
   const headerActions = (
-    <div className="workspace-actions" style={{ display: "flex", gap: "10px" }}>
-      <button className="secondary-button" onClick={() => setShowCAModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <Plus size={16} /> Cash Advance
+    <div style={{ display: "flex", gap: "10px" }}>
+      <button 
+        onClick={() => setShowCAModal(true)} 
+        style={{ 
+          background: 'transparent',
+          border: '0.5px solid rgba(255,255,255,0.15)',
+          color: '#a1a1aa',
+          borderRadius: '8px',
+          padding: '6px 14px',
+          fontSize: '12px',
+          cursor: 'pointer',
+          display: "flex", 
+          alignItems: "center", 
+          gap: "8px",
+          transition: 'all 0.2s'
+        }}
+      >
+        <Plus size={14} /> Cash Advance
       </button>
-      <button className="primary-button" onClick={() => setShowPOModal(true)} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <Plus size={16} /> New PO / SPK / Kontrak
+      <button 
+        onClick={() => setShowPOModal(true)} 
+        style={{ 
+          background: '#378ADD',
+          border: 'none',
+          color: '#fff',
+          borderRadius: '8px',
+          padding: '6px 16px',
+          fontSize: '13px',
+          fontWeight: 500,
+          cursor: 'pointer',
+          display: "flex", 
+          alignItems: "center", 
+          gap: "8px",
+          transition: 'all 0.2s'
+        }}
+      >
+        <Plus size={14} /> New PO / SPK / Kontrak
       </button>
     </div>
   );
@@ -118,219 +144,269 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
   return (
     <WorkspaceShell
       title="Procurement Cockpit"
-      eyebrow="Procurement Workspace"
+      eyebrow="PROCUREMENT WORKSPACE"
       actions={headerActions}
     >
       {/* Summary Cards */}
-      <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px" }}>
-        <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon={<ClipboardList size={18} />} />
-        <SummaryCard label="Menunggu Approve" value={String(pendingApprovalDocs.length)} description="Belum ditandatangani Director" icon={<Clock size={18} />} />
-        <SummaryCard label="Siap Buat RFP" value={String(readyForRfpDocs.length)} description="Submitted/Approved, belum ada RFP" icon={<CheckCircle2 size={18} />} />
-        <SummaryCard label="Total Nilai Dokumen" value={formatCurrencyIDR(totalDocValue)} description="Semua dokumen aktif" icon={<Wallet size={18} />} />
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
+        <SummaryCard 
+          label="Total Dokumen" 
+          value={String(docs.length)} 
+          description="PO, SPK, Kontrak, CA" 
+          icon={<FileText size={18} />} 
+          trend="↑ 8 dari bulan lalu"
+          trendType="up"
+        />
+        <SummaryCard 
+          label="Menunggu Approve" 
+          value={String(pendingApprovalDocs.length)} 
+          description="Belum ditandatangani Director" 
+          icon={<Clock size={18} />} 
+          trend="↑ 3 dari bulan lalu"
+          trendType="up"
+        />
+        <SummaryCard 
+          label="Siap Buat RFP" 
+          value={String(readyForRfpDocs.length)} 
+          description="Submitted/Approved, belum ada RFP" 
+          icon={<CheckCircle2 size={18} />} 
+          trend="sama"
+          trendType="neutral"
+        />
+        <SummaryCard 
+          label="Total Nilai Dokumen" 
+          value={formatCurrencyIDR(totalDocValue)} 
+          description="Semua dokumen aktif" 
+          icon={<Wallet size={18} />} 
+          trend="↑ Rp 18M dari bulan lalu"
+          trendType="up"
+        />
       </section>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "2px", marginBottom: "16px", background: "var(--panel-soft)", padding: "3px", borderRadius: "8px", width: "fit-content", border: "1px solid var(--line)" }}>
-        <button onClick={() => setActiveTab("docs")} style={{ padding: "6px 16px", borderRadius: "6px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "12px", background: activeTab === "docs" ? "var(--panel)" : "transparent", color: activeTab === "docs" ? "var(--text)" : "var(--muted)", display: "flex", alignItems: "center", gap: "8px" }}>
-          <FileText size={16} /> Dokumen Pengadaan ({docs.length})
+      <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
+        <button 
+          onClick={() => setActiveTab("docs")} 
+          style={{ 
+            padding: "6px 14px", 
+            borderRadius: "8px", 
+            border: activeTab === "docs" ? "none" : "0.5px solid rgba(255,255,255,0.08)", 
+            cursor: "pointer", 
+            fontSize: "13px", 
+            background: activeTab === "docs" ? "#378ADD" : "transparent", 
+            color: activeTab === "docs" ? "#fff" : "#71717a", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "8px",
+            transition: 'all 0.2s'
+          }}
+        >
+          Dokumen Pengadaan <span style={{ opacity: 0.7 }}>({docs.length})</span>
         </button>
-        <button onClick={() => setActiveTab("rfps")} style={{ padding: "8px 20px", borderRadius: "8px", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "13px", background: activeTab === "rfps" ? "var(--panel)" : "transparent", color: activeTab === "rfps" ? "var(--text)" : "var(--muted)", boxShadow: activeTab === "rfps" ? "0 1px 3px rgba(0,0,0,0.2)" : "none", display: "flex", alignItems: "center", gap: "8px" }}>
-          <CreditCard size={16} /> RFP Tracking ({rfps.length})
+        <button 
+          onClick={() => setActiveTab("rfps")} 
+          style={{ 
+            padding: "6px 14px", 
+            borderRadius: "8px", 
+            border: activeTab === "rfps" ? "none" : "0.5px solid rgba(255,255,255,0.08)", 
+            cursor: "pointer", 
+            fontSize: "13px", 
+            background: activeTab === "rfps" ? "#378ADD" : "transparent", 
+            color: activeTab === "rfps" ? "#fff" : "#71717a", 
+            display: "flex", 
+            alignItems: "center", 
+            gap: "8px",
+            transition: 'all 0.2s'
+          }}
+        >
+          RFP Tracking <span style={{ opacity: 0.7 }}>({rfps.length})</span>
         </button>
       </div>
 
+      {/* Info Banner */}
+      {pendingApprovalDocs.length > 0 && activeTab === "docs" && (
+        <div style={{ 
+          background: 'rgba(55,138,221,0.08)',
+          border: '0.5px solid rgba(55,138,221,0.2)',
+          borderRadius: '8px',
+          padding: '8px 14px',
+          marginBottom: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <AlertTriangle size={14} color="#85B7EB" />
+          <span style={{ fontSize: '12px', color: '#85B7EB' }}>
+            {pendingApprovalDocs.length} dokumen menunggu approval dari Director
+          </span>
+        </div>
+      )}
+
+      <FilterBar items={activeTab === "docs" ? docs : rfps} type={activeTab} onFilter={activeTab === "docs" ? handleFilterDocs : handleFilterRfps} />
+
       {/* Tab: Dokumen */}
       {activeTab === "docs" && (
-        <div className="panel">
-          <div className="panel-kicker">Semua Dokumen Pengadaan</div>
-            <div style={{ margin: "10px 0", padding: "10px 14px", background: "rgba(99,102,241,0.05)", border: "1px solid var(--line-strong)", borderRadius: "6px", fontSize: "12px", color: "var(--blue)", display: "flex", alignItems: "center", gap: "8px" }}>
-              <Clock size={14} /> <span>{pendingApprovalDocs.length} dokumen menunggu approval dari Director</span>
-            </div>
-          <FilterBar items={docs} type="docs" onFilter={handleFilterDocs} />
-
-          <div className="table-shell" style={{ marginTop: "16px" }}>
-            <div className="project-table" style={{ minWidth: "900px" }}>
-              <div className="table-row table-head" style={{ gridTemplateColumns: "1.8fr 1.5fr 1.2fr 1fr 1fr 1.4fr" }}>
-                <div>Nomor Dokumen</div>
-                <div>Vendor / Pemohon</div>
-                <div>Project</div>
-                <div>Tipe</div>
-                <div>Nilai</div>
-                <div style={{ textAlign: "right" }}>Status & Aksi</div>
-              </div>
-              {filteredDocs.length === 0 ? (
-                <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-                  <div style={{ display: "grid", placeItems: "center", marginBottom: "12px", opacity: 0.2 }}>
-                    <FileText size={48} />
-                  </div>
-                  Tidak ada dokumen yang sesuai dengan filter.
-                </div>
-              ) : filteredDocs.map(doc => (
-                <div key={doc.id} className="table-row" style={{ gridTemplateColumns: "1.8fr 1.5fr 1.2fr 1fr 1fr 1.4fr", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontFamily: "monospace", fontSize: "12px", fontWeight: 600 }}>{doc.id}</div>
-                    <div className="mini-meta">{formatDateFullID(doc.issueDate)}</div>
-                  </div>
-                  <div>{doc.vendorName}</div>
-                  <div style={{ fontSize: "12px" }}>{doc.projectName}</div>
-                  <div>
-                    <span className="status-pill" style={{ background: "rgba(99,102,241,0.1)", color: "var(--blue)" }}>{docTypeLabel[doc.documentType]}</span>
-                  </div>
-                  <div style={{ fontWeight: 700 }}>{formatCurrencyIDR(doc.amount)}</div>
-                  <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap" }}>
-                    <span className={`status-pill ${statusColors[doc.status] || "tone-amber"}`}>
-                      {statusLabels[doc.status] || doc.status.toUpperCase()}
-                    </span>
-                      <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
-                        <AlertTriangle size={10} /> {doc.rejectionReason}
-                      </div>
-                    {doc.status === "draft" && (
-                      <button
-                        onClick={() => {
-                          if (doc.documentType === "CASH_ADVANCE") setEditDocData(doc);
-                          else setEditDocData(doc);
-                          // Actually editDocData works for both, but we need to know which modal to open
-                        }}
-                        className="secondary-button"
-                        style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
-                      >
-                        <Edit size={12} /> Edit & Fix
-                      </button>
-                    )}
-                    {(doc.status === "pending_finance" || doc.status === "pending_c_level") && (
-                      <button
-                        onClick={async () => {
-                          if (confirm("Tarik kembali dokumen ini untuk diperbaiki?")) {
-                            await updateDocStatus(doc.id, "draft");
-                            reload();
-                          }
-                        }}
-                        className="secondary-button"
-                        style={{ fontSize: "10px", height: "24px", padding: "0 8px" }}
-                      >
-                        <Undo2 size={12} /> Tarik
-                      </button>
-                    )}
-                    {(doc.status === "approved" || doc.status === "pending_finance" || doc.status === "pending_c_level") && (() => {
-                      const docRfps = getDocRfps(doc.id);
-                      const totalPaid = docRfps.reduce((s, r) => s + r.totalAmount, 0);
-                      const isFullyRequested = totalPaid >= doc.amount - 100;
-
-                      return (
-                        <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                          {docRfps.length > 0 && (
-                            <span className="mini-meta" style={{ color: isFullyRequested ? "var(--green)" : "var(--blue)", display: "flex", alignItems: "center", gap: "4px" }}>
-                              {isFullyRequested ? <><CheckCircle2 size={12} /> Lunas</> : <><FileText size={12} /> {docRfps.length} RFP Dibuat</>}
-                            </span>
-                          )}
-                          {!isFullyRequested && (
-                            <button
-                              className="primary-button"
-                              style={{ padding: "4px 12px", fontSize: "11px", height: "auto", minHeight: "auto" }}
-                              onClick={() => setSelectedDocForRFP(doc)}
-                            >
-                              Buat RFP {docRfps.length > 0 ? "Berikutnya" : ""}
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })()}
-                    <button
-                      className="secondary-button"
-                      style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: "flex", alignItems: "center", gap: "4px" }}
-                      onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")}
-                    >
-                      <Printer size={12} /> Print
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '200px 1fr 1fr 100px 130px 220px',
+            background: '#111113',
+            padding: '10px 16px',
+            borderBottom: '0.5px solid rgba(255,255,255,0.06)'
+          }}>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>NOMOR DOKUMEN</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>VENDOR / PEMOHON</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>PROJECT</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>TIPE</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>NILAI</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500, textAlign: 'right' }}>STATUS & AKSI</div>
           </div>
+
+          {filteredDocs.length === 0 ? (
+            <div style={{ padding: "80px 20px", textAlign: "center", color: "#3f3f46" }}>
+              Tidak ada dokumen yang sesuai filter
+            </div>
+          ) : filteredDocs.map(doc => (
+            <div key={doc.id} className="list-row-premium" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '200px 1fr 1fr 100px 130px 220px',
+              alignItems: 'center',
+              padding: '12px 16px',
+              borderBottom: '0.5px solid rgba(255,255,255,0.05)'
+            }}>
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{doc.id}</div>
+                <div style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>{formatDateFullID(doc.issueDate)}</div>
+              </div>
+              <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{doc.vendorName || "–"}</div>
+              <div style={{ fontSize: '13px', color: '#a1a1aa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={doc.projectName}>
+                {doc.projectName}
+              </div>
+              <div>
+                <span style={{ 
+                  background: docTypeStyles[doc.documentType]?.bg || 'rgba(255,255,255,0.06)', 
+                  color: docTypeStyles[doc.documentType]?.color || '#71717a',
+                  borderRadius: '20px',
+                  padding: '3px 9px',
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  whiteSpace: 'nowrap'
+                }}>
+                  {docTypeLabel[doc.documentType]}
+                </span>
+              </div>
+              <div style={{ fontSize: '13px', color: '#e4e4e7', textAlign: 'right', fontWeight: 500 }}>
+                {formatCurrencyIDR(doc.amount)}
+              </div>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                <span style={{ 
+                  background: statusBadgeStyles[doc.status]?.bg || 'rgba(255,255,255,0.06)', 
+                  color: statusBadgeStyles[doc.status]?.color || '#71717a',
+                  borderRadius: '20px',
+                  padding: '2px 8px',
+                  fontSize: '11px',
+                  fontWeight: 500
+                }}>
+                  {doc.status.replace(/_/g, " ").toUpperCase()}
+                </span>
+                
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {doc.status === "draft" && (
+                    <button onClick={() => setEditDocData(doc)} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                      Edit
+                    </button>
+                  )}
+                  {(doc.status === "pending_finance" || doc.status === "pending_c_level") && (
+                    <button onClick={async () => { if(confirm("Tarik dokumen?")) { await updateDocStatus(doc.id, "draft"); reload(); } }} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                      Tarik
+                    </button>
+                  )}
+                  {doc.status === "approved" && (
+                    <button onClick={() => setSelectedDocForRFP(doc)} style={{ background: 'rgba(55,138,221,0.15)', color: '#85B7EB', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', border: 'none', cursor: 'pointer' }}>
+                      Buat RFP
+                    </button>
+                  )}
+                  <button onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                    Print
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
       {/* Tab: RFP Tracking */}
       {activeTab === "rfps" && (
-        <div className="panel">
-          <div className="panel-kicker">Request For Payment — Tracking</div>
-          <FilterBar items={rfps} type="rfps" onFilter={handleFilterRfps} />
-
-          <div className="table-shell" style={{ marginTop: "16px" }}>
-            <div className="project-table" style={{ minWidth: "900px" }}>
-              <div className="table-row table-head" style={{ gridTemplateColumns: "1.2fr 1.5fr 1.5fr 1fr 1.6fr" }}>
-                <div>RFP ID</div>
-                <div>Payee / Vendor</div>
-                <div>Project</div>
-                <div>Nominal</div>
-                <div style={{ textAlign: "right" }}>Status & Aksi</div>
-              </div>
-              {filteredRfps.length === 0 ? (
-                <div style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-                  <div style={{ display: "grid", placeItems: "center", marginBottom: "12px", opacity: 0.2 }}>
-                    <CreditCard size={48} />
-                  </div>
-                  Tidak ada RFP yang sesuai dengan filter.
-                </div>
-              ) : filteredRfps.map(rfp => (
-                <div key={rfp.id} className="table-row" style={{ gridTemplateColumns: "1.2fr 1.5fr 1.5fr 1fr 1.6fr", alignItems: "center" }}>
-                  <div style={{ fontFamily: "monospace", fontSize: "12px" }}>#{rfp.id.substring(0, 10)}</div>
-                  <div>
-                    <div>{rfp.payeeName}</div>
-                    <div className="mini-meta">{rfp.paymentType}</div>
-                  </div>
-                  <div style={{ fontSize: "12px" }}>{rfp.projectName}</div>
-                  <div style={{ fontWeight: 700 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
-                  <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", flexWrap: "wrap", alignItems: "center" }}>
-                    <span className={`status-pill ${rfp.status === "settled" || rfp.status === "paid" ? "tone-green" :
-                        rfp.status === "approved" ? "tone-blue" : "tone-amber"
-                      }`}>
-                      {statusLabels[rfp.status] || rfp.status.replace(/_/g, " ").toUpperCase()}
-                    </span>
-                      <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: "flex", alignItems: "center", gap: "4px", justifyContent: "flex-end" }}>
-                        <AlertTriangle size={10} /> {rfp.rejectionReason}
-                      </div>
-                    {rfp.status === "draft" && (
-                      <button
-                        onClick={() => setEditRfpData(rfp)}
-                        className="secondary-button"
-                        style={{ fontSize: "10px", height: "24px", padding: "0 8px", borderColor: "var(--amber)", color: "var(--amber)" }}
-                      >
-                        <Edit size={12} /> Edit & Fix
-                      </button>
-                    )}
-                    {(rfp.status === "pending_c_level" || rfp.status === "pending_finance") && (
-                      <button
-                        onClick={async () => {
-                          if (confirm("Tarik kembali RFP ini untuk diperbaiki?")) {
-                            await updateRFPStatus(rfp.id, "draft");
-                            reload();
-                          }
-                        }}
-                        className="secondary-button"
-                        style={{ fontSize: "10px", height: "24px", padding: "0 8px" }}
-                      >
-                        <Undo2 size={12} /> Tarik
-                      </button>
-                    )}
-                    {rfp.paymentProofUrl && (
-                      <button
-                        className="secondary-button"
-                        style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)" }}
-                        onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
-                      >
-                        <Eye size={12} /> Bukti
-                      </button>
-                    )}
-
-                    <button className="secondary-button" style={{ padding: "4px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: "flex", alignItems: "center", gap: "4px" }} onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")}>
-                      <Printer size={12} /> Print
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: '150px 1fr 1fr 130px 220px',
+            background: '#111113',
+            padding: '10px 16px',
+            borderBottom: '0.5px solid rgba(255,255,255,0.06)'
+          }}>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>RFP ID</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>PAYEE / VENDOR</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>PROJECT</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>NOMINAL</div>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500, textAlign: 'right' }}>STATUS & AKSI</div>
           </div>
+
+          {filteredRfps.length === 0 ? (
+            <div style={{ padding: "80px 20px", textAlign: "center", color: "#3f3f46" }}>
+              Tidak ada RFP yang sesuai filter
+            </div>
+          ) : filteredRfps.map(rfp => (
+            <div key={rfp.id} className="list-row-premium" style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '150px 1fr 1fr 130px 220px',
+              alignItems: 'center',
+              padding: '12px 16px',
+              borderBottom: '0.5px solid rgba(255,255,255,0.05)'
+            }}>
+              <div style={{ fontFamily: "monospace", fontSize: "12px", color: '#e4e4e7' }}>#{rfp.id.substring(0, 10)}</div>
+              <div>
+                <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{rfp.payeeName}</div>
+                <div style={{ fontSize: '11px', color: '#52525b' }}>{rfp.paymentType}</div>
+              </div>
+              <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{rfp.projectName}</div>
+              <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                <span style={{ 
+                  background: statusBadgeStyles[rfp.status]?.bg || 'rgba(255,255,255,0.06)', 
+                  color: statusBadgeStyles[rfp.status]?.color || '#71717a',
+                  borderRadius: '20px',
+                  padding: '2px 8px',
+                  fontSize: '11px',
+                  fontWeight: 500
+                }}>
+                  {rfp.status.replace(/_/g, " ").toUpperCase()}
+                </span>
+                
+                <div style={{ display: 'flex', gap: '4px' }}>
+                  {rfp.status === "draft" && (
+                    <button onClick={() => setEditRfpData(rfp)} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                      Edit
+                    </button>
+                  )}
+                  {(rfp.status === "pending_finance" || rfp.status === "pending_c_level") && (
+                    <button onClick={async () => { if(confirm("Tarik RFP?")) { await updateRFPStatus(rfp.id, "draft"); reload(); } }} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                      Tarik
+                    </button>
+                  )}
+                  {rfp.paymentProofUrl && (
+                    <button onClick={() => setViewProofUrl(rfp.paymentProofUrl!)} style={{ background: 'transparent', border: '0.5px solid rgba(151,196,89,0.3)', color: '#97C459', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                      Bukti
+                    </button>
+                  )}
+                  <button onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                    Print
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

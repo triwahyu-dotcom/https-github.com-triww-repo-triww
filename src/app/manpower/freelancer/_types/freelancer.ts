@@ -25,10 +25,10 @@ export interface Freelancer {
   no_hp: string;
   posisi_utama: Posisi[];
   rate_estimate: {
-    [key in Posisi]?: number;
+    [key in Posisi]?: number | null;
   };
   kota_domisili: string;
-  status: "aktif" | "tidak_aktif" | "blacklist" | "on_event";
+  status: "aktif" | "tidak_aktif" | "blacklist" | "on_event" | "new";
   rekening_bank: RekeningBank | null;
   nomor_ktp: string;
   foto_url: string | null;

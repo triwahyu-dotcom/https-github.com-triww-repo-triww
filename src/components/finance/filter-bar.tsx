@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
+import { Search, Filter, SortDesc } from "lucide-react";
 
 interface FilterBarProps<T> {
   items: T[];
@@ -21,132 +22,81 @@ export function FilterBar<T extends ExpenseDocument | RequestForPayment>({
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
 
-  // Multi-select for Doc Types
   const docTypes = ["PO", "SPK", "KONTRAK", "CASH_ADVANCE"];
-  
-  // Statuses depend on whether we are filtering Docs or RFPs
   const docStatuses = ["draft", "pending_finance", "pending_c_level", "approved", "paid"];
   const rfpStatuses = ["draft", "pending_finance", "pending_c_level", "approved", "paid", "settled"];
   const statuses = type === "docs" ? docStatuses : rfpStatuses;
 
   const filteredItems = useMemo(() => {
     let result = [...items];
-
-    // 1. Search
     if (search) {
       const q = search.toLowerCase();
       result = result.filter(item => {
         const doc = item as any;
-        return (
-          doc.id?.toLowerCase().includes(q) ||
-          doc.projectName?.toLowerCase().includes(q) ||
-          doc.vendorName?.toLowerCase().includes(q) ||
-          doc.payeeName?.toLowerCase().includes(q)
-        );
+        return (doc.id?.toLowerCase().includes(q) || doc.projectName?.toLowerCase().includes(q) || doc.vendorName?.toLowerCase().includes(q) || doc.payeeName?.toLowerCase().includes(q));
       });
     }
-
-    // 2. Filter Status
-    if (statusFilter !== "all") {
-      result = result.filter(item => (item as any).status === statusFilter);
-    }
-
-    // 3. Filter Type
-    if (typeFilter !== "all") {
-      result = result.filter(item => (item as any).documentType === typeFilter);
-    }
-
-    // 4. Sort
+    if (statusFilter !== "all") result = result.filter(item => (item as any).status === statusFilter);
+    if (typeFilter !== "all") result = result.filter(item => (item as any).documentType === typeFilter);
     result.sort((a: any, b: any) => {
       const dateA = new Date(a.issueDate || a.requestDate || 0).getTime();
       const dateB = new Date(b.issueDate || b.requestDate || 0).getTime();
       const amountA = a.amount || a.totalAmount || 0;
       const amountB = b.amount || b.totalAmount || 0;
-
       switch (sortBy) {
         case "oldest": return dateA - dateB;
         case "amount_hi": return amountB - amountA;
         case "amount_lo": return amountA - amountB;
         case "name": return (a.projectName || "").localeCompare(b.projectName || "");
-        case "newest":
         default: return dateB - dateA;
       }
     });
-
     return result;
   }, [items, search, statusFilter, typeFilter, sortBy]);
 
-  useEffect(() => {
-    onFilter(filteredItems);
-  }, [filteredItems, onFilter]);
+  useEffect(() => { onFilter(filteredItems); }, [filteredItems, onFilter]);
 
   return (
-    <div className="filter-bar" style={{ 
-      display: "flex", 
-      flexWrap: "wrap", 
-      gap: "12px", 
-      marginBottom: "20px",
-      alignItems: "center",
-      background: "var(--panel-soft)",
-      padding: "12px 16px",
-      borderRadius: "12px",
-      border: "1px solid var(--line)"
-    }}>
-      {/* Search */}
-      <div style={{ flex: 1, minWidth: "200px" }}>
-        <input 
-          type="text" 
-          placeholder={placeholder}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ 
-            width: "100%", 
-            background: "var(--bg)", 
-            border: "1px solid var(--line)", 
-            padding: "8px 12px", 
-            borderRadius: "8px",
-            fontSize: "13px",
-            color: "var(--text)"
-          }}
-        />
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", marginBottom: "32px", alignItems: "flex-end", background: '#111113', padding: '16px 20px', borderRadius: '16px', border: '0.5px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ flex: 1, minWidth: "240px", display: "flex", flexDirection: "column", gap: "8px" }}>
+        <label style={{ fontSize: "11px", color: "#52525b", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Find Document</label>
+        <div style={{ position: 'relative' }}>
+          <Search size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: '#52525b' }} />
+          <input 
+            type="text" placeholder={placeholder} value={search} onChange={(e) => setSearch(e.target.value)}
+            style={{ width: "100%", background: "#18181b", border: "0.5px solid rgba(255,255,255,0.1)", padding: "10px 14px 10px 36px", borderRadius: "10px", fontSize: "13px", color: "#f4f4f5", outline: "none" }}
+          />
+        </div>
       </div>
 
-      {/* Type Filter (Only for Docs tab if applicable) */}
-      {type === "docs" && (
-        <select 
-          value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          style={{ background: "var(--bg)", border: "1px solid var(--line)", padding: "8px", borderRadius: "8px", fontSize: "13px", outline: "none" }}
-        >
-          <option value="all">All Types</option>
-          {docTypes.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
-      )}
+      <div style={{ display: "flex", gap: "12px", alignItems: "flex-end" }}>
+        {type === "docs" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            <label style={{ fontSize: "11px", color: "#52525b", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Category</label>
+            <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} style={{ background: "#18181b", border: "0.5px solid rgba(255,255,255,0.1)", padding: "10px 12px", borderRadius: "10px", fontSize: "13px", color: "#f4f4f5", outline: "none", width: "150px", cursor: 'pointer' }}>
+              <option value="all">All Types</option>
+              {docTypes.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+          </div>
+        )}
 
-      {/* Status Filter */}
-      <select 
-        value={statusFilter}
-        onChange={(e) => setStatusFilter(e.target.value)}
-        style={{ background: "var(--bg)", border: "1px solid var(--line)", padding: "8px", borderRadius: "8px", fontSize: "13px", outline: "none" }}
-      >
-        <option value="all">All Statuses</option>
-        {statuses.map(s => <option key={s} value={s}>{s.replace("_", " ").toUpperCase()}</option>)}
-      </select>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <label style={{ fontSize: "11px", color: "#52525b", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Stage</label>
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ background: "#18181b", border: "0.5px solid rgba(255,255,255,0.1)", padding: "10px 12px", borderRadius: "10px", fontSize: "13px", color: "#f4f4f5", outline: "none", width: "160px", cursor: 'pointer' }}>
+            <option value="all">All Stages</option>
+            {statuses.map(s => <option key={s} value={s}>{s.replace(/_/g, " ").toUpperCase()}</option>)}
+          </select>
+        </div>
 
-      {/* Sort By */}
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <span className="mini-meta" style={{ margin: 0 }}>Sort:</span>
-        <select 
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          style={{ background: "var(--bg)", border: "1px solid var(--line)", padding: "8px", borderRadius: "8px", fontSize: "13px", outline: "none" }}
-        >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-          <option value="amount_hi">Amount (High-Low)</option>
-          <option value="amount_lo">Amount (Low-High)</option>
-          <option value="name">Project Name (A-Z)</option>
-        </select>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <label style={{ fontSize: "11px", color: "#52525b", fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>Sort</label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ background: "#18181b", border: "0.5px solid rgba(255,255,255,0.1)", padding: "10px 12px", borderRadius: "10px", fontSize: "13px", color: "#f4f4f5", outline: "none", width: "160px", cursor: 'pointer' }}>
+            <option value="newest">Recent First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="amount_hi">Highest Value</option>
+            <option value="amount_lo">Lowest Value</option>
+          </select>
+        </div>
       </div>
     </div>
   );

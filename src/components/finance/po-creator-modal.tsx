@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { ProjectRecord } from "@/lib/project/types";
 import { LineItem, PaymentEvent, ExpenseDocument } from "@/lib/finance/types";
 import { 
@@ -12,7 +12,8 @@ import {
   Plus, 
   Upload, 
   X,
-  ChevronRight
+  ChevronRight,
+  Check
 } from "lucide-react";
 import { formatCurrencyIDR } from "@/lib/utils/format";
 import { supabase } from "@/lib/supabase";
@@ -122,7 +123,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         "Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)"
       ]);
       setPenaltyMemoUrl(editDoc.penaltyMemoUrl || "");
-      setStep(2); // Jump to detail step if editing
+      setStep(2); 
     }
   }, [editDoc, activeProjects]);
 
@@ -130,13 +131,11 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
     setLineItems(prev => {
       const updated = [...prev];
       const line = { ...updated[idx], [field]: value };
-      // Auto-calc amount = qty * freq * vol * price
-      if (["qty", "freq", "vol", "price", field].includes(field as string)) {
+      if (["qty", "freq", "price", field].includes(field as string)) {
         const qty = field === "qty" ? Number(value) : Number(line.qty);
         const freq = field === "freq" ? Number(value) : Number(line.freq);
-        const vol = field === "vol" ? Number(value) : Number(line.vol);
         const price = field === "price" ? Number(value) : Number(line.price);
-        line.amount = qty * freq * vol * price;
+        line.amount = qty * freq * price;
       }
       updated[idx] = line;
       return updated;
@@ -148,7 +147,6 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
 
   const subtotalItems = lineItems.reduce((s, l) => s + (l.amount || 0), 0);
   
-  // Tax logic based on mode selection
   let docGross = subtotalItems;
   let docNet = subtotalItems;
   let docTax = 0;
@@ -163,8 +161,8 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
     docTax = docGross - docNet;
   }
 
-  const grandTotal = docNet; // The amount to be paid/transferred
-  const finalDocGross = docGross; // The amount that appears on the document/tax-base
+  const grandTotal = docNet;
+  const finalDocGross = docGross;
 
   const toggleBillingTerm = (term: string) => {
     setBillingTerms(prev => prev.includes(term) ? prev.filter(t => t !== term) : [...prev, term]);
@@ -179,24 +177,11 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
     } else {
       const raw = vendor.rawSource || {};
       setVendorName(vendor.name || "");
-      
-      setVendorAddress(
-        vendor.businessAddress || 
-        vendor.address || 
-        raw["Alamat :"] || 
-        raw["Alamat Vendor"] || 
-        raw["Alamat Kantor"] || 
-        raw["Domisili"] || 
-        raw["Alamat Lengkap"] || 
-        ""
-      );
-      
-      setVendorTaxId(vendor.npwpNumber || raw["Nomor Pokok Wajib Pajak (NPWP)"] || raw["NPWP :"] || "");
-      
-      const phone = vendor.picPhone || (vendor.contacts && vendor.contacts[0]?.phone) || raw["Nomor HP/WA PIC"] || "";
+      setVendorAddress(vendor.businessAddress || vendor.address || raw["Alamat :"] || raw["Alamat Vendor"] || "");
+      setVendorTaxId(vendor.npwpNumber || raw["Nomor Pokok Wajib Pajak (NPWP)"] || "");
+      const phone = vendor.picPhone || (vendor.contacts && vendor.contacts[0]?.phone) || "";
       setVendorPhone(phone);
     }
-    
     setVendorSearch("");
     setShowVendorSuggestions(false);
   };
@@ -204,24 +189,13 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const handleTermsChange = (mode: string) => {
     setPaymentTerms(mode);
     const bullets = ["Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)"];
-    
     if (mode === "Full Payment") {
       setPaymentSchedule([{ label: "Full Payment", percentage: 100, date: "" }]);
       bullets.push("Pembayaran 100% akan dilakukan setelah pekerjaan selesai dan invoice diterima.");
     } else if (mode === "DP + Pelunasan") {
-      setPaymentSchedule([
-        { label: "Down Payment (DP)", percentage: 50, date: "" },
-        { label: "Pelunasan", percentage: 50, date: "" }
-      ]);
+      setPaymentSchedule([{ label: "Down Payment (DP)", percentage: 50, date: "" }, { label: "Pelunasan", percentage: 50, date: "" }]);
       bullets.push("DP 50% akan dibayarkan setelah invoice diterima.");
       bullets.push("Pelunasan 50% akan dibayarkan setelah pekerjaan selesai.");
-    } else if (mode === "Retensi 5%") {
-      setPaymentSchedule([
-        { label: "Pekerjaan Selesai (95%)", percentage: 95, date: "" },
-        { label: "Retensi (5%)", percentage: 5, date: "" }
-      ]);
-      bullets.push("Pembayaran 95% setelah pekerjaan selesai.");
-      bullets.push("Retensi 5% akan dibayarkan setelah masa pemeliharaan selesai.");
     }
     setPaymentKeterangan(bullets);
   };
@@ -236,30 +210,20 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
     (v.displayMeta && v.displayMeta.toLowerCase().includes(vendorSearch.toLowerCase()))
   ).slice(0, 10);
 
-  const hasPenalty = lineItems.some(item => item.price < 0);
+  const hasPenalty = lineItems.some(item => (item.price || 0) < 0);
 
   const uploadPenaltyMemo = async (file: File) => {
     if (!supabase) return "";
     setIsUploadingPenalty(true);
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const fileName = `${Date.now()}.${fileExt}`;
       const filePath = `penalty-memos/${fileName}`;
-
-      const { data, error } = await supabase.storage
-        .from('finance-docs')
-        .upload(filePath, file);
-
+      const { data, error } = await supabase.storage.from('finance-docs').upload(filePath, file);
       if (error) throw error;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('finance-docs')
-        .getPublicUrl(filePath);
-
+      const { data: { publicUrl } } = supabase.storage.from('finance-docs').getPublicUrl(filePath);
       return publicUrl;
     } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Gagal mengunggah Memo Penalti. Silakan coba lagi.");
       return "";
     } finally {
       setIsUploadingPenalty(false);
@@ -268,559 +232,391 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
 
   const handleSubmit = async () => {
     if (!selectedProject || !vendorName) {
-      alert("Lengkapi Project dan Vendor terlebih dahulu.");
+      alert("Harap pilih project dan isi nama vendor sebelum submit.");
       return;
     }
-    
-    if (hasPenalty && !penaltyFile && !penaltyMemoUrl) {
-      alert("Wajib mengunggah Internal Memo / Surat Penalti jika terdapat penalti (harga negatif).");
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       let finalMemoUrl = penaltyMemoUrl;
       if (hasPenalty && penaltyFile) {
         finalMemoUrl = await uploadPenaltyMemo(penaltyFile);
-        if (!finalMemoUrl) {
-          setIsSubmitting(false);
-          return;
-        }
       }
-
-      // Ensure payment schedule amounts are synced with final grandTotal
-      const finalPaymentSchedule = paymentSchedule.map(ev => ({
-        ...ev,
-        amount: (grandTotal * (ev.percentage || 0)) / 100
-      }));
+      const finalPaymentSchedule = paymentSchedule.map(ev => ({ ...ev, amount: (grandTotal * (ev.percentage || 0)) / 100 }));
+      
+      const payload = {
+        id: editDoc?.id, projectId: selectedProject.id, projectInitial: selectedProject.projectInitial,
+        documentType: docType, vendorName, vendorPhone, vendorAddress, vendorTaxId,
+        lineItems, documentTotal: grandTotal, paymentTerms, paymentSchedule: finalPaymentSchedule,
+        deliveryDate, shipTo, billingInstruction, billingTerms, notes, venue, duration, lampiran, workScope,
+        paymentKeterangan, penaltyMemoUrl: finalMemoUrl, description: lineItems[0]?.description || "",
+        pph21Mode, usePPh21: pph21Mode !== "none", grossAmount: finalDocGross, taxAmount: docTax, netAmount: grandTotal,
+        preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
+      };
 
       const res = await fetch("/api/finance/document", {
         method: editDoc ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: editDoc?.id, // Only for PATCH
-          projectId: selectedProject.id,
-          projectInitial: selectedProject.projectInitial,
-          documentType: docType,
-          vendorName,
-          vendorPhone,
-          vendorAddress,
-          vendorTaxId,
-          lineItems,
-          documentTotal: grandTotal,
-          paymentTerms,
-          paymentSchedule: finalPaymentSchedule,
-          paymentDate: finalPaymentSchedule[0]?.date || "", // Fallback
-          deliveryDate,
-          shipTo,
-          billingInstruction,
-          billingTerms,
-          notes,
-          venue,
-          duration,
-          lampiran,
-          workScope,
-          paymentKeterangan,
-          penaltyMemoUrl: finalMemoUrl,
-          description: lineItems[0]?.description || "", // Principal job name
-          pph21Mode,
-          usePPh21: pph21Mode !== "none",
-          grossAmount: finalDocGross,
-          taxAmount: docTax,
-          netAmount: grandTotal,
-          preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
-        }),
+        body: JSON.stringify(payload),
       });
+
       if (res.ok) {
         onSuccess();
       } else {
-        const err = await res.json();
-        alert("Gagal menyimpan: " + err.error);
+        const errData = await res.json().catch(() => ({}));
+        alert(`Gagal menyimpan dokumen: ${errData.message || 'Server error'}`);
       }
     } catch (e) {
-      alert("Network error");
+      console.error("Submit Error:", e);
+      alert("Terjadi kesalahan koneksi saat submit.");
     }
     setIsSubmitting(false);
   };
 
-  const docTypeLabels: Record<DocType, string> = {
-    PO: "Purchase Order",
-    SPK: "SPK / Penugasan",
-    KONTRAK: "Kontrak Kerja",
-  };
+  const docTypeLabels: Record<DocType, string> = { PO: "Purchase Order", SPK: "SPK / Penugasan", KONTRAK: "Kontrak Kerja" };
 
-  const docTypeIcons: Record<DocType, React.ReactNode> = {
-    PO: <ShoppingBag size={18} />,
-    SPK: <Scroll size={18} />,
-    KONTRAK: <FileSignature size={18} />,
-  };
+  const isStep1Valid = !!selectedProject;
+  const isStep2Valid = !!vendorName && lineItems.length > 0;
 
   return (
-    <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.75)", backdropFilter: "blur(10px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ backgroundColor: "var(--panel)", borderRadius: "16px", width: "100%", maxWidth: "960px", maxHeight: "90vh", border: "1px solid var(--line)", boxShadow: "var(--shadow)", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 1000, display: "grid", placeItems: "center", backdropFilter: "blur(12px)" }}>
+      <div style={{ width: "min(960px, 95vw)", height: "min(820px, 92vh)", background: "#1f1f23", borderRadius: "24px", display: "flex", flexDirection: "column", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.1)" }}>
         
-        {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "rgba(91,140,255,0.1)", color: "var(--blue)", display: "grid", placeItems: "center" }}>
-              {step === 1 ? <Plus size={20} /> : step === 2 ? <FileSignature size={20} /> : <AlertCircle size={20} />}
-            </div>
+        {/* Header & Steps */}
+        <div style={{ padding: "32px 40px", background: "#111113", borderBottom: "0.5px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: "18px", fontWeight: 700 }}>{editDoc ? "Edit Dokumen" : "Buat Dokumen Pengadaan"}</h2>
-              <p className="mini-meta" style={{ margin: 0 }}>Step {step} of 3 — {step === 1 ? "Pilih Project & Tipe" : step === 2 ? "Detail Vendor & Line Items" : "Syarat & Ketentuan"}</p>
+              <h2 style={{ fontSize: "20px", color: "#f4f4f5", margin: 0 }}>{editDoc ? 'Edit' : 'Create'} Procurement Document</h2>
+              <p style={{ fontSize: "12px", color: "#71717a", marginTop: "4px" }}>Generate PO, SPK, or Contract for project: <strong>{selectedProject?.projectName || 'Select Project'}</strong></p>
             </div>
+            <button onClick={onClose} style={{ background: "rgba(255,255,255,0.05)", border: "none", width: '32px', height: '32px', borderRadius: '8px', color: "#71717a", cursor: "pointer", display: 'grid', placeItems: 'center' }}><X size={18} /></button>
           </div>
-          <button onClick={onClose} style={{ background: "none", border: "none", padding: "8px", color: "var(--muted)", cursor: "pointer", borderRadius: "50%", display: "grid", placeItems: "center", transition: "all 0.2s" }} className="ghost-button">
-            <X size={20} />
-          </button>
 
-        <div style={{ padding: "32px", overflowY: "auto", flex: 1 }}>
-
-          {/* ─── STEP 1 ─── */}
-          {step === 1 && (
-            <div>
-              <div className="form-section-title" style={{ marginBottom: "16px" }}>Pilih Project</div>
-              <div style={{ display: "grid", gap: "8px", maxHeight: "220px", overflowY: "auto", marginBottom: "28px" }}>
-                {activeProjects.map(p => (
-                  <div key={p.id} onClick={() => setSelectedProject(p)} style={{ padding: "14px 16px", borderRadius: "10px", border: `2px solid ${selectedProject?.id === p.id ? "var(--blue)" : "var(--line)"}`, background: selectedProject?.id === p.id ? "rgba(91,140,255,0.08)" : "transparent", cursor: "pointer" }}>
-                    <div style={{ fontWeight: 600 }}>{p.projectName}</div>
-                    <div className="mini-meta">{p.client} • {p.currentStageLabel}</div>
-                  </div>
-                ))}
-              </div>
-
-              {selectedProject && (
-                <div style={{ marginBottom: "28px", padding: "12px", background: "rgba(91,140,255,0.04)", borderRadius: "8px", border: "1px solid var(--line)" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span className="mini-meta">Inisial Event</span>
-                    <span style={{ fontWeight: 700, color: "var(--blue)" }}>{selectedProject.projectInitial || "BELUM DISET"}</span>
-                  </div>
-                  {selectedProject.projectInitial ? (
-                    <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>
-                      Nomor PO otomatis: {`00x/JBBS/${docType}/${selectedProject.projectInitial}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`}
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: "10px", color: "var(--red)", marginTop: "4px", display: "flex", alignItems: "center", gap: "4px" }}>
-                      <AlertCircle size={10} /> Inisial belum diatur di Project Tracker. Nomor PO akan menggunakan format standar.
-                    </div>
-                  )}
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            {[1, 2, 3].map((s) => (
+              <React.Fragment key={s}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <div style={{ 
+                    width: '28px', height: '28px', borderRadius: '50%', border: step === s ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                    background: step === s ? '#378ADD' : (step > s ? 'rgba(93,202,165,0.1)' : 'transparent'),
+                    display: 'grid', placeItems: 'center', fontSize: '12px', fontWeight: 600,
+                    color: step === s ? '#fff' : (step > s ? '#5DCAA5' : '#52525b')
+                  }}>{step > s ? <Check size={14} /> : s}</div>
+                  <span style={{ fontSize: '13px', fontWeight: step === s ? 600 : 500, color: step === s ? '#e4e4e7' : '#52525b' }}>{s === 1 ? 'Project & Type' : s === 2 ? 'Vendor & Items' : 'Terms & Submit'}</span>
                 </div>
-              )}
+                {s < 3 && <div style={{ flex: 1, height: '1px', background: step > s ? '#5DCAA5' : 'rgba(255,255,255,0.06)', margin: '0 12px', maxWidth: '60px' }} />}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
 
-              <div className="form-section-title" style={{ marginBottom: "16px" }}>Tipe Dokumen</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" }}>
-                {(["PO", "SPK", "KONTRAK"] as DocType[]).map(t => (
-                  <label key={t} onClick={() => setDocType(t)} style={{ padding: "16px", borderRadius: "12px", border: `2px solid ${docType === t ? "var(--blue)" : "var(--line)"}`, background: docType === t ? "rgba(91,140,255,0.08)" : "transparent", cursor: "pointer", display: "flex", alignItems: "flex-start", gap: "12px", transition: "all 0.2s ease" }}>
-                    <div style={{ color: docType === t ? "var(--blue)" : "var(--muted-soft)", marginTop: "2px" }}>
-                      {docTypeIcons[t]}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: "13px", color: docType === t ? "var(--text)" : "var(--muted)" }}>{docTypeLabels[t]}</div>
-                      <div className="mini-meta">{t === "PO" ? "Pembelian barang/jasa" : t === "SPK" ? "Penugasan tenaga/jasa" : "Perjanjian jangka panjang"}</div>
-                    </div>
-                  </label>
+        {/* Content Area */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "40px" }}>
+          
+          {step === 1 && (
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Select Project</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px", marginBottom: '40px', maxHeight: '240px', overflowY: 'auto', padding: '4px' }}>
+                {activeProjects.map(p => (
+                  <div key={p.id} onClick={() => setSelectedProject(p)} style={{ 
+                    padding: "16px", background: selectedProject?.id === p.id ? "rgba(55,138,221,0.1)" : "#18181b",
+                    borderRadius: "12px", border: selectedProject?.id === p.id ? "1.5px solid #378ADD" : "0.5px solid rgba(255,255,255,0.06)",
+                    cursor: "pointer", transition: "all 0.2s"
+                  }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: selectedProject?.id === p.id ? '#378ADD' : '#e4e4e7' }}>{p.projectName}</div>
+                    <div style={{ fontSize: '11px', color: '#52525b', marginTop: '4px' }}>{p.client}</div>
+                  </div>
                 ))}
               </div>
 
-              <div style={{ marginTop: "32px", display: "flex", justifyContent: "flex-end", gap: "12px", paddingBottom: "10px" }}>
-                <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
-                <button onClick={() => setStep(2)} disabled={!selectedProject} className="primary-button">Lanjut →</button>
+              <div style={{ fontSize: '12px', fontWeight: 600, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Document Type</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+                {(["PO", "SPK", "KONTRAK"] as DocType[]).map(t => (
+                  <div key={t} onClick={() => setDocType(t)} style={{ 
+                    padding: "20px", background: docType === t ? "rgba(55,138,221,0.1)" : "#18181b",
+                    borderRadius: "16px", border: docType === t ? "1.5px solid #378ADD" : "0.5px solid rgba(255,255,255,0.06)",
+                    cursor: "pointer", textAlign: 'center'
+                  }}>
+                    <div style={{ color: docType === t ? '#378ADD' : '#52525b', marginBottom: '8px' }}>{t === 'PO' ? <ShoppingBag size={24} /> : t === 'SPK' ? <Scroll size={24} /> : <FileSignature size={24} />}</div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: docType === t ? '#e4e4e7' : '#71717a' }}>{docTypeLabels[t]}</div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* ─── STEP 2 ─── */}
           {step === 2 && (
-            <div>
-              {/* Active Project Banner */}
-              <div style={{ marginBottom: "24px", padding: "12px 16px", background: "rgba(91,140,255,0.06)", border: "1px solid rgba(91,140,255,0.2)", borderRadius: "10px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div className="mini-meta" style={{ color: "var(--blue)" }}>PROJECT AKTIF</div>
-                  <div style={{ fontWeight: 700 }}>{selectedProject?.projectName}</div>
-                </div>
-                <button onClick={() => setStep(1)} style={{ background: "none", border: "1px solid var(--line)", padding: "4px 10px", borderRadius: "6px", fontSize: "11px", cursor: "pointer", color: "var(--muted)" }}>Ganti Project</button>
-              </div>
-
-              {/* Vendor Info */}
-              <div className="form-section-title" style={{ marginBottom: "16px" }}>Informasi Vendor / Penerima</div>
-              
-              <div style={{ position: "relative", marginBottom: "20px" }}>
-                <label className="mini-meta">Cari Vendor dari Database VMS</label>
-                <div style={{ position: "relative", marginTop: "4px" }}>
-                  <input 
-                    style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--blue)", padding: "12px 16px", color: "var(--text)", borderRadius: "10px", outline: "none", boxShadow: "0 0 0 2px rgba(91,140,255,0.1)" }} 
-                    value={vendorSearch} 
-                    onChange={e => { setVendorSearch(e.target.value); setShowVendorSuggestions(true); }}
-                    onFocus={() => setShowVendorSuggestions(true)}
-                    placeholder="Ketik nama vendor atau jenis jasa (e.g. 'Catering', 'Tenda')..." 
-                  />
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              <div style={{ position: "relative", marginBottom: "32px" }}>
+                <label style={{ fontSize: '11px', color: '#52525b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>Vendor Database Lookup</label>
+                <div style={{ position: "relative", marginTop: "8px" }}>
+                  <input style={{ width: "100%", background: "#111113", border: "0.5px solid rgba(255,255,255,0.1)", padding: "12px 16px", color: "#e4e4e7", borderRadius: "10px", outline: "none" }} value={vendorSearch} onChange={e => { setVendorSearch(e.target.value); setShowVendorSuggestions(true); }} placeholder="Search existing vendors or freelancers..." />
                   {showVendorSuggestions && vendorSearch.length > 0 && (
-                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "var(--panel)", border: "1px solid var(--line)", borderRadius: "10px", marginTop: "4px", boxShadow: "0 10px 25px rgba(0,0,0,0.3)", zIndex: 10, maxHeight: "280px", overflowY: "auto" }}>
-                      {filteredVendors.length === 0 ? (
-                        <div style={{ padding: "16px", textAlign: "center", color: "var(--muted)" }}>Vendor tidak ditemukan</div>
-                      ) : (
-                        filteredVendors.map(v => (
-                          <div 
-                            key={v.id} 
-                            onClick={() => handleVendorSelect(v)}
-                            style={{ padding: "12px 16px", borderBottom: "1px solid var(--line)", cursor: "pointer", transition: "background 0.2s" }}
-                            onMouseEnter={e => e.currentTarget.style.background = "var(--panel-soft)"}
-                            onMouseLeave={e => e.currentTarget.style.background = "transparent"}
-                          >
-                            <div style={{ fontWeight: 600, fontSize: "13px" }}>{v.displayName}</div>
-                            <div style={{ display: "flex", gap: "6px", marginTop: "4px" }}>
-                              <span className="chip" style={{ fontSize: "10px", background: v.type === 'freelancer' ? "rgba(34,197,94,0.1)" : "rgba(91,140,255,0.1)", color: v.type === 'freelancer' ? "#22c55e" : "var(--blue)" }}>
-                                {v.type === 'freelancer' ? 'Manpower' : (v.classification || 'Vendor')}
-                              </span>
-                              {v.displayMeta && (
-                                <span className="mini-meta" style={{ fontSize: "10px" }}>• {v.displayMeta}</span>
-                              )}
-                            </div>
-                          </div>
-                        ))
-                      )}
+                    <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: "#18181b", border: "0.5px solid rgba(255,255,255,0.1)", borderRadius: "10px", marginTop: "4px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)", zIndex: 10, maxHeight: "240px", overflowY: "auto" }}>
+                      {filteredVendors.map(v => (
+                        <div key={v.id} onClick={() => handleVendorSelect(v)} style={{ padding: "12px 16px", borderBottom: "0.5px solid rgba(255,255,255,0.05)", cursor: "pointer" }}>
+                          <div style={{ fontWeight: 600, fontSize: "13px", color: '#e4e4e7' }}>{v.displayName}</div>
+                          <div style={{ fontSize: '11px', color: '#52525b' }}>{v.displayMeta}</div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
-                <div>
-                  <label className="mini-meta">Nama Tertera di Dokumen *</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={vendorName} onChange={e => setVendorName(e.target.value)} placeholder="PT. Mitra Seni Indonesia" />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "32px" }}>
+                <div className="p-input-group"><label>Vendor Name</label><input className="p-input" value={vendorName} onChange={e => setVendorName(e.target.value)} /></div>
+                <div className="p-input-group"><label>Phone</label><input className="p-input" value={vendorPhone} onChange={e => setVendorPhone(e.target.value)} /></div>
+                <div className="p-input-group"><label>Tax ID (NPWP)</label><input className="p-input" value={vendorTaxId} onChange={e => setVendorTaxId(e.target.value)} placeholder="00.000.000.0-000.000" /></div>
+                <div className="p-input-group"><label>PPh21 Mode</label>
+                  <select className="p-input" value={pph21Mode} onChange={e => setPph21Mode(e.target.value as any)}>
+                    <option value="none">No PPh21</option>
+                    <option value="deduction">Deduction (PPH 2.5%)</option>
+                    <option value="grossup">Gross Up (PPH 2.5%)</option>
+                  </select>
                 </div>
-                <div>
-                  <label className="mini-meta">No. Telepon PIC</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={vendorPhone} onChange={e => setVendorPhone(e.target.value)} placeholder="08xx-xxxx-xxxx" />
-                </div>
-                <div>
-                  <label className="mini-meta">Alamat Vendor</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={vendorAddress} onChange={e => setVendorAddress(e.target.value)} placeholder="Jl. Kebon Jeruk No. 12, Jakarta" />
-                </div>
-                <div>
-                  <label className="mini-meta">NPWP / Tax ID</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={vendorTaxId} onChange={e => setVendorTaxId(e.target.value)} placeholder="00.000.000.0-000.000" />
-                </div>
+                {docType !== "PO" && (
+                  <>
+                    <div className="p-input-group"><label>Venue</label><input className="p-input" value={venue} onChange={e => setVenue(e.target.value)} /></div>
+                    <div className="p-input-group"><label>Duration</label><input className="p-input" value={duration} onChange={e => setDuration(e.target.value)} /></div>
+                    <div className="p-input-group"><label>Lampiran</label><input className="p-input" value={lampiran} onChange={e => setLampiran(e.target.value)} /></div>
+                  </>
+                )}
+                <div className="p-input-group" style={{ gridColumn: docType === "PO" ? 'span 2' : 'span 1' }}><label>Address</label><input className="p-input" value={vendorAddress} onChange={e => setVendorAddress(e.target.value)} /></div>
               </div>
-
-              {/* Line Items */}
-              {/* SPK Specific Details */}
-              {(docType === "SPK" || docType === "KONTRAK") && (
-                <div style={{ background: "rgba(91,140,255,0.06)", padding: "20px", borderRadius: "12px", border: "1px solid rgba(91,140,255,0.15)", marginBottom: "24px" }}>
-                  <div className="form-section-title" style={{ color: "var(--blue)", marginBottom: "16px", marginTop: 0 }}>Detail SPK / Talent</div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "16px" }}>
-                    <div>
-                      <label className="mini-meta">Lokasi Pekerjaan (Venue) *</label>
-                      <input value={venue} onChange={e => setVenue(e.target.value)} placeholder="Contoh: Mandarin Oriental Hotel Jakarta" style={{ width: "100%", background: "var(--panel)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} />
-                    </div>
-                    <div>
-                      <label className="mini-meta">Durasi Pekerjaan *</label>
-                      <input value={duration} onChange={e => setDuration(e.target.value)} placeholder="Contoh: 30 Maret 2026 - 31 Maret 2026" style={{ width: "100%", background: "var(--panel)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} />
-                    </div>
-                  </div>
-                  <div style={{ marginBottom: "16px" }}>
-                     <label className="mini-meta">Lampiran</label>
-                     <input value={lampiran} onChange={e => setLampiran(e.target.value)} style={{ width: "100%", background: "var(--panel)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} />
-                  </div>
-                  <div>
-                     <label className="mini-meta" style={{ display: "flex", justifyContent: "space-between" }}>
-                        <span>Ruang Lingkup Pekerjaan (Bullet points)</span>
-                        <span style={{ fontSize: "10px", opacity: 0.6 }}>Pisahkan dengan baris baru</span>
-                     </label>
-                     <textarea 
-                       value={workScope.join("\n")} 
-                       onChange={e => setWorkScope(e.target.value.split("\n"))}
-                       rows={6}
-                       placeholder="Satu baris per poin pekerjaan..."
-                       style={{ width: "100%", background: "var(--panel)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px", fontSize: "12px", lineHeight: "1.6" }} 
-                     />
-                  </div>
-                </div>
-              )}
-
-              <div className="form-section-title" style={{ margin: "24px 0 12px" }}>Detail Pesanan / Pekerjaan</div>
-              <div style={{ overflowX: "auto" }}>
-                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-                  <thead>
-                    <tr style={{ background: "var(--panel-soft)" }}>
-                      {["No", "Item / Task", "Spec", "Qty", "Satuan", "Freq", "Sat", "Harga", "Total", ""].map(h => (
-                        <th key={h} style={{ padding: "8px 10px", textAlign: "left", fontWeight: 600, color: "var(--muted)", whiteSpace: "nowrap", borderBottom: "1px solid var(--line)" }}>{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {lineItems.map((line, idx) => (
-                      <tr key={idx}>
-                        <td style={{ padding: "6px 8px", color: "var(--muted)" }}>{idx + 1}</td>
-                        <td style={{ padding: "4px 6px" }}><input value={line.description} onChange={e => updateLine(idx, "description", e.target.value)} placeholder="Nama item" style={{ width: "140px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 6px" }}><input value={line.specification} onChange={e => updateLine(idx, "specification", e.target.value)} placeholder="Detail" style={{ width: "120px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 6px" }}><input type="number" value={line.qty} onChange={e => updateLine(idx, "qty", e.target.value)} style={{ width: "52px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 6px" }}><input value={line.unit} onChange={e => updateLine(idx, "unit", e.target.value)} style={{ width: "64px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 6px" }}><input type="number" value={line.freq} onChange={e => updateLine(idx, "freq", e.target.value)} style={{ width: "52px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 6px" }}><input value={line.freqUnit} onChange={e => updateLine(idx, "freqUnit", e.target.value)} style={{ width: "64px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 6px" }}><input type="number" value={line.price} onChange={e => updateLine(idx, "price", e.target.value)} style={{ width: "110px", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "6px 8px", color: "var(--text)", borderRadius: "6px" }} /></td>
-                        <td style={{ padding: "4px 8px", fontWeight: 600, whiteSpace: "nowrap", fontSize: "11px" }}>{formatCurrencyIDR(line.amount)}</td>
-                        <td style={{ padding: "4px 6px" }}><button onClick={() => removeLine(idx)} style={{ background: "rgba(239,68,68,0.1)", border: "none", borderRadius: "4px", color: "#f87171", cursor: "pointer", padding: "4px 8px" }}>✕</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colSpan={8} style={{ padding: "12px 0px 4px 8px", textAlign: "right", color: "var(--muted)", fontSize: "11px" }}>NOMINAL DI SPK (GROSS)</td>
-                      <td colSpan={2} style={{ padding: "12px 8px 4px", fontSize: "12px", textAlign: "right", color: "var(--text)" }}>{formatCurrencyIDR(finalDocGross)}</td>
-                    </tr>
-                    {pph21Mode !== "none" && (
-                      <tr>
-                        <td colSpan={8} style={{ padding: "4px 0px 4px 8px", textAlign: "right", color: "#f87171", fontSize: "11px" }}>PPH 21 (2.5%)</td>
-                        <td colSpan={2} style={{ padding: "4px 8px", fontSize: "12px", textAlign: "right", color: "#f87171" }}>- {formatCurrencyIDR(docTax)}</td>
-                      </tr>
-                    )}
-                    <tr style={{ borderTop: "1px solid var(--line)" }}>
-                      <td colSpan={8} style={{ padding: "8px 0px 12px 8px", textAlign: "right", fontWeight: 700, color: "var(--text)" }}>TOTAL YANG DITRANSFER (NET)</td>
-                      <td colSpan={2} style={{ padding: "8px 8px 12px", fontWeight: 700, fontSize: "18px", color: "var(--blue)", textAlign: "right" }}>{formatCurrencyIDR(grandTotal)}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-              <button onClick={addLine} style={{ marginTop: "10px", background: "rgba(91,140,255,0.1)", border: "1px dashed var(--blue)", borderRadius: "8px", color: "var(--blue)", cursor: "pointer", padding: "8px 20px", width: "100%", fontSize: "12px" }}>+ Tambah Item</button>
 
               {docType !== "PO" && (
-                <div style={{ marginTop: "24px", padding: "16px", borderRadius: "12px", background: "rgba(91,140,255,0.05)", border: "1px solid rgba(91,140,255,0.1)" }}>
-                  <label className="mini-meta" style={{ display: "block", marginBottom: "12px" }}>PENGATURAN PAJAK PPH 21 (2,5%)</label>
-                  <div style={{ display: "flex", gap: "10px" }}>
-                    {[
-                      { id: "none", label: "Tanpa Pajak", desc: "No deduction" },
-                      { id: "deduction", label: "Potongan (Netto)", desc: "Vendor pays tax" },
-                      { id: "grossup", label: "Gross Up", desc: "Company pays tax" }
-                    ].map((opt) => (
-                      <div 
-                        key={opt.id}
-                        onClick={() => setPph21Mode(opt.id as any)}
-                        style={{ 
-                          flex: 1, 
-                          padding: "12px", 
-                          borderRadius: "8px", 
-                          border: `2px solid ${pph21Mode === opt.id ? "var(--blue)" : "var(--line)"}`,
-                          background: pph21Mode === opt.id ? "rgba(91,140,255,0.08)" : "var(--panel)",
-                          cursor: "pointer",
-                          transition: "all 0.2s"
-                        }}
-                      >
-                        <div style={{ fontWeight: 600, fontSize: "13px", color: pph21Mode === opt.id ? "var(--blue)" : "var(--text)" }}>{opt.label}</div>
-                        <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "2px" }}>{opt.desc}</div>
+                <div style={{ marginBottom: '32px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#378ADD', textTransform: 'uppercase', letterSpacing: '1px' }}>Work Scope (Ruang Lingkup Pekerjaan)</div>
+                    <button onClick={() => setWorkScope(prev => [...prev, ""])} style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', border: 'none', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>+ Add Scope</button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {workScope.map((scope, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#111113', padding: '8px 12px', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.06)' }}>
+                        <input className="cell-input" value={scope} onChange={e => {
+                          const next = [...workScope];
+                          next[idx] = e.target.value;
+                          setWorkScope(next);
+                        }} />
+                        <button onClick={() => setWorkScope(prev => prev.filter((_, i) => i !== idx))} style={{ color: '#52525b', background: 'none', border: 'none' }}><Trash2 size={14} /></button>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-
-
-              {hasPenalty && (
-                <div style={{ marginTop: "24px", padding: "16px", borderRadius: "12px", background: "rgba(220, 38, 38, 0.05)", border: "1px dashed #dc2626" }}>
-                  <label className="mini-meta" style={{ display: "block", marginBottom: "8px", color: "#dc2626" }}>DOCUMENTATION REQUIRED</label>
-                  <p style={{ fontSize: "12px", marginBottom: "12px" }}>Terdeteksi nilai penalti (negatif). Wajib mengunggah Internal Memo atau Surat Penalti sebagai dasar pemotongan.</p>
-                  
-                  {penaltyMemoUrl && !penaltyFile ? (
-                    <div style={{ fontSize: "12px", color: "var(--blue)", marginBottom: "8px" }}>✓ Dokumen sudah tersedia (Edit Mode)</div>
-                  ) : null}
-
-                  <input 
-                    type="file" 
-                    onChange={e => setPenaltyFile(e.target.files?.[0] || null)}
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    style={{ fontSize: "12px", color: "var(--text)" }}
-                  />
-                  {isUploadingPenalty && <div style={{ fontSize: "10px", marginTop: "4px", color: "var(--blue)" }}>Mengunggah...</div>}
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#e4e4e7', textTransform: 'uppercase' }}>Line Items</div>
+                  <button onClick={addLine} style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', border: 'none', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>+ Add Row</button>
                 </div>
-              )}
-
-              <div style={{ marginTop: "32px", display: "flex", justifyContent: "space-between", gap: "12px" }}>
-                <button onClick={() => setStep(1)} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>← Kembali</button>
-                <div style={{ display: "flex", gap: "12px" }}>
-                  <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
-                  <button 
-                    onClick={() => {
-                      if (hasPenalty && !penaltyFile && !penaltyMemoUrl) {
-                        alert("Silakan unggah Memo Penalti terlebih dahulu.");
-                        return;
-                      }
-                      setStep(3);
-                    }} 
-                    disabled={grandTotal === 0} 
-                    className="primary-button"
-                  >
-                    Lanjut →
-                  </button>
+                <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <thead><tr style={{ background: '#18181b' }}>
+                      <th style={{ padding: '12px', textAlign: 'left', color: '#52525b' }}>Description</th>
+                      <th style={{ padding: '12px', textAlign: 'center', color: '#52525b', width: '50px' }}>Qty</th>
+                      <th style={{ padding: '12px', textAlign: 'center', color: '#52525b', width: '60px' }}>Unit</th>
+                      <th style={{ padding: '12px', textAlign: 'center', color: '#52525b', width: '50px' }}>Freq</th>
+                      <th style={{ padding: '12px', textAlign: 'center', color: '#52525b', width: '60px' }}>Unit</th>
+                      <th style={{ padding: '12px', textAlign: 'right', color: '#52525b' }}>Price</th>
+                      <th style={{ padding: '12px', textAlign: 'right', color: '#52525b' }}>Total</th>
+                      <th style={{ width: '40px' }}></th>
+                    </tr></thead>
+                    <tbody>
+                      {lineItems.map((line, idx) => (
+                        <tr key={idx} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                          <td style={{ padding: '8px' }}><input className="cell-input" value={line.description} onChange={e => updateLine(idx, "description", e.target.value)} /></td>
+                          <td style={{ padding: '8px' }}><input className="cell-input text-center" type="number" value={line.qty} onChange={e => updateLine(idx, "qty", e.target.value)} /></td>
+                          <td style={{ padding: '8px' }}><input className="cell-input text-center" value={line.unit} onChange={e => updateLine(idx, "unit", e.target.value)} placeholder="Unit" /></td>
+                          <td style={{ padding: '8px' }}><input className="cell-input text-center" type="number" value={line.freq} onChange={e => updateLine(idx, "freq", e.target.value)} /></td>
+                          <td style={{ padding: '8px' }}><input className="cell-input text-center" value={line.freqUnit} onChange={e => updateLine(idx, "freqUnit", e.target.value)} placeholder="Days" /></td>
+                          <td style={{ padding: '8px' }}><input className="cell-input text-right" type="number" value={line.price} onChange={e => updateLine(idx, "price", e.target.value)} /></td>
+                          <td style={{ padding: '8px', textAlign: 'right', color: '#e4e4e7', fontWeight: 600 }}>{formatCurrencyIDR(line.amount)}</td>
+                          <td style={{ textAlign: 'center' }}><button onClick={() => removeLine(idx)} style={{ color: '#52525b', background: 'none', border: 'none' }}><Trash2 size={14} /></button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <div style={{ padding: '20px', background: '#18181b', display: 'flex', justifyContent: 'flex-end', gap: '24px', alignItems: 'baseline' }}>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '10px', color: '#52525b' }}>Gross Amount</div>
+                      <div style={{ fontSize: '14px', color: '#e4e4e7' }}>{formatCurrencyIDR(finalDocGross)}</div>
+                    </div>
+                    {pph21Mode !== "none" && (
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '10px', color: '#52525b' }}>Tax (PPh21)</div>
+                        <div style={{ fontSize: '14px', color: '#ef4444' }}>- {formatCurrencyIDR(docTax)}</div>
+                      </div>
+                    )}
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '10px', color: '#378ADD', fontWeight: 700 }}>Total Net Pay</div>
+                      <div style={{ fontSize: '24px', fontWeight: 700, color: '#378ADD' }}>{formatCurrencyIDR(grandTotal)}</div>
+                    </div>
+                  </div>
                 </div>
+
+                {hasPenalty && (
+                  <div style={{ marginTop: '20px', padding: '16px', background: 'rgba(239,68,68,0.05)', borderRadius: '12px', border: '1px dashed rgba(239,68,68,0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: '#ef4444' }}>Penalty Memo Required</div>
+                      <div style={{ fontSize: '11px', color: '#71717a' }}>Negative items detected. Please upload an approval memo.</div>
+                    </div>
+                    <label style={{ cursor: 'pointer', background: 'rgba(239,68,68,0.1)', color: '#ef4444', padding: '8px 16px', borderRadius: '8px', fontSize: '11px', fontWeight: 600 }}>
+                      {isUploadingPenalty ? 'Uploading...' : (penaltyFile || penaltyMemoUrl ? '✓ Memo Attached' : 'Upload Memo')}
+                      <input type="file" hidden accept="image/*,application/pdf" onChange={e => e.target.files?.[0] && setPenaltyFile(e.target.files[0])} />
+                    </label>
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* ─── STEP 3 ─── */}
           {step === 3 && (
-            <div>
-              {/* Active Project Banner */}
-              <div style={{ marginBottom: "24px", padding: "12px 16px", background: "rgba(91,140,255,0.06)", border: "1px solid rgba(91,140,255,0.2)", borderRadius: "10px" }}>
-                <div className="mini-meta" style={{ color: "var(--blue)" }}>PROJECT</div>
-                <div style={{ fontWeight: 700 }}>{selectedProject?.projectName}</div>
-              </div>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "24px" }}>
-                <div>
-                  <label className="mini-meta">Payment Method Reference</label>
-                  <select 
-                    style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--blue)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} 
-                    value={paymentTerms} 
-                    onChange={e => handleTermsChange(e.target.value)}
-                  >
-                    <option>Full Payment</option>
-                    <option>DP + Pelunasan</option>
-                    <option>Retensi 5%</option>
-                    <option>Custom Schedule</option>
+            <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+                <div className="p-input-group">
+                  <label>Payment Method Reference</label>
+                  <select className="p-input" value={paymentTerms} onChange={e => handleTermsChange(e.target.value)}>
+                    <option value="Full Payment">Full Payment</option>
+                    <option value="DP + Pelunasan">DP + Pelunasan</option>
+                    <option value="Custom Schedule">Custom Schedule</option>
                   </select>
-                  <div style={{ fontSize: "10px", opacity: 0.6, marginTop: "4px" }}>Pilih referensi untuk mengisi jadwal otomatis.</div>
                 </div>
-                <div>
-                  <label className="mini-meta">Catatan Pembayaran</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Misal: Pembayaran bertahap sesuai progres..." />
+                <div className="p-input-group">
+                  <label>Notes / Catatan Pembayaran</label>
+                  <input className="p-input" placeholder="Misal: Pembayaran bertahap sesuai progres..." value={notes} onChange={e => setNotes(e.target.value)} />
                 </div>
               </div>
 
-              <div className="form-section-title" style={{ marginBottom: "16px" }}>Detail Jadwal Pembayaran (Schedule)</div>
-              <div style={{ marginBottom: "20px" }}>
-                <div style={{ display: "grid", gap: "10px" }}>
+              {/* Payment Schedule */}
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#378ADD', textTransform: 'uppercase', letterSpacing: '1px' }}>Detail Jadwal Pembayaran (Schedule)</div>
+                  {paymentTerms === "Custom Schedule" && (
+                    <button onClick={() => setPaymentSchedule(prev => [...prev, emptyEvent(`Termin ${prev.length + 1}`)])} style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', border: 'none', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>+ Add Termin</button>
+                  )}
+                </div>
+                <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
                   {paymentSchedule.map((ev, idx) => (
-                    <div key={idx} style={{ display: "grid", gridTemplateColumns: "1fr 100px 160px auto", gap: "10px", alignItems: "center", background: "var(--panel-soft)", padding: "10px", borderRadius: "8px", border: "1px solid var(--line)" }}>
-                      <input 
-                        value={ev.label} 
-                        onChange={e => {
-                          const updated = [...paymentSchedule];
-                          updated[idx].label = e.target.value;
-                          setPaymentSchedule(updated);
-                          setPaymentTerms("Custom Schedule");
-                        }}
-                        placeholder="e.g. DP / Termin 1"
-                        style={{ background: "transparent", border: "none", borderBottom: "1px solid var(--line)", padding: "4px", color: "var(--text)", fontSize: "14px" }}
-                      />
-                      <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                        <input 
-                          type="number" 
-                          value={ev.percentage || ""} 
-                          onChange={e => {
-                            const updated = [...paymentSchedule];
-                            updated[idx].percentage = Number(e.target.value);
-                            updated[idx].amount = (grandTotal * (updated[idx].percentage || 0)) / 100;
-                            setPaymentSchedule(updated);
-                            setPaymentTerms("Custom Schedule");
-                          }}
-                          style={{ width: "50px", background: "transparent", border: "none", borderBottom: "1px solid var(--line)", padding: "4px", color: "var(--text)", textAlign: "center" }}
-                        />
-                        <span className="mini-meta">%</span>
+                    <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 180px 40px', gap: '12px', padding: '12px 16px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
+                      <input className="cell-input" value={ev.label} onChange={e => {
+                        const next = [...paymentSchedule];
+                        next[idx].label = e.target.value;
+                        setPaymentSchedule(next);
+                      }} placeholder="Label (e.g. DP 50%)" />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <input className="cell-input text-center" type="number" value={ev.percentage} onChange={e => {
+                          const next = [...paymentSchedule];
+                          next[idx].percentage = Number(e.target.value);
+                          setPaymentSchedule(next);
+                        }} />
+                        <span style={{ color: '#52525b', fontSize: '12px' }}>%</span>
                       </div>
-                      <input 
-                        type="date" 
-                        value={ev.date || ""} 
-                        onChange={e => {
-                          const updated = [...paymentSchedule];
-                          updated[idx].date = e.target.value;
-                          setPaymentSchedule(updated);
-                        }}
-                        style={{ background: "transparent", border: "none", borderBottom: "1px solid var(--line)", padding: "4px", color: "var(--text)" }}
-                      />
-                      <button onClick={() => {
-                        setPaymentSchedule(prev => prev.filter((_, i) => i !== idx));
-                        setPaymentTerms("Custom Schedule");
-                      }} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer" }}>&times;</button>
+                      <input className="p-input" type="date" value={ev.date} onChange={e => {
+                        const next = [...paymentSchedule];
+                        next[idx].date = e.target.value;
+                        setPaymentSchedule(next);
+                      }} style={{ padding: '6px 10px', fontSize: '12px' }} />
+                      <button onClick={() => setPaymentSchedule(prev => prev.filter((_, i) => i !== idx))} style={{ color: '#ef4444', background: 'none', border: 'none', opacity: paymentSchedule.length > 1 ? 1 : 0, pointerEvents: paymentSchedule.length > 1 ? 'auto' : 'none' }}><Trash2 size={14} /></button>
                     </div>
                   ))}
                 </div>
-                <button onClick={() => {
-                  setPaymentSchedule(prev => [...prev, emptyEvent(`Termin ${prev.length + 1}`)]);
-                  setPaymentTerms("Custom Schedule");
-                }} style={{ marginTop: "12px", background: "none", border: "1px dashed var(--blue)", color: "var(--blue)", padding: "8px 16px", borderRadius: "8px", cursor: "pointer", fontSize: "12px" }}>+ Tambah Termin / Pembayaran</button>
               </div>
 
-              <div className="form-section-title" style={{ margin: "24px 0 16px" }}>Keterangan Pembayaran (Bullet Points)</div>
-              <div style={{ background: "rgba(91,140,255,0.06)", padding: "16px", borderRadius: "10px", border: "1px solid rgba(91,140,255,0.1)" }}>
-                 <div style={{ display: "grid", gap: "8px" }}>
-                    {paymentKeterangan.map((k, i) => (
-                       <div key={i} style={{ display: "flex", gap: "10px" }}>
-                          <input 
-                            value={k} 
-                            onChange={e => {
-                               const updated = [...paymentKeterangan];
-                               updated[i] = e.target.value;
-                               setPaymentKeterangan(updated);
-                            }}
-                            style={{ flex: 1, background: "var(--panel)", border: "1px solid var(--line)", padding: "8px 12px", borderRadius: "6px", color: "var(--text)", fontSize: "12px" }} 
-                          />
-                          <button onClick={() => setPaymentKeterangan(prev => prev.filter((_, idx) => idx !== i))} style={{ color: "#f87171", background: "none", border: "none", cursor: "pointer" }}>✕</button>
-                       </div>
-                    ))}
-                 </div>
-                 <button onClick={() => setPaymentKeterangan(prev => [...prev, ""])} style={{ marginTop: "12px", background: "none", border: "1px dashed var(--blue)", color: "var(--blue)", padding: "6px 12px", borderRadius: "6px", fontSize: "11px", cursor: "pointer" }}>+ Tambah Poin Keterangan</button>
-              </div>
-
-              <div className="form-section-title" style={{ margin: "24px 0 16px" }}>Delivery Instruction</div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
-                <div>
-                  <label className="mini-meta">Ship To (Lokasi Event)</label>
-                  <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={shipTo} onChange={e => setShipTo(e.target.value)} placeholder="Gedung A, Jl. Sudirman..." />
+              {/* Payment Remarks */}
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#378ADD', textTransform: 'uppercase', letterSpacing: '1px' }}>Keterangan Pembayaran (Bullet Points)</div>
+                  <button onClick={() => setPaymentKeterangan(prev => [...prev, ""])} style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', border: 'none', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>+ Add Line</button>
                 </div>
-                <div>
-                  <label className="mini-meta">Delivery Date</label>
-                  <input type="date" style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} />
-                </div>
-              </div>
-
-              <div className="form-section-title" style={{ margin: "24px 0 16px" }}>Billing Instruction</div>
-              <div style={{ marginBottom: "12px" }}>
-                <label className="mini-meta">Email Billing</label>
-                <input style={{ width: "100%", background: "var(--panel-soft)", border: "1px solid var(--line)", padding: "10px", color: "var(--text)", borderRadius: "8px", marginTop: "4px" }} value={billingInstruction} onChange={e => setBillingInstruction(e.target.value)} placeholder="finance@juara.co.id" />
-              </div>
-              <div style={{ marginBottom: "20px" }}>
-                <label className="mini-meta" style={{ display: "block", marginBottom: "8px" }}>Billing Terms — Dokumen Wajib Diserahkan Vendor:</label>
-                <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                  {["Invoice", "BAST", "Report Dokumentasi", "Kwitansi", "PPN/PPh Faktur"].map(term => (
-                    <label key={term} style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", fontSize: "13px" }}>
-                      <input type="checkbox" checked={billingTerms.includes(term)} onChange={() => toggleBillingTerm(term)} />
-                      {term}
-                    </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {paymentKeterangan.map((kt, idx) => (
+                    <div key={idx} style={{ display: 'flex', gap: '8px', alignItems: 'center', background: '#111113', padding: '8px 12px', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.06)' }}>
+                      <input className="cell-input" value={kt} onChange={e => {
+                        const next = [...paymentKeterangan];
+                        next[idx] = e.target.value;
+                        setPaymentKeterangan(next);
+                      }} />
+                      <button onClick={() => setPaymentKeterangan(prev => prev.filter((_, i) => i !== idx))} style={{ color: '#52525b', background: 'none', border: 'none' }}><Trash2 size={14} /></button>
+                    </div>
                   ))}
                 </div>
               </div>
 
-              {/* Summary box */}
-              <div style={{ marginTop: "24px", padding: "20px", background: "rgba(91,140,255,0.06)", border: "1px solid rgba(91,140,255,0.2)", borderRadius: "12px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div className="mini-meta">Ringkasan Dokumen</div>
-                    <div style={{ fontWeight: 600, marginTop: "4px" }}>{docTypeLabels[docType]} — {selectedProject?.projectName}</div>
-                    <div className="mini-meta">Vendor: {vendorName} • {lineItems.length} item</div>
-                  </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div className="mini-meta">Total Nilai</div>
-                    <div style={{ fontSize: "22px", fontWeight: 700, color: "var(--blue)" }}>{formatCurrencyIDR(grandTotal)}</div>
-                  </div>
+              {/* Delivery & Billing */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '32px' }}>
+                <div className="p-input-group">
+                  <label>Ship To (Lokasi Event)</label>
+                  <input className="p-input" value={shipTo} onChange={e => setShipTo(e.target.value)} placeholder="Gedung A, Jl. Sudirman..." />
                 </div>
-                <div style={{ marginTop: "12px", padding: "8px 12px", background: "rgba(234,179,8,0.1)", borderRadius: "8px", border: "1px solid rgba(234,179,8,0.2)", fontSize: "12px", color: "#ca8a04" }}>
-                  ⚠️ Dokumen akan tersimpan sebagai <strong>DRAFT</strong> dan perlu disetujui oleh Director sebelum dapat dibuatkan RFP.
+                <div className="p-input-group">
+                  <label>Delivery Date</label>
+                  <input className="p-input" type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} />
+                </div>
+                <div className="p-input-group">
+                  <label>Email Billing</label>
+                  <input className="p-input" value={billingInstruction} onChange={e => setBillingInstruction(e.target.value)} placeholder="finance@juara.co.id" />
+                </div>
+                <div className="p-input-group">
+                  <label>Required Documents (Billing Terms)</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '8px' }}>
+                    {["Invoice", "BAST", "Report Dokumentasi", "Kwitansi", "PPh/PPN Faktur"].map(term => (
+                      <label key={term} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', color: '#a1a1aa' }}>
+                        <input type="checkbox" checked={billingTerms.includes(term)} onChange={() => toggleBillingTerm(term)} style={{ width: '14px', height: '14px' }} />
+                        {term}
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              <div style={{ marginTop: "24px", display: "flex", justifyContent: "space-between", gap: "12px" }}>
-                <button onClick={() => setStep(2)} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>← Kembali</button>
-                <div style={{ display: "flex", gap: "12px" }}>
-                  <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
-                  <button onClick={handleSubmit} disabled={isSubmitting} className="primary-button" style={{ minWidth: "180px" }}>
-                    {isSubmitting ? "Menyimpan..." : `Submit ${docTypeLabels[docType]}`}
-                  </button>
-                </div>
+              {/* Ringkasan */}
+              <div style={{ background: 'rgba(55,138,221,0.05)', border: '1px solid rgba(55,138,221,0.1)', borderRadius: '16px', padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                 <div>
+                   <div style={{ fontSize: '11px', color: '#378ADD', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Ringkasan Dokumen</div>
+                   <div style={{ fontSize: '14px', fontWeight: 600, color: '#e4e4e7' }}>{docTypeLabels[docType]} — {selectedProject?.projectName}</div>
+                   <div style={{ fontSize: '12px', color: '#71717a', marginTop: '2px' }}>Vendor: {vendorName} • {lineItems.length} items</div>
+                 </div>
+                 <div style={{ textAlign: 'right' }}>
+                   <div style={{ fontSize: '11px', color: '#71717a' }}>Total Nilai</div>
+                   <div style={{ fontSize: '24px', fontWeight: 800, color: '#e4e4e7' }}>{formatCurrencyIDR(grandTotal)}</div>
+                 </div>
               </div>
             </div>
           )}
 
         </div>
+
+        {/* Footer */}
+        <div style={{ padding: "24px 40px", background: "#111113", borderTop: "0.5px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between" }}>
+          <button onClick={() => step > 1 && setStep((step - 1) as any)} style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer', opacity: step === 1 ? 0 : 1 }}>Back</button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+             <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#71717a', padding: '0 20px', cursor: 'pointer' }}>Cancel</button>
+             <button 
+                onClick={() => {
+                  if (step === 1 && !isStep1Valid) { alert("Harap pilih project terlebih dahulu."); return; }
+                  if (step === 2 && !isStep2Valid) { alert("Harap isi nama vendor dan minimal 1 item."); return; }
+                  step < 3 ? setStep((step + 1) as any) : handleSubmit();
+                }} 
+                style={{ 
+                  background: (step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid) ? 'rgba(55,138,221,0.3)' : '#378ADD', 
+                  color: '#fff', border: 'none', borderRadius: '10px', padding: '10px 32px', fontWeight: 600, 
+                  cursor: (step === 1 && !isStep1Valid) || (step === 2 && !isStep2Valid) ? 'not-allowed' : 'pointer' 
+                }}
+              >
+                {isSubmitting ? 'Submitting...' : (step === 3 ? `Submit ${docType}` : 'Next Step')}
+             </button>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          .p-input-group label { display: block; font-size: 11px; color: #52525b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 600; }
+          .p-input { width: 100%; background: #111113; border: 0.5px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 14px; color: #e4e4e7; outline: none; }
+          .cell-input { width: 100%; background: transparent; border: none; color: #e4e4e7; outline: none; }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+        `}</style>
       </div>
     </div>
   );

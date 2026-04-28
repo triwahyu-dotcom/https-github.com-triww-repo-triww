@@ -47,9 +47,16 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     activeProjects[0]?.id ?? null
   );
+  const [projectSearch, setProjectSearch] = useState("");
 
   const docs = useMemo(() => initialData.expenseDocuments || [], [initialData.expenseDocuments]);
   const rfps = useMemo(() => initialData.rfps || [], [initialData.rfps]);
+
+  const filteredProjects = useMemo(() => {
+    if (!projectSearch) return activeProjects;
+    const q = projectSearch.toLowerCase();
+    return activeProjects.filter(p => p.projectName.toLowerCase().includes(q) || p.client.toLowerCase().includes(q));
+  }, [activeProjects, projectSearch]);
 
   const selectedProject = useMemo(() => activeProjects.find(p => p.id === selectedProjectId), [activeProjects, selectedProjectId]);
   const projectDocs = useMemo(() => docs.filter(d => d.projectId === selectedProjectId), [docs, selectedProjectId]);
@@ -72,9 +79,23 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
   const combinedItems = useMemo(() => [...projectDocs, ...projectRfps], [projectDocs, projectRfps]);
 
   const headerActions = (
-    <div className="workspace-actions">
-      <button className="secondary-button" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={() => window.print()}>
-        <Printer size={16} /> Export Report
+    <div style={{ display: 'flex', gap: '10px' }}>
+      <button 
+        style={{ 
+          background: 'transparent',
+          border: '0.5px solid rgba(255,255,255,0.15)',
+          color: '#a1a1aa',
+          borderRadius: '8px',
+          padding: '6px 14px',
+          fontSize: '12px',
+          cursor: 'pointer',
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '8px' 
+        }} 
+        onClick={() => window.print()}
+      >
+        <FileDown size={14} /> Export Report
       </button>
     </div>
   );
@@ -82,44 +103,63 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
   return (
     <WorkspaceShell
       title="Project Monitor"
-      eyebrow="PM Workspace (Read-Only)"
+      eyebrow="PM WORKSPACE (READ-ONLY)"
       actions={headerActions}
     >
-      <section className="summary-grid" style={{ gridTemplateColumns: "repeat(4, 1fr)", marginBottom: "24px", display: 'grid', gap: '16px' }}>
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
         <SummaryCard label="My Projects" value={String(activeProjects.length)} description="Active executions" icon={<FolderOpen size={18} />} />
         <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon={<FileText size={18} />} />
-        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description="Belum terbayar" icon={<Clock size={18} />} />
-        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description="Nilai terotorisasi" icon={<CheckCircle2 size={18} />} />
+        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description="Belum terbayar" icon={<Clock size={18} />} trendType="down" />
+        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description="Nilai terotorisasi" icon={<CheckCircle2 size={18} />} trendType="up" />
       </section>
 
-      <div style={{ display: "grid", gridTemplateColumns: "260px 1fr", gap: "20px", alignItems: "start" }}>
-
-        <div className="panel" style={{ padding: "16px" }}>
-          <div className="panel-kicker" style={{ marginBottom: "12px" }}>Pilih Project</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            {activeProjects.map(p => {
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "1px", background: 'rgba(255,255,255,0.08)', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+        {/* Left Panel: Project List */}
+        <div style={{ background: "#111113", padding: "12px", height: '70vh', overflowY: 'auto' }}>
+          <input 
+            type="text" 
+            placeholder="Cari project..." 
+            value={projectSearch}
+            onChange={(e) => setProjectSearch(e.target.value)}
+            style={{ 
+              width: "100%", 
+              background: "#1f1f23", 
+              border: "0.5px solid rgba(255,255,255,0.1)", 
+              borderRadius: "8px", 
+              fontSize: "12px", 
+              padding: "7px 10px", 
+              marginBottom: "10px",
+              color: '#d4d4d8',
+              outline: 'none'
+            }}
+          />
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            {filteredProjects.map(p => {
               const pDocs = docs.filter(d => d.projectId === p.id);
               const pRfps = rfps.filter(r => r.projectId === p.id);
               const hasPending = pRfps.some(r => r.status !== "paid" && r.status !== "settled");
+              const isActive = selectedProjectId === p.id;
+
               return (
                 <div
                   key={p.id}
                   onClick={() => setSelectedProjectId(p.id)}
                   style={{
-                    padding: "12px 14px",
-                    borderRadius: "10px",
+                    padding: "10px 12px",
+                    borderRadius: isActive ? "0 8px 8px 0" : "8px",
                     cursor: "pointer",
-                    border: `2px solid ${selectedProjectId === p.id ? "var(--blue)" : "var(--line)"}`,
-                    background: selectedProjectId === p.id ? "rgba(91,140,255,0.08)" : "transparent",
-                    transition: "all 0.15s",
+                    background: isActive ? "rgba(55,138,221,0.08)" : "transparent",
+                    borderLeft: isActive ? "3px solid #378ADD" : "none",
+                    transition: "all 0.2s",
                   }}
+                  className="project-card-pm"
                 >
-                  <div style={{ fontWeight: 600, fontSize: "13px", marginBottom: "4px" }}>{p.projectName}</div>
-                  <div className="mini-meta">{p.client}</div>
-                  <div style={{ display: "flex", gap: "6px", marginTop: "6px", flexWrap: "wrap" }}>
-                    {pDocs.length > 0 && <span className="chip" style={{ fontSize: "10px", padding: "2px 6px" }}>{pDocs.length} Dok</span>}
-                    {pRfps.length > 0 && <span className="chip" style={{ fontSize: "10px", padding: "2px 6px" }}>{pRfps.length} RFP</span>}
-                    {hasPending && <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#f59e0b", display: "inline-block", alignSelf: "center" }} title="Ada pending" />}
+                  <div style={{ fontSize: "11px", color: "#52525b", letterSpacing: "0.04em", textTransform: 'uppercase' }}>{p.client}</div>
+                  <div style={{ fontWeight: 500, fontSize: "13px", color: "#e4e4e7", margin: "3px 0", lineHeight: 1.4 }}>{p.projectName}</div>
+                  <div style={{ display: "flex", gap: "6px", marginTop: "6px", alignItems: 'center' }}>
+                    <span style={{ background: 'rgba(255,255,255,0.06)', color: '#71717a', borderRadius: '20px', padding: '2px 7px', fontSize: '11px' }}>{pDocs.length} Dok</span>
+                    <span style={{ background: 'rgba(255,255,255,0.06)', color: '#71717a', borderRadius: '20px', padding: '2px 7px', fontSize: '11px' }}>{pRfps.length} RFP</span>
+                    {hasPending && <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#EF9F27" }} title="Pending items" />}
                   </div>
                 </div>
               );
@@ -127,24 +167,25 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        {/* Right Panel: Project Detail */}
+        <div style={{ background: "#18181b", padding: "20px", height: '70vh', overflowY: 'auto' }}>
           {selectedProject ? (
             <>
-              <div className="panel" style={{ padding: "20px 24px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <div>
-                    <div className="panel-kicker">{selectedProject.client}</div>
-                    <h2 style={{ margin: "4px 0 8px", fontSize: "20px" }}>{selectedProject.projectName}</h2>
-                    <span className="status-pill tone-blue">{selectedProject.currentStageLabel}</span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: '24px' }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#52525b' }}>{selectedProject.client}</div>
+                  <h2 style={{ fontSize: '18px', fontWeight: 500, color: '#f4f4f5', margin: '4px 0' }}>{selectedProject.projectName}</h2>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
+                    <span className="stage-pill-premium" style={{ background: 'rgba(55,138,221,0.15)', color: '#85B7EB', fontSize: '10px' }}>{selectedProject.currentStageLabel}</span>
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div className="mini-meta">Nilai Project</div>
-                    <div style={{ fontWeight: 700, fontSize: "18px" }}>{selectedProject.projectValueLabel}</div>
-                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontSize: '12px', color: '#71717a' }}>Nilai Project</div>
+                  <div style={{ fontWeight: 500, fontSize: "16px", color: '#f4f4f5' }}>{selectedProject.projectValueLabel}</div>
                 </div>
               </div>
 
-              <div style={{ marginBottom: "16px" }}>
+              <div style={{ marginBottom: "20px" }}>
                 <FilterBar 
                   items={combinedItems} 
                   type="rfps" 
@@ -153,119 +194,78 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                 />
               </div>
 
-              <div className="panel">
-                <div className="panel-kicker">Dokumen Pengadaan</div>
-                <div className="table-shell" style={{ marginTop: "12px" }}>
-                  <div className="project-table">
-                    <div className="table-row table-head" style={{ gridTemplateColumns: "1.8fr 1.2fr 0.8fr 1fr 1.4fr" }}>
-                      <div>No. Dokumen</div>
-                      <div>Vendor</div>
-                      <div>Tipe</div>
-                      <div>Nilai</div>
-                      <div style={{ textAlign: "right" }}>Status & Aksi</div>
-                    </div>
-                    {filteredProjectDocs.length === 0 ? (
-                      <div style={{ padding: "32px", textAlign: "center", color: "var(--muted-soft)", fontSize: "13px" }}>
-                        Tidak ada dokumen yang sesuai filter.
-                      </div>
-                    ) : filteredProjectDocs.map(doc => {
-                      const s = statusLabel[doc.status] ?? { text: doc.status, tone: "tone-amber" };
-                      return (
-                        <div key={doc.id} className="table-row" style={{ gridTemplateColumns: "1.8fr 1.2fr 0.8fr 1fr 1.4fr", alignItems: "center" }}>
-                          <div>
-                            <div style={{ fontFamily: "monospace", fontSize: "11px", fontWeight: 600 }}>{doc.id}</div>
-                            <div className="mini-meta">{formatDateFullID(doc.issueDate)}</div>
-                          </div>
-                          <div style={{ fontSize: "13px" }}>{doc.vendorName}</div>
-                          <div><span className="status-pill" style={{ background: "rgba(91,140,255,0.15)", color: "var(--blue)", fontSize: "10px" }}>{docTypeLabel[doc.documentType]}</span></div>
-                          <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(doc.amount)}</div>
-                          <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
-                            <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px", display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              {s.icon && s.icon} {s.text}
-                            </span>
-                            {doc.rejectionReason && (
-                                <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                  <AlertCircle size={10} /> {doc.rejectionReason}
-                                </div>
-                            )}
-                            {(doc.status === "approved" || doc.status === "paid") && (
-                              <button
-                                className="secondary-button"
-                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: 'flex', alignItems: 'center', gap: '6px' }}
-                                onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")}
-                              >
-                                <Printer size={10} /> View / Print
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+              <section style={{ marginBottom: '32px' }}>
+                <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 500 }}>DOKUMEN PENGADAAN</div>
+                <div style={{ background: '#111113', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 100px 120px 140px', padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>NO. DOKUMEN</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>VENDOR</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>TIPE</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>NILAI</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em', textAlign: 'right' }}>STATUS</div>
                   </div>
+                  {filteredProjectDocs.length === 0 ? (
+                    <div style={{ padding: "40px", textAlign: "center", color: "#3f3f46", fontSize: "13px" }}>
+                      Tidak ada dokumen yang sesuai filter
+                    </div>
+                  ) : filteredProjectDocs.map(doc => (
+                    <div key={doc.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 100px 120px 140px', padding: '12px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 500, color: '#e4e4e7' }}>{doc.id}</div>
+                      <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{doc.vendorName}</div>
+                      <div><span style={{ background: 'rgba(55,138,221,0.1)', color: '#85B7EB', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>{docTypeLabel[doc.documentType]}</span></div>
+                      <div style={{ fontSize: '12px', color: '#e4e4e7' }}>{formatCurrencyIDR(doc.amount)}</div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ 
+                          background: doc.status === 'approved' || doc.status === 'paid' ? 'rgba(151,196,89,0.15)' : 'rgba(239,159,39,0.15)',
+                          color: doc.status === 'approved' || doc.status === 'paid' ? '#97C459' : '#EF9F27',
+                          fontSize: '10px', padding: '2px 8px', borderRadius: '20px'
+                        }}>
+                          {doc.status.replace(/_/g, " ").toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </section>
 
-              <div className="panel">
-                <div className="panel-kicker">Request For Payment (RFP)</div>
-                <div className="table-shell" style={{ marginTop: "12px" }}>
-                  <div className="project-table">
-                    <div className="table-row table-head" style={{ gridTemplateColumns: "1.2fr 1.5fr 0.8fr 1fr 1.4fr" }}>
-                      <div>RFP ID</div>
-                      <div>Payee</div>
-                      <div>Metode</div>
-                      <div>Nominal</div>
-                      <div style={{ textAlign: "right" }}>Status & Aksi</div>
-                    </div>
-                    {filteredProjectRfps.length === 0 ? (
-                      <div style={{ padding: "32px", textAlign: "center", color: "var(--muted-soft)", fontSize: "13px" }}>
-                        Tidak ada RFP yang sesuai filter.
-                      </div>
-                    ) : filteredProjectRfps.map(rfp => {
-                      const s = statusLabel[rfp.status] ?? { text: rfp.status.replace(/_/g, " ").toUpperCase(), tone: "tone-amber" };
-                      return (
-                        <div key={rfp.id} className="table-row" style={{ gridTemplateColumns: "1.2fr 1.5fr 0.8fr 1fr 1.4fr", alignItems: "center" }}>
-                          <div style={{ fontFamily: "monospace", fontSize: "11px" }}>#{rfp.id.substring(0, 10)}</div>
-                          <div>{rfp.payeeName}</div>
-                          <div style={{ fontSize: "12px" }}>{rfp.paymentType}</div>
-                          <div style={{ fontWeight: 600 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
-                          <div style={{ textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end", alignItems: "center" }}>
-                            <span className={`status-pill ${s.tone}`} style={{ fontSize: "10px", display: 'flex', alignItems: 'center', gap: '4px' }}>
-                              {s.icon && s.icon} {s.text}
-                            </span>
-                            {rfp.rejectionReason && (
-                              <div style={{ color: "#ef4444", fontSize: "10px", marginTop: "4px", fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                <AlertCircle size={10} /> {rfp.rejectionReason}
-                              </div>
-                            )}
-                            {rfp.paymentProofUrl && (
-                              <button 
-                                className="secondary-button" 
-                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", borderColor: "var(--green)", color: "var(--green)", display: 'flex', alignItems: 'center', gap: '6px' }}
-                                onClick={() => setViewProofUrl(rfp.paymentProofUrl!)}
-                              >
-                                <Eye size={10} /> Bukti
-                              </button>
-                            )}
-                            {(rfp.status === "approved" || rfp.status === "paid") && (
-                              <button
-                                className="secondary-button"
-                                style={{ padding: "3px 10px", fontSize: "11px", height: "auto", minHeight: "auto", display: 'flex', alignItems: 'center', gap: '6px' }}
-                                onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")}
-                              >
-                                <FileDown size={10} /> Download RFP
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
+              <section>
+                <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 500 }}>REQUEST FOR PAYMENT (RFP)</div>
+                <div style={{ background: '#111113', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 100px 120px 140px', padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>RFP ID</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>PAYEE</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>METODE</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>NOMINAL</div>
+                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em', textAlign: 'right' }}>STATUS</div>
                   </div>
+                  {filteredProjectRfps.length === 0 ? (
+                    <div style={{ padding: "40px", textAlign: "center", color: "#3f3f46", fontSize: "13px" }}>
+                      Tidak ada RFP yang sesuai filter
+                    </div>
+                  ) : filteredProjectRfps.map(rfp => (
+                    <div key={rfp.id} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 100px 120px 140px', padding: '12px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
+                      <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#e4e4e7' }}>#{rfp.id.substring(0, 8)}</div>
+                      <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{rfp.payeeName}</div>
+                      <div style={{ fontSize: '11px', color: '#71717a' }}>{rfp.paymentType}</div>
+                      <div style={{ fontSize: '12px', color: '#e4e4e7', fontWeight: 500 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ 
+                          background: rfp.status === 'paid' || rfp.status === 'settled' ? 'rgba(15,110,86,0.15)' : rfp.status === 'approved' ? 'rgba(55,138,221,0.15)' : 'rgba(239,159,39,0.15)',
+                          color: rfp.status === 'paid' || rfp.status === 'settled' ? '#5DCAA5' : rfp.status === 'approved' ? '#85B7EB' : '#EF9F27',
+                          fontSize: '10px', padding: '2px 8px', borderRadius: '20px'
+                        }}>
+                          {rfp.status.replace(/_/g, " ").toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              </section>
             </>
           ) : (
-            <div className="panel" style={{ padding: "60px", textAlign: "center", color: "var(--muted-soft)" }}>
-              Pilih project di sebelah kiri untuk melihat status dokumen.
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#3f3f46' }}>
+              <FolderOpen size={48} style={{ marginBottom: '16px', opacity: 0.2 }} />
+              <div style={{ fontSize: '14px' }}>Pilih project untuk melihat detail</div>
             </div>
           )}
         </div>

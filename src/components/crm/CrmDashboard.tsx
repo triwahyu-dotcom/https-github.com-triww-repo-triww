@@ -1,369 +1,835 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { 
   Users, 
-  CheckCircle2, 
-  LineChart, 
+  CheckCircle, 
+  Diamond, 
+  TrendingUp, 
   Flame, 
   Search, 
   Plus, 
-  MapPin, 
-  Globe, 
-  AlertCircle,
-  Coins,
-  ChevronRight,
-  TrendingUp,
-  Activity,
-  Heart,
-  Diamond
+  X, 
+  Edit, 
+  Phone, 
+  Mail, 
+  ArrowUp, 
+  ArrowDown
 } from "lucide-react";
 import Link from "next/link";
-import { CRMDashboardData, CRMClient } from "@/lib/project/types";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
-import { SummaryCard } from "@/components/ui/summary-card";
+
+// --- Types ---
+interface ClientContact {
+  name: string;
+  role: string;
+  email?: string;
+  phone?: string;
+  initials: string;
+  color: string;
+}
+
+interface ClientProject {
+  id: string;
+  name: string;
+  stage: string;
+  stageColor: string;
+  result?: "Won" | "Lost" | "Ongoing";
+}
+
+interface Client {
+  id: string;
+  name: string;
+  category: "Brand" | "Government" | "Co. Partner" | "NGO" | "Media";
+  contacts: ClientContact[];
+  projects: number;
+  recentProjects: ClientProject[];
+  status: "Active" | "Lead" | "Inactive" | "Lost";
+  value: number;
+  lastActivity: string;
+  industry?: string;
+  website?: string;
+}
+
+// --- Sample Data ---
+const CLIENT_DATA: Client[] = [
+  { id: "1", name: "ACCESS IND", category: "Co. Partner", contacts: [{ name: "Andi Pratama", role: "Manager", initials: "AP", color: "#378ADD" }], projects: 1, status: "Active", value: 15000000, lastActivity: "2 hari lalu", recentProjects: [{ id: "p1", name: "Indo Expo 2026", stage: "Execution", stageColor: "#378ADD" }] },
+  { id: "2", name: "Bali Super Fast", category: "Co. Partner", contacts: [{ name: "Budi Santoso", role: "Owner", initials: "BS", color: "#5DCAA5" }], projects: 0, status: "Active", value: 0, lastActivity: "1 minggu lalu", recentProjects: [] },
+  { id: "3", name: "BTV", category: "Brand", contacts: [], projects: 1, status: "Lead", value: 18425763015, lastActivity: "Hari ini", recentProjects: [{ id: "p2", name: "BTV Anniversary", stage: "Proposal", stageColor: "#EF9F27" }] },
+  { id: "4", name: "GAPEMPI", category: "Brand", contacts: [], projects: 1, status: "Active", value: 0, lastActivity: "3 hari lalu", recentProjects: [] },
+  { id: "5", name: "HERBAL SALAM", category: "Brand", contacts: [{ name: "Siti Aminah", role: "Marketing", initials: "SA", color: "#AFA9EC" }], projects: 1, status: "Active", value: 750000000, lastActivity: "5 hari lalu", recentProjects: [{ id: "p3", name: "Brand Activation", stage: "Completed", stageColor: "#97C459", result: "Won" }] },
+  { id: "6", name: "Hutama Karya PT", category: "Government", contacts: [], projects: 1, status: "Active", value: 750000000, lastActivity: "1 minggu lalu", recentProjects: [] },
+  { id: "7", name: "International Legends Funmatch", category: "Brand", contacts: [], projects: 1, status: "Active", value: 9433800000, lastActivity: "Hari ini", recentProjects: [{ id: "p4", name: "Legends Match", stage: "Planning", stageColor: "#378ADD" }] },
+  { id: "8", name: "KAEL", category: "Brand", contacts: [], projects: 1, status: "Active", value: 0, lastActivity: "2 minggu lalu", recentProjects: [] },
+  { id: "9", name: "MIRELA", category: "Brand", contacts: [], projects: 1, status: "Active", value: 90900000, lastActivity: "4 hari lalu", recentProjects: [] },
+  { id: "10", name: "OCBC", category: "Brand", contacts: [], projects: 1, status: "Active", value: 0, lastActivity: "3 hari lalu", recentProjects: [] },
+  { id: "11", name: "QAPPT", category: "Brand", contacts: [], projects: 1, status: "Lead", value: 0, lastActivity: "Hari ini", recentProjects: [] },
+  { id: "12", name: "Raja Rogawa", category: "Brand", contacts: [], projects: 1, status: "Active", value: 2089071800, lastActivity: "1 minggu lalu", recentProjects: [] },
+  { id: "13", name: "WE DO", category: "Co. Partner", contacts: [], projects: 3, status: "Active", value: 7500000000, lastActivity: "Hari ini", recentProjects: [] },
+];
 
 interface Props {
-  initialData: CRMDashboardData;
+  initialData?: any;
 }
 
 export function CRMDashboard({ initialData }: Props) {
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterCategory, setFilterCategory] = useState<string>("all");
-  const [selectedClient, setSelectedClient] = useState<CRMClient | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<"add" | "edit">("add");
-  const [formData, setFormData] = useState<Partial<CRMClient>>({});
-  const [isSaving, setIsSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("All");
+  const [sortKey, setSortKey] = useState<keyof Client>("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [isAddingClient, setIsAddingClient] = useState(false);
+  const [isEditingClient, setIsEditingClient] = useState(false);
 
-  const handleSaveClient = async () => {
-    if (!formData.name) {
-      setError("Please enter a company name.");
-      return;
-    }
+  // Form States (Shared for Add/Edit)
+  const [formName, setFormName] = useState("");
+  const [formCategory, setFormCategory] = useState<Client["category"]>("Brand");
+  const [formIndustry, setFormIndustry] = useState("");
+  const [formWebsite, setFormWebsite] = useState("");
+  const [formContactName, setFormContactName] = useState("");
+  const [formContactPhone, setFormContactPhone] = useState("");
+  const [formRemark, setFormRemark] = useState("");
 
-    const endpoint = "/api/clients";
-    const method = modalMode === "add" ? "POST" : "PUT";
+  // Merge store data with premium seed data
+  const clients = useMemo(() => {
+    const rawClients = initialData?.clients || [];
     
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
+    return rawClients.map((rc: any) => {
+      // Find premium seed for extra detail if it exists
+      const seed = CLIENT_DATA.find(s => s.name.toLowerCase() === rc.name.toLowerCase());
       
-      if (res.ok && data.success) {
-        setIsModalOpen(false);
-        window.location.reload(); 
-      } else {
-        setError(data.error || "Failed to save client. Check your connection.");
+      const mappedStatus = rc.status === "active" ? "Active" : (rc.status === "lead" ? "Lead" : "Inactive");
+      
+      // Category is the client type (Brand, Government, etc.)
+      // Relation is the PIC name or Lead Source in the JUARA tracker CSV
+      const finalCategory = rc.category || "Brand";
+      let leadSource = rc.relation || "";
+      
+      // Sanitize leadSource: if it's "Brand" or "Agency", it's likely a mis-entry in the CSV
+      if (["Brand", "Agency", "End Client"].includes(leadSource)) {
+        leadSource = "";
       }
-    } catch (err) {
-      console.error("Save error", err);
-      setError("Server connection error. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
+      
+      // Account Executive (AE) is the person appointed to handle the project (PIC in CSV)
+      // Extract from the first project's owners if available
+      const accountExecutive = rc.projects?.[0]?.owners?.join(", ") || "";
 
-  const openAddModal = () => {
-    setModalMode("add");
-    setFormData({ status: "lead", category: "BRAND", contacts: [], projects: [] });
-    setError(null);
-    setIsModalOpen(true);
-  };
+      return {
+        id: rc.id,
+        name: rc.name,
+        category: finalCategory as any,
+        leadSource,
+        accountExecutive,
+        contacts: rc.contacts?.length > 0 
+          ? rc.contacts.map((ct: any, idx: number) => ({
+              name: ct.name,
+              role: ct.role || (idx === 0 ? "Main Contact" : "Contact"),
+              phone: ct.phone || "",
+              initials: ct.name.split(" ").map((n: string) => n[0]).join("").substring(0, 2).toUpperCase(),
+              color: seed?.contacts[idx]?.color || `hsl(${(ct.name.length * 40) % 360}, 60%, 60%)`
+            }))
+          : (seed?.contacts || []),
+        projects: rc.projectCount || seed?.projects || 0,
+        recentProjects: rc.projects?.slice(0, 2).map((p: any) => ({
+          id: p.id,
+          name: p.projectName,
+          stage: p.currentStageLabel,
+          stageColor: "#378ADD"
+        })) || (seed?.recentProjects || []),
+        status: mappedStatus as any,
+        value: rc.totalProjectValue || seed?.value || 0,
+        lastActivity: seed?.lastActivity || (rc.activeProjectCount > 0 ? "Active Project" : "Updated recently"),
+        industry: rc.industry || seed?.industry || "Enterprise",
+        website: rc.website || seed?.website || ""
+      } as Client;
+    });
+  }, [initialData]);
 
-  const openEditModal = (client: CRMClient) => {
-    setModalMode("edit");
-    setFormData(client);
-    setIsModalOpen(true);
-  };
+  const selectedClient = useMemo(() => clients.find(c => c.id === selectedClientId) || null, [selectedClientId, clients]);
 
   const filteredClients = useMemo(() => {
-    const unique = Array.from(new Map(initialData.clients.map(c => [c.id, c])).values());
-    return unique.filter((client) => {
-      const matchesSearch =
-        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        client.contacts.some((c) => c.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesStatus = filterStatus === "all" || client.status === filterStatus;
-      const matchesCategory = filterCategory === "all" || (client.category || "").toUpperCase() === filterCategory;
+    return clients.filter(c => {
+      const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesStatus = statusFilter === "all" || c.status.toLowerCase() === statusFilter.toLowerCase();
+      const matchesCategory = categoryFilter === "All" || c.category === categoryFilter;
       return matchesSearch && matchesStatus && matchesCategory;
-    }).sort((a, b) => a.name.localeCompare(b.name));
-  }, [initialData.clients, searchQuery, filterStatus, filterCategory]);
+    }).sort((a, b) => {
+      const valA = a[sortKey];
+      const valB = b[sortKey];
+      if (typeof valA === "string" && typeof valB === "string") {
+        return sortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+      }
+      if (typeof valA === "number" && typeof valB === "number") {
+        return sortOrder === "asc" ? valA - valB : valB - valA;
+      }
+      return 0;
+    });
+  }, [clients, searchQuery, statusFilter, categoryFilter, sortKey, sortOrder]);
+
+  const formatCurrency = (val: number) => {
+    return val.toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+  };
+
+  const handleAddClient = async () => {
+    if (!formName) return;
+
+    const newClientData = {
+      name: formName,
+      category: formCategory,
+      relation: formRemark, // We use formRemark as PIC name for now, or add a new field
+      industry: formIndustry,
+      website: formWebsite,
+      status: "lead",
+      remark: "",
+      contacts: formContactName ? [
+        { name: formContactName, role: "Main Contact", phone: formContactPhone }
+      ] : []
+    };
+
+    try {
+      const response = await fetch('/api/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newClientData)
+      });
+
+      if (response.ok) {
+        setIsAddingClient(false);
+        resetForm();
+        alert("Client baru berhasil ditambahkan!");
+        window.location.reload();
+      } else {
+        alert("Gagal menambahkan client baru.");
+      }
+    } catch (err) {
+      console.error("Error adding client:", err);
+      alert("Terjadi kesalahan koneksi.");
+    }
+  };
+
+  const handleUpdateClient = async () => {
+    if (!selectedClientId || !formName) return;
+
+    const updatedData = {
+      id: selectedClientId,
+      name: formName,
+      category: formCategory,
+      relation: formRemark || selectedClient?.leadSource || "", // Use remark field as PIC for simplicity in this UI
+      industry: formIndustry,
+      website: formWebsite,
+      remark: "", // Clear remark as it was used for PIC
+      contacts: formContactName ? [
+        { name: formContactName, role: "Main Contact", phone: formContactPhone }
+      ] : (selectedClient?.contacts || [])
+    };
+
+    try {
+      const response = await fetch('/api/clients', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedData)
+      });
+
+      if (response.ok) {
+        setIsEditingClient(false);
+        alert("Data klien berhasil diperbarui!");
+        window.location.reload();
+      } else {
+        alert("Gagal memperbarui data klien.");
+      }
+    } catch (err) {
+      console.error("Error updating client:", err);
+      alert("Terjadi kesalahan koneksi.");
+    }
+  };
+
+  const resetForm = () => {
+    setFormName("");
+    setFormCategory("Brand");
+    setFormIndustry("");
+    setFormWebsite("");
+    setFormContactName("");
+    setFormContactPhone("");
+    setFormRemark("");
+  };
+
+  const openEditModal = () => {
+    if (!selectedClient) return;
+    setFormName(selectedClient.name);
+    setFormCategory(selectedClient.category);
+    setFormIndustry(selectedClient.industry || "");
+    setFormWebsite(selectedClient.website || "");
+    setFormContactName(selectedClient.contacts[0]?.name || "");
+    setFormContactPhone(selectedClient.contacts[0]?.phone || "");
+    setFormRemark("");
+    setIsEditingClient(true);
+  };
+
+  const getCategoryStyles = (cat: string) => {
+    switch (cat) {
+      case "Brand": return { bg: "rgba(83,74,183,0.15)", color: "#AFA9EC" };
+      case "Government": return { bg: "rgba(15,110,86,0.15)", color: "#5DCAA5" };
+      case "Co. Partner": return { bg: "rgba(55,138,221,0.15)", color: "#85B7EB" };
+      case "NGO": return { bg: "rgba(180,115,23,0.15)", color: "#EF9F27" };
+      case "Media": return { bg: "rgba(212,83,126,0.15)", color: "#ED93B1" };
+      default: return { bg: "rgba(255,255,255,0.05)", color: "#71717a" };
+    }
+  };
+
+  const getStatusStyles = (status: string) => {
+    switch (status.toUpperCase()) {
+      case "ACTIVE": return { bg: "rgba(99,153,34,0.15)", color: "#97C459" };
+      case "LEAD": return { bg: "rgba(239,159,39,0.15)", color: "#EF9F27" };
+      case "INACTIVE": return { bg: "rgba(255,255,255,0.06)", color: "#71717a" };
+      case "LOST": return { bg: "rgba(226,75,74,0.15)", color: "#F09595" };
+      default: return { bg: "rgba(255,255,255,0.05)", color: "#71717a" };
+    }
+  };
 
   const headerActions = (
-    <>
-      <div className="workspace-actions" style={{ marginRight: '16px' }}>
-        <span className="mini-meta">{filteredClients.length} Clients found</span>
-      </div>
-      <button className="primary-button" style={{ borderRadius: '8px', padding: '0 16px', height: '36px', display: 'flex', alignItems: 'center', gap: '8px' }} onClick={openAddModal}>
-        <Plus size={16} /> Add New Lead
+    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+      <span style={{ fontSize: '12px', color: '#71717a' }}>{filteredClients.length} Clients found</span>
+      <button className="primary-button-premium" style={{ background: '#378ADD', color: '#fff', borderRadius: '8px', padding: '8px 16px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }} onClick={() => setIsAddingClient(true)}>
+        + Add New Client
       </button>
-    </>
+    </div>
   );
 
   return (
     <WorkspaceShell
       title="Manage your client ecosystem"
-      eyebrow="Customer Relationship Management"
+      eyebrow="CUSTOMER RELATIONSHIP MANAGEMENT"
       actions={headerActions}
     >
-      <section className="summary-deck" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-        <SummaryCard 
-          label="Total Accounts" 
-          value={String(initialData.summary.totalClients + initialData.summary.totalLeads)} 
-          description="Active and leads combined"
-          icon={<Users size={18} />} 
-        />
-        <SummaryCard 
-          label="Active Clients" 
-          value={String(initialData.summary.activeClients)} 
-          description="Working on projects"
-          icon={<CheckCircle2 size={18} />} 
-        />
-        <SummaryCard 
-          label="Relationship Value" 
-          value={initialData.summary.totalPortfolioValueLabel} 
-          description="Lifetime project value"
-          icon={<Diamond size={18} />} 
-        />
-        <SummaryCard 
-          label="Potential Leads" 
-          value={String(initialData.summary.totalLeads)} 
-          description="In pipeline stage"
-          icon={<TrendingUp size={18} />} 
-        />
-        <SummaryCard 
-          label="Engagement" 
-          value="High" 
-          description="Based on activity"
-          icon={<Flame size={18} />} 
-        />
-      </section>
-
-      <div className="toolbar-panel">
-        <div className="control-bar">
-          <input
-            type="text"
-            placeholder="Search clients or contacts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-            <option value="all">All Status</option>
-            <option value="active">Active Clients</option>
-            <option value="lead">Pipeline Leads</option>
-          </select>
-          <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)}>
-            <option value="all">All Categories</option>
-            <option value="BRAND">Brand</option>
-            <option value="GOVERNMENT">Government</option>
-            <option value="CO. PARTNER">Co. Partner</option>
-            <option value="EVENT ORGANIZER">Event Organizer</option>
-          </select>
-          <button className="primary-button" style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={openAddModal}><Plus size={16} /> Add New Lead</button>
-        </div>
-      </div>
-
-      <div className="workspace-grid">
-        <div className="panel list-panel">
-          <div className="panel-kicker">Client Directory</div>
-          <div className="table-shell">
-            <div className="project-table">
-              <div className="table-row table-head">
-                <div style={{ gridColumn: "span 1" }}>Client Name</div>
-                <div>Category</div>
-                <div>Contacts</div>
-                <div>Projects</div>
-                <div>Status</div>
-                <div>Lifetime Value</div>
-                <div>Health</div>
+      <div className="crm-container" style={{ padding: '0px' }}>
+        
+        {/* Stat Cards Row */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '24px' }}>
+          {[
+            { label: "Total Accounts", value: clients.length.toString(), sub: "Active and prospects combined", trend: "Real-time", trendType: 'neutral', icon: <Users size={16} /> },
+            { label: "Active Clients", value: initialData.summary.activeClients.toString(), sub: "Working on projects", trend: "Real-time", trendType: 'neutral', icon: <CheckCircle size={16} /> },
+            { label: "Relationship Value", value: initialData.summary.totalPortfolioValueLabel, sub: "Lifetime project value", trend: "Real-time", trendType: 'neutral', icon: <Diamond size={16} />, valueSize: '16px' },
+            { label: "Potential Clients", value: initialData.summary.totalLeads.toString(), sub: "In pipeline stage", trend: "Real-time", trendType: 'neutral', icon: <TrendingUp size={16} /> },
+            { 
+              label: "Engagement", 
+              value: "High", 
+              sub: "Based on activity", 
+              trend: "↑ dari bulan lalu", 
+              trendType: 'up', 
+              icon: <Flame size={16} />,
+              customContent: (
+                <div style={{ display: 'flex', gap: '3px', marginTop: '12px' }}>
+                  <div style={{ height: '4px', width: '20px', background: '#97C459', borderRadius: '2px' }} />
+                  <div style={{ height: '4px', width: '20px', background: '#EF9F27', borderRadius: '2px' }} />
+                  <div style={{ height: '4px', width: '20px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }} />
+                </div>
+              )
+            },
+          ].map((s, idx) => (
+            <div key={idx} style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontSize: '12px', color: '#71717a' }}>{s.label}</span>
+                <div style={{ color: '#52525b' }}>{s.icon}</div>
               </div>
-              {filteredClients.map((client) => (
-                <button
-                  key={client.id}
-                  className={`table-row ${selectedClient?.id === client.id ? "active-table-row" : ""}`}
-                  onClick={() => setSelectedClient(client)}
-                  style={{ background: "none", borderLeft: "none", borderRight: "none", width: "100%", padding: "13px 14px", textAlign: "left" }}
-                >
-                  <div style={{ fontWeight: 600 }}>{client.name}</div>
-                  <div className="mini-meta">{client.category || client.type?.toUpperCase()}</div>
-                  <div className="mini-meta">{client.contacts.length} persons</div>
-                  <div className="mini-meta">{client.projectCount} total</div>
-                  <div>
-                    <span className={`status-pill ${client.status === "active" ? "tone-green" : "tone-amber"}`}>
-                      {client.status.toUpperCase()}
-                    </span>
-                  </div>
-                  <div style={{ fontWeight: 600, fontSize: "0.85rem" }}>{client.totalProjectValueLabel}</div>
-                  <div>
-                    <span className={`status-pill tone-${client.health === "on_track" ? "green" : client.health === "watch" ? "amber" : "red"}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }}>
-                      <Activity size={10} />
-                    </span>
-                  </div>
-                </button>
-              ))}
+              <div style={{ fontSize: s.valueSize || '24px', fontWeight: 500, color: '#f4f4f5' }}>{s.value}</div>
+              <div style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>{s.sub}</div>
+              {s.customContent}
+              <div style={{ marginTop: '12px' }}>
+                <span style={{ 
+                  fontSize: '11px', 
+                  padding: '2px 8px', 
+                  borderRadius: '20px',
+                  background: s.trendType === 'up' ? 'rgba(99,153,34,0.1)' : (s.trendType === 'down' ? 'rgba(226,75,74,0.1)' : 'transparent'),
+                  color: s.trendType === 'up' ? '#97C459' : (s.trendType === 'down' ? '#F09595' : '#71717a')
+                }}>
+                  {s.trend}
+                </span>
+              </div>
             </div>
+          ))}
+        </div>
+
+        {/* Search + Filter Toolbar */}
+        <div style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ position: 'relative', flex: 1 }}>
+              <Search size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: '#52525b' }} />
+              <input 
+                type="text" 
+                placeholder="Search clients or contacts..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px 8px 36px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none' }}
+              />
+            </div>
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ width: '160px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0 12px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none', appearance: 'none' }}
+            >
+              <option value="all">All Status</option>
+              <option value="Active">Active</option>
+              <option value="Lead">Lead</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Lost">Lost</option>
+            </select>
+            <select 
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              style={{ width: '180px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0 12px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none', appearance: 'none' }}
+            >
+              <option value="All">All Categories</option>
+              <option value="Brand">Brand</option>
+              <option value="Government">Government</option>
+              <option value="Co. Partner">Co. Partner</option>
+              <option value="NGO">NGO</option>
+              <option value="Media">Media</option>
+            </select>
+            <button className="primary-button-premium" style={{ background: '#378ADD', color: '#fff', borderRadius: '8px', padding: '8px 16px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer', height: '36px' }} onClick={() => setIsAddingClient(true)}>
+              + Add New Client
+            </button>
+          </div>
+
+          {/* Category Chips */}
+          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
+            {["All", "Brand", "Government", "Co. Partner", "NGO", "Media"].map(chip => (
+              <button
+                key={chip}
+                onClick={() => setCategoryFilter(chip)}
+                style={{
+                  padding: '4px 12px',
+                  fontSize: '12px',
+                  borderRadius: '20px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  background: categoryFilter === chip ? 'rgba(55,138,221,0.12)' : 'rgba(255,255,255,0.05)',
+                  color: categoryFilter === chip ? '#85B7EB' : '#71717a',
+                  border: categoryFilter === chip ? '0.5px solid rgba(55,138,221,0.3)' : '0.5px solid transparent'
+                }}
+              >
+                {chip}
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="panel detail-panel" style={{ position: "sticky", top: "20px" }}>
-          {selectedClient ? (
-            <>
-              <div className="detail-head">
-                <div>
-                  <div className="eyebrow" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                    <span className="status-pill tone-slate" style={{ fontSize: "0.6rem" }}>{selectedClient.category?.toUpperCase() || selectedClient.type?.toUpperCase()}</span>
-                    {selectedClient.industry && <span>• {selectedClient.industry}</span>}
+        {/* Content Split */}
+        <div style={{ display: 'flex', gap: '0px', position: 'relative' }}>
+          
+          {/* Main Directory Table */}
+          <div style={{ 
+            flex: 1, 
+            width: selectedClientId ? 'calc(100% - 320px)' : '100%', 
+            transition: 'width 0.3s ease',
+            paddingRight: selectedClientId ? '24px' : '0'
+          }}>
+            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '12px', fontWeight: 600 }}>CLIENT DIRECTORY</div>
+            
+            <div style={{ background: '#111113', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 140px 130px 100px 80px 100px 140px', 
+                padding: '10px 0', 
+                borderBottom: '0.5px solid rgba(255,255,255,0.06)',
+                background: '#111113'
+              }}>
+                {[
+                  { label: "CLIENT NAME", key: "name" },
+                  { label: "PIC", key: "leadSource" },
+                  { label: "CATEGORY", key: "category" },
+                  { label: "CONTACTS", key: "contacts" },
+                  { label: "PROJECTS", key: "projects" },
+                  { label: "STATUS", key: "status" },
+                  { label: "LIFETIME VALUE", key: "value", align: 'right' }
+                ].map(h => (
+                  <div 
+                    key={h.label} 
+                    onClick={() => {
+                      if (sortKey === h.key) setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+                      else { setSortKey(h.key as any); setSortOrder("asc"); }
+                    }}
+                    style={{ 
+                      fontSize: '11px', 
+                      color: sortKey === h.key ? '#378ADD' : '#52525b', 
+                      letterSpacing: '0.05em', 
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      padding: '0 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      justifyContent: h.align === 'right' ? 'flex-end' : 'flex-start'
+                    }}
+                  >
+                    {h.label} {sortKey === h.key && (sortOrder === "asc" ? <ArrowUp size={10} /> : <ArrowDown size={10} />)}
                   </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
-                    <h2>{selectedClient.name}</h2>
-                    <button className="primary-button" style={{ scale: "0.8", background: "none", color: "var(--accent)" }} onClick={() => openEditModal(selectedClient)}>Edit Profile</button>
-                  </div>
-                  {selectedClient.website && (
-                    <a href={selectedClient.website} target="_blank" className="mini-stage" style={{ marginTop: "4px", display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Globe size={12} /> {selectedClient.website.replace("https://", "")}
-                    </a>
-                  )}
-                </div>
-                <span className={`status-pill tone-${selectedClient.status === "active" ? "green" : "amber"}`}>
-                  {selectedClient.status?.toUpperCase() || "LEAD"}
-                </span>
+                ))}
               </div>
 
-              {selectedClient.address && (
-                <div style={{ marginTop: "12px", fontSize: "0.8rem", color: "var(--muted-soft)", display: "flex", gap: "8px", alignItems: 'flex-start' }}>
-                  <MapPin size={14} style={{ flexShrink: 0, marginTop: '2px' }} /> <span>{selectedClient.address}</span>
-                </div>
-              )}
-
-              <div className="detail-summary" style={{ gridTemplateColumns: "repeat(2, 1fr)" }}>
-                <article>
-                  <span>Project Value</span>
-                  <strong>{selectedClient.totalProjectValueLabel}</strong>
-                </article>
-                <article>
-                  <span>Active Projects</span>
-                  <strong>{selectedClient.activeProjectCount}</strong>
-                </article>
-              </div>
-
-              <div className="detail-stack" style={{ marginTop: "20px", display: "grid", gap: "16px" }}>
-                <section>
-                  <div className="panel-kicker">Key Contacts</div>
-                  <div className="task-stack">
-                    {selectedClient.contacts.map((contact, i) => (
-                      <div key={i} className="activity-card">
-                        <strong>{contact.name}</strong>
-                        <p>{contact.projects.length} participation(s)</p>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                {filteredClients.map(client => {
+                  const catStyles = getCategoryStyles(client.category);
+                  const statusStyles = getStatusStyles(client.status);
+                  const isSelected = selectedClientId === client.id;
+                  
+                  return (
+                    <div 
+                      key={client.id}
+                      onClick={() => setSelectedClientId(client.id)}
+                      className={`client-row-premium ${isSelected ? 'active' : ''}`}
+                      style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '1fr 140px 130px 100px 80px 100px 140px', 
+                        padding: '12px 0', 
+                        borderBottom: '0.5px solid rgba(255,255,255,0.05)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        borderLeft: isSelected ? '3px solid #378ADD' : '3px solid transparent',
+                        background: isSelected ? 'rgba(255,255,255,0.02)' : 'transparent'
+                      }}
+                    >
+                      <div style={{ padding: '0 12px' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{client.name}</div>
+                        <div style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>Account: {client.id.substring(0,6).toUpperCase()}</div>
                       </div>
-                    ))}
-                  </div>
-                </section>
-
-                <section>
-                  <div className="panel-kicker">Recent Projects</div>
-                  <div className="project-list">
-                    {selectedClient.projects.slice(0, 3).map((p) => (
-                      <div key={p.id} className="document-card" style={{ padding: "12px" }}>
-                        <div style={{ fontSize: "0.75rem", color: "var(--muted-soft)" }}>{p.numberLabel}</div>
-                        <div style={{ fontWeight: 600, fontSize: "0.9rem" }}>{p.projectName}</div>
-                        <div className="mini-stage">{p.currentStageLabel}</div>
+                      <div style={{ padding: '0 12px' }}>
+                        <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{client.leadSource || "–"}</div>
                       </div>
-                    ))}
-                  </div>
-                </section>
-                
-                <Link href="/projects" className="primary-button" style={{ width: "100%", marginTop: "10px" }}>
-                  View All Projects
-                </Link>
+                      <div style={{ padding: '0 12px' }}>
+                        <span style={{ background: catStyles.bg, color: catStyles.color, borderRadius: '20px', padding: '2px 8px', fontSize: '11px', fontWeight: 500 }}>
+                          {client.category}
+                        </span>
+                      </div>
+                      <div style={{ padding: '0 12px' }}>
+                        {client.contacts.length === 0 ? (
+                          <span style={{ color: '#3f3f46' }}>–</span>
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <div style={{ display: 'flex' }}>
+                              {client.contacts.slice(0, 3).map((contact, i) => (
+                                <div 
+                                  key={i} 
+                                  style={{ 
+                                    width: '20px', 
+                                    height: '20px', 
+                                    borderRadius: '50%', 
+                                    background: contact.color, 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center', 
+                                    fontSize: '9px', 
+                                    fontWeight: 'bold', 
+                                    color: 'white',
+                                    border: '1.5px solid #111113',
+                                    marginLeft: i === 0 ? 0 : '-6px'
+                                  }}
+                                >
+                                  {contact.initials}
+                                </div>
+                              ))}
+                            </div>
+                            <span style={{ fontSize: '12px', color: '#71717a' }}>{client.contacts.length} persons</span>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ padding: '0 12px' }}>
+                        {client.projects === 0 ? (
+                          <span style={{ color: '#3f3f46' }}>–</span>
+                        ) : (
+                          <div style={{ fontSize: '13px', color: '#e4e4e7' }}>{client.projects} <span style={{ fontSize: '11px', color: '#52525b' }}>total</span></div>
+                        )}
+                      </div>
+                      <div style={{ padding: '0 12px' }}>
+                        <span style={{ background: statusStyles.bg, color: statusStyles.color, borderRadius: '20px', padding: '2px 10px', fontSize: '11px', fontWeight: 500 }}>
+                          {client.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <div style={{ padding: '0 12px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
+                        {client.value > 5000000000 && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#97C459' }} />}
+                        <span style={{ fontSize: '13px', color: client.value === 0 ? '#3f3f46' : '#e4e4e7' }}>
+                          {client.value === 0 ? "Rp 0" : formatCurrency(client.value)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </>
-          ) : (
-            <div className="empty-state" style={{ textAlign: "center", padding: "60px 20px" }}>
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px', opacity: 0.2 }}>
-                <Search size={48} />
-              </div>
-              <h3>Select a client</h3>
-              <p>Select a client from the list to see their relationship history and portfolio details.</p>
             </div>
+          </div>
+
+          {/* Right Panel - Client Detail */}
+          {selectedClientId && (
+            <aside style={{ 
+              width: '320px', 
+              background: '#111113', 
+              borderLeft: '0.5px solid rgba(255,255,255,0.08)',
+              height: 'calc(100vh - 120px)',
+              position: 'sticky',
+              top: '0px',
+              overflowY: 'auto',
+              animation: 'slideIn 0.3s ease'
+            }}>
+              {selectedClient ? (
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ 
+                        background: getCategoryStyles(selectedClient.category).bg, 
+                        color: getCategoryStyles(selectedClient.category).color, 
+                        borderRadius: '20px', 
+                        padding: '2px 8px', 
+                        fontSize: '11px', 
+                        fontWeight: 500 
+                      }}>
+                        {selectedClient.category.toUpperCase()}
+                      </span>
+                      <span style={{ fontSize: '11px', color: '#52525b' }}>• {selectedClient.industry || "ENTERPRISE"}</span>
+                    </div>
+                    <span style={{ 
+                      background: getStatusStyles(selectedClient.status).bg, 
+                      color: getStatusStyles(selectedClient.status).color, 
+                      borderRadius: '20px', 
+                      padding: '2px 10px', 
+                      fontSize: '11px', 
+                      fontWeight: 500 
+                    }}>
+                      {selectedClient.status.toUpperCase()}
+                    </span>
+                  </div>
+
+                  <div style={{ marginBottom: '24px' }}>
+                    <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>{selectedClient.name}</h2>
+                    <div style={{ fontSize: '12px', color: '#378ADD', marginTop: '6px', cursor: 'pointer' }} onClick={openEditModal}>Edit Profile</div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>Sales / PIC Source</div>
+                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#f4f4f5' }}>{selectedClient.leadSource || "Internal Lead"}</div>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>Account Executive (AE)</div>
+                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#EF9F27' }}>{(selectedClient as any).accountExecutive || "Unassigned"}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ height: '0.5px', background: 'rgba(255,255,255,0.06)', marginBottom: '24px' }} />
+
+                  {/* Key Contacts */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '16px' }}>KEY CONTACTS</div>
+                    {selectedClient.contacts.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {selectedClient.contacts.map((c, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', color: 'white' }}>{c.initials}</div>
+                              <div>
+                                <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{c.name}</div>
+                                <div style={{ fontSize: '11px', color: '#52525b' }}>{c.role}</div>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <Phone size={14} style={{ color: '#52525b' }} />
+                              <Mail size={14} style={{ color: '#52525b' }} />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div>
+                        <div style={{ fontSize: '12px', color: '#3f3f46', fontStyle: 'italic', marginBottom: '8px' }}>Belum ada kontak</div>
+                        <div style={{ fontSize: '12px', color: '#378ADD', cursor: 'pointer' }} onClick={() => alert("Fitur tambah kontak sedang disiapkan.")}>+ Tambah kontak</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Engagement History */}
+                  <div style={{ marginBottom: '32px' }}>
+                    <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '16px' }}>ENGAGEMENT</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                      <div style={{ fontSize: '12px', color: '#3f3f46', fontStyle: 'italic' }}>No engagement history recorded</div>
+                    </div>
+                  </div>
+
+                  {/* Recent Projects */}
+                  <div style={{ marginBottom: '24px' }}>
+                    <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '16px' }}>RECENT PROJECTS</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      {selectedClient.recentProjects.length > 0 ? (
+                        selectedClient.recentProjects.map(p => (
+                          <div key={p.id} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
+                            <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7', marginBottom: '6px' }}>{p.name}</div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span className="stage-pill-premium" style={{ background: 'rgba(55, 138, 221, 0.1)', color: '#378ADD', fontSize: '10px' }}>{p.stage}</span>
+                              {p.result && (
+                                <span style={{ 
+                                  background: p.result === "Won" ? "rgba(99,153,34,0.15)" : "rgba(226,75,74,0.15)", 
+                                  color: p.result === "Won" ? "#97C459" : "#F09595",
+                                  borderRadius: '20px', padding: '1px 8px', fontSize: '10px', fontWeight: 600
+                                }}>
+                                  {p.result}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div style={{ fontSize: '12px', color: '#3f3f46', fontStyle: 'italic' }}>Belum ada project</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Link href={`/projects?client=${selectedClient.name}`} style={{ textDecoration: 'none' }}>
+                    <button style={{ width: '100%', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', marginTop: '12px' }}>
+                      View All Projects
+                    </button>
+                  </Link>
+                </div>
+              ) : null}
+            </aside>
+          )}
+
+          {!selectedClientId && (
+            <aside style={{ width: '320px', background: '#111113', borderLeft: '0.5px solid rgba(255,255,255,0.08)', height: 'calc(100vh - 120px)', position: 'sticky', top: '0px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+              <Search size={48} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: '16px' }} />
+              <div style={{ fontSize: '16px', fontWeight: 500, color: '#71717a', marginBottom: '8px' }}>Select a client</div>
+              <p style={{ fontSize: '13px', color: '#3f3f46', margin: 0, maxWidth: '200px', lineHeight: 1.5 }}>
+                Select a client from the list to see their relationship history and portfolio details.
+              </p>
+            </aside>
           )}
         </div>
       </div>
-      {isModalOpen && (
-        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="modal-content wide-modal" style={{ backgroundColor: '#1a1a1a', padding: '32px', borderRadius: '16px', width: '100%', border: '1px solid #333', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}>
-            <h2 style={{ marginBottom: '24px' }}>{modalMode === 'add' ? 'Add New Lead' : 'Edit Client Profile'}</h2>
+
+      {/* Add / Edit Client Modal */}
+      {(isAddingClient || isEditingClient) && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+          <div style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '16px', maxWidth: '520px', width: '100%', padding: '24px', position: 'relative' }}>
+            <button onClick={() => { setIsAddingClient(false); setIsEditingClient(false); }} style={{ position: 'absolute', right: '16px', top: '16px', background: 'none', border: 'none', color: '#71717a', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
             
-            {error && (
-              <div style={{ padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', marginBottom: '20px', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <AlertCircle size={16} /> {error}
+            <h3 style={{ fontSize: '18px', fontWeight: 500, color: '#f4f4f5', margin: '0 0 20px 0' }}>
+              {isEditingClient ? 'Edit Client Details' : 'Add New Client'}
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Company Name</label>
+                <input 
+                  className="modal-input-premium" 
+                  style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#d4d4d8', outline: 'none' }}
+                  placeholder="e.g. PT. Juara Indonesia"
+                  value={formName}
+                  onChange={e => setFormName(e.target.value)}
+                />
               </div>
-            )}
 
-            <div className="form-section-title">Company Identity</div>
-            <div className="form-grid-2">
-              <div className="form-group">
-                <label className="mini-meta" style={{ marginBottom: '4px' }}>Company Name</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} placeholder="e.g., PT Telkom Indonesia" />
+              <div>
+                <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Sales / PIC Source</label>
+                <input 
+                  style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#d4d4d8', outline: 'none' }}
+                  placeholder="e.g. Bram Hady Sulton"
+                  value={formRemark}
+                  onChange={e => setFormRemark(e.target.value)}
+                />
               </div>
-              <div className="form-group">
-                <label className="mini-meta" style={{ marginBottom: '4px' }}>Industry</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={formData.industry || ''} onChange={(e) => setFormData({...formData, industry: e.target.value})} placeholder="e.g., Telecom, Banking" />
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Category</label>
+                  <select 
+                    style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#d4d4d8', outline: 'none' }}
+                    value={formCategory}
+                    onChange={e => setFormCategory(e.target.value as any)}
+                  >
+                    <option value="Brand">Brand</option>
+                    <option value="Government">Government</option>
+                    <option value="Co. Partner">Co. Partner</option>
+                    <option value="NGO">NGO</option>
+                    <option value="Media">Media</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Industry</label>
+                  <input 
+                    style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#d4d4d8', outline: 'none' }}
+                    placeholder="e.g. Technology"
+                    value={formIndustry}
+                    onChange={e => setFormIndustry(e.target.value)}
+                  />
+                </div>
               </div>
+
+              <div>
+                <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Website</label>
+                <input 
+                  style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#d4d4d8', outline: 'none' }}
+                  placeholder="https://example.com"
+                  value={formWebsite}
+                  onChange={e => setFormWebsite(e.target.value)}
+                />
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)' }}>
+                <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '12px' }}>MAIN CONTACT (CLIENT SIDE)</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Contact Name</label>
+                    <input 
+                      style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#d4d4d8', outline: 'none' }}
+                      placeholder="e.g. Andi Pratama"
+                      value={formContactName}
+                      onChange={e => setFormContactName(e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Phone / WA</label>
+                    <input 
+                      style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#d4d4d8', outline: 'none' }}
+                      placeholder="0812..."
+                      value={formContactPhone}
+                      onChange={e => setFormContactPhone(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {!isEditingClient && (
+                <div>
+                  <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '6px', display: 'block' }}>Remark / Notes</label>
+                  <textarea 
+                    style={{ width: '100%', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '10px 12px', color: '#d4d4d8', outline: 'none', minHeight: '80px', resize: 'vertical' }}
+                    placeholder="Additional context about this lead..."
+                    value={formRemark}
+                    onChange={e => setFormRemark(e.target.value)}
+                  />
+                </div>
+              )}
             </div>
 
-            <div className="form-grid-2" style={{ marginTop: '16px' }}>
-              <div className="form-group">
-                <label className="mini-meta" style={{ marginBottom: '4px' }}>Category</label>
-                <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={formData.category || 'BRAND'} onChange={(e) => setFormData({...formData, category: e.target.value})}>
-                   <option value="BRAND">Brand</option>
-                   <option value="GOVERNMENT">Government</option>
-                   <option value="CO. PARTNER">Co. Partner</option>
-                   <option value="EVENT ORGANIZER">Event Organizer</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label className="mini-meta" style={{ marginBottom: '4px' }}>Status</label>
-                <select style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={formData.status || 'lead'} onChange={(e) => setFormData({...formData, status: e.target.value as 'active' | 'lead'})}>
-                   <option value="active">Active Client</option>
-                   <option value="lead">Pipeline Lead</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="form-section-title" style={{ marginTop: '24px' }}>Location & Reach</div>
-            <div className="form-grid-2">
-              <div className="form-group">
-                <label className="mini-meta" style={{ marginBottom: '4px' }}>Website</label>
-                <input style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px' }} 
-                   value={formData.website || ''} onChange={(e) => setFormData({...formData, website: e.target.value})} placeholder="https://..." />
-              </div>
-              <div className="form-group">
-                <label className="mini-meta" style={{ marginBottom: '4px' }}>Address</label>
-                <textarea style={{ width: '100%', background: '#222', border: '1px solid #333', padding: '10px', color: 'white', borderRadius: '8px', height: '42px' }} 
-                   value={formData.address || ''} onChange={(e) => setFormData({...formData, address: e.target.value})} placeholder="Office address..." />
-              </div>
-            </div>
-            <div style={{ marginTop: '24px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-              <button className="primary-button" style={{ background: 'none', border: '1px solid #333' }} disabled={isSaving} onClick={() => setIsModalOpen(false)}>Cancel</button>
-              <button className="primary-button" disabled={isSaving} onClick={handleSaveClient}>
-                {isSaving ? "Connecting..." : "Save Changes"}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px' }}>
+              <button 
+                onClick={() => { setIsAddingClient(false); setIsEditingClient(false); }}
+                style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 16px', color: '#a1a1aa', fontSize: '13px', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={isEditingClient ? handleUpdateClient : handleAddClient}
+                style={{ background: '#378ADD', border: 'none', borderRadius: '8px', padding: '8px 20px', color: '#fff', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+              >
+                {isEditingClient ? 'Update Client' : 'Save Client'}
               </button>
             </div>
           </div>
         </div>
       )}
+
+
     </WorkspaceShell>
   );
 }

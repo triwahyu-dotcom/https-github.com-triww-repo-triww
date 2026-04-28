@@ -31,21 +31,13 @@ export function WorkspaceShell({
 }: WorkspaceShellProps) {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [theme, setTheme] = useState("dark");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const savedTheme = localStorage.getItem("pm-theme") || "dark";
-    setTheme(savedTheme);
+    const savedTheme = "dark"; // Default to dark
     document.documentElement.setAttribute("data-theme", savedTheme);
   }, []);
-
-  const handleThemeChange = (newTheme: string) => {
-    setTheme(newTheme);
-    localStorage.setItem("pm-theme", newTheme);
-    document.documentElement.setAttribute("data-theme", newTheme);
-  };
 
   const navItems = [
     { label: "Workspace Hub", href: "/", icon: <Home size={18} /> },
@@ -104,23 +96,7 @@ export function WorkspaceShell({
             <option value="director">Director (C-Level)</option>
           </select>
 
-          <p className="pm-sidebar-label" style={{ marginBottom: "4px", marginTop: "12px" }}>Theme</p>
-          <div style={{ display: "flex", gap: "4px" }}>
-            <button 
-              onClick={() => handleThemeChange("dark")}
-              className={`chip ${theme === "dark" ? "active" : ""}`}
-              style={{ padding: "4px 8px", fontSize: "11px", minHeight: "24px", flex: 1 }}
-            >
-              Dark
-            </button>
-            <button 
-              onClick={() => handleThemeChange("monday")}
-              className={`chip ${theme === "monday" ? "active" : ""}`}
-              style={{ padding: "4px 8px", fontSize: "11px", minHeight: "24px", flex: 1 }}
-            >
-              Monday
-            </button>
-          </div>
+
         </div>
       </aside>
 

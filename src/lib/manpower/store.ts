@@ -21,3 +21,21 @@ export async function getManPowerData(): Promise<Freelancer[]> {
   // Fallback to mock data if Supabase is not configured or fails
   return MOCK_FREELANCERS;
 }
+export async function saveManPowerData(freelancer: Freelancer): Promise<void> {
+  if (!isSupabaseConfigured()) {
+    console.warn("Supabase not configured, cannot persist manpower data.");
+    return;
+  }
+
+  const { error } = await supabase!
+    .from('freelancers')
+    .upsert({
+      id: freelancer.id,
+      data: freelancer,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'id' });
+
+  if (error) {
+    throw new Error(`Failed to save manpower data: ${error.message}`);
+  }
+}

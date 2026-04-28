@@ -146,7 +146,8 @@ export function normalizeProject(project: Partial<ProjectRecord>): ProjectRecord
     vendorShortlist: project.vendorShortlist || [],
     vendorRequirements: project.vendorRequirements || [],
     mainFolder: project.mainFolder || "",
-    projectInitial: project.projectInitial || ""
+    projectInitial: project.projectInitial || "",
+    assignedFreelancers: project.assignedFreelancers || []
   };
 
   normalized.searchableText = [
@@ -840,6 +841,17 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
     serviceLines: [...new Set(projects.map((project) => project.serviceLine).filter((item) => item && item !== "-"))]
       .sort(),
     categories: [...new Set(projects.map((project) => project.category).filter(Boolean))].sort(),
-    availableVendors: [],
+    availableVendors: [
+      { id: 'v1', name: '69 Show Management', category: 'PENYEDIA JASA' },
+      { id: 'v2', name: 'PT. Abhinaya Visual Radhikasakti', category: 'PENYEDIA BARANG' },
+      { id: 'v3', name: 'Adam Pratama', category: 'PENYEDIA JASA' },
+      { id: 'v4', name: 'Addiksi Kreatif Imagi', category: 'PENYEDIA JASA' },
+      { id: 'v5', name: 'CV Afifah Kreatif', category: 'PENYEDIA JASA' },
+    ],
+    availableFreelancers: [
+      { id: 'f1', nama: 'Dixie', posisi_utama: ['Project Officer'], no_hp: '089505761056', kota_domisili: 'Jakarta' },
+      { id: 'f2', nama: 'Shafa', posisi_utama: ['Project Officer'], no_hp: '', kota_domisili: 'Jakarta' },
+      { id: 'f3', nama: 'Jimi', posisi_utama: ['Runner'], no_hp: '08119095656', kota_domisili: 'Bandung' },
+    ],
   };
 }

@@ -196,27 +196,46 @@ export function normalizeClient(client: Partial<CRMClient>): CRMClient {
 }
 
 export async function updateJsonProject(project: ProjectRecord) {
-  const normalized = normalizeProject(project);
+  try {
+    const normalized = normalizeProject(project);
 
-  // If Supabase is configured (production/Vercel), write only to Supabase
-  if (isSupabaseConfigured()) {
-    const { error } = await supabase!.from('projects').upsert({ id: normalized.id, data: normalized });
-    if (error) {
-      console.error("Supabase project update error:", error.message);
-      throw new Error(`Supabase update failed: ${error.message}`);
+    // If Supabase is configured (production/Vercel), write only to Supabase
+    if (isSupabaseConfigured()) {
+      console.log(`Attempting to upsert project ${normalized.id} to Supabase...`);
+      const { error } = await supabase!.from('projects').upsert({ 
+        id: normalized.id, 
+        data: normalized,
+        updated_at: new Date().toISOString()
+      });
+      
+      if (error) {
+        console.error("Supabase project update error details:", error);
+        throw new Error(`Database error: ${error.message}`);
+      }
+      return;
     }
-    return;
-  }
 
-  // Fallback: write to local JSON file (development only)
-  const existing = await readJsonProjects();
-  const index = existing.findIndex((p: ProjectRecord) => p.id === normalized.id);
-  if (index !== -1) {
-    existing[index] = normalized;
-  } else {
-    existing.push(normalized);
+    // Fallback: write to local JSON file (development only)
+    const existing = await readJsonProjects();
+    const index = existing.findIndex((p: ProjectRecord) => p.id === normalized.id);
+    if (index !== -1) {
+      existing[index] = normalized;
+    } else {
+      existing.push(normalized);
+    }
+    
+    // Ensure data directory exists
+    const dataDir = path.dirname(JSON_PROJECTS_PATH);
+    if (!existsSync(dataDir)) {
+      // In read-only env like Vercel, this might fail, but isSupabaseConfigured should have caught it
+      console.warn("Data directory for projects does not exist.");
+    }
+
+    writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(existing, null, 2));
+  } catch (err) {
+    console.error("Critical error in updateJsonProject:", err);
+    throw err;
   }
-  writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(existing, null, 2));
 }
 
 export async function getJsonProjects(): Promise<ProjectRecord[]> {
@@ -765,11 +784,34 @@ function parseProjectsFromRows(rows: (string | number | Date | null)[][]) {
 }
 
 export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
-  if (!existsSync(SOURCE_PATH)) {
+  const sourceExists = existsSync(SOURCE_PATH);
+  
+  // 1. Get projects from CSV (if available)
+  const csvProjects = (sourceExists && workbookRows()) ? parseProjectsFromRows(workbookRows()) : [];
+  
+  // 2. Get projects from Database/JSON
+  const savedProjects = await readJsonProjects();
+  
+  // 3. Merge and Deduplicate (Prioritize saved data)
+  const projectsMap = new Map<string, ProjectRecord>();
+  
+  // First, load all from CSV
+  csvProjects.forEach(p => {
+    projectsMap.set(p.id, normalizeProject(p));
+  });
+  
+  // Then, overwrite with saved data (Supabase/JSON)
+  savedProjects.forEach(p => {
+    projectsMap.set(p.id, normalizeProject(p));
+  });
+
+  const projects = Array.from(projectsMap.values());
+
+  if (projects.length === 0) {
     return {
       projects: [],
       sourcePath: SOURCE_PATH,
-      sourceAvailable: false,
+      sourceAvailable: sourceExists,
       summary: {
         totalProjects: 0,
         activeProjects: 0,
@@ -787,16 +829,6 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
       categories: [],
       availableVendors: [],
     };
-  }
-
-  const jsonProjects = await readJsonProjects();
-  let projects: ProjectRecord[] = [];
-
-  if (jsonProjects.length > 0) {
-    projects = jsonProjects.map((p: ProjectRecord) => normalizeProject(p));
-  } else {
-    const csvProjects = workbookRows() ? parseProjectsFromRows(workbookRows()) : [];
-    projects = csvProjects.map((p: ProjectRecord) => normalizeProject(p));
   }
 
   const totalPipelineValue = projects.reduce((sum, project) => sum + project.projectValue, 0);

@@ -85,23 +85,31 @@ function defaultComplianceItems(vendor: Vendor): VendorComplianceItem[] {
 }
 
 async function ensureDataDir() {
-  await mkdir(DATA_DIR, { recursive: true });
+  try {
+    await mkdir(DATA_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("Could not create DATA_DIR for ops (read-only filesystem on Vercel?)", e);
+  }
 }
 
 async function readOpsState() {
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase!.from('vendor_ops_state').select('data').limit(1).single();
-    if (!error && data) {
-      const parsed = data.data as Partial<VendorOpsState>;
-      return {
-        profiles: parsed.profiles ?? [],
-        scorecards: parsed.scorecards ?? [],
-        compliance: parsed.compliance ?? [],
-        auditLog: parsed.auditLog ?? [],
-        revisionRequests: parsed.revisionRequests ?? [],
-        notifications: parsed.notifications ?? [],
-        portalAccessTokens: parsed.portalAccessTokens ?? [],
-      } satisfies VendorOpsState;
+    try {
+      const { data, error } = await supabase!.from('vendor_ops_state').select('data').limit(1).single();
+      if (!error && data) {
+        const parsed = data.data as Partial<VendorOpsState>;
+        return {
+          profiles: parsed.profiles ?? [],
+          scorecards: parsed.scorecards ?? [],
+          compliance: parsed.compliance ?? [],
+          auditLog: parsed.auditLog ?? [],
+          revisionRequests: parsed.revisionRequests ?? [],
+          notifications: parsed.notifications ?? [],
+          portalAccessTokens: parsed.portalAccessTokens ?? [],
+        } satisfies VendorOpsState;
+      }
+    } catch (e) {
+      console.warn("Error reading vendor_ops_state from Supabase", e);
     }
   }
 
@@ -111,28 +119,41 @@ async function readOpsState() {
     return structuredClone(EMPTY_OPS_STATE);
   }
 
-  const content = await readFile(OPS_STATE_PATH, "utf8");
-  const parsed = JSON.parse(content) as Partial<VendorOpsState>;
+  try {
+    const content = await readFile(OPS_STATE_PATH, "utf8");
+    const parsed = JSON.parse(content) as Partial<VendorOpsState>;
 
-  return {
-    profiles: parsed.profiles ?? [],
-    scorecards: parsed.scorecards ?? [],
-    compliance: parsed.compliance ?? [],
-    auditLog: parsed.auditLog ?? [],
-    revisionRequests: parsed.revisionRequests ?? [],
-    notifications: parsed.notifications ?? [],
-    portalAccessTokens: parsed.portalAccessTokens ?? [],
-  } satisfies VendorOpsState;
+    return {
+      profiles: parsed.profiles ?? [],
+      scorecards: parsed.scorecards ?? [],
+      compliance: parsed.compliance ?? [],
+      auditLog: parsed.auditLog ?? [],
+      revisionRequests: parsed.revisionRequests ?? [],
+      notifications: parsed.notifications ?? [],
+      portalAccessTokens: parsed.portalAccessTokens ?? [],
+    } satisfies VendorOpsState;
+  } catch (e) {
+    console.warn("Could not read local ops state", e);
+    return structuredClone(EMPTY_OPS_STATE);
+  }
 }
 
 async function writeOpsState(state: VendorOpsState) {
   if (isSupabaseConfigured()) {
-    await supabase!.from('vendor_ops_state').upsert({ id: 'current', data: state });
-    return;
+    try {
+      await supabase!.from('vendor_ops_state').upsert({ id: 'current', data: state });
+      return;
+    } catch (e) {
+      console.warn("Failed to write ops state to Supabase", e);
+    }
   }
 
-  await ensureDataDir();
-  await writeFile(OPS_STATE_PATH, JSON.stringify(state, null, 2));
+  try {
+    await ensureDataDir();
+    await writeFile(OPS_STATE_PATH, JSON.stringify(state, null, 2));
+  } catch (e) {
+    console.warn("Failed to write ops state locally (read-only filesystem?)", e);
+  }
 }
 
 export async function ensureVendorOpsState(vendors: Vendor[]) {

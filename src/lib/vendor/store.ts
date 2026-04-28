@@ -454,16 +454,23 @@ async function importSpreadsheetRows(): Promise<ImportedRow[]> {
 }
 
 async function ensureDataDir() {
-  await mkdir(DATA_DIR, { recursive: true });
+  try {
+    await mkdir(DATA_DIR, { recursive: true });
+  } catch (e) {
+    console.warn("Could not create DATA_DIR (read-only filesystem on Vercel?)", e);
+  }
 }
 
 async function readState() {
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase!.from('vendor_state').select('data').limit(1).single();
-    if (!error && data) {
-      return data.data as VendorState;
+    try {
+      const { data, error } = await supabase!.from('vendor_state').select('data').limit(1).single();
+      if (!error && data) {
+        return data.data as VendorState;
+      }
+    } catch (e) {
+      console.warn("Error reading vendor_state from Supabase", e);
     }
-    // If not found in Supabase, we might want to seed it later or return empty
   }
 
   await ensureDataDir();
@@ -472,18 +479,31 @@ async function readState() {
     return structuredClone(EMPTY_STATE);
   }
 
-  const content = await readFile(STATE_PATH, "utf8");
-  return JSON.parse(content) as VendorState;
+  try {
+    const content = await readFile(STATE_PATH, "utf8");
+    return JSON.parse(content) as VendorState;
+  } catch (e) {
+    console.warn("Could not read local state", e);
+    return structuredClone(EMPTY_STATE);
+  }
 }
 
 async function writeState(state: VendorState) {
   if (isSupabaseConfigured()) {
-    await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
-    return;
+    try {
+      await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
+      return;
+    } catch (e) {
+      console.warn("Failed to write state to Supabase", e);
+    }
   }
 
-  await ensureDataDir();
-  await writeFile(STATE_PATH, JSON.stringify(state, null, 2));
+  try {
+    await ensureDataDir();
+    await writeFile(STATE_PATH, JSON.stringify(state, null, 2));
+  } catch (e) {
+    console.warn("Failed to write state locally (read-only filesystem?)", e);
+  }
 }
 
 export async function syncFromSource() {

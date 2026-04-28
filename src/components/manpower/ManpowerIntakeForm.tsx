@@ -23,7 +23,6 @@ const INITIAL_FORM = {
   bank_name: "",
   bank_account_number: "",
   bank_account_holder: "",
-  foto_url: "", // In a real app, this would be a file upload
 };
 
 export function ManpowerIntakeForm() {
@@ -260,23 +259,7 @@ export function ManpowerIntakeForm() {
           </div>
         </section>
 
-        {/* Photos/Docs */}
-        <div className="form-section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--blue)', marginBottom: '24px' }}>
-          <Camera size={18} /> <span>Portofolio & Link</span>
-        </div>
-        <section style={{ marginBottom: '40px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--muted)' }}>Link Google Drive (Foto & Portofolio)</label>
-            <input 
-              required 
-              value={form.foto_url} 
-              onChange={e => updateField("foto_url", e.target.value)} 
-              placeholder="https://drive.google.com/..." 
-              style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}
-            />
-            <p style={{ fontSize: '0.75rem', color: 'var(--muted-soft)', marginTop: '4px' }}>Pastikan link sudah "Public" atau bisa diakses oleh tim JUARA.</p>
-          </div>
-        </section>
+
 
         {/* Feedback Messages */}
         {message && (

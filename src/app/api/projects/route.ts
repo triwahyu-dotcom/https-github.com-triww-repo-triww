@@ -10,14 +10,12 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const newProject = await req.json();
+    const project = await req.json();
     
-    if (!newProject.id) {
-      newProject.id = Date.now().toString();
-    }
+    // Normalize before saving to ensure ID and all fields are present
+    const normalized = await updateJsonProject(project);
     
-    await updateJsonProject(newProject);
-    return NextResponse.json({ success: true, project: newProject });
+    return NextResponse.json({ success: true, project: normalized });
   } catch (err: unknown) {
     console.error("API POST projects error:", err);
     const message = err instanceof Error ? err.message : "Unknown error";
@@ -27,9 +25,12 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    const updatedProject = await req.json();
-    await updateJsonProject(updatedProject);
-    return NextResponse.json({ success: true, project: updatedProject });
+    const project = await req.json();
+    
+    // Normalize before saving
+    const normalized = await updateJsonProject(project);
+    
+    return NextResponse.json({ success: true, project: normalized });
   } catch (err: unknown) {
     console.error("API PUT projects error:", err);
     const message = err instanceof Error ? err.message : "Unknown error";

@@ -195,7 +195,7 @@ export function normalizeClient(client: Partial<CRMClient>): CRMClient {
   };
 }
 
-export async function updateJsonProject(project: ProjectRecord) {
+export async function updateJsonProject(project: ProjectRecord): Promise<ProjectRecord> {
   try {
     const normalized = normalizeProject(project);
 
@@ -212,7 +212,7 @@ export async function updateJsonProject(project: ProjectRecord) {
         console.error("Supabase project update error details:", error);
         throw new Error(`Database error: ${error.message}`);
       }
-      return;
+      return normalized;
     }
 
     // Fallback: write to local JSON file (development only)
@@ -227,11 +227,11 @@ export async function updateJsonProject(project: ProjectRecord) {
     // Ensure data directory exists
     const dataDir = path.dirname(JSON_PROJECTS_PATH);
     if (!existsSync(dataDir)) {
-      // In read-only env like Vercel, this might fail, but isSupabaseConfigured should have caught it
       console.warn("Data directory for projects does not exist.");
     }
 
     writeFileSync(JSON_PROJECTS_PATH, JSON.stringify(existing, null, 2));
+    return normalized;
   } catch (err) {
     console.error("Critical error in updateJsonProject:", err);
     throw err;

@@ -22,23 +22,36 @@ export async function POST(request: NextRequest) {
       throw new Error("Supabase is not initialized");
     }
 
-    // Map form to table structure
+    const newId = `fl-${Date.now()}`;
+    const freelancerData = {
+      id: newId,
+      nama,
+      no_hp,
+      kota_domisili,
+      posisi_utama,
+      rate_estimate,
+      nomor_ktp,
+      rekening_bank: {
+        nama_bank: bank_name,
+        no_rekening: bank_account_number,
+        nama_pemilik: bank_account_holder,
+      },
+      foto_url,
+      status: "new",
+      assignment_history: [],
+      total_event: 0,
+      rating_avg: null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    // Map form to JSONB table structure
     const { data, error } = await supabase
       .from("freelancers")
       .insert({
-        nama,
-        no_hp,
-        kota_domisili,
-        posisi_utama,
-        rate_estimate,
-        nomor_ktp,
-        rekening_bank: {
-          nama_bank: bank_name,
-          no_rekening: bank_account_number,
-          nama_pemilik: bank_account_holder,
-        },
-        foto_url,
-        status: "new", // Default status for new registration
+        id: newId,
+        data: freelancerData,
+        updated_at: new Date().toISOString()
       })
       .select()
       .single();

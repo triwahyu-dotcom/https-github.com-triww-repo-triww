@@ -1097,9 +1097,17 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '5px', display: 'block' }}>Project Value (IDR)</label>
                     <input 
                       className="modal-input-premium" 
-                      placeholder="e.g. 1500000000"
+                      placeholder="e.g. 1.500.000.000"
                       value={newProjectValue}
-                      onChange={e => setNewProjectValue(e.target.value)}
+                      onChange={e => {
+                        const val = e.target.value.replace(/[^0-9]/g, "");
+                        if (!val) {
+                          setNewProjectValue("");
+                          return;
+                        }
+                        const formatted = new Intl.NumberFormat("id-ID").format(parseInt(val));
+                        setNewProjectValue(formatted);
+                      }}
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -93,6 +93,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [isAssignManpowerOpen, setIsAssignManpowerOpen] = useState(false);
   const [manpowerToAssign, setManpowerToAssign] = useState<string>("");
   const [selectedPositionToAssign, setSelectedPositionToAssign] = useState<string>("");
+  const [customPosition, setCustomPosition] = useState<string>("");
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectClient, setNewProjectClient] = useState("");
@@ -231,10 +232,13 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     const mpObj = initialData.availableFreelancers?.find(f => f.id === manpowerToAssign);
     if (!mpObj) return;
 
+    const finalPosition = selectedPositionToAssign === "Custom" ? customPosition : selectedPositionToAssign;
+    if (!finalPosition) return;
+
     setProjects(prev => prev.map(p => {
       if (p.id !== projectId) return p;
       // Allow multiple assignments of the same person if the position is different
-      const alreadyAssignedSamePosition = (p.assignedFreelancers || []).some(f => f.id === manpowerToAssign && f.position === selectedPositionToAssign);
+      const alreadyAssignedSamePosition = (p.assignedFreelancers || []).some(f => f.id === manpowerToAssign && f.position === finalPosition);
       if (alreadyAssignedSamePosition) return p;
       
       return {
@@ -244,7 +248,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           {
             id: mpObj.id,
             name: mpObj.nama,
-            position: selectedPositionToAssign || mpObj.posisi_utama[0] || "Crew",
+            position: finalPosition || mpObj.posisi_utama[0] || "Crew",
             phone: mpObj.no_hp
           }
         ]
@@ -253,6 +257,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     setIsAssignManpowerOpen(false);
     setManpowerToAssign("");
     setSelectedPositionToAssign("");
+    setCustomPosition("");
   };
 
   const handleRemoveManpower = (projectId: string, freelancerId: string) => {
@@ -969,6 +974,16 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                               ))}
                               <option value="Custom">Other Role...</option>
                             </select>
+                          )}
+
+                          {selectedPositionToAssign === "Custom" && (
+                            <input 
+                              className="mini-input"
+                              placeholder="Type role..."
+                              style={{ height: '28px', fontSize: '11px', width: '100px', background: '#111113', border: '0.5px solid #EF9F27' }}
+                              value={customPosition}
+                              onChange={(e) => setCustomPosition(e.target.value)}
+                            />
                           )}
 
                           <button 

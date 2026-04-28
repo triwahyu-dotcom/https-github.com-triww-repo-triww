@@ -300,7 +300,7 @@ export async function deleteJsonClient(id: string) {
   }
 }
 
-export async function updateJsonClient(client: Partial<CRMClient>) {
+export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMClient> {
   const normalized = normalizeClient(client);
 
   // If Supabase is configured (production/Vercel), write only to Supabase
@@ -310,7 +310,7 @@ export async function updateJsonClient(client: Partial<CRMClient>) {
       console.error("Supabase client update error:", error.message);
       throw new Error(`Supabase update failed: ${error.message}`);
     }
-    return;
+    return normalized;
   }
 
   // Fallback: write to local JSON file (development only)
@@ -322,6 +322,7 @@ export async function updateJsonClient(client: Partial<CRMClient>) {
     existing.push(normalized);
   }
   writeFileSync(JSON_CLIENTS_PATH, JSON.stringify(existing, null, 2));
+  return normalized;
 }
 
 const SECTION_LABELS: Record<ProjectSection, string> = {

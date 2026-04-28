@@ -254,6 +254,29 @@ export function CRMDashboard({ initialData }: Props) {
     setFormRemark("");
   };
 
+  const handleDeleteClient = async () => {
+    if (!selectedClientId) return;
+    if (!confirm(`Apakah Anda yakin ingin menghapus client "${selectedClient?.name}"?`)) return;
+
+    try {
+      const response = await fetch(`/api/clients?id=${selectedClientId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setIsEditingClient(false);
+        setSelectedClientId(null);
+        alert("Client berhasil dihapus.");
+        window.location.reload();
+      } else {
+        alert("Gagal menghapus client.");
+      }
+    } catch (err) {
+      console.error("Error deleting client:", err);
+      alert("Terjadi kesalahan koneksi.");
+    }
+  };
+
   const openEditModal = () => {
     if (!selectedClient) return;
     setFormName(selectedClient.name);
@@ -542,9 +565,18 @@ export function CRMDashboard({ initialData }: Props) {
                         )}
                       </div>
                       <div style={{ padding: '0 12px' }}>
-                        <span style={{ background: statusStyles.bg, color: statusStyles.color, borderRadius: '20px', padding: '2px 10px', fontSize: '11px', fontWeight: 500 }}>
-                          {client.status.toUpperCase()}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ background: statusStyles.bg, color: statusStyles.color, borderRadius: '20px', padding: '2px 10px', fontSize: '11px', fontWeight: 500 }}>
+                            {client.status.toUpperCase()}
+                          </span>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); setSelectedClientId(client.id); openEditModal(); }}
+                            style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
+                            title="Edit Client"
+                          >
+                            <Edit size={12} />
+                          </button>
+                        </div>
                       </div>
                       <div style={{ padding: '0 12px', textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px' }}>
                         {client.value > 5000000000 && <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#97C459' }} />}
@@ -587,21 +619,30 @@ export function CRMDashboard({ initialData }: Props) {
                       </span>
                       <span style={{ fontSize: '11px', color: '#52525b' }}>• {selectedClient.industry || "ENTERPRISE"}</span>
                     </div>
-                    <span style={{ 
-                      background: getStatusStyles(selectedClient.status).bg, 
-                      color: getStatusStyles(selectedClient.status).color, 
-                      borderRadius: '20px', 
-                      padding: '2px 10px', 
-                      fontSize: '11px', 
-                      fontWeight: 500 
-                    }}>
-                      {selectedClient.status.toUpperCase()}
-                    </span>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <span style={{ 
+                        background: getStatusStyles(selectedClient.status).bg, 
+                        color: getStatusStyles(selectedClient.status).color, 
+                        borderRadius: '20px', 
+                        padding: '2px 10px', 
+                        fontSize: '11px', 
+                        fontWeight: 500 
+                      }}>
+                        {selectedClient.status.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>{selectedClient.name}</h2>
-                    <div style={{ fontSize: '12px', color: '#378ADD', marginTop: '6px', cursor: 'pointer' }} onClick={openEditModal}>Edit Profile</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>{selectedClient.name}</h2>
+                      <button 
+                        onClick={openEditModal}
+                        style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.1)', color: '#a1a1aa', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
@@ -811,19 +852,31 @@ export function CRMDashboard({ initialData }: Props) {
               )}
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '24px' }}>
-              <button 
-                onClick={() => { setIsAddingClient(false); setIsEditingClient(false); }}
-                style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 16px', color: '#a1a1aa', fontSize: '13px', cursor: 'pointer' }}
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={isEditingClient ? handleUpdateClient : handleAddClient}
-                style={{ background: '#378ADD', border: 'none', borderRadius: '8px', padding: '8px 20px', color: '#fff', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
-              >
-                {isEditingClient ? 'Update Client' : 'Save Client'}
-              </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', marginTop: '24px' }}>
+              <div>
+                {isEditingClient && (
+                  <button 
+                    onClick={handleDeleteClient}
+                    style={{ background: 'transparent', border: '0.5px solid rgba(226,75,74,0.3)', borderRadius: '8px', padding: '8px 16px', color: '#F09595', fontSize: '13px', cursor: 'pointer' }}
+                  >
+                    Delete Account
+                  </button>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button 
+                  onClick={() => { setIsAddingClient(false); setIsEditingClient(false); }}
+                  style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 16px', color: '#a1a1aa', fontSize: '13px', cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={isEditingClient ? handleUpdateClient : handleAddClient}
+                  style={{ background: '#378ADD', border: 'none', borderRadius: '8px', padding: '8px 20px', color: '#fff', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
+                >
+                  {isEditingClient ? 'Update Client' : 'Save Client'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
       bank_name,
       bank_account_number,
       bank_account_holder,
+      last_events,
     } = body;
 
     if (!supabase) {
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
         no_rekening: bank_account_number,
         nama_pemilik: bank_account_holder,
       },
-
+      last_events,
       status: "new",
       assignment_history: [],
       total_event: 0,

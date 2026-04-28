@@ -23,6 +23,11 @@ const INITIAL_FORM = {
   bank_name: "",
   bank_account_number: "",
   bank_account_holder: "",
+  last_events: [
+    { event_name: "", position: "" },
+    { event_name: "", position: "" },
+    { event_name: "", position: "" },
+  ]
 };
 
 export function ManpowerIntakeForm() {
@@ -56,6 +61,14 @@ export function ManpowerIntakeForm() {
       ...current,
       rate_estimate: { ...current.rate_estimate, [posisi]: numRate }
     }));
+  }
+
+  function updateEvent(index: number, field: "event_name" | "position", value: string) {
+    setForm(current => {
+      const newEvents = [...current.last_events];
+      newEvents[index] = { ...newEvents[index], [field]: value };
+      return { ...current, last_events: newEvents };
+    });
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -260,6 +273,43 @@ export function ManpowerIntakeForm() {
         </section>
 
 
+
+        {/* Experience Section */}
+        <div className="form-section-title" style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--blue)', marginBottom: '24px' }}>
+          <Briefcase size={18} /> <span>3 Event Terakhir yang Diikuti</span>
+        </div>
+        <p style={{ fontSize: '0.85rem', color: 'var(--muted-soft)', marginBottom: '20px' }}>Sebutkan 3 event terakhir di mana Anda bertugas dan posisi Anda.</p>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '40px' }}>
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="form-grid-2" style={{ 
+              background: 'var(--panel-soft)', 
+              padding: '20px', 
+              borderRadius: '16px',
+              border: '1px solid var(--line)',
+              gap: '20px'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--muted)' }}>Nama Event {i + 1}</label>
+                <input 
+                  value={form.last_events[i].event_name}
+                  onChange={e => updateEvent(i, "event_name", e.target.value)}
+                  placeholder="Nama project/event..." 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--text)' }}
+                />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--muted)' }}>Posisi Anda</label>
+                <input 
+                  value={form.last_events[i].position}
+                  onChange={e => updateEvent(i, "position", e.target.value)}
+                  placeholder="Contoh: Crew Stage" 
+                  style={{ padding: '10px', borderRadius: '8px', border: '1px solid var(--line)', background: 'var(--panel)', color: 'var(--text)' }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Feedback Messages */}
         {message && (

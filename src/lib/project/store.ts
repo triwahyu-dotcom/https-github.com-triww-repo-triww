@@ -829,6 +829,7 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
       serviceLines: [],
       categories: [],
       availableVendors: [],
+      availableFreelancers: [],
     };
   }
 

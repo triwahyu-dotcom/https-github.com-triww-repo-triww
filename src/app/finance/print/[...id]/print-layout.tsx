@@ -224,19 +224,19 @@ export function PrintLayout({ rfp, doc }: Props) {
                   {formatCurrency(rfp.totalAmount)}
                 </td>
               </tr>
-              {rfp.taxAmount > 0 && (
+              {(rfp.taxAmount || 0) > 0 && (
                 <tr>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f', fontWeight: '500' }}>
                     PPh {rfp.pphType === "PPH21" ? "21" : "23"} Deduction
                   </td>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f' }}>
-                    - {formatCurrency(rfp.taxAmount)}
+                    - {formatCurrency(rfp.taxAmount || 0)}
                   </td>
                 </tr>
               )}
               <tr>
                 <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold", textAlign: "right", background: '#f8f9fa' }}>
-                  {rfp.taxAmount > 0 ? "Total Net Payment" : "Total Amount"}
+                  {(rfp.taxAmount || 0) > 0 ? "Total Net Payment" : "Total Amount"}
                 </td>
                 <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold", textAlign: "right", background: '#f8f9fa' }}>
                   {formatCurrency(rfp.netAmount || rfp.totalAmount)}

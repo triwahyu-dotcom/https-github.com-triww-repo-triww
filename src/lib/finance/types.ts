@@ -101,6 +101,7 @@ export interface RequestForPayment {
   ppnAmount?: number;
   netAmount?: number;
   grossAmount?: number;
+  pphType?: "NONE" | "PPH21" | "PPH23";
   financeApprovedBy?: { name: string; date: string; signature?: string };
   cLevelApprovedBy?: { name: string; date: string; signature?: string };
   rejectionReason?: string;

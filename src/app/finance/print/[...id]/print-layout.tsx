@@ -105,6 +105,10 @@ export function PrintLayout({ rfp, doc }: Props) {
   
   const isGrossUp = doc?.pph21Mode === "grossup" || (scheduleTotal > (calculatedTotal * 1.01)); 
   
+  const taxToDisplay = (doc?.taxAmount || 0) > 0 
+    ? (doc?.taxAmount || 0) 
+    : (isGrossUp ? (scheduleTotal > 0 ? (scheduleTotal - calculatedTotal - (doc?.ppnAmount || 0)) : (calculatedTotal / (1 - pphRate)) - calculatedTotal) : 0);
+  
   const ppnToDisplay = (doc?.ppnAmount || 0) > 0 ? (doc?.ppnAmount || 0) : (doc?.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
   const finalTotalPO = Math.max((doc as any)?.totalPO || 0, doc?.amount || 0, scheduleTotal, calculatedTotal + taxToDisplay + ppnToDisplay);
 

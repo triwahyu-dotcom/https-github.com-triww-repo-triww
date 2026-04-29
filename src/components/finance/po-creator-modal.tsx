@@ -86,6 +86,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const [isUploadingPenalty, setIsUploadingPenalty] = useState(false);
   const [notes, setNotes] = useState("");
   const [usePPN, setUsePPN] = useState(false);
+  const [isGrossUp, setIsGrossUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // SPK Specific
@@ -117,13 +118,8 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
       setBillingTerms(editDoc.billingTerms || []);
       setNotes(editDoc.notes || "");
       
-      if (editDoc.pph21Mode === "grossup") {
-        setPphType(editDoc.usePPh21 ? "PPH21" : "NONE");
-      } else if (editDoc.pph21Mode === "deduction") {
-        setPphType("PPH21");
-      }
-      
       setUsePPN(editDoc.usePPN || false);
+      setIsGrossUp(editDoc.pph21Mode === "grossup");
       setVenue(editDoc.venue || "");
       setDuration(editDoc.duration || "");
       setLampiran(editDoc.lampiran || "");
@@ -155,8 +151,14 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const removeLine = (idx: number) => setLineItems(prev => prev.filter((_, i) => i !== idx));
 
   const subtotalItems = lineItems.reduce((s, l) => s + (l.amount || 0), 0);
-  const ppnAmount = usePPN ? subtotalItems * 0.11 : 0;
-  const totalPO = subtotalItems + ppnAmount;
+  
+  // PPh Calculation
+  const pphRate = pphType === "PPH21" ? 0.025 : pphType === "PPH23" ? 0.02 : 0;
+  const pphAmount = isGrossUp ? (subtotalItems / (1 - pphRate)) - subtotalItems : 0;
+  const docGross = subtotalItems + pphAmount;
+
+  const ppnAmount = usePPN ? docGross * 0.11 : 0;
+  const totalPO = docGross + ppnAmount;
   const grandTotal = totalPO;
 
   const toggleBillingTerm = (term: string) => {
@@ -244,7 +246,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         lineItems, documentTotal: grandTotal, paymentTerms, paymentSchedule: finalPaymentSchedule,
         deliveryDate, shipTo, billingInstruction, billingTerms, notes, venue, duration, lampiran, workScope,
         paymentKeterangan, penaltyMemoUrl: finalMemoUrl, description: lineItems[0]?.description || "",
-        pphType, usePPh21: pphType !== "NONE", usePPN, grossAmount: docGross, taxAmount: pphAmount, ppnAmount, netAmount: grandTotal, totalPO,
+        pphType, usePPh21: pphType !== "NONE", pph21Mode: isGrossUp ? "grossup" : "none", usePPN, grossAmount: docGross, taxAmount: pphAmount, ppnAmount, netAmount: grandTotal, totalPO,
         preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
       };
 
@@ -363,10 +365,26 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                 <div className="p-input-group"><label>Phone</label><input className="p-input" value={vendorPhone} onChange={e => setVendorPhone(e.target.value)} /></div>
                 <div className="p-input-group"><label>Tax ID (NPWP)</label><input className="p-input" value={vendorTaxId} onChange={e => setVendorTaxId(e.target.value)} placeholder="00.000.000.0-000.000" /></div>
                 <div className="p-input-group">
+                  <label>PPh & Gross Up</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <select className="p-input" style={{ flex: 2 }} value={pphType} onChange={e => setPphType(e.target.value as any)}>
+                      <option value="NONE">Tanpa PPh</option>
+                      <option value="PPH21">PPh 21 (2.5%)</option>
+                      <option value="PPH23">PPh 23 (2.0%)</option>
+                    </select>
+                    {pphType !== "NONE" && (
+                      <label style={{ flex: 1.2, display: 'flex', alignItems: 'center', gap: '8px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', padding: '0 12px', borderRadius: '8px', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={isGrossUp} onChange={e => setIsGrossUp(e.target.checked)} style={{ width: '14px', height: '14px' }} />
+                        <span style={{ fontSize: '11px', color: isGrossUp ? '#378ADD' : '#71717a', fontWeight: 600 }}>Gross Up</span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+                <div className="p-input-group">
                   <label>PPN Status</label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer' }}>
                     <input type="checkbox" checked={usePPN} onChange={e => setUsePPN(e.target.checked)} style={{ width: '16px', height: '16px' }} />
-                    <span style={{ fontSize: '13px', color: usePPN ? '#378ADD' : '#71717a', fontWeight: 600 }}>{usePPN ? 'Menggunakan PPN (11%)' : 'Menggunakan PPN'}</span>
+                    <span style={{ fontSize: '13px', color: usePPN ? '#378ADD' : '#71717a', fontWeight: 600 }}>{usePPN ? 'Menggunakan PPN (11%)' : 'Tanpa PPN'}</span>
                   </label>
                 </div>
                 {docType !== "PO" && (
@@ -437,10 +455,10 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                       <div style={{ fontSize: '10px', color: '#52525b' }}>Subtotal</div>
                       <div style={{ fontSize: '14px', color: '#e4e4e7' }}>{formatCurrencyIDR(subtotalItems)}</div>
                     </div>
-                    {pphType !== "NONE" && (
+                    {isGrossUp && pphType !== "NONE" && (
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '10px', color: '#52525b' }}>PPh ({pphType === "PPH21" ? "2.5%" : "2.0%"})</div>
-                        <div style={{ fontSize: '14px', color: '#ef4444' }}>- {formatCurrencyIDR(pphAmount)}</div>
+                        <div style={{ fontSize: '10px', color: '#52525b' }}>PPh {pphType === "PPH21" ? "21" : "23"} Gross Up</div>
+                        <div style={{ fontSize: '14px', color: '#378ADD' }}>+ {formatCurrencyIDR(pphAmount)}</div>
                       </div>
                     )}
                     {usePPN && (

@@ -386,8 +386,14 @@ export function PrintLayout({ rfp, doc }: Props) {
                   <tfoot>
                     <tr style={{ fontWeight: 'bold' }}>
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal + (doc.taxAmount || 0))}</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal)}</td>
                     </tr>
+                    {doc.pph21Mode === "grossup" && (doc.taxAmount || 0) > 0 && (
+                      <tr style={{ color: '#2563eb' }}>
+                        <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPh {doc.pphType === "PPH21" ? "21" : "23"} Gross Up</td>
+                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>+ {formatCurrency(doc.taxAmount || 0)}</td>
+                      </tr>
+                    )}
                     {(doc as any).usePPN && (
                       <tr style={{ color: '#ff9900' }}>
                         <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPN (11%)</td>
@@ -583,7 +589,14 @@ export function PrintLayout({ rfp, doc }: Props) {
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
-                    <div>: <strong>{formatCurrency(calculatedTotal + (doc.taxAmount || 0))}</strong></div>
+                    <div>: <strong>{formatCurrency(calculatedTotal)}</strong></div>
+
+                    {doc.pph21Mode === "grossup" && (doc.taxAmount || 0) > 0 && (
+                      <>
+                        <div style={{ whiteSpace: 'nowrap', color: '#2563eb' }}>PPh {doc.pphType === "PPH21" ? "21" : "23"} Gross Up</div>
+                        <div style={{ color: '#2563eb' }}>: + {formatCurrency(doc.taxAmount || 0)}</div>
+                      </>
+                    )}
 
                     {(doc as any).usePPN && (
                       <>

@@ -105,12 +105,10 @@ export function PrintLayout({ rfp, doc }: Props) {
   
   const isGrossUp = doc?.pph21Mode === "grossup" || (scheduleTotal > (calculatedTotal * 1.01)); 
   
-  const taxToDisplay = (doc?.taxAmount || 0) > 0 
-    ? (doc?.taxAmount || 0) 
-    : (isGrossUp ? (scheduleTotal > 0 ? (scheduleTotal - calculatedTotal - (doc?.ppnAmount || 0)) : (calculatedTotal / (1 - pphRate)) - calculatedTotal) : 0);
-  
   const ppnToDisplay = (doc?.ppnAmount || 0) > 0 ? (doc?.ppnAmount || 0) : (doc?.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
   const finalTotalPO = Math.max((doc as any)?.totalPO || 0, doc?.amount || 0, scheduleTotal, calculatedTotal + taxToDisplay + ppnToDisplay);
+
+  const displayFactor = isGrossUp && calculatedTotal > 0 ? (calculatedTotal + taxToDisplay) / calculatedTotal : 1;
 
   return (
     <div style={{ background: "white", color: "black", minHeight: "100vh", padding: "0", fontFamily: "'Inter', Arial, sans-serif" }}>
@@ -376,8 +374,8 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <td style={{ textAlign: 'center' }}>{item.freqUnit}</td>
                         <td style={{ textAlign: 'center' }}>{item.vol}</td>
                         <td style={{ textAlign: 'center' }}>{item.volUnit}</td>
-                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price)}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount)}</td>
+                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price * displayFactor)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount * displayFactor)}</td>
                       </tr>
                     )) : (
                       <tr>
@@ -390,15 +388,15 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <td style={{ textAlign: 'center' }}>-</td>
                         <td style={{ textAlign: 'center' }}>1</td>
                         <td style={{ textAlign: 'center' }}>-</td>
-                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
+                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(doc.amount * displayFactor)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(doc.amount * displayFactor)}</td>
                       </tr>
                     )}
                   </tbody>
                   <tfoot>
                     <tr style={{ fontWeight: 'bold' }}>
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal * displayFactor)}</td>
                     </tr>
                     {(doc as any).usePPN && (
                       <tr style={{ color: '#ff9900' }}>
@@ -591,7 +589,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
-                    <div>: <strong>{formatCurrency(calculatedTotal)}</strong></div>
+                    <div>: <strong>{formatCurrency(calculatedTotal * displayFactor)}</strong></div>
 
 
                     {(doc as any).usePPN && (

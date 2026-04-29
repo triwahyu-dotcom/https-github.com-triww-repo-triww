@@ -323,12 +323,18 @@ export function PrintLayout({ rfp, doc }: Props) {
             </div>
           </div>
 
-          {/* Table */}
           {(() => {
             const calculatedTotal = (doc.lineItems && doc.lineItems.length > 0) 
               ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
               : doc.amount;
             
+            // Dynamic Tax Fallback for Display
+            const pphRate = doc.pphType === "PPH21" ? 0.025 : doc.pphType === "PPH23" ? 0.02 : 0;
+            const isGrossUp = doc.pph21Mode === "grossup";
+            const taxToDisplay = (doc.taxAmount || 0) > 0 ? (doc.taxAmount || 0) : (isGrossUp ? (calculatedTotal / (1 - pphRate)) - calculatedTotal : 0);
+            const ppnToDisplay = (doc.ppnAmount || 0) > 0 ? (doc.ppnAmount || 0) : (doc.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
+            const finalTotalPO = (doc as any).totalPO && (doc as any).totalPO > calculatedTotal ? (doc as any).totalPO : (calculatedTotal + taxToDisplay + ppnToDisplay);
+
             return (
               <>
                 <table className="po-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
@@ -388,21 +394,21 @@ export function PrintLayout({ rfp, doc }: Props) {
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
                       <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal)}</td>
                     </tr>
-                    {doc.pph21Mode === "grossup" && (doc.taxAmount || 0) > 0 && (
+                    {isGrossUp && taxToDisplay > 0 && (
                       <tr style={{ color: '#2563eb' }}>
                         <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPh {doc.pphType === "PPH21" ? "21" : "23"} Gross Up</td>
-                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>+ {formatCurrency(doc.taxAmount || 0)}</td>
+                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>+ {formatCurrency(taxToDisplay)}</td>
                       </tr>
                     )}
                     {(doc as any).usePPN && (
                       <tr style={{ color: '#ff9900' }}>
                         <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPN (11%)</td>
-                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>+ {formatCurrency((doc as any).ppnAmount || 0)}</td>
+                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>+ {formatCurrency(ppnToDisplay)}</td>
                       </tr>
                     )}
                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #333' }}>
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px', background: '#f0f4f8' }}>TOTAL PURCHASE ORDER</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '14px', background: '#f0f4f8', color: '#004a99' }}>{formatCurrency((doc as any).totalPO || doc.amount)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '14px', background: '#f0f4f8', color: '#004a99' }}>{formatCurrency(finalTotalPO)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -591,19 +597,22 @@ export function PrintLayout({ rfp, doc }: Props) {
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
                     <div>: <strong>{formatCurrency(calculatedTotal)}</strong></div>
 
-                    {doc.pph21Mode === "grossup" && (doc.taxAmount || 0) > 0 && (
+                    {isGrossUp && taxToDisplay > 0 && (
                       <>
                         <div style={{ whiteSpace: 'nowrap', color: '#2563eb' }}>PPh {doc.pphType === "PPH21" ? "21" : "23"} Gross Up</div>
-                        <div style={{ color: '#2563eb' }}>: + {formatCurrency(doc.taxAmount || 0)}</div>
+                        <div>: + {formatCurrency(taxToDisplay)}</div>
                       </>
                     )}
 
                     {(doc as any).usePPN && (
                       <>
                         <div style={{ whiteSpace: 'nowrap', color: '#ff9900' }}>PPN (11%)</div>
-                        <div style={{ color: '#ff9900' }}>: + {formatCurrency((doc as any).ppnAmount || 0)}</div>
+                        <div>: + {formatCurrency(ppnToDisplay)}</div>
                       </>
                     )}
+
+                    <div style={{ whiteSpace: 'nowrap', fontSize: '14px', fontWeight: 'bold', marginTop: '5px', borderTop: '1px solid #ddd', paddingTop: '5px' }}>Total</div>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '5px', borderTop: '1px solid #ddd', paddingTop: '5px' }}>: {formatCurrency(finalTotalPO)}</div>
                     
                     <div style={{ whiteSpace: 'nowrap', fontSize: '13px', marginTop: '5px' }}><strong>Total Nilai Kontrak</strong></div>
                     <div style={{ fontSize: '13px', marginTop: '5px' }}>: <strong>{formatCurrency((doc as any).totalPO || doc.amount)}</strong></div>
@@ -615,7 +624,7 @@ export function PrintLayout({ rfp, doc }: Props) {
               <p style={{ margin: '15px 0 10px', fontSize: '12px' }}>
                 <strong>Terbilang:</strong> 
                 <em style={{ color: '#004a99', marginLeft: '8px', fontWeight: 'bold' }}>
-                  ## {terbilang(doc.netAmount || doc.amount).toUpperCase()} ##
+                  ## {terbilang(finalTotalPO).toUpperCase()} ##
                 </em>
               </p>
 

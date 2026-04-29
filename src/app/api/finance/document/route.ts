@@ -126,11 +126,11 @@ export async function PATCH(request: Request) {
     const updatedDoc: ExpenseDocument = {
       ...doc,
       ...updates,
-      grossAmount: calculatedGross,
-      taxAmount: calculatedTax,
-      ppnAmount: calculatedPPN,
-      totalPO: updatedTotalPO,
-      amount: updatedTotalPO,
+      grossAmount: calculatedGross || 0,
+      taxAmount: calculatedTax || 0,
+      ppnAmount: calculatedPPN || 0,
+      totalPO: updatedTotalPO || 0,
+      amount: updatedTotalPO || 0,
       status: resetStatus,
       rejectionReason: "", 
     };

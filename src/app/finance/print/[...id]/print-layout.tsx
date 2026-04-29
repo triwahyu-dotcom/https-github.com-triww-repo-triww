@@ -95,6 +95,17 @@ export function PrintLayout({ rfp, doc }: Props) {
     "CASH_ADVANCE": "Cash Advance"
   };
 
+  // Common calculation logic for doc/po/spk
+  const calculatedTotal = (doc?.lineItems && doc.lineItems.length > 0) 
+    ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
+    : (doc?.amount || 0);
+  
+  const pphRate = doc?.pphType === "PPH21" ? 0.025 : doc?.pphType === "PPH23" ? 0.02 : 0;
+  const isGrossUp = doc?.pph21Mode === "grossup";
+  const taxToDisplay = (doc?.taxAmount || 0) > 0 ? (doc?.taxAmount || 0) : (isGrossUp ? (calculatedTotal / (1 - pphRate)) - calculatedTotal : 0);
+  const ppnToDisplay = (doc?.ppnAmount || 0) > 0 ? (doc?.ppnAmount || 0) : (doc?.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
+  const finalTotalPO = (doc as any)?.totalPO && (doc as any).totalPO > calculatedTotal ? (doc as any).totalPO : (calculatedTotal + taxToDisplay + ppnToDisplay);
+
   return (
     <div style={{ background: "white", color: "black", minHeight: "100vh", padding: "0", fontFamily: "'Inter', Arial, sans-serif" }}>
       <style>{`
@@ -324,17 +335,6 @@ export function PrintLayout({ rfp, doc }: Props) {
           </div>
 
           {(() => {
-            const calculatedTotal = (doc.lineItems && doc.lineItems.length > 0) 
-              ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
-              : doc.amount;
-            
-            // Dynamic Tax Fallback for Display
-            const pphRate = doc.pphType === "PPH21" ? 0.025 : doc.pphType === "PPH23" ? 0.02 : 0;
-            const isGrossUp = doc.pph21Mode === "grossup";
-            const taxToDisplay = (doc.taxAmount || 0) > 0 ? (doc.taxAmount || 0) : (isGrossUp ? (calculatedTotal / (1 - pphRate)) - calculatedTotal : 0);
-            const ppnToDisplay = (doc.ppnAmount || 0) > 0 ? (doc.ppnAmount || 0) : (doc.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
-            const finalTotalPO = (doc as any).totalPO && (doc as any).totalPO > calculatedTotal ? (doc as any).totalPO : (calculatedTotal + taxToDisplay + ppnToDisplay);
-
             return (
               <>
                 <table className="po-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
@@ -588,10 +588,6 @@ export function PrintLayout({ rfp, doc }: Props) {
           <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #ddd', background: '#fafafa', borderRadius: '4px' }}>
              <p style={{ margin: '0 0 10px', fontSize: '14px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}><strong>Rincian Nilai Pekerjaan :</strong></p>
              {(() => {
-                const calculatedTotal = (doc.lineItems && doc.lineItems.length > 0) 
-                  ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
-                  : doc.amount;
-                
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
@@ -613,9 +609,8 @@ export function PrintLayout({ rfp, doc }: Props) {
 
                     <div style={{ whiteSpace: 'nowrap', fontSize: '14px', fontWeight: 'bold', marginTop: '5px', borderTop: '1px solid #ddd', paddingTop: '5px' }}>Total</div>
                     <div style={{ fontSize: '14px', fontWeight: 'bold', marginTop: '5px', borderTop: '1px solid #ddd', paddingTop: '5px' }}>: {formatCurrency(finalTotalPO)}</div>
-                    
                     <div style={{ whiteSpace: 'nowrap', fontSize: '13px', marginTop: '5px' }}><strong>Total Nilai Kontrak</strong></div>
-                    <div style={{ fontSize: '13px', marginTop: '5px' }}>: <strong>{formatCurrency((doc as any).totalPO || doc.amount)}</strong></div>
+                    <div style={{ fontSize: '13px', marginTop: '5px' }}>: <strong>{formatCurrency(finalTotalPO)}</strong></div>
                   </div>
                 );
              })()}

@@ -100,11 +100,17 @@ export function PrintLayout({ rfp, doc }: Props) {
     ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
     : (doc?.amount || 0);
   
-  const pphRate = doc?.pphType === "PPH21" ? 0.025 : doc?.pphType === "PPH23" ? 0.02 : 0;
-  const isGrossUp = doc?.pph21Mode === "grossup";
-  const taxToDisplay = (doc?.taxAmount || 0) > 0 ? (doc?.taxAmount || 0) : (isGrossUp ? (calculatedTotal / (1 - pphRate)) - calculatedTotal : 0);
+  const scheduleTotal = doc?.paymentSchedule?.reduce((sum, ev) => sum + (ev.amount || 0), 0) || 0;
+  const pphRate = doc?.pphType === "PPH21" ? 0.025 : doc?.pphType === "PPH23" ? 0.02 : 0.02; // Default to 2% if ambiguous
+  
+  const isGrossUp = doc?.pph21Mode === "grossup" || (scheduleTotal > (calculatedTotal * 1.01)); 
+  
+  const taxToDisplay = (doc?.taxAmount || 0) > 0 
+    ? (doc?.taxAmount || 0) 
+    : (isGrossUp ? (scheduleTotal > 0 ? (scheduleTotal - calculatedTotal - (doc?.ppnAmount || 0)) : (calculatedTotal / (1 - pphRate)) - calculatedTotal) : 0);
+  
   const ppnToDisplay = (doc?.ppnAmount || 0) > 0 ? (doc?.ppnAmount || 0) : (doc?.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
-  const finalTotalPO = (doc as any)?.totalPO && (doc as any).totalPO > calculatedTotal ? (doc as any).totalPO : (calculatedTotal + taxToDisplay + ppnToDisplay);
+  const finalTotalPO = Math.max((doc as any)?.totalPO || 0, doc?.amount || 0, scheduleTotal, calculatedTotal + taxToDisplay + ppnToDisplay);
 
   return (
     <div style={{ background: "white", color: "black", minHeight: "100vh", padding: "0", fontFamily: "'Inter', Arial, sans-serif" }}>

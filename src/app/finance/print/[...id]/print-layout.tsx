@@ -378,8 +378,8 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <td style={{ textAlign: 'center' }}>{item.freqUnit}</td>
                         <td style={{ textAlign: 'center' }}>{item.vol}</td>
                         <td style={{ textAlign: 'center' }}>{item.volUnit}</td>
-                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price * displayFactor)}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount * displayFactor)}</td>
+                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(Math.round(item.price * displayFactor))}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(Math.round(item.amount * displayFactor))}</td>
                       </tr>
                     )) : (
                       <tr>
@@ -392,15 +392,15 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <td style={{ textAlign: 'center' }}>-</td>
                         <td style={{ textAlign: 'center' }}>1</td>
                         <td style={{ textAlign: 'center' }}>-</td>
-                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(doc.amount * displayFactor)}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(doc.amount * displayFactor)}</td>
+                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(Math.round(doc.amount * displayFactor))}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(Math.round(doc.amount * displayFactor))}</td>
                       </tr>
                     )}
                   </tbody>
                   <tfoot>
                     <tr style={{ fontWeight: 'bold' }}>
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal * displayFactor)}</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(Math.round(calculatedTotal * displayFactor))}</td>
                     </tr>
                     {(doc as any).usePPN && (
                       <tr style={{ color: '#ff9900' }}>
@@ -593,7 +593,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
-                    <div>: <strong>{formatCurrency(calculatedTotal * displayFactor)}</strong></div>
+                    <div>: <strong>{formatCurrency(Math.round(calculatedTotal * displayFactor))}</strong></div>
 
 
                     {(doc as any).usePPN && (

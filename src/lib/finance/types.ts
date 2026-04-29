@@ -14,6 +14,7 @@ export interface LineItem {
   volUnit: string;
   price: number;
   amount: number;
+  usePPh?: boolean;
 }
 
 export interface PaymentEvent {
@@ -50,9 +51,13 @@ export interface ExpenseDocument {
   notes?: string;
   usePPh21?: boolean;
   pph21Mode?: "none" | "deduction" | "grossup";
+  pphType?: "NONE" | "PPH21" | "PPH23";
+  usePPN?: boolean;
   grossAmount?: number;
   taxAmount?: number;
+  ppnAmount?: number;
   netAmount?: number;
+  totalPO?: number;
   
   // SPK Specific fields
   workScope?: string[];
@@ -92,6 +97,10 @@ export interface RequestForPayment {
   };
   paymentProofUrl?: string;
   vendorInvoiceUrl?: string;
+  taxAmount?: number;
+  ppnAmount?: number;
+  netAmount?: number;
+  grossAmount?: number;
   financeApprovedBy?: { name: string; date: string; signature?: string };
   cLevelApprovedBy?: { name: string; date: string; signature?: string };
   rejectionReason?: string;

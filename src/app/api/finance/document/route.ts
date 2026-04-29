@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readDocuments, saveDocument } from "@/lib/finance/store";
+import { readDocuments, saveDocument, deleteDocument } from "@/lib/finance/store";
 import { ExpenseDocument } from "@/lib/finance/types";
 import { getProjectDashboardData } from "@/lib/project/store";
 import { logger } from "@/lib/logger";
@@ -14,6 +14,7 @@ export async function POST(request: Request) {
       notes, preparedBy, venue, duration, workScope, lampiran, paymentSchedule,
       paymentKeterangan, penaltyMemoUrl,
       usePPh21, pph21Mode, grossAmount, taxAmount, netAmount,
+      pphType, usePPN, ppnAmount, totalPO,
       projectInitial,
     } = body;
     if (!projectId || !documentType) {
@@ -39,23 +40,10 @@ export async function POST(request: Request) {
       docId = `${sequence}/JBBS/${documentType}${initialPart}/${month}/${year}`;
     }
     const subtotalItems = lineItems?.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0) ?? 0;
-    
-    // Server-side recalculation logic
-    let calculatedNet = subtotalItems;
-    let calculatedGross = subtotalItems;
-    let calculatedTax = 0;
+    const ppnAmountValue = usePPN ? subtotalItems * 0.11 : 0;
+    const totalPOValue = subtotalItems + ppnAmountValue;
 
-    if (pph21Mode === "deduction") {
-      calculatedGross = subtotalItems;
-      calculatedNet = subtotalItems * 0.975;
-      calculatedTax = calculatedGross - calculatedNet;
-    } else if (pph21Mode === "grossup") {
-      calculatedGross = subtotalItems / 0.975;
-      calculatedNet = subtotalItems;
-      calculatedTax = calculatedGross - calculatedNet;
-    }
-
-    const finalAmount = calculatedNet || Number(documentTotal) || 0;
+    const finalAmount = totalPOValue || Number(documentTotal) || 0;
     
     // Determine initial status based on document type
     // PO, SPK, KONTRAK bypass Finance verification and go direct to C-level
@@ -72,7 +60,9 @@ export async function POST(request: Request) {
       preparedBy, venue, duration, workScope, lampiran, paymentSchedule,
       paymentKeterangan: paymentKeterangan || [],
       penaltyMemoUrl,
-      usePPh21, pph21Mode, grossAmount: calculatedGross, taxAmount: calculatedTax, netAmount: calculatedNet,
+      pphType: "NONE", usePPh21: false, usePPN, 
+      grossAmount: subtotalItems, taxAmount: 0, ppnAmount: ppnAmountValue, 
+      netAmount: subtotalItems, totalPO: totalPOValue,
     };
     await saveDocument(newDoc);
     logger.audit("FinanceAPI", "DOCUMENT_CREATED", { docId, projectId, documentType });
@@ -93,21 +83,21 @@ export async function PATCH(request: Request) {
     if (docIndex === -1) return NextResponse.json({ error: "Document not found" }, { status: 404 });
     const doc = allDocs[docIndex];
     
-    // Recalculate amount if lineItems are being updated
-    let updatedAmount = doc.amount;
-    if (updates.lineItems) {
-      const subtotal = updates.lineItems.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0);
-      const mode = updates.pph21Mode || doc.pph21Mode || "none";
-      
-      if (mode === "deduction") {
-        updatedAmount = subtotal * 0.975;
-      } else if (mode === "grossup") {
-        updatedAmount = subtotal; // Net remains matching subtotal in grossup
-      } else {
-        updatedAmount = subtotal;
-      }
-    } else if (updates.documentTotal !== undefined) {
-      updatedAmount = Number(updates.documentTotal);
+    // Recalculate amounts if any tax or items change
+    let calculatedGross = doc.grossAmount;
+    let calculatedTax = doc.taxAmount;
+    let calculatedPPN = doc.ppnAmount;
+    let updatedTotalPO = doc.totalPO;
+
+    if (updates.lineItems || updates.usePPN !== undefined) {
+      const items = updates.lineItems || doc.lineItems || [];
+      const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0);
+      const activeUsePPN = updates.usePPN !== undefined ? updates.usePPN : doc.usePPN;
+
+      calculatedGross = subtotal;
+      calculatedTax = 0;
+      calculatedPPN = activeUsePPN ? calculatedGross * 0.11 : 0;
+      updatedTotalPO = calculatedGross + calculatedPPN;
     }
 
     // Determine status based on document type
@@ -118,7 +108,11 @@ export async function PATCH(request: Request) {
     const updatedDoc: ExpenseDocument = {
       ...doc,
       ...updates,
-      amount: updatedAmount,
+      grossAmount: calculatedGross,
+      taxAmount: calculatedTax,
+      ppnAmount: calculatedPPN,
+      totalPO: updatedTotalPO,
+      amount: updatedTotalPO,
       status: resetStatus,
       rejectionReason: "", 
     };
@@ -129,5 +123,21 @@ export async function PATCH(request: Request) {
     logger.error("FinanceAPI", "DOCUMENT_UPDATE_FAILED", { error });
     console.error("[PATCH /api/finance/document]", error);
     return NextResponse.json({ error: "Failed to update document" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing document id" }, { status: 400 });
+
+    await deleteDocument(id);
+    logger.audit("FinanceAPI", "DOCUMENT_DELETED", { docId: id });
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    logger.error("FinanceAPI", "DOCUMENT_DELETE_FAILED", { error });
+    console.error("[DELETE /api/finance/document]", error);
+    return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
   }
 }

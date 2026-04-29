@@ -6,9 +6,9 @@ import { ADMIN_SESSION_COOKIE, validateTeamMember } from "@/lib/auth";
 export async function POST(request: NextRequest) {
   const body = (await request.json()) as { email?: string; password?: string };
   
-  const isValid = await validateTeamMember(body.email, body.password);
+  const user = await validateTeamMember(body.email, body.password);
 
-  if (!isValid) {
+  if (!user) {
     return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
@@ -20,6 +20,21 @@ export async function POST(request: NextRequest) {
     path: "/",
   });
 
-  return NextResponse.json({ ok: true });
+  // Store role in a separate cookie for UI filtering (not for security-critical logic, use session for that)
+  cookieStore.set("juara_user_role", user.role, {
+    httpOnly: false,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  cookieStore.set("juara_user_name", user.name || "", {
+    httpOnly: false,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  });
+
+  return NextResponse.json({ ok: true, role: user.role });
 }
 

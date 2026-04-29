@@ -105,3 +105,29 @@ export async function saveRFP(rfp: RequestForPayment) {
   }
   writeFileSync(RFPS_PATH, JSON.stringify(rfps, null, 2));
 }
+
+export async function deleteDocument(id: string) {
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('finance_documents').delete().eq('id', id);
+    if (error) console.error("Supabase finance document delete error:", error.message);
+    return;
+  }
+
+  ensureDataDir();
+  const docs = await readDocuments();
+  const filtered = docs.filter(d => d.id !== id);
+  writeFileSync(DOCS_PATH, JSON.stringify(filtered, null, 2));
+}
+
+export async function deleteRFP(id: string) {
+  if (isSupabaseConfigured()) {
+    const { error } = await supabase!.from('finance_rfps').delete().eq('id', id);
+    if (error) console.error("Supabase finance RFP delete error:", error.message);
+    return;
+  }
+
+  ensureDataDir();
+  const rfps = await readRFPs();
+  const filtered = rfps.filter(r => r.id !== id);
+  writeFileSync(RFPS_PATH, JSON.stringify(filtered, null, 2));
+}

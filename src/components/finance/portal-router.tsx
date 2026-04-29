@@ -19,25 +19,38 @@ interface Props {
 export function FinancePortalRouter(props: Props) {
   const [role, setRole] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"monitoring" | "operational">("monitoring");
+  const [adminViewRole, setAdminViewRole] = useState<string>("finance");
 
   useEffect(() => {
-    const savedRole = localStorage.getItem("pm-role") || "pm";
+    // Get role from cookie first
+    const cookies = document.cookie.split(';');
+    const roleCookie = cookies.find(c => c.trim().startsWith('juara_user_role='));
+    let savedRole = "";
+    
+    if (roleCookie) {
+      savedRole = roleCookie.split('=')[1].toLowerCase();
+    } else {
+      savedRole = localStorage.getItem("pm-role") || "pm";
+    }
+    
     setRole(savedRole);
   }, []);
 
   if (!role) return <div style={{ padding: '40px', textAlign: 'center' }}>Initializing Portal...</div>;
 
-  // Toggle button for switching views (Only for roles that need monitoring)
-  const showToggle = role === "finance" || role === "pm";
+  // Toggle button for switching views (Always show when RBAC is disabled)
+  const showToggle = true; // role === "finance" || role === "pm" || role === "ae" || role === "admin";
 
   const renderOperational = () => {
-    if (role === "finance") return <FinanceOpsDashboard {...props} />;
-    if (role === "director") return <DirectorDashboard initialData={props.initialData} />;
-    if (role === "procurement") return <ProcurementDashboard {...props} />;
+    const activeRole = role === "admin" ? adminViewRole : role;
+
+    if (activeRole === "finance") return <FinanceOpsDashboard {...props} />;
+    if (activeRole === "director") return <DirectorDashboard initialData={props.initialData} />;
+    if (activeRole === "procurement") return <ProcurementDashboard {...props} />;
     return <PMDashboard {...props} />;
   };
 
-  if (viewMode === "monitoring" && (role === "finance" || role === "pm")) {
+  if (viewMode === "monitoring") {
     return (
       <>
         <FinanceMonitoringCenter {...props} />
@@ -53,6 +66,31 @@ export function FinancePortalRouter(props: Props) {
 
   return (
     <>
+      {role === "admin" && (
+        <div style={{ position: 'sticky', top: 0, zIndex: 1100, background: '#18181b', borderBottom: '1px solid #378ADD', padding: '12px 40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: '#378ADD', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Super Admin View Override:</div>
+          <div style={{ display: 'flex', gap: '4px', background: 'rgba(55,138,221,0.05)', padding: '4px', borderRadius: '10px' }}>
+            {[
+              { id: 'finance', label: 'Finance Ops' },
+              { id: 'procurement', label: 'Procurement' },
+              { id: 'director', label: 'C-Level (Director)' },
+              { id: 'pm', label: 'Project Manager' }
+            ].map(v => (
+              <button
+                key={v.id}
+                onClick={() => setAdminViewRole(v.id)}
+                style={{
+                  padding: '8px 16px', borderRadius: '8px', fontSize: '11px', fontWeight: 700, border: 'none', cursor: 'pointer', transition: 'all 0.2s',
+                  background: adminViewRole === v.id ? '#378ADD' : 'transparent',
+                  color: adminViewRole === v.id ? '#fff' : '#71717a'
+                }}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {renderOperational()}
       {showToggle && (
         <button 

@@ -42,6 +42,8 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
   const [notes, setNotes] = useState(doc.description || "");
   const [invoiceFile, setInvoiceFile] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [pphType, setPphType] = useState<"NONE" | "PPH21" | "PPH23">("NONE");
+  const [taxableItems, setTaxableItems] = useState<Record<number, boolean>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -69,6 +71,14 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
     }
   });
 
+  const ratio = doc.amount > 0 ? rfpAmount / doc.amount : 0;
+  const pphRate = pphType === "PPH21" ? 0.025 : (pphType === "PPH23" ? 0.02 : 0);
+  
+  const taxableBase = doc.lineItems?.filter(li => taxableItems[li.no]).reduce((sum, li) => sum + li.amount, 0) || 0;
+  const rfpTaxableBase = taxableBase * ratio;
+  const rfpPPh = rfpTaxableBase * pphRate;
+  const netToVendor = rfpAmount - rfpPPh;
+
   const handleInvoiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -89,6 +99,7 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
         body: JSON.stringify({
           id: editRfp?.id, documentId: doc.id, rfpAmount, paymentTerms, paymentType,
           bankAccount: { bankName, accountNo, accountName }, notes, requiredDate, vendorInvoiceUrl: invoiceFile,
+          taxAmount: rfpPPh, netAmount: netToVendor, pphType,
         }),
       });
       if (res.ok) {
@@ -169,6 +180,53 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
               </div>
             </div>
             <div className="p-input-group"><label>Term Label</label><input className="p-input" value={paymentTerms} readOnly={!!doc.paymentSchedule?.length} onChange={e => setPaymentTerms(e.target.value)} /></div>
+          </div>
+
+          <div style={{ marginBottom: '32px', padding: '24px', background: '#18181b', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h4 style={{ margin: 0, fontSize: '11px', fontWeight: 700, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>Taxation (Deduction)</h4>
+              <select className="p-input" style={{ width: '180px' }} value={pphType} onChange={e => setPphType(e.target.value as any)}>
+                <option value="NONE">No PPh Deduction</option>
+                <option value="PPH21">PPh 21 (2.5%)</option>
+                <option value="PPH23">PPh 23 (2.0%)</option>
+              </select>
+            </div>
+
+            {pphType !== "NONE" && (
+              <>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', marginBottom: '20px' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                      <th style={{ textAlign: 'left', padding: '8px', color: '#52525b' }}>Item Description</th>
+                      <th style={{ textAlign: 'right', padding: '8px', color: '#52525b' }}>Amount</th>
+                      <th style={{ textAlign: 'center', padding: '8px', color: '#52525b', width: '60px' }}>Taxable?</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {doc.lineItems?.map((li) => (
+                      <tr key={li.no} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                        <td style={{ padding: '8px', color: '#e4e4e7' }}>{li.description}</td>
+                        <td style={{ padding: '8px', textAlign: 'right', color: '#a1a1aa' }}>{formatCurrencyIDR(li.amount)}</td>
+                        <td style={{ padding: '8px', textAlign: 'center' }}>
+                          <input type="checkbox" checked={!!taxableItems[li.no]} onChange={e => setTaxableItems(prev => ({ ...prev, [li.no]: e.target.checked }))} style={{ cursor: 'pointer' }} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                <div style={{ padding: '16px', background: 'rgba(239,68,68,0.05)', borderRadius: '12px', border: '1.5px dashed rgba(239,68,68,0.15)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                   <div>
+                      <div style={{ fontSize: '10px', color: '#ef4444', fontWeight: 700, textTransform: 'uppercase' }}>PPh {pphType === "PPH21" ? "21" : "23"} Deduction</div>
+                      <div style={{ fontSize: '18px', fontWeight: 800, color: '#ef4444', marginTop: '4px' }}>- {formatCurrencyIDR(rfpPPh)}</div>
+                   </div>
+                   <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '10px', color: '#22c55e', fontWeight: 700, textTransform: 'uppercase' }}>Net to Vendor</div>
+                      <div style={{ fontSize: '18px', fontWeight: 800, color: '#22c55e', marginTop: '4px' }}>{formatCurrencyIDR(netToVendor)}</div>
+                   </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: '32px', marginBottom: '32px' }}>

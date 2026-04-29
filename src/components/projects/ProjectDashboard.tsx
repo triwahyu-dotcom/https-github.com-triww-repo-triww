@@ -104,7 +104,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [newProjectInitial, setNewProjectInitial] = useState("");
   const [newProjectServiceLine, setNewProjectServiceLine] = useState("EO - Corporate");
   const [newProjectStage, setNewProjectStage] = useState<WorkflowStage>("lead");
-  const [newProjectPIC, setNewProjectPIC] = useState("");
+  const [newProjectOwners, setNewProjectOwners] = useState<string[]>([]);
   const [newProjectMainFolder, setNewProjectMainFolder] = useState("");
   const [newProjectProposalLink, setNewProjectProposalLink] = useState("");
   const [newProjectRemark, setNewProjectRemark] = useState("");
@@ -120,7 +120,28 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   // Sorting
   const [sortConfig, setSortConfig] = useState<{ key: keyof ProjectRecord; direction: 'asc' | 'desc' } | null>(null);
 
+  const [currentUser, setCurrentUser] = useState<{ name: string; role: string } | null>(null);
+
+  useEffect(() => {
+    const cookies = document.cookie.split(';');
+    const roleCookie = cookies.find(c => c.trim().startsWith('juara_user_role='));
+    const nameCookie = cookies.find(c => c.trim().startsWith('juara_user_name='));
+    
+    if (roleCookie) {
+      setCurrentUser({
+        role: roleCookie.split('=')[1].toLowerCase(),
+        name: nameCookie ? decodeURIComponent(nameCookie.split('=')[1]) : ""
+      });
+    }
+  }, []);
+
   const filteredProjects = projects.filter(p => {
+    // RBAC Filter: Disabled temporarily
+    // const isRestrictedRole = currentUser && ["pm", "ae"].includes(currentUser.role);
+    // const isOwner = currentUser && (p.owners || []).includes(currentUser.name);
+    
+    // if (isRestrictedRole && !isOwner) return false;
+
     const matchesSearch = 
       (p.projectName || (p as any).name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.client || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -176,7 +197,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       if (p.id !== projectId) return p;
       return {
         ...p,
-        tasks: p.tasks.map(t => t.id === taskId ? { ...t, status: t.status === "done" ? "todo" : "done" } : t)
+        tasks: p.tasks.map(t => t.id === taskId ? { ...t, status: t.status === "done" ? "pending" : "done" } : t)
       };
     }));
   };
@@ -194,8 +215,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       const newAssignment = {
         vendorId: vendor.id,
         vendorName: vendor.name,
+        vendorType: (vendor as any).serviceNames?.[0] || "General",
+        businessAddress: (vendor as any).businessAddress || "",
+        whatsappPhone: (vendor as any).whatsappPhone || "",
+        averageScore: (vendor as any).averageScore || 0,
         linkId: `lnk_${Date.now()}`,
-        status: "confirmed" as const,
         quotedPrice: 0,
       };
       
@@ -283,7 +307,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       currentStage: newProjectStage,
       eventDate: newProjectDate || "TBD",
       projectValue: numericValue,
-      owners: newProjectPIC ? newProjectPIC.split(",").map(s => s.trim()) : ["Admin"],
+      owners: newProjectOwners.length > 0 ? newProjectOwners : ["Admin"],
       mainFolder: newProjectMainFolder,
       remark: newProjectRemark,
     };
@@ -323,7 +347,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         setNewProjectInitial("");
         setNewProjectClient("");
         setNewProjectValue("0");
-        setNewProjectPIC("");
+        setNewProjectOwners([]);
         setNewProjectMainFolder("");
         setNewProjectProposalLink("");
         setNewProjectRemark("");
@@ -347,7 +371,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     setNewProjectClient(project.client);
     setNewProjectDate(project.eventDate === "TBD" ? "" : project.eventDate);
     setNewProjectValue(project.projectValue?.toString() || "0");
-    setNewProjectPIC(project.owners.join(", "));
+    setNewProjectOwners(project.owners || []);
     setNewProjectMainFolder(project.mainFolder || "");
     setNewProjectServiceLine(project.serviceLine || "EO - Corporate");
     setNewProjectStage(project.currentStage);
@@ -797,9 +821,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     <div style={{ padding: '0 16px 16px' }}>
                       {(selectedProject.milestones || []).map(m => (
                         <div key={m.id} className="item-row-premium" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '0.5px solid rgba(255,255,255,0.05)' }}>
-                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.completed ? '#97C459' : '#3f3f46' }} />
+                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.done ? '#97C459' : '#3f3f46' }} />
                           <span style={{ fontSize: '13px' }}>{m.label}</span>
-                          <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#71717a' }}>{m.target}</span>
+                          <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#71717a' }}>{m.value}</span>
                         </div>
                       ))}
                     </div>
@@ -1076,8 +1100,8 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                       onChange={e => setNewProjectClient(e.target.value)}
                     >
                       <option value="">Select Client</option>
-                      {initialData.clients?.map(c => (
-                        <option key={c.id} value={c.name}>{c.name}</option>
+                      {initialData.clients?.map((c, idx) => (
+                        <option key={`${c.id}-${idx}`} value={c.name}>{c.name}</option>
                       ))}
                     </select>
                   </div>
@@ -1149,13 +1173,41 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     />
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '5px', display: 'block' }}>PIC / Owners</label>
-                    <input 
-                      className="modal-input-premium" 
-                      placeholder="e.g. Yudi, Andi"
-                      value={newProjectPIC}
-                      onChange={e => setNewProjectPIC(e.target.value)}
-                    />
+                    <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>PIC / Owners (Multi-Select)</label>
+                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '12px', maxHeight: '150px', overflowY: 'auto' }}>
+                      {(initialData as any).teamMembers?.map((member: any) => (
+                        <label key={member.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', cursor: 'pointer', fontSize: '13px', color: '#e4e4e7' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={newProjectOwners.includes(member.name)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewProjectOwners([...newProjectOwners, member.name]);
+                              } else {
+                                setNewProjectOwners(newProjectOwners.filter(n => n !== member.name));
+                              }
+                            }}
+                          />
+                          <span style={{ flex: 1 }}>{member.name}</span>
+                          <span style={{ color: '#71717a', fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{member.role.toUpperCase()}</span>
+                        </label>
+                      ))}
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#e4e4e7' }}>
+                          <input 
+                            type="checkbox" 
+                            checked={newProjectOwners.includes("Sindy")}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setNewProjectOwners([...newProjectOwners, "Sindy"]);
+                              } else {
+                                setNewProjectOwners(newProjectOwners.filter(n => n !== "Sindy"));
+                              }
+                            }}
+                          />
+                          <span style={{ flex: 1 }}>Sindy</span>
+                          <span style={{ color: '#71717a', fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>LEGACY</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

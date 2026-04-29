@@ -109,6 +109,7 @@ export interface ProjectRecord {
     businessAddress: string;
     whatsappPhone: string;
     averageScore: number;
+    quotedPrice?: number;
   }[];
   vendorShortlist?: {
     linkId: string;
@@ -228,6 +229,12 @@ export interface ProjectDashboardData {
     posisi_utama: string[];
     no_hp: string;
     kota_domisili: string;
+  }[];
+  teamMembers?: {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
   }[];
 }
 

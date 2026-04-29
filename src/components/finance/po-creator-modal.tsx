@@ -36,7 +36,7 @@ const emptyEvent = (label = "Termin"): PaymentEvent => ({
   date: "",
 });
 
-const emptyLine = (): LineItem => ({
+const emptyLine = (pphEnabled: boolean): LineItem => ({
   no: 1,
   description: "",
   specification: "",
@@ -48,6 +48,7 @@ const emptyLine = (): LineItem => ({
   volUnit: "Hari",
   price: 0,
   amount: 0,
+  usePPh: pphEnabled
 });
 
 export function POCreatorModal({ activeProjects, availableVendors = [], availableFreelancers = [], editDoc, onClose, onSuccess }: Props) {
@@ -64,7 +65,8 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const [showVendorSuggestions, setShowVendorSuggestions] = useState(false);
 
   // Line items
-  const [lineItems, setLineItems] = useState<LineItem[]>([{ ...emptyLine() }]);
+  const [pphType, setPphType] = useState<"NONE" | "PPH21" | "PPH23">("NONE");
+  const [lineItems, setLineItems] = useState<LineItem[]>([{ ...emptyLine(false) }]);
 
   // Terms
   const [paymentTerms, setPaymentTerms] = useState("Full Payment");
@@ -83,7 +85,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const [penaltyMemoUrl, setPenaltyMemoUrl] = useState("");
   const [isUploadingPenalty, setIsUploadingPenalty] = useState(false);
   const [notes, setNotes] = useState("");
-  const [pph21Mode, setPph21Mode] = useState<"none" | "deduction" | "grossup">("none");
+  const [usePPN, setUsePPN] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // SPK Specific
@@ -106,7 +108,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
       setVendorName(editDoc.vendorName);
       setVendorAddress(editDoc.vendorAddress || "");
       setVendorTaxId(editDoc.vendorTaxId || "");
-      setLineItems(editDoc.lineItems || [{ ...emptyLine() }]);
+      setLineItems(editDoc.lineItems || [{ ...emptyLine(false) }]);
       setPaymentTerms(editDoc.paymentTerms || "");
       setPaymentSchedule(editDoc.paymentSchedule || []);
       setDeliveryDate(editDoc.deliveryDate || "");
@@ -114,7 +116,14 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
       setBillingInstruction(editDoc.billingInstruction || "");
       setBillingTerms(editDoc.billingTerms || []);
       setNotes(editDoc.notes || "");
-      setPph21Mode(editDoc.pph21Mode || (editDoc.usePPh21 ? "deduction" : "none"));
+      
+      if (editDoc.pph21Mode === "grossup") {
+        setPphType(editDoc.usePPh21 ? "PPH21" : "NONE");
+      } else if (editDoc.pph21Mode === "deduction") {
+        setPphType("PPH21");
+      }
+      
+      setUsePPN(editDoc.usePPN || false);
       setVenue(editDoc.venue || "");
       setDuration(editDoc.duration || "");
       setLampiran(editDoc.lampiran || "");
@@ -142,27 +151,13 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
     });
   };
 
-  const addLine = () => setLineItems(prev => [...prev, { ...emptyLine(), no: prev.length + 1 }]);
+  const addLine = () => setLineItems(prev => [...prev, { ...emptyLine(pphType !== "NONE"), no: prev.length + 1 }]);
   const removeLine = (idx: number) => setLineItems(prev => prev.filter((_, i) => i !== idx));
 
   const subtotalItems = lineItems.reduce((s, l) => s + (l.amount || 0), 0);
-  
-  let docGross = subtotalItems;
-  let docNet = subtotalItems;
-  let docTax = 0;
-
-  if (pph21Mode === "deduction") {
-    docGross = subtotalItems;
-    docNet = subtotalItems * 0.975;
-    docTax = docGross - docNet;
-  } else if (pph21Mode === "grossup") {
-    docGross = subtotalItems / 0.975;
-    docNet = subtotalItems;
-    docTax = docGross - docNet;
-  }
-
-  const grandTotal = docNet;
-  const finalDocGross = docGross;
+  const ppnAmount = usePPN ? subtotalItems * 0.11 : 0;
+  const totalPO = subtotalItems + ppnAmount;
+  const grandTotal = totalPO;
 
   const toggleBillingTerm = (term: string) => {
     setBillingTerms(prev => prev.includes(term) ? prev.filter(t => t !== term) : [...prev, term]);
@@ -249,7 +244,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         lineItems, documentTotal: grandTotal, paymentTerms, paymentSchedule: finalPaymentSchedule,
         deliveryDate, shipTo, billingInstruction, billingTerms, notes, venue, duration, lampiran, workScope,
         paymentKeterangan, penaltyMemoUrl: finalMemoUrl, description: lineItems[0]?.description || "",
-        pph21Mode, usePPh21: pph21Mode !== "none", grossAmount: finalDocGross, taxAmount: docTax, netAmount: grandTotal,
+        pphType, usePPh21: pphType !== "NONE", usePPN, grossAmount: docGross, taxAmount: pphAmount, ppnAmount, netAmount: grandTotal, totalPO,
         preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
       };
 
@@ -367,12 +362,12 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                 <div className="p-input-group"><label>Vendor Name</label><input className="p-input" value={vendorName} onChange={e => setVendorName(e.target.value)} /></div>
                 <div className="p-input-group"><label>Phone</label><input className="p-input" value={vendorPhone} onChange={e => setVendorPhone(e.target.value)} /></div>
                 <div className="p-input-group"><label>Tax ID (NPWP)</label><input className="p-input" value={vendorTaxId} onChange={e => setVendorTaxId(e.target.value)} placeholder="00.000.000.0-000.000" /></div>
-                <div className="p-input-group"><label>PPh21 Mode</label>
-                  <select className="p-input" value={pph21Mode} onChange={e => setPph21Mode(e.target.value as any)}>
-                    <option value="none">No PPh21</option>
-                    <option value="deduction">Deduction (PPH 2.5%)</option>
-                    <option value="grossup">Gross Up (PPH 2.5%)</option>
-                  </select>
+                <div className="p-input-group">
+                  <label>PPN Status</label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', padding: '10px 14px', borderRadius: '8px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={usePPN} onChange={e => setUsePPN(e.target.checked)} style={{ width: '16px', height: '16px' }} />
+                    <span style={{ fontSize: '13px', color: usePPN ? '#378ADD' : '#71717a', fontWeight: 600 }}>{usePPN ? 'Menggunakan PPN (11%)' : 'Menggunakan PPN'}</span>
+                  </label>
                 </div>
                 {docType !== "PO" && (
                   <>
@@ -439,18 +434,24 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                   </table>
                   <div style={{ padding: '20px', background: '#18181b', display: 'flex', justifyContent: 'flex-end', gap: '24px', alignItems: 'baseline' }}>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '10px', color: '#52525b' }}>Gross Amount</div>
-                      <div style={{ fontSize: '14px', color: '#e4e4e7' }}>{formatCurrencyIDR(finalDocGross)}</div>
+                      <div style={{ fontSize: '10px', color: '#52525b' }}>Subtotal</div>
+                      <div style={{ fontSize: '14px', color: '#e4e4e7' }}>{formatCurrencyIDR(subtotalItems)}</div>
                     </div>
-                    {pph21Mode !== "none" && (
+                    {pphType !== "NONE" && (
                       <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '10px', color: '#52525b' }}>Tax (PPh21)</div>
-                        <div style={{ fontSize: '14px', color: '#ef4444' }}>- {formatCurrencyIDR(docTax)}</div>
+                        <div style={{ fontSize: '10px', color: '#52525b' }}>PPh ({pphType === "PPH21" ? "2.5%" : "2.0%"})</div>
+                        <div style={{ fontSize: '14px', color: '#ef4444' }}>- {formatCurrencyIDR(pphAmount)}</div>
+                      </div>
+                    )}
+                    {usePPN && (
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '10px', color: '#52525b' }}>PPN (11%)</div>
+                        <div style={{ fontSize: '14px', color: '#EF9F27' }}>+ {formatCurrencyIDR(ppnAmount)}</div>
                       </div>
                     )}
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '10px', color: '#378ADD', fontWeight: 700 }}>Total Net Pay</div>
-                      <div style={{ fontSize: '24px', fontWeight: 700, color: '#378ADD' }}>{formatCurrencyIDR(grandTotal)}</div>
+                      <div style={{ fontSize: '10px', color: '#378ADD', fontWeight: 700 }}>Total PO Value</div>
+                      <div style={{ fontSize: '24px', fontWeight: 700, color: '#378ADD' }}>{formatCurrencyIDR(totalPO)}</div>
                     </div>
                   </div>
                 </div>

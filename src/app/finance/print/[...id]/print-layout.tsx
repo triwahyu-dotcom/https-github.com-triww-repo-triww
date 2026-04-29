@@ -224,10 +224,22 @@ export function PrintLayout({ rfp, doc }: Props) {
                   {formatCurrency(rfp.totalAmount)}
                 </td>
               </tr>
+              {rfp.taxAmount > 0 && (
+                <tr>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f', fontWeight: '500' }}>
+                    PPh {rfp.pphType === "PPH21" ? "21" : "23"} Deduction
+                  </td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f' }}>
+                    - {formatCurrency(rfp.taxAmount)}
+                  </td>
+                </tr>
+              )}
               <tr>
-                <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold", textAlign: "right" }}>Total Amount</td>
-                <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold", textAlign: "right" }}>
-                  {formatCurrency(rfp.totalAmount)}
+                <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold", textAlign: "right", background: '#f8f9fa' }}>
+                  {rfp.taxAmount > 0 ? "Total Net Payment" : "Total Amount"}
+                </td>
+                <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold", textAlign: "right", background: '#f8f9fa' }}>
+                  {formatCurrency(rfp.netAmount || rfp.totalAmount)}
                 </td>
               </tr>
             </tbody>
@@ -373,18 +385,18 @@ export function PrintLayout({ rfp, doc }: Props) {
                   </tbody>
                   <tfoot>
                     <tr style={{ fontWeight: 'bold' }}>
-                      <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>NOMINAL DI SPK (GROSS)</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px', background: '#f9f9f9' }}>{formatCurrency(doc.grossAmount || calculatedTotal)}</td>
+                      <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal + (doc.taxAmount || 0))}</td>
                     </tr>
-                    {doc.usePPh21 && (
-                      <tr style={{ color: '#d32f2f' }}>
-                        <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPh 21 (2,5%)</td>
-                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>- {formatCurrency(doc.taxAmount || (calculatedTotal * 0.025))}</td>
+                    {(doc as any).usePPN && (
+                      <tr style={{ color: '#ff9900' }}>
+                        <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPN (11%)</td>
+                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>+ {formatCurrency((doc as any).ppnAmount || 0)}</td>
                       </tr>
                     )}
                     <tr style={{ fontWeight: 'bold', borderTop: '2px solid #333' }}>
-                      <td colSpan={10} style={{ textAlign: 'right', padding: '10px', background: '#f0f4f8' }}>TOTAL YANG DITRANSFER (NET)</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '14px', background: '#f0f4f8', color: '#004a99' }}>{formatCurrency(doc.netAmount || doc.amount)}</td>
+                      <td colSpan={10} style={{ textAlign: 'right', padding: '10px', background: '#f0f4f8' }}>TOTAL PURCHASE ORDER</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '14px', background: '#f0f4f8', color: '#004a99' }}>{formatCurrency((doc as any).totalPO || doc.amount)}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -563,20 +575,29 @@ export function PrintLayout({ rfp, doc }: Props) {
 
           <div style={{ marginBottom: '25px', padding: '15px', border: '1px solid #ddd', background: '#fafafa', borderRadius: '4px' }}>
              <p style={{ margin: '0 0 10px', fontSize: '14px', borderBottom: '1px solid #eee', paddingBottom: '8px' }}><strong>Rincian Nilai Pekerjaan :</strong></p>
-             <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
-                <div style={{ whiteSpace: 'nowrap' }}>Nominal di SPK (Gross)</div>
-                <div>: <strong>{formatCurrency(doc.grossAmount || doc.amount / (doc.usePPh21 ? 0.975 : 1))}</strong></div>
+             {(() => {
+                const calculatedTotal = (doc.lineItems && doc.lineItems.length > 0) 
+                  ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
+                  : doc.amount;
                 
-                {doc.usePPh21 && (
-                  <>
-                    <div style={{ whiteSpace: 'nowrap', color: '#d32f2f' }}>PPh 21 (2,5%)</div>
-                    <div style={{ color: '#d32f2f' }}>: - {formatCurrency(doc.taxAmount || (doc.grossAmount ? doc.grossAmount * 0.025 : 0))}</div>
-                  </>
-                )}
-                
-                <div style={{ whiteSpace: 'nowrap', fontSize: '13px', marginTop: '5px' }}><strong>Total yang ditransfer (Net)</strong></div>
-                <div style={{ fontSize: '13px', marginTop: '5px' }}>: <strong>{formatCurrency(doc.netAmount || doc.amount)}</strong></div>
-              </div>
+                return (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
+                    <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
+                    <div>: <strong>{formatCurrency(calculatedTotal + (doc.taxAmount || 0))}</strong></div>
+
+                    {(doc as any).usePPN && (
+                      <>
+                        <div style={{ whiteSpace: 'nowrap', color: '#ff9900' }}>PPN (11%)</div>
+                        <div style={{ color: '#ff9900' }}>: + {formatCurrency((doc as any).ppnAmount || 0)}</div>
+                      </>
+                    )}
+                    
+                    <div style={{ whiteSpace: 'nowrap', fontSize: '13px', marginTop: '5px' }}><strong>Total Nilai Kontrak</strong></div>
+                    <div style={{ fontSize: '13px', marginTop: '5px' }}>: <strong>{formatCurrency((doc as any).totalPO || doc.amount)}</strong></div>
+                  </div>
+                );
+             })()}
+          </div>
               
               <p style={{ margin: '15px 0 10px', fontSize: '12px' }}>
                 <strong>Terbilang:</strong> 
@@ -604,7 +625,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                    </>
                  )}
               </ul>
-          </div>
+
 
           <p style={{ marginTop: '40px', textAlign: 'right' }}>Jakarta, {today}</p>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
@@ -748,18 +769,18 @@ export function PrintLayout({ rfp, doc }: Props) {
                      </tr>
                      <tr style={{ height: '45px' }}>
                         <td style={{ padding: '10px 0' }}>Banyaknya Uang (Amount in Words)</td>
-                        <td style={{ padding: '10px 0', fontStyle: 'italic', background: '#f5f5f5', paddingLeft: '10px', fontWeight: '600' }}>: {terbilang(doc?.amount || rfp?.totalAmount || 0)}</td>
+                        <td style={{ padding: '10px 0', fontStyle: 'italic', background: '#f5f5f5', paddingLeft: '10px', fontWeight: '600' }}>: {terbilang(rfp?.netAmount || doc?.amount || rfp?.totalAmount || 0)}</td>
                      </tr>
                      <tr style={{ height: '45px' }}>
                         <td style={{ padding: '10px 0' }}>Untuk Pembayaran (For Payment of)</td>
-                        <td style={{ padding: '10px 0' }}>: {doc?.description || rfp?.notes || doc?.projectName}</td>
+                        <td style={{ padding: '10px 0' }}>: {doc?.description || rfp?.notes || doc?.projectName} {rfp?.taxAmount ? "(Net of Taxes)" : ""}</td>
                      </tr>
                   </tbody>
                </table>
 
                <div style={{ marginTop: '50px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <div style={{ background: '#eee', padding: '15px 30px', border: '2px solid #333', fontSize: '24px', fontWeight: 'bold' }}>
-                     Rp {new Intl.NumberFormat("id-ID").format(doc?.amount || rfp?.totalAmount || 0)},-
+                     Rp {new Intl.NumberFormat("id-ID").format(rfp?.netAmount || doc?.amount || rfp?.totalAmount || 0)},-
                   </div>
                   <div style={{ textAlign: 'center', width: '250px' }}>
                      <div>Jakarta, {today}</div>

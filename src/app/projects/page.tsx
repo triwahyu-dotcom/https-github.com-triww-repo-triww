@@ -3,17 +3,24 @@ import { buildIntegratedDashboards } from "@/lib/integration/view-models";
 import { getProjectDashboardData, getJsonClients } from "@/lib/project/store";
 import { getDashboardData } from "@/lib/vendor/store";
 import { getManPowerData } from "@/lib/manpower/store";
+import { getTeamMembers } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
-  const [projectData, vendorData, freelancerData, clients] = await Promise.all([
+  const [projectData, vendorData, freelancerData, clients, teamMembers] = await Promise.all([
     getProjectDashboardData(),
     getDashboardData(),
     getManPowerData(),
-    getJsonClients()
+    getJsonClients(),
+    getTeamMembers()
   ]);
+  
   const integrated = await buildIntegratedDashboards(projectData, vendorData, freelancerData, clients);
+  const finalProjectData = {
+    ...integrated.projectData,
+    teamMembers
+  };
 
-  return <ProjectDashboard initialData={integrated.projectData as any} />;
+  return <ProjectDashboard initialData={finalProjectData as any} />;
 }

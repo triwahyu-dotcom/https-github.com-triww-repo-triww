@@ -18,7 +18,8 @@ import {
   X,
   Plus,
   ArrowRight,
-  Receipt
+  Receipt,
+  Trash2
 } from "lucide-react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
@@ -184,6 +185,18 @@ export function FinanceOpsDashboard({ initialData }: Props) {
     window.location.reload();
   };
 
+  const handleDeleteDoc = async (id: string) => {
+    if (!confirm("Hapus dokumen ini secara permanen?")) return;
+    await fetch(`/api/finance/document?id=${id}`, { method: "DELETE" });
+    window.location.reload();
+  };
+
+  const handleDeleteRfp = async (id: string) => {
+    if (!confirm("Hapus RFP ini secara permanen?")) return;
+    await fetch(`/api/finance/rfp?id=${id}`, { method: "DELETE" });
+    window.location.reload();
+  };
+
   const docVerificationQueue = useMemo(() => (initialData.expenseDocuments || []).filter(d => d.status === "pending_finance"), [initialData.expenseDocuments]);
   const verificationQueue = useMemo(() => (initialData.rfps || []).filter(r => r.status === "pending_finance"), [initialData.rfps]);
   const paymentQueue = useMemo(() => (initialData.rfps || []).filter(r => r.status === "approved"), [initialData.rfps]);
@@ -301,6 +314,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                     <button onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Audit</button>
                     <button onClick={() => handleRejectDoc(doc.id)} style={{ background: 'transparent', border: '0.5px solid rgba(226,75,74,0.2)', color: '#F09595', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Return</button>
+                    <button onClick={() => handleDeleteDoc(doc.id)} style={{ background: 'transparent', border: '0.5px solid rgba(226,75,74,0.2)', color: '#F09595', borderRadius: '6px', padding: '4px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Hapus Dokumen"><Trash2 size={14} /></button>
                     <button onClick={() => setSelectedReviewDoc(doc)} style={{ background: '#378ADD', color: '#fff', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Sign & Forward</button>
                  </div>
                </div>
@@ -325,6 +339,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                        <>
                          <button onClick={() => handleRejectRfp(rfp.id)} style={{ background: 'transparent', border: '0.5px solid rgba(226,75,74,0.2)', color: '#F09595', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Return</button>
                          <button onClick={() => setSelectedReviewRfp(rfp)} style={{ background: '#378ADD', color: '#fff', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Review & Sign</button>
+                         <button onClick={() => handleDeleteRfp(rfp.id)} style={{ background: 'transparent', border: '0.5px solid rgba(226,75,74,0.2)', color: '#F09595', borderRadius: '6px', padding: '4px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Hapus RFP"><Trash2 size={14} /></button>
                        </>
                     )}
                     {activeTab === 'payment' && (

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readDocuments, readRFPs, saveDocument, saveRFP } from "@/lib/finance/store";
+import { readDocuments, readRFPs, saveDocument, saveRFP, deleteRFP } from "@/lib/finance/store";
 import { RequestForPayment } from "@/lib/finance/types";
 import { logger } from "@/lib/logger";
 
@@ -15,6 +15,10 @@ export async function POST(request: Request) {
       notes,
       requiredDate,
       vendorInvoiceUrl,
+      taxAmount,
+      ppnAmount,
+      netAmount,
+      grossAmount,
     } = body;
 
     if (!documentId || rfpAmount === undefined) {
@@ -73,6 +77,10 @@ export async function POST(request: Request) {
       notes: notes || "",
       terminLabel: paymentTerms,
       vendorInvoiceUrl,
+      taxAmount,
+      ppnAmount,
+      netAmount,
+      grossAmount,
     };
 
     if (!sourceDoc.rfpIds) sourceDoc.rfpIds = [];
@@ -122,5 +130,21 @@ export async function PATCH(request: Request) {
     logger.error("FinanceAPI", "RFP_UPDATE_FAILED", { error });
     console.error("[PATCH /api/finance/rfp]", error);
     return NextResponse.json({ error: "Failed to update RFP" }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing RFP id" }, { status: 400 });
+
+    await deleteRFP(id);
+    logger.audit("FinanceAPI", "RFP_DELETED", { rfpId: id });
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    logger.error("FinanceAPI", "RFP_DELETE_FAILED", { error });
+    console.error("[DELETE /api/finance/rfp]", error);
+    return NextResponse.json({ error: "Failed to delete RFP" }, { status: 500 });
   }
 }

@@ -22249,63 +22249,6 @@
         "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
       }
     ],
-    "mainFolder": "",
-    "ceAmount": 816917400,
-    "billingSchedule": [
-      {
-        "id": "top-1",
-        "amount": 0,
-        "status": "scheduled",
-        "termName": "Down Payment (DP)",
-        "percentage": 50,
-        "targetDate": ""
-      },
-      {
-        "id": "top-2",
-        "amount": 0,
-        "status": "scheduled",
-        "termName": "Termin II",
-        "percentage": 30,
-        "targetDate": ""
-      },
-      {
-        "id": "top-3",
-        "amount": 0,
-        "status": "scheduled",
-        "termName": "Pelunasan / Final",
-        "percentage": 20,
-        "targetDate": ""
-      }
-    ],
-    "extractedBudgets": [
-      {
-        "vendorName": "Choir Stage",
-        "total": 6500000,
-        "schedule": {
-          "488x366x10cm, 2 layer, multiplek, fin white matte melamint": 6500000
-        }
-      },
-      {
-        "vendorName": "Lighting System",
-        "total": 7500000,
-        "schedule": {
-          "4 beam, 8 parled, 8 fresnell": 7500000
-        }
-      },
-      {
-        "vendorName": "Choir",
-        "total": 35000000,
-        "schedule": {
-          "10 pax. Incl.Riders & GR": 35000000
-        }
-      },
-      {
-        "vendorName": "Home Band",
-        "total": 10000000,
-        "schedule": {
-          "5 pax, 2 hours, accoustic": 10000000
-        }
-      }
-    ]
+    "mainFolder": ""
   }
 ]

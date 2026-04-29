@@ -14,30 +14,51 @@ export function getAdminCredentials() {
 }
 
 export async function validateTeamMember(email?: string, password?: string) {
-  if (!email || !password) return false;
+  if (!email || !password) return null;
 
-  // 1. Cek kredensial dari Environment Variables (Vercel Settings) jika ada
+  // 1. Cek kredensial dari Environment Variables (Vercel Settings) sebagai Admin Utama
   if (DEFAULT_ADMIN_EMAIL && DEFAULT_ADMIN_PASSWORD) {
     if (email === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD) {
-      return true;
+      return { email, role: "admin", name: "Super Admin" };
     }
   }
 
-  // 2. Cek di tabel team_members Supabase (Utama)
-  if (!supabase) return false;
+  // 2. Cek di tabel team_members Supabase (User lainnya)
+  if (!supabase) return null;
   
   const { data, error } = await supabase
     .from("team_members")
-    .select("id")
+    .select("id, email, role, name")
     .eq("email", email)
     .eq("password", password)
     .single();
 
   if (error || !data) {
-    return false;
+    return null;
   }
 
-  return true;
+  return {
+    id: data.id,
+    email: data.email,
+    role: data.role || "member", // Default role if not set
+    name: data.name || "Team Member"
+  };
+}
+
+export async function getTeamMembers() {
+  if (!supabase) return [];
+  
+  const { data, error } = await supabase
+    .from("team_members")
+    .select("id, name, email, role")
+    .order("name", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching team members:", error);
+    return [];
+  }
+
+  return data;
 }
 
 export async function isAdminAuthenticated() {

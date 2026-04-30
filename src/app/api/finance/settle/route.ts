@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readRFPs, saveRFP } from "@/lib/finance/store";
+import { readRFPs, saveRFP, readDocuments, saveDocument } from "@/lib/finance/store";
 import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
@@ -18,8 +18,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "RFP not found" }, { status: 404 });
     }
 
-    if (rfp.status !== "paid") {
-      return NextResponse.json({ error: "Only paid RFPs can be settled" }, { status: 400 });
+    const allowedStatuses = ["paid", "pending_settlement_approval", "settled"];
+    if (!allowedStatuses.includes(rfp.status)) {
+      return NextResponse.json({ error: `Hanya RFP dengan status PAID yang bisa di-settle. Status saat ini: ${rfp.status}` }, { status: 400 });
     }
 
     rfp.status = "pending_settlement_approval";
@@ -32,6 +33,16 @@ export async function POST(request: Request) {
     };
 
     await saveRFP(rfp);
+
+    // Update linked CA document status to "settlement_audit"
+    const docs = await readDocuments();
+    for (const docId of rfp.documentIds || []) {
+      const doc = docs.find(d => d.id === docId);
+      if (doc && doc.documentType === "CASH_ADVANCE") {
+        doc.status = "settlement_audit" as any;
+        await saveDocument(doc);
+      }
+    }
 
     logger.audit("FinanceAPI", "RFP_SETTLEMENT_SUBMITTED", { rfpId, actualAmount: Number(actualAmount), difference: Number(difference) });
     return NextResponse.json({ success: true });

@@ -60,7 +60,7 @@ export function WorkspaceShell({
     { label: "Document Center", href: "/docs", icon: <FolderSearch size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director"] },
   ];
 
-  const filteredNavItems = navItems;
+  const filteredNavItems = navItems; // RBAC Disabled: All items visible
 
   return (
     <div className="pm-app">
@@ -94,9 +94,9 @@ export function WorkspaceShell({
 
         <div style={{ marginTop: "auto", padding: "16px 12px", borderTop: "1px solid var(--line)", display: isCollapsed ? "none" : "flex", gap: "8px", flexDirection: "column" }}>
           <p className="pm-sidebar-label" style={{ marginBottom: "4px" }}>Active Identity</p>
-          <div style={{ padding: '8px', background: 'var(--panel-soft)', border: '1px solid var(--line)', borderRadius: '6px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text)', textTransform: 'capitalize' }}>{userRole}</div>
-            <div style={{ fontSize: '10px', color: 'var(--text-soft)', marginTop: '2px' }}>Role-based Access Active</div>
+          <div style={{ padding: '8px', background: 'rgba(93, 202, 165, 0.1)', border: '1px solid rgba(93, 202, 165, 0.2)', borderRadius: '6px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green)', textTransform: 'capitalize' }}>{userRole}</div>
+            <div style={{ fontSize: '10px', color: 'var(--green)', marginTop: '2px', fontWeight: 700 }}>RBAC DISABLED</div>
           </div>
 
           {userRole === "admin" && (

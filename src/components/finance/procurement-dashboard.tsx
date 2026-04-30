@@ -25,6 +25,7 @@ import {
 import { POCreatorModal } from "./po-creator-modal";
 import { CashAdvanceModal } from "./cash-advance-modal";
 import { RfpFromDocModal } from "./rfp-from-doc-modal";
+import { SettlementModal } from "./settlement-modal";
 
 import { FilterBar } from "./filter-bar";
 import { updateDocStatus, updateRFPStatus } from "@/lib/finance/actions";
@@ -50,6 +51,8 @@ const statusBadgeStyles: Record<string, { bg: string, color: string }> = {
   paid: { bg: 'rgba(15,110,86,0.15)', color: '#5DCAA5' },
   draft: { bg: 'rgba(255,255,255,0.06)', color: '#71717a' },
   returned: { bg: 'rgba(226,75,74,0.15)', color: '#F09595' },
+  settlement_pending: { bg: 'rgba(255,255,255,0.06)', color: '#a1a1aa' },
+  settlement_audit: { bg: 'rgba(55,138,221,0.15)', color: '#85B7EB' },
 };
 
 const docTypeStyles: Record<string, { bg: string, color: string }> = {
@@ -60,7 +63,17 @@ const docTypeStyles: Record<string, { bg: string, color: string }> = {
 };
 
 export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [], availableFreelancers = [] }: Props) {
-  const [activeTab, setActiveTab] = useState<"docs" | "rfps">("docs");
+  const [activeTab, setActiveTab] = useState<"docs" | "rfps">(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("procurement-active-tab") as "docs" | "rfps") || "docs";
+    }
+    return "docs";
+  });
+
+  const handleTabChange = (tab: "docs" | "rfps") => {
+    setActiveTab(tab);
+    localStorage.setItem("procurement-active-tab", tab);
+  };
   const [showPOModal, setShowPOModal] = useState(false);
   const [showCAModal, setShowCAModal] = useState(false);
   const [selectedDocForRFP, setSelectedDocForRFP] = useState<ExpenseDocument | null>(null);
@@ -69,6 +82,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
 
   const [editDocData, setEditDocData] = useState<ExpenseDocument | null>(null);
   const [editRfpData, setEditRfpData] = useState<RequestForPayment | null>(null);
+  const [selectedRfpForSettlement, setSelectedRfpForSettlement] = useState<RequestForPayment | null>(null);
 
   const reload = () => window.location.reload();
 
@@ -186,7 +200,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
       {/* Tabs */}
       <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
         <button 
-          onClick={() => setActiveTab("docs")} 
+          onClick={() => handleTabChange("docs")} 
           style={{ 
             padding: "6px 14px", 
             borderRadius: "8px", 
@@ -204,7 +218,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           Dokumen Pengadaan <span style={{ opacity: 0.7 }}>({docs.length})</span>
         </button>
         <button 
-          onClick={() => setActiveTab("rfps")} 
+          onClick={() => handleTabChange("rfps")} 
           style={{ 
             padding: "6px 14px", 
             borderRadius: "8px", 
@@ -326,6 +340,18 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       Buat RFP
                     </button>
                   )}
+                  {doc.status === "settlement_pending" && doc.documentType === "CASH_ADVANCE" && (
+                    <button 
+                      onClick={() => {
+                        const linkedRfp = rfps.find(r => r.documentIds.includes(doc.id) && (r.status === "paid" || r.status === "settled"));
+                        if (linkedRfp) setSelectedRfpForSettlement(linkedRfp);
+                        else alert("RFP untuk CA ini belum lunas atau tidak ditemukan.");
+                      }} 
+                      style={{ background: 'rgba(239,159,39,0.15)', color: '#EF9F27', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', border: 'none', cursor: 'pointer' }}
+                    >
+                      Submit STL
+                    </button>
+                  )}
                   <button onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
                     Print
                   </button>
@@ -371,7 +397,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                 <div style={{ fontSize: '11px', color: '#52525b' }}>{rfp.paymentType}</div>
               </div>
               <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{rfp.projectName}</div>
-              <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
+              <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</div>
               <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
                 <span style={{ 
                   background: statusBadgeStyles[rfp.status]?.bg || 'rgba(255,255,255,0.06)', 
@@ -437,7 +463,15 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           allRfps={rfps}
           availableVendors={availableVendors}
           onClose={() => { setSelectedDocForRFP(null); setEditRfpData(null); }}
-          onSuccess={() => { setSelectedDocForRFP(null); setEditRfpData(null); reload(); }}
+          onSuccess={() => { setSelectedDocForRFP(null); setEditRfpData(null); handleTabChange("rfps"); reload(); }}
+        />
+      )}
+
+      {selectedRfpForSettlement && (
+        <SettlementModal 
+          rfp={selectedRfpForSettlement} 
+          isOpen={true} 
+          onClose={() => setSelectedRfpForSettlement(null)} 
         />
       )}
 

@@ -57,7 +57,7 @@ function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) 
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
       <div style={{ background: "var(--panel)", borderRadius: "16px", width: "100%", maxWidth: "480px", padding: "32px", border: "1px solid var(--line)" }}>
         <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>Upload Bukti Transfer</h3>
-        <p className="mini-meta" style={{ marginBottom: "24px" }}>RFP #{rfp.id.substring(0,8)} — {formatCurrencyIDR(rfp.totalAmount)}</p>
+        <p className="mini-meta" style={{ marginBottom: "24px" }}>RFP #{rfp.id.substring(0,8)} — {formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</p>
         
         <div style={{ marginBottom: "24px" }}>
           <label className="mini-meta">Pilih Gambar Bukti Transfer (Mandatory)</label>
@@ -331,7 +331,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                     <div style={{ fontSize: '13px', color: '#e4e4e7' }}>{rfp.projectName}</div>
                     <div style={{ fontSize: '11px', color: '#52525b' }}>{rfp.payeeName}</div>
                  </div>
-                 <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
+                 <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</div>
                  <div style={{ fontSize: '12px', color: '#71717a' }}>{formatDateFullID(rfp.requestDate)}</div>
                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end' }}>
                     <button onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Audit</button>
@@ -349,7 +349,7 @@ export function FinanceOpsDashboard({ initialData }: Props) {
                        <button onClick={async () => { await handleUpdateStatus(rfp.id, 'settled'); window.location.reload(); }} style={{ background: '#5DCAA5', color: '#fff', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Approve STL</button>
                     )}
                     {activeTab === 'settlement' && !rfp.settlementDetails && (
-                       <button onClick={() => setSelectedRfpForSettlement(rfp)} style={{ background: 'rgba(239,159,39,0.15)', color: '#EF9F27', borderRadius: '6px', padding: '4px 12px', fontSize: '11px', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Submit STL</button>
+                       <span style={{ fontSize: '11px', color: '#52525b', padding: '4px 12px' }}>Waiting Procurement</span>
                     )}
                     {rfp.paymentProofUrl && (
                        <button onClick={() => setViewProofUrl(rfp.paymentProofUrl!)} style={{ background: 'transparent', border: '0.5px solid rgba(151,196,89,0.3)', color: '#97C459', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', cursor: 'pointer' }}>Bukti</button>

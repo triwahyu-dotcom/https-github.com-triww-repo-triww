@@ -19,9 +19,11 @@ export async function POST(request: Request) {
       ppnAmount,
       netAmount,
       grossAmount,
+      pphType,
     } = body;
 
     if (!documentId || rfpAmount === undefined) {
+      console.log("RFP ERROR: Missing documentId or rfpAmount", { documentId, rfpAmount });
       return NextResponse.json({ error: "Missing documentId or rfpAmount" }, { status: 400 });
     }
 
@@ -29,10 +31,12 @@ export async function POST(request: Request) {
     const sourceDoc = allDocs.find(d => d.id === documentId);
 
     if (!sourceDoc) {
+      console.log("RFP ERROR: Source document not found", { documentId });
       return NextResponse.json({ error: "Source document not found" }, { status: 404 });
     }
 
     if (sourceDoc.status !== "approved" && sourceDoc.status !== "pending_finance" && sourceDoc.status !== "pending_c_level") {
+      console.log("RFP ERROR: Invalid document status", { docId: sourceDoc.id, status: sourceDoc.status });
       return NextResponse.json({ error: "Document must be approved or in review before creating an RFP" }, { status: 400 });
     }
 
@@ -40,16 +44,26 @@ export async function POST(request: Request) {
     const existingRFPs = allRFPs.filter(r => r.documentIds.includes(documentId));
     const totalRequested = existingRFPs.reduce((sum, r) => sum + r.totalAmount, 0);
 
-    if (totalRequested + Number(rfpAmount) > sourceDoc.amount + 1) {
-      return NextResponse.json({ error: "Total RFP amount exceeds document total" }, { status: 400 });
+    if (totalRequested + Number(rfpAmount) > (sourceDoc.amount || 0) + 10) {
+      console.log("RFP ERROR: Amount exceeds limit", { 
+        totalRequested, 
+        rfpAmount, 
+        docAmount: sourceDoc.amount,
+        diff: (totalRequested + Number(rfpAmount)) - (sourceDoc.amount || 0)
+      });
+      return NextResponse.json({ 
+        error: `Total RFP (Rp ${Math.round(totalRequested + Number(rfpAmount)).toLocaleString()}) melebihi limit dokumen (Rp ${Math.round(sourceDoc.amount || 0).toLocaleString()}). Sisa plafon: Rp ${Math.round((sourceDoc.amount || 0) - totalRequested).toLocaleString()}.` 
+      }, { status: 400 });
     }
 
     if (sourceDoc.paymentSchedule && sourceDoc.paymentSchedule.length > 0) {
       const terminIndex = sourceDoc.paymentSchedule.findIndex(s => s.label === paymentTerms);
+      console.log("RFP DEBUG: Termin check", { paymentTerms, terminIndex });
       if (terminIndex > 0) {
         const previousTermin = sourceDoc.paymentSchedule[terminIndex - 1];
         const prevExists = existingRFPs.some(r => r.terminLabel === previousTermin.label);
         if (!prevExists) {
+          console.log("RFP ERROR: Sequential termin missing", { previousTerminLabel: previousTermin.label });
           return NextResponse.json({ error: `Harus membuat RFP untuk ${previousTermin.label} terlebih dahulu.` }, { status: 400 });
         }
       }
@@ -78,6 +92,7 @@ export async function POST(request: Request) {
       terminLabel: paymentTerms,
       vendorInvoiceUrl,
       taxAmount,
+      pphType,
       ppnAmount,
       netAmount,
       grossAmount,

@@ -27,9 +27,13 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
     return null;
   };
 
+  const rfpsForDoc = allRfps.filter(r => r.documentIds && r.documentIds.includes(doc.id));
+  const totalPaid = rfpsForDoc.filter(r => r.status === "paid" || r.status === "settled" || r.status === "pending_finance" || r.status === "pending_c_level" || r.status === "approved").reduce((s, r) => s + r.totalAmount, 0);
+  const remainingAmount = Math.max(0, doc.amount - totalPaid);
+
   const nextTerm = editRfp ? null : getNextUnpaidTerm();
-  const defaultAmount = nextTerm ? (nextTerm.amount || Math.round(doc.amount * (nextTerm.percentage || 0) / 100)) : doc.amount;
-  const defaultTermLabel = nextTerm ? nextTerm.label : (doc.paymentSchedule && doc.paymentSchedule.length > 0 ? "" : "Full Payment");
+  const defaultAmount = nextTerm ? (nextTerm.amount || Math.round(doc.amount * (nextTerm.percentage || 0) / 100)) : Math.round(remainingAmount);
+  const defaultTermLabel = nextTerm ? nextTerm.label : (doc.paymentSchedule && doc.paymentSchedule.length > 0 ? "" : (isCA && totalPaid > 0 ? "Kekurangan Settlement" : "Full Payment"));
 
   const [selectedTermRatio, setSelectedTermRatio] = useState<"100" | "50" | "30" | "20" | "custom">("100");
   const [rfpAmount, setRfpAmount] = useState<number>(defaultAmount);
@@ -39,11 +43,21 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
   const [accountNo, setAccountNo] = useState("");
   const [accountName, setAccountName] = useState("");
   const [requiredDate, setRequiredDate] = useState("");
-  const [notes, setNotes] = useState(doc.description || "");
+  const [notes, setNotes] = useState(isCA && totalPaid > 0 ? `Kekurangan CA ${doc.projectName}` : (doc.description || ""));
+  const existingRfp = allRfps.find(r => r.documentIds.includes(doc.id) && r.terminLabel === (paymentTerms || "Full Payment"));
+  const isEditing = !!editRfp || !!existingRfp;
+  const targetRfpId = editRfp?.id || existingRfp?.id;
+
   const [invoiceFile, setInvoiceFile] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [pphType, setPphType] = useState<"NONE" | "PPH21" | "PPH23">("NONE");
-  const [taxableItems, setTaxableItems] = useState<Record<number, boolean>>({});
+  const [pphType, setPphType] = useState<"NONE" | "PPH21" | "PPH23">(doc.pphType || "NONE");
+  const [taxableItems, setTaxableItems] = useState<Record<number, boolean>>(() => {
+    const initial: Record<number, boolean> = {};
+    doc.lineItems?.forEach(li => {
+      if (li.usePPh) initial[li.no] = true;
+    });
+    return initial;
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -71,13 +85,19 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
     }
   });
 
+  const subtotalLineItems = doc.lineItems?.reduce((sum, li) => sum + li.amount, 0) || 0;
+  const isGrossedUp = doc.pph21Mode === "grossup";
+  const grossFactor = (isGrossedUp && doc.grossAmount && subtotalLineItems > 0) 
+    ? (doc.grossAmount / subtotalLineItems) 
+    : 1;
+
   const ratio = doc.amount > 0 ? rfpAmount / doc.amount : 0;
   const pphRate = pphType === "PPH21" ? 0.025 : (pphType === "PPH23" ? 0.02 : 0);
   
-  const taxableBase = doc.lineItems?.filter(li => taxableItems[li.no]).reduce((sum, li) => sum + li.amount, 0) || 0;
+  const taxableBase = doc.lineItems?.filter(li => taxableItems[li.no]).reduce((sum, li) => sum + (li.amount * grossFactor), 0) || 0;
   const rfpTaxableBase = taxableBase * ratio;
-  const rfpPPh = rfpTaxableBase * pphRate;
-  const netToVendor = rfpAmount - rfpPPh;
+  const rfpPPh = Math.round(rfpTaxableBase * pphRate);
+  const netToVendor = Math.round(rfpAmount - rfpPPh);
 
   const handleInvoiceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -94,19 +114,20 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/finance/rfp", {
-        method: editRfp ? "PATCH" : "POST",
+        method: targetRfpId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id: editRfp?.id, documentId: doc.id, rfpAmount, paymentTerms, paymentType,
+          id: targetRfpId, documentId: doc.id, rfpAmount, paymentTerms, paymentType,
           bankAccount: { bankName, accountNo, accountName }, notes, requiredDate, vendorInvoiceUrl: invoiceFile,
           taxAmount: rfpPPh, netAmount: netToVendor, pphType,
+          status: "pending_finance"
         }),
       });
       if (res.ok) {
         onSuccess();
       } else {
         const err = await res.json().catch(() => ({}));
-        alert(`Gagal: ${err.message || 'Server error'}`);
+        alert(`Gagal: ${err.error || err.message || 'Server error'}`);
       }
     } catch {
       alert("Terjadi kesalahan koneksi.");
@@ -151,14 +172,34 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
             <div style={{ marginBottom: '32px' }}>
                <h4 style={{ margin: '0 0 16px', fontSize: '11px', fontWeight: 700, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>Payment Schedule Selection</h4>
                <div style={{ display: 'grid', gap: '8px' }}>
-                  {doc.paymentSchedule.map((term, idx) => {
-                    const isPaid = allRfps.filter(r => r.documentIds.includes(doc.id)).some(r => r.terminLabel === term.label);
-                    const isNext = !isPaid && (idx === 0 || allRfps.filter(r => r.documentIds.includes(doc.id)).some(r => r.terminLabel === doc.paymentSchedule![idx-1].label));
+                   {doc.paymentSchedule.map((term, idx) => {
+                    const termExistingRfp = allRfps.find(r => r.documentIds.includes(doc.id) && r.terminLabel === term.label);
+                    const isPaid = termExistingRfp?.status === "paid" || termExistingRfp?.status === "settled";
+                    const isRequested = !!termExistingRfp && !isPaid;
+                    const isNext = !termExistingRfp && (idx === 0 || allRfps.some(r => r.documentIds.includes(doc.id) && r.terminLabel === doc.paymentSchedule![idx-1].label));
+                    
                     return (
-                      <div key={idx} style={{ padding: '16px 20px', borderRadius: '12px', background: isNext ? 'rgba(55,138,221,0.05)' : isPaid ? 'rgba(34,197,94,0.03)' : '#18181b', border: isNext ? '1.5px solid #378ADD' : '1px solid rgba(255,255,255,0.06)', opacity: (!isPaid && !isNext) ? 0.4 : 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div key={idx} style={{ 
+                        padding: '16px 20px', 
+                        borderRadius: '12px', 
+                        background: isNext ? 'rgba(55,138,221,0.05)' : (isPaid || isRequested) ? 'rgba(34,197,94,0.03)' : '#18181b', 
+                        border: isNext ? '1.5px solid #378ADD' : '1px solid rgba(255,255,255,0.06)', 
+                        opacity: (!existingRfp && !isNext) ? 0.4 : 1, 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center' 
+                      }}>
                         <div>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            {isPaid ? <div style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>PAID</div> : isNext ? <div style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>UP NEXT</div> : <div style={{ background: '#111113', color: '#52525b', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>PENDING</div>}
+                            {isPaid ? (
+                              <div style={{ background: 'rgba(34,197,94,0.1)', color: '#22c55e', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>PAID</div>
+                            ) : isRequested ? (
+                              <div style={{ background: 'rgba(239,159,39,0.1)', color: '#EF9F27', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>REQUESTED</div>
+                            ) : isNext ? (
+                              <div style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>UP NEXT</div>
+                            ) : (
+                              <div style={{ background: '#111113', color: '#52525b', padding: '4px 8px', borderRadius: '6px', fontSize: '10px', fontWeight: 700 }}>PENDING</div>
+                            )}
                             <span style={{ fontSize: '14px', fontWeight: 600, color: '#f4f4f5' }}>{term.label} ({term.percentage}%)</span>
                           </div>
                           <div style={{ fontSize: '12px', color: '#71717a', marginTop: '4px' }}>Target: {term.date || "Upon delivery"}</div>
@@ -175,7 +216,14 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
             <div className="p-input-group">
               <label>Amount to Request (IDR)</label>
               <div style={{ position: 'relative' }}>
-                <input type="number" className="p-input" style={{ fontSize: '18px', fontWeight: 800, color: '#378ADD', background: doc.paymentSchedule?.length ? '#111113' : '#111113' }} value={rfpAmount || ""} disabled={!!doc.paymentSchedule?.length} onChange={e => setRfpAmount(Number(e.target.value))} />
+                <input 
+                  type="number" 
+                  className="p-input" 
+                  style={{ fontSize: '18px', fontWeight: 800, color: '#378ADD', background: '#111113' }} 
+                  value={rfpAmount ? Math.round(rfpAmount) : ""} 
+                  disabled={!!doc.paymentSchedule?.length} 
+                  onChange={e => setRfpAmount(Number(e.target.value))} 
+                />
                 {doc.paymentSchedule?.length && <div style={{ position: 'absolute', right: '12px', top: '10px', fontSize: '10px', fontWeight: 700, color: '#378ADD' }}>LOCKED</div>}
               </div>
             </div>
@@ -206,7 +254,7 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
                     {doc.lineItems?.map((li) => (
                       <tr key={li.no} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
                         <td style={{ padding: '8px', color: '#e4e4e7' }}>{li.description}</td>
-                        <td style={{ padding: '8px', textAlign: 'right', color: '#a1a1aa' }}>{formatCurrencyIDR(li.amount)}</td>
+                        <td style={{ padding: '8px', textAlign: 'right', color: '#a1a1aa' }}>{formatCurrencyIDR(li.amount * grossFactor)}</td>
                         <td style={{ padding: '8px', textAlign: 'center' }}>
                           <input type="checkbox" checked={!!taxableItems[li.no]} onChange={e => setTaxableItems(prev => ({ ...prev, [li.no]: e.target.checked }))} style={{ cursor: 'pointer' }} />
                         </td>
@@ -274,7 +322,27 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
           </div>
           <div style={{ display: 'flex', gap: '12px' }}>
             <button onClick={onClose} style={{ padding: '12px 24px', background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
-            <button onClick={handleSubmit} disabled={isSubmitting || rfpAmount === 0} style={{ padding: '12px 32px', background: '#378ADD', border: 'none', borderRadius: '10px', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer', opacity: (isSubmitting || rfpAmount === 0) ? 0.5 : 1, display: 'flex', alignItems: 'center', gap: '8px' }}>{isSubmitting ? 'Processing...' : 'Submit Request'} <ArrowRight size={16} /></button>
+            <button 
+              onClick={handleSubmit} 
+              disabled={isSubmitting || rfpAmount === 0} 
+              style={{ 
+                padding: '12px 32px', 
+                background: '#378ADD', 
+                border: 'none', 
+                borderRadius: '10px', 
+                color: '#fff', 
+                fontSize: '13px', 
+                fontWeight: 700, 
+                cursor: 'pointer', 
+                opacity: (isSubmitting || rfpAmount === 0) ? 0.5 : 1, 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '8px' 
+              }}
+            >
+              {isSubmitting ? 'Processing...' : targetRfpId ? 'Update Existing Request' : 'Submit Request'} 
+              <ArrowRight size={16} />
+            </button>
           </div>
         </div>
 

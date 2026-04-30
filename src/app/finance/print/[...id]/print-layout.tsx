@@ -14,9 +14,10 @@ import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 interface Props {
   rfp?: RequestForPayment;
   doc?: ExpenseDocument;
+  relatedRfps?: RequestForPayment[];
 }
 
-export function PrintLayout({ rfp, doc }: Props) {
+export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
   const [mounted, setMounted] = useState(false);
   const [onlyRender, setOnlyRender] = useState<string | null>(null);
 
@@ -43,7 +44,8 @@ export function PrintLayout({ rfp, doc }: Props) {
     const units = ['', 'satu', 'dua', 'tiga', 'empat', 'lima', 'enam', 'tujuh', 'delapan', 'sembilan', 'sepuluh', 'sebelas'];
     let result = '';
 
-    if (amount === 0) return 'nol';
+    const roundedAmount = Math.round(amount);
+    if (roundedAmount === 0) return 'nol';
 
     const getTerbilang = (n: number): string => {
       let temp = '';
@@ -69,7 +71,7 @@ export function PrintLayout({ rfp, doc }: Props) {
       return temp.trim();
     };
 
-    result = getTerbilang(amount);
+    result = getTerbilang(roundedAmount);
     return result.charAt(0).toUpperCase() + result.slice(1) + ' rupiah';
   };
 
@@ -378,8 +380,8 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <td style={{ textAlign: 'center' }}>{item.freqUnit}</td>
                         <td style={{ textAlign: 'center' }}>{item.vol}</td>
                         <td style={{ textAlign: 'center' }}>{item.volUnit}</td>
-                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(Math.round(item.price * displayFactor))}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(Math.round(item.amount * displayFactor))}</td>
+                        <td style={{ textAlign: 'right' }}>{formatCurrency(item.price * displayFactor)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(item.amount * displayFactor)}</td>
                       </tr>
                     )) : (
                       <tr>
@@ -392,15 +394,15 @@ export function PrintLayout({ rfp, doc }: Props) {
                         <td style={{ textAlign: 'center' }}>-</td>
                         <td style={{ textAlign: 'center' }}>1</td>
                         <td style={{ textAlign: 'center' }}>-</td>
-                        <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(Math.round(doc.amount * displayFactor))}</td>
-                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(Math.round(doc.amount * displayFactor))}</td>
+                        <td style={{ textAlign: 'right' }}>{formatCurrency(doc.amount * displayFactor)}</td>
+                        <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{formatCurrency(doc.amount * displayFactor)}</td>
                       </tr>
                     )}
                   </tbody>
                   <tfoot>
                     <tr style={{ fontWeight: 'bold' }}>
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
-                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(Math.round(calculatedTotal * displayFactor))}</td>
+                      <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal * displayFactor)}</td>
                     </tr>
                     {(doc as any).usePPN && (
                       <tr style={{ color: '#ff9900' }}>
@@ -593,7 +595,7 @@ export function PrintLayout({ rfp, doc }: Props) {
                 return (
                   <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
-                    <div>: <strong>{formatCurrency(Math.round(calculatedTotal * displayFactor))}</strong></div>
+                    <div>: <strong>{formatCurrency(calculatedTotal * displayFactor)}</strong></div>
 
 
                     {(doc as any).usePPN && (
@@ -811,107 +813,113 @@ export function PrintLayout({ rfp, doc }: Props) {
         </>
       )}
 
-      {rfp && rfp.settlementDetails && (
-        <div className="print-page page-break" style={{ padding: "60px 40px", fontSize: "12px", lineHeight: 1.5 }}>
-          <div style={{ textAlign: "center", marginBottom: "30px" }}>
-            <div style={{ fontSize: '18px', fontWeight: 'bold' }}>PT JUARA BERHASIL BERKAH SEJAHTERA</div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', textDecoration: 'underline', marginTop: '4px' }}>FORMULIR PERTANGGUNGJAWABAN ADVANCE</div>
-          </div>
+      {(() => {
+        const settlementRfp = rfp?.settlementDetails ? rfp : (relatedRfps || []).find(r => r.settlementDetails);
+        if (!settlementRfp || !settlementRfp.settlementDetails) return null;
+        const s = settlementRfp.settlementDetails;
+        
+        return (
+          <div className="print-page page-break" style={{ padding: "60px 40px", fontSize: "12px", lineHeight: 1.5 }}>
+            <div style={{ textAlign: "center", marginBottom: "30px" }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold' }}>PT JUARA BERHASIL BERKAH SEJAHTERA</div>
+              <div style={{ fontSize: '16px', fontWeight: 'bold', textDecoration: 'underline', marginTop: '4px' }}>FORMULIR PERTANGGUNGJAWABAN ADVANCE</div>
+            </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+            <div style={{ marginBottom: '20px' }}>
+              <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ width: '150px', fontWeight: 'bold' }}>Nama Event</td>
+                    <td>: {settlementRfp.projectName}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>Tanggal Laporan</td>
+                    <td>: {formatDateFullID(s.settlementDate)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>Total Kasbon (Awal)</td>
+                    <td>: {formatCurrencyIDR(settlementRfp.totalAmount)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>Total Realisasi</td>
+                    <td>: {formatCurrencyIDR(s.actualAmount)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ fontWeight: 'bold' }}>Selisih (Variance)</td>
+                    <td style={{ fontWeight: 'bold', color: s.difference > 0 ? '#ff0000' : '#00aa00' }}>
+                      : {s.difference > 0 
+                          ? `KURANG (+) ${formatCurrencyIDR(s.difference)}` 
+                          : (s.difference < 0 
+                              ? `SISA (-) ${formatCurrencyIDR(Math.abs(s.difference))}`
+                              : 'PAS (0)')}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div style={{ marginTop: '30px', fontWeight: 'bold', borderBottom: '1px solid #333', paddingBottom: '4px', marginBottom: '8px' }}>
+              Rincian Penggunaan Dana Aktual:
+            </div>
+            <table className="po-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px' }}>
+              <thead>
+                <tr style={{ background: '#f0f0f0' }}>
+                  <th style={{ width: '40px' }}>No.</th>
+                  <th>Uraian / Keterangan Kwitansi</th>
+                  <th style={{ width: '60px' }}>Qty</th>
+                  <th style={{ width: '120px' }}>Harga</th>
+                  <th style={{ width: '120px' }}>Jumlah(Rp.)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {s.items.map((item, idx) => (
+                  <tr key={idx}>
+                    <td style={{ textAlign: 'center' }}>{idx + 1}</td>
+                    <td>{item.description} {item.specification ? `- ${item.specification}` : ""}</td>
+                    <td style={{ textAlign: 'center' }}>{item.qty} {item.unit}</td>
+                    <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price)}</td>
+                    <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount)}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr style={{ background: '#f0f0f0', fontWeight: 'bold' }}>
+                  <td colSpan={4} style={{ textAlign: 'right', padding: '10px' }}>Total Realisasi Biaya</td>
+                  <td style={{ textAlign: 'right', padding: '10px' }}>{new Intl.NumberFormat("id-ID").format(s.actualAmount)}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            {s.notes && (
+              <div style={{ marginBottom: '40px', padding: '10px', background: '#f9f9f9', border: '1px solid #ddd', minHeight: '60px' }}>
+                <strong>Catatan:</strong><br />
+                {s.notes}
+              </div>
+            )}
+
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', marginTop: '60px' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '150px', fontWeight: 'bold' }}>Nama Event</td>
-                  <td>: {rfp.projectName}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>Tanggal Laporan</td>
-                  <td>: {formatDateFullID(rfp.settlementDetails.settlementDate)}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>Total Kasbon (Awal)</td>
-                  <td>: {formatCurrencyIDR(rfp.totalAmount)}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>Total Realisasi</td>
-                  <td>: {formatCurrencyIDR(rfp.settlementDetails.actualAmount)}</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 'bold' }}>Selisih (Variance)</td>
-                  <td style={{ fontWeight: 'bold', color: rfp.settlementDetails.difference > 0 ? '#ff0000' : '#00aa00' }}>
-                    : {rfp.settlementDetails.difference > 0 
-                        ? `KURANG (+) ${formatCurrencyIDR(rfp.settlementDetails.difference)}` 
-                        : (rfp.settlementDetails.difference < 0 
-                            ? `SISA (-) ${formatCurrencyIDR(Math.abs(rfp.settlementDetails.difference))}`
-                            : 'PAS (0)')}
+                  <td style={{ width: '50%', paddingBottom: '80px' }}>Dilaporkan oleh (PM) :</td>
+                  <td style={{ width: '50%', paddingBottom: '80px', position: 'relative' }}>
+                    Disetujui oleh (Finance) :
+                    {(settlementRfp.status === 'settled' || rfp?.status === 'settled') && (
+                      <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translate(-50%, 0) rotate(-5deg)', border: '1px solid #2563eb', padding: '4px 10px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.9)', color: '#1e40af', width: 'max-content' }}>
+                          <div style={{ fontFamily: 'var(--font-signature)', fontSize: '18px', lineHeight: 1 }}>Finance / Direktur</div>
+                          <div style={{ fontSize: '6px', fontWeight: 'bold', letterSpacing: '0.5px' }}>SETTLEMENT APPROVED</div>
+                      </div>
+                    )}
                   </td>
+                </tr>
+                <tr>
+                  <td style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{settlementRfp.payeeName}</td>
+                  <td style={{ fontWeight: 'bold', textDecoration: 'underline' }}>Finance Dept.</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <div style={{ marginTop: '30px', fontWeight: 'bold', borderBottom: '1px solid #333', paddingBottom: '4px', marginBottom: '8px' }}>
-            Rincian Penggunaan Dana Aktual:
-          </div>
-          <table className="po-table" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '30px' }}>
-            <thead>
-              <tr style={{ background: '#f0f0f0' }}>
-                <th style={{ width: '40px' }}>No.</th>
-                <th>Uraian / Keterangan Kwitansi</th>
-                <th style={{ width: '60px' }}>Qty</th>
-                <th style={{ width: '120px' }}>Harga</th>
-                <th style={{ width: '120px' }}>Jumlah(Rp.)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rfp.settlementDetails.items.map((item, idx) => (
-                <tr key={idx}>
-                  <td style={{ textAlign: 'center' }}>{idx + 1}</td>
-                  <td>{item.description} {item.specification ? `- ${item.specification}` : ""}</td>
-                  <td style={{ textAlign: 'center' }}>{item.qty} {item.unit}</td>
-                  <td style={{ textAlign: 'right' }}>{new Intl.NumberFormat("id-ID").format(item.price)}</td>
-                  <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{new Intl.NumberFormat("id-ID").format(item.amount)}</td>
-                </tr>
-              ))}
-            </tbody>
-            <tfoot>
-              <tr style={{ background: '#f0f0f0', fontWeight: 'bold' }}>
-                <td colSpan={4} style={{ textAlign: 'right', padding: '10px' }}>Total Realisasi Biaya</td>
-                <td style={{ textAlign: 'right', padding: '10px' }}>{new Intl.NumberFormat("id-ID").format(rfp.settlementDetails.actualAmount)}</td>
-              </tr>
-            </tfoot>
-          </table>
-
-          {rfp.settlementDetails.notes && (
-            <div style={{ marginBottom: '40px', padding: '10px', background: '#f9f9f9', border: '1px solid #ddd', minHeight: '60px' }}>
-              <strong>Catatan:</strong><br />
-              {rfp.settlementDetails.notes}
-            </div>
-          )}
-
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center', marginTop: '60px' }}>
-            <tbody>
-              <tr>
-                <td style={{ width: '50%', paddingBottom: '80px' }}>Dilaporkan oleh (PM) :</td>
-                <td style={{ width: '50%', paddingBottom: '80px', position: 'relative' }}>
-                  Disetujui oleh (Finance) :
-                  {rfp.status === 'settled' && (
-                    <div style={{ position: 'absolute', top: '10px', left: '50%', transform: 'translate(-50%, 0) rotate(-5deg)', border: '1px solid #2563eb', padding: '4px 10px', borderRadius: '4px', background: 'rgba(255, 255, 255, 0.9)', color: '#1e40af', width: 'max-content' }}>
-                        <div style={{ fontFamily: 'var(--font-signature)', fontSize: '18px', lineHeight: 1 }}>Finance / Direktur</div>
-                        <div style={{ fontSize: '6px', fontWeight: 'bold', letterSpacing: '0.5px' }}>SETTLEMENT APPROVED</div>
-                    </div>
-                  )}
-                </td>
-              </tr>
-              <tr>
-                <td style={{ fontWeight: 'bold', textDecoration: 'underline' }}>{rfp.payeeName}</td>
-                <td style={{ fontWeight: 'bold', textDecoration: 'underline' }}>Finance Dept.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      )}
+        );
+      })()}
       {!doc && (!onlyRender || onlyRender === 'po') && (
         <div className="print-page" style={{ padding: "60px 40px", fontSize: "12px", lineHeight: 1.5, textAlign: "center" }}>
           <h2>PO / Kontrak (Dokumen Dasar) Tidak Ditemukan</h2>

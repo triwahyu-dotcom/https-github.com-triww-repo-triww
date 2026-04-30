@@ -39,6 +39,21 @@ const docTypeLabel: Record<string, string> = {
   CASH_ADVANCE: "Cash Advance",
 };
 
+const getDocDisplayAmount = (doc: ExpenseDocument) => {
+  const subtotal = (doc.lineItems && doc.lineItems.length > 0) 
+    ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
+    : doc.amount;
+  
+  const scheduleTotal = doc.paymentSchedule?.reduce((sum, ev) => sum + (ev.amount || 0), 0) || 0;
+  const pphRate = doc.pphType === "PPH21" ? 0.025 : doc.pphType === "PPH23" ? 0.02 : 0.02;
+  const isGrossUp = doc.pph21Mode === "grossup" || (scheduleTotal > (subtotal * 1.01));
+  
+  const tax = (doc.taxAmount || 0) > 0 ? (doc.taxAmount || 0) : (isGrossUp ? (scheduleTotal > 0 ? (scheduleTotal - subtotal - (doc.ppnAmount || 0)) : (subtotal / (1 - pphRate)) - subtotal) : 0);
+  const ppn = (doc.ppnAmount || 0) > 0 ? (doc.ppnAmount || 0) : (doc.usePPN ? (subtotal + tax) * 0.11 : 0);
+  
+  return Math.max(doc.totalPO || 0, doc.amount || 0, scheduleTotal, subtotal + tax + ppn);
+};
+
 export function DirectorApprovals({ initialData }: Props) {
   const [activeTab, setActiveTab] = useState<"docs" | "rfps" | "history">("docs");
   const [viewProofUrl, setViewProofUrl] = useState<string | null>(null);
@@ -237,7 +252,7 @@ export function DirectorApprovals({ initialData }: Props) {
                     <div style={{ fontSize: '11px', color: '#52525b' }}>Payee: {rfp.payeeName}</div>
                  </div>
                  <div style={{ fontSize: '12px', color: '#71717a' }}>{formatDateFullID(rfp.requestDate)}</div>
-                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#e4e4e7' }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
+                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#e4e4e7' }}>{formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</div>
                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', color: '#71717a', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer' }}>View</button>
                     {activeTab !== 'history' && <button onClick={() => { setSelectedRfp(rfp); setIsRfpReviewOpen(true); }} style={{ background: '#378ADD', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Sign</button>}
@@ -252,7 +267,7 @@ export function DirectorApprovals({ initialData }: Props) {
                  <div style={{ fontSize: '13px', color: '#e4e4e7' }}>{doc.vendorName}</div>
                  <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{doc.projectName}</div>
                  <div><span style={{ fontSize: '10px', background: 'rgba(55,138,221,0.1)', color: '#85B7EB', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{doc.documentType}</span></div>
-                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#e4e4e7' }}>{formatCurrencyIDR(doc.amount)}</div>
+                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#e4e4e7' }}>{formatCurrencyIDR(getDocDisplayAmount(doc))}</div>
                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
                     <button onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', color: '#71717a', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer' }}>View</button>
                     {activeTab !== 'history' && <button onClick={() => { setSelectedDoc(doc); setIsDocReviewOpen(true); }} style={{ background: '#378ADD', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Sign</button>}
@@ -278,7 +293,7 @@ export function DirectorApprovals({ initialData }: Props) {
               <div style={{ padding: "40px", overflowY: "auto", borderRight: "0.5px solid rgba(255,255,255,0.06)" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px", marginBottom: "40px" }}>
                   <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>PROJECT</label><div style={{ fontWeight: 600, fontSize: '15px', color: '#e4e4e7', marginTop: "6px" }}>{selectedDoc.projectName}</div></div>
-                  <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>DOC VALUE</label><div style={{ fontWeight: 700, fontSize: "24px", color: "#378ADD", marginTop: "6px" }}>{formatCurrencyIDR(selectedDoc.amount)}</div></div>
+                  <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>DOC VALUE</label><div style={{ fontWeight: 700, fontSize: "24px", color: "#378ADD", marginTop: "6px" }}>{formatCurrencyIDR(getDocDisplayAmount(selectedDoc))}</div></div>
                   <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>VENDOR</label><div style={{ marginTop: "6px", color: '#a1a1aa' }}>{selectedDoc.vendorName}</div></div>
                   <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>PAYMENT TERMS</label><div style={{ marginTop: "6px", color: '#a1a1aa' }}>{selectedDoc.paymentTerms || "-"}</div></div>
                 </div>
@@ -346,7 +361,7 @@ export function DirectorApprovals({ initialData }: Props) {
               <div style={{ padding: "40px", overflowY: "auto", borderRight: "0.5px solid rgba(255,255,255,0.06)" }}>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px", marginBottom: "40px" }}>
                   <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>PROJECT</label><div style={{ fontWeight: 600, fontSize: '15px', color: '#e4e4e7', marginTop: "6px" }}>{selectedRfp.projectName}</div></div>
-                  <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>RFP VALUE</label><div style={{ fontWeight: 700, fontSize: "28px", color: "#e4e4e7", marginTop: "6px" }}>{formatCurrencyIDR(selectedRfp.totalAmount)}</div></div>
+                  <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>RFP VALUE</label><div style={{ fontWeight: 700, fontSize: "28px", color: "#e4e4e7", marginTop: "6px" }}>{formatCurrencyIDR(selectedRfp.netAmount || selectedRfp.totalAmount)}</div></div>
                   <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>PAYEE / VENDOR</label><div style={{ marginTop: "6px", color: '#a1a1aa' }}>{selectedRfp.payeeName}</div></div>
                   <div><label style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, letterSpacing: '1px', textTransform: 'uppercase' }}>METHOD</label><div style={{ marginTop: "6px", color: '#a1a1aa' }}>{selectedRfp.paymentType}</div></div>
                 </div>

@@ -26,5 +26,7 @@ export default async function PrintRFPPage({ params }: { params: Promise<{ id: s
 
   // If we arrived via doc ID but it has an RFP, show both or show the RFP.
   // We'll pass both to the layout.
-  return <PrintLayout rfp={rfp} doc={doc} />;
+  const relatedRfps = doc ? financeData.rfps.filter(r => r.documentIds?.includes(doc.id)) : [];
+  
+  return <PrintLayout rfp={rfp} doc={doc} relatedRfps={relatedRfps} />;
 }

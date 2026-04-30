@@ -25,7 +25,6 @@ export async function buildIntegratedDashboards(
     readDocuments()
   ]);
 
-
   function projectVendorRequirements(project: ProjectDashboardData["projects"][number]) {
     return [
       {

@@ -18,11 +18,20 @@ interface Props {
 
 export function FinancePortalRouter(props: Props) {
   const [role, setRole] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"monitoring" | "operational">("monitoring");
-  const [adminViewRole, setAdminViewRole] = useState<string>("finance");
+  
+  // Persist view mode and selected role in localStorage to survive reloads
+  const [viewMode, setViewModeRaw] = useState<"monitoring" | "operational">("monitoring");
+  const [adminViewRole, setAdminViewRoleRaw] = useState<string>("finance");
 
   useEffect(() => {
-    // Get role from cookie first
+    // Restore states from localStorage
+    const savedViewMode = localStorage.getItem("juara_finance_view_mode") as "monitoring" | "operational";
+    if (savedViewMode) setViewModeRaw(savedViewMode);
+
+    const savedAdminRole = localStorage.getItem("juara_finance_admin_role");
+    if (savedAdminRole) setAdminViewRoleRaw(savedAdminRole);
+
+    // Get role from cookie
     const cookies = document.cookie.split(';');
     const roleCookie = cookies.find(c => c.trim().startsWith('juara_user_role='));
     let savedRole = "";
@@ -36,13 +45,23 @@ export function FinancePortalRouter(props: Props) {
     setRole(savedRole);
   }, []);
 
+  const setViewMode = (mode: "monitoring" | "operational") => {
+    setViewModeRaw(mode);
+    localStorage.setItem("juara_finance_view_mode", mode);
+  };
+
+  const setAdminViewRole = (role: string) => {
+    setAdminViewRoleRaw(role);
+    localStorage.setItem("juara_finance_admin_role", role);
+  };
+
   if (!role) return <div style={{ padding: '40px', textAlign: 'center' }}>Initializing Portal...</div>;
 
   // Toggle button for switching views (Always show when RBAC is disabled)
-  const showToggle = true; // role === "finance" || role === "pm" || role === "ae" || role === "admin";
+  const showToggle = true; 
 
   const renderOperational = () => {
-    const activeRole = role === "admin" ? adminViewRole : role;
+    const activeRole = adminViewRole;
 
     if (activeRole === "finance") return <FinanceOpsDashboard {...props} />;
     if (activeRole === "director") return <DirectorDashboard initialData={props.initialData} />;
@@ -66,9 +85,8 @@ export function FinancePortalRouter(props: Props) {
 
   return (
     <>
-      {role === "admin" && (
-        <div style={{ position: 'sticky', top: 0, zIndex: 1100, background: '#18181b', borderBottom: '1px solid #378ADD', padding: '12px 40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
-          <div style={{ fontSize: '11px', fontWeight: 700, color: '#378ADD', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Super Admin View Override:</div>
+      <div style={{ position: 'sticky', top: 0, zIndex: 1100, background: '#18181b', borderBottom: '1px solid #378ADD', padding: '12px 40px', display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: '#378ADD', textTransform: 'uppercase', letterSpacing: '1.5px' }}>RBAC DISABLED - View Override:</div>
           <div style={{ display: 'flex', gap: '4px', background: 'rgba(55,138,221,0.05)', padding: '4px', borderRadius: '10px' }}>
             {[
               { id: 'finance', label: 'Finance Ops' },
@@ -88,9 +106,8 @@ export function FinancePortalRouter(props: Props) {
                 {v.label}
               </button>
             ))}
-          </div>
         </div>
-      )}
+      </div>
       {renderOperational()}
       {showToggle && (
         <button 

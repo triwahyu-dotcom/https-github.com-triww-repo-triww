@@ -161,20 +161,65 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     return direction === 'asc' ? res : -res;
   });
 
-  const activeProjectsCount = projects.filter(p => ["execution", "finance"].includes(p.currentStage)).length;
-  const leadsCount = projects.filter(p => p.currentStage === "lead").length;
-  const totalValue = projects.reduce((sum, p) => {
-    const valStr = (p as any).projectValue || (p as any).value || "0";
+  const getVal = (p: any) => {
+    const valStr = p.projectValue || p.value || "0";
     const val = typeof valStr === 'number' ? valStr : parseFloat(valStr.toString().replace(/[^0-9.-]+/g,"") || "0");
-    return sum + (isNaN(val) ? 0 : val);
-  }, 0);
+    return isNaN(val) ? 0 : val;
+  };
+
+  const leadsValue = projects.filter(p => ["lead", "pitching"].includes(p.currentStage)).reduce((sum, p) => sum + getVal(p), 0);
+  const ongoingValue = projects.filter(p => ["negotiation", "execution", "reporting", "finance"].includes(p.currentStage)).reduce((sum, p) => sum + getVal(p), 0);
+  const billedValue = projects.filter(p => p.currentStage === "completed").reduce((sum, p) => sum + getVal(p), 0);
+  const totalValue = projects.reduce((sum, p) => sum + getVal(p), 0);
 
   const stats = [
-    { label: "Total Projects", value: projects.length.toString(), sub: "Projects in workspace", trend: "Real-time", trendType: 'neutral', icon: <BarChart3 size={16} /> },
-    { label: "Active Projects", value: activeProjectsCount.toString(), sub: "In execution/finance", trend: "Real-time", trendType: 'neutral', icon: <Zap size={16} /> },
-    { label: "Leads", value: leadsCount.toString(), sub: "New opportunities", trend: "Real-time", trendType: 'neutral', icon: <Target size={16} /> },
-    { label: "Total Value", value: mounted && totalValue > 0 ? `Rp ${totalValue.toLocaleString('id-ID')}` : (mounted ? "Rp 0" : "---"), sub: "Account worth", trend: "Real-time", trendType: 'neutral', icon: <Coins size={16} /> },
+    { label: "Leads & Pitching", numericValue: leadsValue.toLocaleString('id-ID'), sub: "Potential opportunities", color: "#a78bfa", icon: <Target size={16} /> },
+    { label: "On Going Projects", numericValue: ongoingValue.toLocaleString('id-ID'), sub: "Active & Finance stage", color: "#378ADD", icon: <Zap size={16} /> },
+    { label: "Billed / Completed", numericValue: billedValue.toLocaleString('id-ID'), sub: "Success projects", color: "#5DCAA5", icon: <Check size={16} /> },
+    { label: "Grand Total Value", numericValue: totalValue.toLocaleString('id-ID'), sub: "All historical value", color: "#EF9F27", icon: <Coins size={16} /> },
   ];
+
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const currentYear = now.getFullYear();
+
+  const newLeadsThisMonth = projects.filter(p => {
+    if (!p.createdAt) return false;
+    const d = new Date(p.createdAt);
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  }).length;
+
+  const pitchingCount = projects.filter(p => p.currentStage === "pitching").length;
+  const negotiationCount = projects.filter(p => p.currentStage === "negotiation").length;
+  
+  const upcomingCount = projects.filter(p => {
+    if (!p.eventDate || p.eventDate === "TBD") return false;
+    const parts = p.eventDate.split("/");
+    if (parts.length !== 3) return false;
+    const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+    const diff = d.getTime() - now.getTime();
+    const days = Math.ceil(diff / (1000 * 3600 * 24));
+    return days >= 0 && days <= 7;
+  }).length;
+
+  const workloadStats = [
+    { label: "Leads Masuk (Bln Ini)", value: newLeadsThisMonth, icon: <PlusCircle size={14} />, color: "#a78bfa" },
+    { label: "Pitching In Progress", value: pitchingCount, icon: <Palette size={14} />, color: "#378ADD" },
+    { label: "Submitted / Nego", value: negotiationCount, icon: <FileBarChart size={14} />, color: "#EF9F27" },
+    { label: "Events Minggu Ini", value: upcomingCount, icon: <Calendar size={14} />, color: "#5DCAA5" },
+  ];
+
+  const aeStats = Array.from(new Set(projects.flatMap(p => p.owners || []))).map(ae => {
+    const aeProjects = projects.filter(p => (p.owners || []).includes(ae));
+    const activeProjects = aeProjects.filter(p => !['completed', 'lost'].includes(p.currentStage));
+    const val = activeProjects.reduce((sum, p) => sum + getVal(p), 0);
+    return {
+      name: ae,
+      total: aeProjects.length,
+      active: activeProjects.length,
+      value: val
+    };
+  }).sort((a, b) => b.value - a.value);
 
   const getStageColor = (stage: string) => {
     switch (stage) {
@@ -430,20 +475,34 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             </div>
           </div>
         </header>
-
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {/* Stat Cards Row */}
           <div className="stat-grid-premium">
             {stats.map((s, idx) => (
-              <div key={idx} className="section-card-premium" style={{ padding: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '12px', color: '#71717a' }}>{s.label}</span>
-                  <div style={{ color: '#52525b' }}>{s.icon}</div>
+              <div key={idx} className="section-card-premium" style={{ padding: '20px', borderLeft: `4px solid ${s.color}`, background: 'rgba(255,255,255,0.01)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <span style={{ fontSize: '11px', color: '#71717a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</span>
+                  <div style={{ color: s.color, opacity: 0.8 }}>{s.icon}</div>
                 </div>
-                <div style={{ fontSize: s.label === "Total Value" ? '20px' : '24px', fontWeight: 500, color: '#f4f4f5' }}>{s.value}</div>
-                <div style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>{s.sub}</div>
-                <div className={`trend-pill ${s.trendType === 'up' ? 'trend-up' : (s.trendType === 'down' ? 'trend-down' : 'trend-neutral')}`}>
-                  {s.trend}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                   <span style={{ fontSize: '14px', fontWeight: 700, color: s.color, opacity: 0.9 }}>Rp</span>
+                   <div style={{ fontSize: '20px', fontWeight: 600, color: '#f4f4f5', letterSpacing: '-0.01em' }}>
+                     {mounted ? s.numericValue : "---"}
+                   </div>
+                </div>
+                <div style={{ fontSize: '11px', color: '#52525b', marginTop: '8px', fontWeight: 500 }}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Workload Activity Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', padding: '0 24px', marginBottom: '32px' }}>
+            {workloadStats.map((s, idx) => (
+              <div key={idx} style={{ background: '#111113', borderRadius: '12px', padding: '12px 16px', border: '0.5px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: `${s.color}15`, color: s.color, display: 'grid', placeItems: 'center' }}>{s.icon}</div>
+                <div>
+                  <div style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#f4f4f5' }}>{s.value}</div>
                 </div>
               </div>
             ))}
@@ -516,25 +575,66 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           <div style={{ padding: '0 24px 40px 24px' }}>
             {viewMode === "overview" && (
               <div className="tab-content-fade">
-                <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '11px', letterSpacing: '0.08em', color: '#52525b', fontWeight: 600 }}>FOCUS PROJECTS</span>
-                  <button className="ghost-button" style={{ fontSize: '12px', color: '#378ADD' }}>View All</button>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  {projects.slice(0, 2).map((p, i) => (
-                    <div key={i} className="section-card-premium" style={{ padding: '14px 16px', cursor: 'pointer' }} onClick={() => openProject(p)}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <div className="stage-pill-premium" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>{p.currentStage.toUpperCase()}</div>
-                        <div className="urgency-badge-premium" style={{ background: 'rgba(180,115,23,0.2)', color: '#EF9F27' }}>Needs monitoring</div>
-                      </div>
-                      <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '2px' }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
-                      <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '12px' }}>{p.client}</div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '12px', color: '#52525b' }}>{p.eventDate || "TBD"}</span>
-                        <span style={{ fontSize: '12px', color: '#a1a1aa' }}>{p.projectValueLabel}</span>
-                      </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
+                  {/* Left Column: Projects & AE */}
+                  <div>
+                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', letterSpacing: '0.08em', color: '#52525b', fontWeight: 600 }}>FOCUS PROJECTS</span>
+                      <button className="ghost-button" style={{ fontSize: '12px', color: '#378ADD' }}>View All</button>
                     </div>
-                  ))}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '32px' }}>
+                      {projects.slice(0, 2).map((p, i) => (
+                        <div key={i} className="section-card-premium" style={{ padding: '14px 16px', cursor: 'pointer' }} onClick={() => openProject(p)}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                            <div className="stage-pill-premium" style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa' }}>{p.currentStage.toUpperCase()}</div>
+                            <div className="urgency-badge-premium" style={{ background: 'rgba(180,115,23,0.2)', color: '#EF9F27' }}>Needs monitoring</div>
+                          </div>
+                          <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '2px' }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
+                          <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '12px' }}>{p.client}</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <span style={{ fontSize: '12px', color: '#52525b' }}>{p.eventDate || "TBD"}</span>
+                            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>{p.projectValueLabel}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', letterSpacing: '0.08em', color: '#52525b', fontWeight: 600 }}>ACCOUNT EXECUTIVE MONITORING</span>
+                    </div>
+                    <div className="section-card-premium" style={{ padding: '0', overflow: 'hidden' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                        <thead>
+                          <tr style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                            <th style={{ padding: '12px 16px', textAlign: 'left', color: '#52525b', fontWeight: 600 }}>AE NAME</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', color: '#52525b', fontWeight: 600 }}>ACTIVE</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'center', color: '#52525b', fontWeight: 600 }}>TOTAL</th>
+                            <th style={{ padding: '12px 16px', textAlign: 'right', color: '#52525b', fontWeight: 600 }}>PORTFOLIO VALUE</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {aeStats.map((ae, idx) => (
+                            <tr key={idx} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                              <td style={{ padding: '12px 16px', color: '#f4f4f5', fontWeight: 500 }}>{ae.name}</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'center', color: '#378ADD', fontWeight: 600 }}>{ae.active}</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'center', color: '#71717a' }}>{ae.total}</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right', color: '#f4f4f5', fontWeight: 600 }}>Rp {ae.value.toLocaleString('id-ID')}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Suggestions or Quick Stats */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div className="section-card-premium" style={{ padding: '20px', background: 'linear-gradient(135deg, rgba(55,138,221,0.1), transparent)' }}>
+                      <h4 style={{ margin: '0 0 12px', fontSize: '13px', color: '#378ADD' }}>Smart Insights</h4>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#a1a1aa', lineHeight: 1.6 }}>
+                        Terdapat <strong>{pitchingCount}</strong> proposal yang sedang diproses. Pastikan deadline pengumpulan tidak terlewat minggu ini.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}

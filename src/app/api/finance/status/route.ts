@@ -77,6 +77,19 @@ export async function PATCH(req: NextRequest) {
           } else {
             doc.status = "paid";
           }
+        } else if (status === "settled") {
+          if (doc.documentType === "CASH_ADVANCE" && rfp.settlementDetails) {
+            const diff = rfp.settlementDetails.difference || 0;
+            if (diff > 0) {
+              doc.status = "approved";
+              doc.amount = rfp.settlementDetails.actualAmount;
+            } else {
+              doc.status = "paid";
+              if (diff < 0) doc.amount = rfp.settlementDetails.actualAmount;
+            }
+          } else {
+            doc.status = "paid";
+          }
         } else if (status === "pending_finance") {
           doc.status = "pending_finance";
         }

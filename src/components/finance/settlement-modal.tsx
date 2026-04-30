@@ -59,8 +59,15 @@ export function SettlementModal({ rfp, isOpen, onClose }: SettlementModalProps) 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rfpId: rfp.id, actualAmount, difference, notes, items })
       });
-      if (res.ok) window.location.reload();
-    } catch (e) {} finally { setIsSubmitting(false); }
+      if (res.ok) {
+        window.location.reload();
+      } else {
+        const err = await res.json().catch(() => ({ error: "Server error" }));
+        alert(`Gagal submit settlement: ${err.error}`);
+      }
+    } catch (e: any) {
+      alert(`Terjadi kesalahan koneksi: ${e.message}`);
+    } finally { setIsSubmitting(false); }
   };
 
   return (
@@ -92,7 +99,9 @@ export function SettlementModal({ rfp, isOpen, onClose }: SettlementModalProps) 
               <div style={{ fontSize: '18px', fontWeight: 700, color: '#378ADD' }}>{formatCurrencyIDR(actualAmount)}</div>
             </div>
             <div style={{ background: '#18181b', padding: '20px', textAlign: 'center' }}>
-              <div style={{ fontSize: '10px', color: '#52525b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Variance</div>
+              <div style={{ fontSize: '10px', color: difference > 0 ? '#fb7185' : (difference < 0 ? '#34d399' : '#52525b'), fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                {difference > 0 ? 'Over Budget' : (difference < 0 ? 'Under Budget' : 'Variance')}
+              </div>
               <div style={{ fontSize: '18px', fontWeight: 700, color: difference > 0 ? '#fb7185' : (difference < 0 ? '#34d399' : '#f4f4f5') }}>
                 {difference > 0 ? '+' : ''}{formatCurrencyIDR(difference)}
               </div>

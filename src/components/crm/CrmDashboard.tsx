@@ -328,7 +328,7 @@ export function CRMDashboard({ initialData }: Props) {
       <div className="crm-container" style={{ padding: '0px' }}>
         
         {/* Stat Cards Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '24px' }}>
+        <div className="crm-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '24px' }}>
           {[
             { label: "Total Accounts", value: clients.length.toString(), sub: "Active and prospects combined", trend: "Real-time", trendType: 'neutral', icon: <Users size={16} /> },
             { label: "Active Clients", value: initialData.summary.activeClients.toString(), sub: "Working on projects", trend: "Real-time", trendType: 'neutral', icon: <CheckCircle size={16} /> },
@@ -375,8 +375,8 @@ export function CRMDashboard({ initialData }: Props) {
 
         {/* Search + Filter Toolbar */}
         <div style={{ marginBottom: '24px' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ position: 'relative', flex: 1 }}>
+          <div className="crm-toolbar" style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
               <Search size={14} style={{ position: 'absolute', left: '12px', top: '11px', color: '#52525b' }} />
               <input 
                 type="text" 
@@ -389,7 +389,7 @@ export function CRMDashboard({ initialData }: Props) {
             <select 
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              style={{ width: '160px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0 12px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none', appearance: 'none' }}
+              style={{ width: '160px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0 12px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none', appearance: 'none', flexShrink: 0 }}
             >
               <option value="all">All Status</option>
               <option value="Active">Active</option>
@@ -400,7 +400,7 @@ export function CRMDashboard({ initialData }: Props) {
             <select 
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              style={{ width: '180px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0 12px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none', appearance: 'none' }}
+              style={{ width: '180px', background: '#111113', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0 12px', color: '#d4d4d8', fontSize: '13px', height: '36px', outline: 'none', appearance: 'none', flexShrink: 0 }}
             >
               <option value="All">All Categories</option>
               <option value="Brand">Brand</option>
@@ -409,7 +409,7 @@ export function CRMDashboard({ initialData }: Props) {
               <option value="NGO">NGO</option>
               <option value="Media">Media</option>
             </select>
-            <button className="primary-button-premium" style={{ background: '#378ADD', color: '#fff', borderRadius: '8px', padding: '8px 16px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer', height: '36px' }} onClick={() => setIsAddingClient(true)}>
+            <button className="primary-button-premium" style={{ background: '#378ADD', color: '#fff', borderRadius: '8px', padding: '8px 16px', border: 'none', fontSize: '13px', fontWeight: 500, cursor: 'pointer', height: '36px', flexShrink: 0 }} onClick={() => setIsAddingClient(true)}>
               + Add New Client
             </button>
           </div>
@@ -439,10 +439,10 @@ export function CRMDashboard({ initialData }: Props) {
         </div>
 
         {/* Content Split */}
-        <div style={{ display: 'flex', gap: '0px', position: 'relative' }}>
+        <div className="crm-content-split" style={{ display: 'flex', gap: '0px', position: 'relative' }}>
           
           {/* Main Directory Table */}
-          <div style={{ 
+          <div className="crm-directory-table" style={{ 
             flex: 1, 
             width: selectedClientId ? 'calc(100% - 320px)' : '100%', 
             transition: 'width 0.3s ease',
@@ -450,8 +450,8 @@ export function CRMDashboard({ initialData }: Props) {
           }}>
             <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '12px', fontWeight: 600 }}>CLIENT DIRECTORY</div>
             
-            <div style={{ background: '#111113', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
-              <div style={{ 
+            <div className="crm-table-container" style={{ background: '#111113', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
+              <div className="crm-table-header" style={{ 
                 display: 'grid', 
                 gridTemplateColumns: '1fr 140px 130px 100px 80px 100px 140px', 
                 padding: '10px 0', 
@@ -593,7 +593,7 @@ export function CRMDashboard({ initialData }: Props) {
 
           {/* Right Panel - Client Detail */}
           {selectedClientId && (
-            <aside style={{ 
+            <aside className="crm-detail-panel" style={{ 
               width: '320px', 
               background: '#111113', 
               borderLeft: '0.5px solid rgba(255,255,255,0.08)',
@@ -605,7 +605,7 @@ export function CRMDashboard({ initialData }: Props) {
             }}>
               {selectedClient ? (
                 <div style={{ padding: '24px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span style={{ 
                         background: getCategoryStyles(selectedClient.category).bg, 
@@ -617,42 +617,25 @@ export function CRMDashboard({ initialData }: Props) {
                       }}>
                         {selectedClient.category.toUpperCase()}
                       </span>
-                      <span style={{ fontSize: '11px', color: '#52525b' }}>• {selectedClient.industry || "ENTERPRISE"}</span>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      <span style={{ 
-                        background: getStatusStyles(selectedClient.status).bg, 
-                        color: getStatusStyles(selectedClient.status).color, 
-                        borderRadius: '20px', 
-                        padding: '2px 10px', 
-                        fontSize: '11px', 
-                        fontWeight: 500 
-                      }}>
-                        {selectedClient.status.toUpperCase()}
-                      </span>
-                    </div>
+                    <button onClick={() => setSelectedClientId(null)} style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}>
+                      <X size={16} />
+                    </button>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>{selectedClient.name}</h2>
-                      <button 
-                        onClick={openEditModal}
-                        style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.1)', color: '#a1a1aa', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer' }}
-                      >
-                        Edit
-                      </button>
-                    </div>
+                    <h2 style={{ fontSize: '20px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>{selectedClient.name}</h2>
+                    <div style={{ fontSize: '11px', color: '#52525b', marginTop: '4px' }}>Account: {selectedClient.id.substring(0,6).toUpperCase()}</div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
                     <div>
-                      <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>Sales / PIC Source</div>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#f4f4f5' }}>{selectedClient.leadSource || "Internal Lead"}</div>
+                      <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>PIC Source</div>
+                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#f4f4f5' }}>{selectedClient.leadSource || "–"}</div>
                     </div>
                     <div>
-                      <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>Account Executive (AE)</div>
-                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#EF9F27' }}>{(selectedClient as any).accountExecutive || "Unassigned"}</div>
+                      <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>AE</div>
+                      <div style={{ fontSize: '13px', fontWeight: 500, color: '#EF9F27' }}>{(selectedClient as any).accountExecutive || "–"}</div>
                     </div>
                   </div>
 
@@ -680,19 +663,8 @@ export function CRMDashboard({ initialData }: Props) {
                         ))}
                       </div>
                     ) : (
-                      <div>
-                        <div style={{ fontSize: '12px', color: '#3f3f46', fontStyle: 'italic', marginBottom: '8px' }}>Belum ada kontak</div>
-                        <div style={{ fontSize: '12px', color: '#378ADD', cursor: 'pointer' }} onClick={() => alert("Fitur tambah kontak sedang disiapkan.")}>+ Tambah kontak</div>
-                      </div>
+                      <div style={{ fontSize: '12px', color: '#3f3f46' }}>No contacts found</div>
                     )}
-                  </div>
-
-                  {/* Engagement History */}
-                  <div style={{ marginBottom: '32px' }}>
-                    <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '16px' }}>ENGAGEMENT</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                      <div style={{ fontSize: '12px', color: '#3f3f46', fontStyle: 'italic' }}>No engagement history recorded</div>
-                    </div>
                   </div>
 
                   {/* Recent Projects */}
@@ -705,45 +677,100 @@ export function CRMDashboard({ initialData }: Props) {
                             <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7', marginBottom: '6px' }}>{p.name}</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                               <span className="stage-pill-premium" style={{ background: 'rgba(55, 138, 221, 0.1)', color: '#378ADD', fontSize: '10px' }}>{p.stage}</span>
-                              {p.result && (
-                                <span style={{ 
-                                  background: p.result === "Won" ? "rgba(99,153,34,0.15)" : "rgba(226,75,74,0.15)", 
-                                  color: p.result === "Won" ? "#97C459" : "#F09595",
-                                  borderRadius: '20px', padding: '1px 8px', fontSize: '10px', fontWeight: 600
-                                }}>
-                                  {p.result}
-                                </span>
-                              )}
+                              <span style={{ fontSize: '10px', color: '#97C459' }}>WON</span>
                             </div>
                           </div>
                         ))
                       ) : (
-                        <div style={{ fontSize: '12px', color: '#3f3f46', fontStyle: 'italic' }}>Belum ada project</div>
+                        <div style={{ fontSize: '12px', color: '#3f3f46' }}>No projects found</div>
                       )}
                     </div>
                   </div>
 
                   <Link href={`/projects?client=${selectedClient.name}`} style={{ textDecoration: 'none' }}>
                     <button style={{ width: '100%', background: '#378ADD', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', marginTop: '12px' }}>
-                      View All Projects
+                      View Portfolio
                     </button>
                   </Link>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '8px' }}>
+                    <button onClick={openEditModal} style={{ background: 'rgba(255,255,255,0.05)', color: '#a1a1aa', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px', fontSize: '12px', cursor: 'pointer' }}>Edit</button>
+                    <button onClick={handleDeleteClient} style={{ background: 'rgba(226,75,74,0.1)', color: '#F09595', border: '1px solid rgba(226,75,74,0.2)', borderRadius: '8px', padding: '8px', fontSize: '12px', cursor: 'pointer' }}>Delete</button>
+                  </div>
                 </div>
               ) : null}
             </aside>
           )}
 
           {!selectedClientId && (
-            <aside style={{ width: '320px', background: '#111113', borderLeft: '0.5px solid rgba(255,255,255,0.08)', height: 'calc(100vh - 120px)', position: 'sticky', top: '0px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
-              <Search size={48} style={{ color: 'rgba(255,255,255,0.15)', marginBottom: '16px' }} />
-              <div style={{ fontSize: '16px', fontWeight: 500, color: '#71717a', marginBottom: '8px' }}>Select a client</div>
-              <p style={{ fontSize: '13px', color: '#3f3f46', margin: 0, maxWidth: '200px', lineHeight: 1.5 }}>
-                Select a client from the list to see their relationship history and portfolio details.
-              </p>
+            <aside className="crm-empty-state" style={{ width: '320px', background: '#111113', borderLeft: '0.5px solid rgba(255,255,255,0.08)', height: 'calc(100vh - 120px)', position: 'sticky', top: '0px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', textAlign: 'center' }}>
+              <Users size={48} style={{ color: 'rgba(255,255,255,0.05)', marginBottom: '16px' }} />
+              <div style={{ fontSize: '14px', fontWeight: 500, color: '#52525b' }}>Select a client to view details</div>
             </aside>
           )}
         </div>
+
+        <style jsx global>{`
+          @media (max-width: 1024px) {
+            .crm-stat-grid {
+              grid-template-columns: repeat(2, 1fr) !important;
+              padding: 0 16px;
+            }
+            .crm-toolbar {
+              flex-wrap: wrap;
+              padding: 0 16px;
+            }
+            .crm-toolbar > div, .crm-toolbar select, .crm-toolbar button {
+              width: 100% !important;
+              flex: none !important;
+            }
+            .crm-content-split {
+              flex-direction: column;
+            }
+            .crm-directory-table {
+              width: 100% !important;
+              padding: 0 16px !important;
+            }
+            .crm-table-header {
+              grid-template-columns: 1fr 100px 100px !important;
+            }
+            .crm-table-header div:nth-child(2),
+            .crm-table-header div:nth-child(4),
+            .crm-table-header div:nth-child(5),
+            .crm-table-header div:nth-child(7) {
+              display: none !important;
+            }
+            .client-row-premium {
+              grid-template-columns: 1fr 100px 100px !important;
+            }
+            .client-row-premium div:nth-child(2),
+            .client-row-premium div:nth-child(4),
+            .client-row-premium div:nth-child(5),
+            .client-row-premium div:nth-child(7) {
+              display: none !important;
+            }
+            .crm-detail-panel {
+              position: fixed !important;
+              inset: 0 !important;
+              width: 100% !important;
+              height: 100% !important;
+              z-index: 1000;
+              background: #09090b !important;
+              padding-bottom: 80px;
+            }
+            .crm-empty-state {
+              display: none !important;
+            }
+          }
+          @media (max-width: 640px) {
+            .crm-stat-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+        `}</style>
       </div>
+
+
 
       {/* Add / Edit Client Modal */}
       {(isAddingClient || isEditingClient) && (

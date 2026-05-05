@@ -19,6 +19,9 @@ export const POSISI_LIST = [
   "Parkir",
   "Kebersihan",
   "Usher",
+  "Stage Man",
+  "Produksi",
+  "Logistik",
   "Other",
 ] as const;
 

@@ -36,7 +36,8 @@ import {
   X,
   PlusCircle,
   TrendingUp,
-  FileText
+  FileText,
+  Menu
 } from "lucide-react";
 import { DashboardData, VendorSummary, ReviewStatus, VendorClassification } from "@/lib/vendor/types";
 
@@ -51,6 +52,15 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "docs" | "projects" | "history">("overview");
   const [selectedVendorIds, setSelectedVendorIds] = useState<string[]>([]);
   const [lang, setLang] = useState<"ID" | "EN">("ID");
+  const [isMobile, setIsMobile] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   // Collapsible sections for "Type" view
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
@@ -234,11 +244,31 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   return (
     <div className="app-layout-premium">
+      {/* Mobile Sidebar Overlay/Scrim */}
+      {isMobile && isSidebarOpen && (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.6)',
+            backdropFilter: 'blur(4px)',
+            zIndex: 190,
+            animation: 'fadeIn 0.2s ease-out'
+          }}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="sidebar-premium">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '32px', padding: '0 4px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>J</div>
-          <span style={{ fontSize: '11px', fontWeight: 500, color: '#a1a1aa', letterSpacing: '0.06em' }}>JUARA WORKSPACE</span>
+      <aside className={`sidebar-premium ${isSidebarOpen ? 'mobile-open' : ''}`}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 4px' }}>
+            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>J</div>
+            <span style={{ fontSize: '11px', fontWeight: 500, color: '#a1a1aa', letterSpacing: '0.06em' }}>JUARA WORKSPACE</span>
+          </div>
+          <button className="mobile-only-close" onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: '#71717a' }}>
+            <X size={20} />
+          </button>
         </div>
 
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
@@ -264,11 +294,30 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         {/* Fixed Top Header */}
         <header className="top-header-premium">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(99,153,34,0.1)', color: '#639922', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>DATABASE READY</div>
-              <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>Supplier/Vendor Management</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <button 
+                className="mobile-menu-toggle" 
+                onClick={() => setIsSidebarOpen(true)}
+                style={{ 
+                  background: 'rgba(255,255,255,0.05)', 
+                  border: '0.5px solid rgba(255,255,255,0.1)', 
+                  borderRadius: '8px', 
+                  width: '36px', 
+                  height: '36px', 
+                  display: 'none', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  color: '#a1a1aa'
+                }}
+              >
+                <Menu size={20} />
+              </button>
+              <div>
+                <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(99,153,34,0.1)', color: '#639922', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>DATABASE READY</div>
+                <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>Supplier/Vendor Management</h1>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+            <div className="desktop-only-presence" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <div style={{ display: 'flex', background: '#111113', borderRadius: '8px', padding: '2px', border: '0.5px solid rgba(255,255,255,0.08)' }}>
                 <button onClick={() => setLang("ID")} style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px', background: lang === "ID" ? "#1f1f23" : "transparent", color: lang === "ID" ? "#f4f4f5" : "#52525b", border: 'none' }}>ID</button>
                 <button onClick={() => setLang("EN")} style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px', background: lang === "EN" ? "#1f1f23" : "transparent", color: lang === "EN" ? "#f4f4f5" : "#52525b", border: 'none' }}>EN</button>
@@ -290,7 +339,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {/* Stat Cards Row */}
-          <div className="vendor-grid-premium">
+          <div className="vendor-grid-premium responsive-grid-4" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
             {[
               { label: "Total Vendors", value: vendors.length, sub: "Registered suppliers", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <Users size={16} /> },
               { label: "Penyedia Jasa", value: vendors.filter(v => v.category === "PENYEDIA JASA").length, sub: "Service providers", trend: "↑ 2 dari bulan lalu", trendType: 'up', icon: <User size={16} /> },
@@ -334,8 +383,8 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   </button>
                 ))}
               </div>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <div style={{ position: 'relative' }}>
+              <div className="toolbar-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
                   <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: '#52525b' }} />
                   <input 
                     className="mini-input"
@@ -345,7 +394,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div style={{ position: 'relative' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button 
                     className="mini-input" 
                     style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: classificationFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
@@ -368,7 +417,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   )}
                 </div>
 
-                <div style={{ position: 'relative' }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button 
                     className="mini-input" 
                     style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: servicesFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
@@ -391,12 +440,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   )}
                 </div>
 
-                <button className="ghost-button" style={{ padding: '4px' }} onClick={() => alert("Opsi lanjutan.")}><MoreVertical size={16} /></button>
-                <div style={{ background: 'rgba(255,255,255,0.05)', color: '#52525b', fontSize: '11px', padding: '3px 10px', borderRadius: '20px' }}>{filteredVendors.length} ITEMS</div>
-                <div style={{ background: '#378ADD', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>Baru</div>
+                <button className="ghost-button" style={{ padding: '4px', flexShrink: 0 }} onClick={() => alert("Opsi lanjutan.")}><MoreVertical size={16} /></button>
+                <div style={{ background: 'rgba(255,255,255,0.05)', color: '#52525b', fontSize: '11px', padding: '3px 10px', borderRadius: '20px', flexShrink: 0 }}>{filteredVendors.length} ITEMS</div>
+                <div style={{ background: '#378ADD', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>Baru</div>
                 <button 
                   className="primary-button" 
-                  style={{ height: '32px', background: '#378ADD', borderRadius: '8px' }}
+                  style={{ height: '32px', background: '#378ADD', borderRadius: '8px', flexShrink: 0 }}
                   onClick={() => alert("Form pendaftaran vendor baru akan segera dibuka.")}
                 >
                   + New
@@ -425,7 +474,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
           </div>
 
           {/* View Renderers */}
-          <div style={{ padding: '0 24px 80px 24px' }}>
+          <div style={{ padding: isMobile ? '0 16px 80px 16px' : '0 24px 80px 24px' }}>
             {viewMode === "all" && (
               <div className="tab-content-fade">
                 <div className="vendor-table-header" style={{ gridTemplateColumns: '32px 1fr 120px 120px 80px', gap: '16px' }}>
@@ -994,6 +1043,172 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         </div>
       )}
 
+      {/* Mobile Bottom Navigation */}
+      <div className="mobile-bottom-nav" style={{ display: isMobile ? 'flex' : 'none' }}>
+        <Link href="/projects" className="nav-item">
+          <Grid size={20} />
+          <span>Projects</span>
+        </Link>
+        <Link href="/crm" className="nav-item">
+          <User size={20} />
+          <span>CRM</span>
+        </Link>
+        <Link href="/vendors" className="nav-item active">
+          <Building2 size={20} />
+          <span>Vendors</span>
+        </Link>
+        <Link href="/finance" className="nav-item">
+          <FileText size={20} />
+          <span>Finance</span>
+        </Link>
+      </div>
+
+      <style jsx global>{`
+        .mobile-only-close { display: none; }
+        .mobile-bottom-nav { display: none; }
+        .mobile-menu-toggle { display: none; }
+        
+        /* Premium Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+        .app-layout-premium {
+          display: flex;
+          min-height: 100vh;
+          background: #09090b;
+          color: #f4f4f5;
+          font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-premium {
+          width: 280px;
+          background: #09090b;
+          border-right: 0.5px solid rgba(255,255,255,0.06);
+          display: flex;
+          flex-direction: column;
+          padding: 24px 16px;
+          flex-shrink: 0;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (max-width: 1024px) {
+          .app-layout-premium {
+            flex-direction: column;
+          }
+
+          .mobile-menu-toggle { display: flex !important; }
+          .desktop-only-presence { display: none !important; }
+          
+          .sidebar-premium {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px !important;
+            z-index: 200;
+            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+            background: #09090b !important;
+            transform: translateX(-100%);
+          }
+
+          .sidebar-premium.mobile-open {
+            transform: translateX(0);
+          }
+          
+          .mobile-only-close {
+            display: block;
+          }
+          
+          .mobile-bottom-nav {
+            display: flex;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: #09090b;
+            border-top: 0.5px solid rgba(255,255,255,0.08);
+            z-index: 150;
+            justify-content: space-around;
+            align-items: center;
+            padding-bottom: env(safe-area-inset-bottom);
+          }
+          
+          .mobile-bottom-nav .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #71717a;
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 500;
+            flex: 1;
+          }
+          
+          .mobile-bottom-nav .nav-item.active {
+            color: #378ADD;
+          }
+          
+          .main-premium {
+            padding-bottom: 80px !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+          }
+
+          .responsive-grid-4 {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+
+          .responsive-grid-2 {
+            grid-template-columns: 1fr !important;
+          }
+
+          .vendor-grid-premium {
+             grid-template-columns: repeat(2, 1fr) !important;
+             gap: 12px !important;
+          }
+
+          .vendor-table-header div:nth-child(3),
+          .vendor-table-header div:nth-child(4),
+          .vendor-list-row div:nth-child(3),
+          .vendor-list-row div:nth-child(4) {
+            display: none !important;
+          }
+
+          .vendor-table-header, .vendor-list-row {
+            grid-template-columns: 32px 1fr 80px !important;
+          }
+
+          .toolbar-actions {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            -webkit-overflow-scrolling: touch;
+          }
+
+          .vendor-detail-panel-premium {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100vh !important;
+            border-radius: 0 !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .responsive-grid-4, .vendor-grid-premium {
+            grid-template-columns: 1fr !important;
+          }
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+      `}</style>
     </div>
   );
 }

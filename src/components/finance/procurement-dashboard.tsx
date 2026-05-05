@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
@@ -69,6 +69,14 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
     }
     return "docs";
   });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleTabChange = (tab: "docs" | "rfps") => {
     setActiveTab(tab);
@@ -125,7 +133,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           padding: '6px 14px',
           fontSize: '12px',
           cursor: 'pointer',
-          display: "flex", 
+          display: isMobile ? "none" : "flex", 
           alignItems: "center", 
           gap: "8px",
           transition: 'all 0.2s'
@@ -150,7 +158,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           transition: 'all 0.2s'
         }}
       >
-        <Plus size={14} /> New PO / SPK / Kontrak
+        <Plus size={14} /> {isMobile ? "Create" : "New PO / SPK / Kontrak"}
       </button>
     </div>
   );
@@ -162,37 +170,33 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
       actions={headerActions}
     >
       {/* Summary Cards */}
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
+      <section className="procurement-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
         <SummaryCard 
           label="Total Dokumen" 
           value={String(docs.length)} 
-          description="PO, SPK, Kontrak, CA" 
+          description={isMobile ? "All" : "PO, SPK, Kontrak, CA"} 
           icon={<FileText size={18} />} 
-          trend="↑ 8 dari bulan lalu"
           trendType="up"
         />
         <SummaryCard 
           label="Menunggu Approve" 
           value={String(pendingApprovalDocs.length)} 
-          description="Belum ditandatangani Director" 
+          description={isMobile ? "Wait" : "Belum ditandatangani Director"} 
           icon={<Clock size={18} />} 
-          trend="↑ 3 dari bulan lalu"
           trendType="up"
         />
         <SummaryCard 
           label="Siap Buat RFP" 
           value={String(readyForRfpDocs.length)} 
-          description="Submitted/Approved, belum ada RFP" 
+          description={isMobile ? "RFP" : "Submitted/Approved, belum ada RFP"} 
           icon={<CheckCircle2 size={18} />} 
-          trend="sama"
           trendType="neutral"
         />
         <SummaryCard 
-          label="Total Nilai Dokumen" 
+          label="Total Nilai" 
           value={formatCurrencyIDR(totalDocValue)} 
-          description="Semua dokumen aktif" 
+          description={isMobile ? "Total" : "Semua dokumen aktif"} 
           icon={<Wallet size={18} />} 
-          trend="↑ Rp 18M dari bulan lalu"
           trendType="up"
         />
       </section>
@@ -256,12 +260,16 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
         </div>
       )}
 
-      <FilterBar items={activeTab === "docs" ? docs : rfps} type={activeTab} onFilter={activeTab === "docs" ? handleFilterDocs : handleFilterRfps} />
+      {activeTab === "docs" ? (
+        <FilterBar items={docs} type="docs" onFilter={handleFilterDocs} />
+      ) : (
+        <FilterBar items={rfps} type="rfps" onFilter={handleFilterRfps} />
+      )}
 
       {/* Tab: Dokumen */}
       {activeTab === "docs" && (
         <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-          <div style={{ 
+          <div className="procurement-table-header" style={{ 
             display: 'grid', 
             gridTemplateColumns: '200px 1fr 1fr 100px 130px 220px',
             background: '#111113',
@@ -269,8 +277,8 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
             borderBottom: '0.5px solid rgba(255,255,255,0.06)'
           }}>
             <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>NOMOR DOKUMEN</div>
-            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>VENDOR / PEMOHON</div>
-            <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>PROJECT</div>
+            <div className="hide-mobile" style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>VENDOR / PEMOHON</div>
+            <div className="hide-mobile" style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>PROJECT</div>
             <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>TIPE</div>
             <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500 }}>NILAI</div>
             <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.05em', fontWeight: 500, textAlign: 'right' }}>STATUS & AKSI</div>
@@ -281,7 +289,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
               Tidak ada dokumen yang sesuai filter
             </div>
           ) : filteredDocs.map(doc => (
-            <div key={doc.id} className="list-row-premium" style={{ 
+            <div key={doc.id} className="list-row-premium procurement-row" style={{ 
               display: 'grid', 
               gridTemplateColumns: '200px 1fr 1fr 100px 130px 220px',
               alignItems: 'center',
@@ -292,11 +300,11 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                 <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{doc.id}</div>
                 <div style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>{formatDateFullID(doc.issueDate)}</div>
               </div>
-              <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{doc.vendorName || "–"}</div>
-              <div style={{ fontSize: '13px', color: '#a1a1aa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={doc.projectName}>
+              <div className="hide-mobile" style={{ fontSize: '13px', color: '#a1a1aa' }}>{doc.vendorName || "–"}</div>
+              <div className="hide-mobile" style={{ fontSize: '13px', color: '#a1a1aa', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={doc.projectName}>
                 {doc.projectName}
               </div>
-              <div>
+              <div className="hide-mobile">
                 <span style={{ 
                   background: docTypeStyles[doc.documentType]?.bg || 'rgba(255,255,255,0.06)', 
                   color: docTypeStyles[doc.documentType]?.color || '#71717a',
@@ -488,6 +496,29 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @media (max-width: 1024px) {
+          .procurement-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .procurement-table-header {
+            grid-template-columns: 100px 60px 80px 1fr !important;
+          }
+          .procurement-row {
+            grid-template-columns: 100px 60px 80px 1fr !important;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .procurement-stat-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </WorkspaceShell>
   );
 }

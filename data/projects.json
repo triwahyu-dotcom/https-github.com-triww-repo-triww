@@ -7,14 +7,38 @@
       "Wasli"
     ],
     "status": "lead",
-    "activity": [],
+    "activity": [
+      {
+        "id": "act_1778005053316",
+        "type": "stage_change",
+        "message": "Stage changed from lead to pitching",
+        "timestampLabel": "06 Mei, 01.17"
+      }
+    ],
     "documents": [],
     "milestones": [],
     "projectName": "Heppiii Skate Day",
     "serviceLine": "Event Management",
-    "currentStage": "lead",
+    "currentStage": "pitching",
     "projectValue": 0,
-    "section": "leads"
+    "section": "leads",
+    "assignedVendors": [],
+    "vendorShortlist": [],
+    "vendorRequirements": [
+      {
+        "label": "Service Fit",
+        "summary": "Prioritaskan vendor dengan layanan Event Management."
+      },
+      {
+        "label": "Coverage",
+        "summary": "Konfirmasi area dan tanggal kerja."
+      },
+      {
+        "label": "Compliance",
+        "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
+      }
+    ],
+    "updatedAt": "2026-05-05T18:17:33.439Z"
   },
   {
     "id": "1773805404790",

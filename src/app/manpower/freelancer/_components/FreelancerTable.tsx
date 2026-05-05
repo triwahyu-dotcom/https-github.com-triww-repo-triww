@@ -113,23 +113,23 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                   onChange={() => onSelectAll(isAllSelected ? [] : data.map(f => f.id))}
                 />
               </th>
-              <th style={{ width: '40px' }}>#</th>
+              <th className="hide-mobile" style={{ width: '40px' }}>#</th>
               <th style={{ width: '160px', cursor: 'pointer' }} onClick={() => onSort('nama')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   NAMA {sortField === 'nama' ? (sortOrder === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />) : <ArrowUpDown size={12} style={{ opacity: 0.3 }} />}
                 </div>
               </th>
               <th style={{ width: '130px' }}>POSISI</th>
-              <th style={{ width: '100px' }}>KOTA</th>
-              <th style={{ width: '140px' }}>NO. HP</th>
-              <th style={{ width: '120px', textAlign: 'right', cursor: 'pointer' }} onClick={() => onSort('rate_tertinggi')}>
+              <th className="hide-mobile" style={{ width: '100px' }}>KOTA</th>
+              <th className="hide-mobile" style={{ width: '140px' }}>NO. HP</th>
+              <th className="hide-mobile" style={{ width: '120px', textAlign: 'right', cursor: 'pointer' }} onClick={() => onSort('rate_tertinggi')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'flex-end' }}>
                   RATE TERTINGGI {sortField === 'rate_tertinggi' ? (sortOrder === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />) : <ArrowUpDown size={12} style={{ opacity: 0.3 }} />}
                 </div>
               </th>
-              <th style={{ width: '160px' }}>EVENT TERAKHIR</th>
+              <th className="hide-mobile" style={{ width: '160px' }}>EVENT TERAKHIR</th>
               <th style={{ width: '90px' }}>STATUS</th>
-              <th style={{ width: '100px', cursor: 'pointer' }} onClick={() => onSort('rating_avg')}>
+              <th className="hide-mobile" style={{ width: '100px', cursor: 'pointer' }} onClick={() => onSort('rating_avg')}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                   RATING {sortField === 'rating_avg' ? (sortOrder === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />) : <ArrowUpDown size={12} style={{ opacity: 0.3 }} />}
                 </div>
@@ -155,7 +155,7 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                       onChange={() => onSelectToggle(f.id)}
                     />
                   </td>
-                  <td style={{ color: '#52525b', fontSize: '12px' }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
+                  <td className="hide-mobile" style={{ color: '#52525b', fontSize: '12px' }}>{(currentPage - 1) * itemsPerPage + idx + 1}</td>
                   <td style={{ position: 'relative' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {isIncomplete && (
@@ -172,8 +172,8 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                       {f.posisi_utama[0]}
                     </span>
                   </td>
-                  <td style={{ color: f.kota_domisili === "—" ? "#3f3f46" : "#a1a1aa", fontSize: '12px' }}>{f.kota_domisili}</td>
-                  <td style={{ position: 'relative' }}>
+                  <td className="hide-mobile" style={{ color: f.kota_domisili === "—" ? "#3f3f46" : "#a1a1aa", fontSize: '12px' }}>{f.kota_domisili}</td>
+                  <td className="hide-mobile" style={{ position: 'relative' }}>
                     <div className="phone-cell">
                       <span style={{ color: !f.no_hp ? "#3f3f46" : "#a1a1aa", fontFamily: 'monospace', fontSize: '12px' }}>
                         {f.no_hp || "–"}
@@ -190,10 +190,10 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                       )}
                     </div>
                   </td>
-                  <td style={{ textAlign: 'right', color: !rate ? "#3f3f46" : "#e4e4e7" }}>
+                  <td className="hide-mobile" style={{ textAlign: 'right', color: !rate ? "#3f3f46" : "#e4e4e7" }}>
                     {rate ? `Rp ${rate.toLocaleString()}` : "–"}
                   </td>
-                  <td>
+                  <td className="hide-mobile">
                     {lastEvent ? (
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <span style={{ color: '#a1a1aa', fontSize: '12px' }}>{lastEvent.nama_event}</span>
@@ -206,7 +206,7 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
                       {statStyles.label}
                     </span>
                   </td>
-                  <td>{renderRating(f.rating_avg)}</td>
+                  <td className="hide-mobile">{renderRating(f.rating_avg)}</td>
                   <td>
                     <div style={{ display: 'flex', gap: '4px' }}>
                       <button 
@@ -328,6 +328,18 @@ export const FreelancerTable: React.FC<FreelancerTableProps> = ({
           padding: 2px 6px;
           border-radius: 4px;
           white-space: nowrap;
+        }
+        @media (max-width: 768px) {
+          .hide-mobile {
+            display: none !important;
+          }
+          .freelancer-table-premium th, 
+          .freelancer-table-premium td {
+            padding: 8px 10px;
+          }
+          .freelancer-table-premium {
+            table-layout: auto;
+          }
         }
       `}</style>
     </div>

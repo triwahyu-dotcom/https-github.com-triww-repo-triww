@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { 
   BarChart3, 
   Clock, 
@@ -31,8 +31,16 @@ interface Props {
 }
 
 export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) {
-  const [activeTab, setActiveTab] = useState<"project" | "outstanding" | "approval" | "summary">("project");
+  const [activeTab, setActiveTab] = useState<"project" | "outstanding" | "approval" | "summary" | "settlement">("project");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(activeProjects[0]?.id || null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const selectedProject = useMemo(() => 
     activeProjects.find(p => p.id === selectedProjectId) || activeProjects[0]
@@ -134,33 +142,34 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
     <WorkspaceShell title="Finance Monitoring Center" eyebrow="FINANCE & RFP — MONITORING">
       
       {/* Top Header Actions */}
-      <div style={{ position: 'absolute', top: '24px', right: '40px', display: 'flex', gap: '12px' }}>
+      <div className="finance-header-actions" style={{ position: 'absolute', top: '24px', right: isMobile ? '16px' : '40px', display: 'flex', gap: '12px' }}>
         <button 
           onClick={handleExport}
-          style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 20px', color: '#e4e4e7', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+          className="desktop-only-btn"
+          style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 20px', color: '#e4e4e7', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '8px' }}
         >
-          <Download size={16} /> Export Report
+          <Download size={16} /> Export
         </button>
         <button style={{ background: '#378ADD', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Plus size={16} /> + New PO / SPK
+          <Plus size={16} /> {isMobile ? 'New' : '+ New PO / SPK'}
         </button>
       </div>
 
       {/* Primary Navigation Tabs */}
-      <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', width: 'fit-content', marginBottom: '32px' }}>
+      <div className="finance-nav-tabs" style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', width: isMobile ? '100%' : 'fit-content', marginBottom: '32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         {[
-          { id: 'project', label: 'Project Finance Dashboard', icon: <BarChart3 size={16} /> },
-          { id: 'outstanding', label: 'Outstanding Payment', icon: <Clock size={16} /> },
-          { id: 'approval', label: 'Approval Pipeline', icon: <CheckCircle2 size={16} /> },
-          { id: 'settlement', label: 'CA Settlement Tracker', icon: <Receipt size={16} /> },
-          { id: 'summary', label: 'Multi-Project Summary', icon: <Briefcase size={16} /> }
+          { id: 'project', label: isMobile ? 'Project' : 'Project Finance Dashboard', icon: <BarChart3 size={16} /> },
+          { id: 'outstanding', label: isMobile ? 'Out.' : 'Outstanding Payment', icon: <Clock size={16} /> },
+          { id: 'approval', label: isMobile ? 'Appr.' : 'Approval Pipeline', icon: <CheckCircle2 size={16} /> },
+          { id: 'settlement', label: isMobile ? 'Sett.' : 'CA Settlement Tracker', icon: <Receipt size={16} /> },
+          { id: 'summary', label: isMobile ? 'Sum.' : 'Multi-Project Summary', icon: <Briefcase size={16} /> }
         ].map(tab => (
           <button 
             key={tab.id} 
             onClick={() => setActiveTab(tab.id as any)}
             style={{ 
               padding: '10px 20px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: 'none',
-              display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s',
+              display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s', flexShrink: 0,
               background: activeTab === tab.id ? '#378ADD' : 'transparent',
               color: activeTab === tab.id ? '#fff' : '#71717a'
             }}
@@ -171,7 +180,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
       </div>
 
       {/* Global Stat Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
+      <div className="finance-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
         <StatCard label="Total Budget Aktif" value={formatCurrencyIDR(globalStats.totalBudget)} trend="+ Rp 0M dari bulan lalu" trendType="neutral" icon={<TrendingUp size={20} />} />
         <StatCard label="Outstanding" value={formatCurrencyIDR(globalStats.totalOutstanding)} trend="Total committed unpaid" trendType="down" icon={<AlertCircle size={20} />} color="#EF9F27" />
         <StatCard label="Pending Approval" value={String(globalStats.pendingApproval)} trend="Queue awaiting action" trendType="down" icon={<Clock size={20} />} color="#378ADD" />
@@ -179,13 +188,13 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
       </div>
 
       {activeTab === 'project' && (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', animation: 'fadeIn 0.3s ease-out' }}>
+        <div className="finance-project-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', animation: 'fadeIn 0.3s ease-out' }}>
           
           {/* Project Summary Left Column */}
-          <div style={{ background: '#1f1f23', borderRadius: '20px', border: '0.5px solid rgba(255,255,255,0.06)', padding: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+          <div style={{ background: '#1f1f23', borderRadius: '20px', border: '0.5px solid rgba(255,255,255,0.06)', padding: isMobile ? '20px' : '32px' }}>
+            <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'stretch' : 'flex-start', marginBottom: '32px', gap: '16px' }}>
               <div style={{ flex: 1 }}>
-                <div style={{ position: 'relative', width: 'fit-content' }}>
+                <div style={{ position: 'relative', width: '100%' }}>
                    <select 
                     value={selectedProjectId || ""} 
                     onChange={e => setSelectedProjectId(e.target.value)}
@@ -194,7 +203,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
                       background: 'rgba(255,255,255,0.03)', 
                       border: '0.5px solid rgba(255,255,255,0.1)', 
                       color: '#f4f4f5', 
-                      fontSize: '20px', 
+                      fontSize: isMobile ? '16px' : '20px', 
                       fontWeight: 700, 
                       outline: 'none', 
                       width: '100%', 
@@ -216,7 +225,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
                   <span style={{ fontSize: '12px', color: '#378ADD', fontWeight: 600 }}>{selectedProject?.currentStageLabel || 'Finance stage'}</span>
                 </div>
               </div>
-              <div style={{ background: 'rgba(239,159,39,0.1)', color: '#EF9F27', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 800, border: '0.5px solid rgba(239,159,39,0.2)' }}>
+              <div style={{ background: 'rgba(239,159,39,0.1)', color: '#EF9F27', padding: '8px 16px', borderRadius: '10px', fontSize: '13px', fontWeight: 800, border: '0.5px solid rgba(239,159,39,0.2)', textAlign: 'center' }}>
                 {formatCurrencyIDR(projectStats?.usedBudget || 0)}
               </div>
             </div>
@@ -224,20 +233,16 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
             {/* Budget Bar */}
             <div style={{ marginBottom: '40px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <span style={{ fontSize: '13px', color: '#71717a' }}>Budget terpakai (vs Project Value)</span>
+                <span style={{ fontSize: '13px', color: '#71717a' }}>Budget terpakai</span>
                 <span style={{ fontSize: '13px', fontWeight: 700, color: '#EF9F27' }}>{projectStats?.budgetPercent}%</span>
               </div>
               <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden', position: 'relative' }}>
                 <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${projectStats?.budgetPercent}%`, background: 'linear-gradient(90deg, #EF9F27, #f59e0b)', borderRadius: '4px' }} />
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px' }}>
-                <span style={{ fontSize: '12px', color: '#52525b' }}>{formatCurrencyIDR(projectStats?.usedBudget || 0)} committed</span>
-                <span style={{ fontSize: '12px', color: '#52525b' }}>{formatCurrencyIDR((projectStats?.budget || 0) - (projectStats?.usedBudget || 0))} margin/rem.</span>
-              </div>
             </div>
 
             {/* Project Details Grid */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <ProjectDetailRow label="Total PO/SPK" value={formatCurrencyIDR(projectStats?.totalPO || 0)} meta={`${(initialData.expenseDocuments || []).filter(d => d.projectId === selectedProject?.id && d.documentType !== "CASH_ADVANCE").length} dokumen`} icon={<CreditCard size={18} />} />
               <ProjectDetailRow label="Cash Advance" value={formatCurrencyIDR(projectStats?.totalCA || 0)} meta={`${(initialData.expenseDocuments || []).filter(d => d.projectId === selectedProject?.id && d.documentType === "CASH_ADVANCE").length} CA aktif`} icon={<DollarSign size={18} />} />
               <ProjectDetailRow label="Outstanding" value={formatCurrencyIDR(projectStats?.totalOutstanding || 0)} meta="Belum terbayar" valueColor="#EF9F27" icon={<Clock size={18} />} />
@@ -246,15 +251,15 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
           </div>
 
           {/* Timeline Right Column */}
-          <div style={{ background: '#1f1f23', borderRadius: '20px', border: '0.5px solid rgba(255,255,255,0.06)', padding: '32px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#f4f4f5', margin: '0 0 8px 0' }}>Cash Flow Timeline</h3>
-            <p style={{ fontSize: '13px', color: '#71717a', margin: '0 0 32px 0' }}>Jadwal pembayaran project ini</p>
+          <div style={{ background: '#1f1f23', borderRadius: '20px', border: '0.5px solid rgba(255,255,255,0.06)', padding: isMobile ? '20px' : '32px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#f4f4f5', margin: '0 0 8px 0' }}>Timeline</h3>
+            <p style={{ fontSize: '13px', color: '#71717a', margin: '0 0 32px 0' }}>Jadwal pembayaran project</p>
 
             <div style={{ position: 'relative', paddingLeft: '32px' }}>
               <div style={{ position: 'absolute', left: '7px', top: '10px', bottom: '10px', width: '2px', background: 'rgba(255,255,255,0.06)' }} />
               
               {projectStats?.timelineItems.length === 0 ? (
-                <div style={{ padding: '40px 0', textAlign: 'center', color: '#3f3f46', fontSize: '13px' }}>No payment schedules found for this project.</div>
+                <div style={{ padding: '40px 0', textAlign: 'center', color: '#3f3f46', fontSize: '13px' }}>No payment schedules found.</div>
               ) : projectStats?.timelineItems.map((item, i) => (
                 <TimelineItem key={i} label={item.label} date={formatDateFullID(item.date)} status={item.status} statusType={item.type} />
               ))}
@@ -276,7 +281,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
              </div>
            </div>
 
-           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', fontSize: '11px', fontWeight: 700, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>
+           <div className="finance-table-header" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', padding: '12px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)', fontSize: '11px', fontWeight: 700, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px' }}>
              <span>PROJECT & VENDOR</span>
              <span>DUE DATE</span>
              <span>TOTAL VALUE</span>
@@ -312,7 +317,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
         <div style={{ background: '#1f1f23', borderRadius: '20px', border: '0.5px solid rgba(255,255,255,0.06)', padding: '32px', animation: 'fadeIn 0.3s ease-out' }}>
            <h3 style={{ fontSize: '18px', fontWeight: 600, color: '#f4f4f5', marginBottom: '32px' }}>Approval Pipeline Status</h3>
            
-           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '40px' }}>
+           <div className="pipeline-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px', marginBottom: '40px' }}>
               <PipelineCard label="Draft" count={ (initialData.expenseDocuments || []).filter(d => d.status === "draft").length } color="#52525b" />
               <PipelineCard label="Pending C-Level" count={ (initialData.expenseDocuments || []).filter(d => d.status === "pending_c_level").length } color="#EF9F27" active />
               <PipelineCard label="Pending Finance" count={ (initialData.expenseDocuments || []).filter(d => d.status === "pending_finance").length } color="#378ADD" />
@@ -428,8 +433,42 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
         </div>
       )}
 
-      <style jsx>{`
+      <style jsx global>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        @media (max-width: 1024px) {
+          .finance-header-actions {
+             top: 12px !important;
+          }
+          .finance-nav-tabs {
+            padding: 4px !important;
+          }
+          .finance-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .finance-project-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .pipeline-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+          }
+          .finance-table-header {
+             grid-template-columns: 1fr 100px 100px !important;
+          }
+          .finance-table-header span:nth-child(2),
+          .finance-table-header span:nth-child(3) {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .finance-stat-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .pipeline-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
       `}</style>
     </WorkspaceShell>
   );

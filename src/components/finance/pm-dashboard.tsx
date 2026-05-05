@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { 
   FolderOpen, 
   FileText, 
@@ -48,6 +48,14 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
     activeProjects[0]?.id ?? null
   );
   const [projectSearch, setProjectSearch] = useState("");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const docs = useMemo(() => initialData.expenseDocuments || [], [initialData.expenseDocuments]);
   const rfps = useMemo(() => initialData.rfps || [], [initialData.rfps]);
@@ -106,16 +114,16 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
       eyebrow="PM WORKSPACE (READ-ONLY)"
       actions={headerActions}
     >
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
-        <SummaryCard label="My Projects" value={String(activeProjects.length)} description="Active executions" icon={<FolderOpen size={18} />} />
-        <SummaryCard label="Total Dokumen" value={String(docs.length)} description="PO, SPK, Kontrak, CA" icon={<FileText size={18} />} />
-        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description="Belum terbayar" icon={<Clock size={18} />} trendType="down" />
-        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description="Nilai terotorisasi" icon={<CheckCircle2 size={18} />} trendType="up" />
+      <section className="pm-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
+        <SummaryCard label="My Projects" value={String(activeProjects.length)} description={isMobile ? "Active" : "Active executions"} icon={<FolderOpen size={18} />} />
+        <SummaryCard label="Total Dokumen" value={String(docs.length)} description={isMobile ? "Files" : "PO, SPK, Kontrak, CA"} icon={<FileText size={18} />} />
+        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description={isMobile ? "Unpaid" : "Belum terbayar"} icon={<Clock size={18} />} trendType="down" />
+        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description={isMobile ? "Auth" : "Nilai terotorisasi"} icon={<CheckCircle2 size={18} />} trendType="up" />
       </section>
 
-      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "1px", background: 'rgba(255,255,255,0.08)', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
+      <div className="pm-split-pane" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "1px", background: 'rgba(255,255,255,0.08)', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
         {/* Left Panel: Project List */}
-        <div style={{ background: "#111113", padding: "12px", height: '70vh', overflowY: 'auto' }}>
+        <div className="pm-left-panel" style={{ background: "#111113", padding: "12px", height: '70vh', overflowY: 'auto' }}>
           <input 
             type="text" 
             placeholder="Cari project..." 
@@ -168,7 +176,7 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
         </div>
 
         {/* Right Panel: Project Detail */}
-        <div style={{ background: "#18181b", padding: "20px", height: '70vh', overflowY: 'auto' }}>
+        <div className="pm-right-panel" style={{ background: "#18181b", padding: "20px", height: '70vh', overflowY: 'auto' }}>
           {selectedProject ? (
             <>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: '24px' }}>
@@ -197,10 +205,10 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
               <section style={{ marginBottom: '32px' }}>
                 <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 500 }}>DOKUMEN PENGADAAN</div>
                 <div style={{ background: '#111113', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 100px 120px 140px', padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                  <div className="pm-table-header" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 100px 120px 140px', padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>NO. DOKUMEN</div>
-                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>VENDOR</div>
-                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>TIPE</div>
+                    <div className="hide-mobile" style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>VENDOR</div>
+                    <div className="hide-mobile" style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>TIPE</div>
                     <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>NILAI</div>
                     <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em', textAlign: 'right' }}>STATUS</div>
                   </div>
@@ -209,10 +217,10 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                       Tidak ada dokumen yang sesuai filter
                     </div>
                   ) : filteredProjectDocs.map(doc => (
-                    <div key={doc.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 100px 120px 140px', padding: '12px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
+                    <div key={doc.id} className="pm-row" style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 100px 120px 140px', padding: '12px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
                       <div style={{ fontSize: '12px', fontWeight: 500, color: '#e4e4e7' }}>{doc.id}</div>
-                      <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{doc.vendorName}</div>
-                      <div><span style={{ background: 'rgba(55,138,221,0.1)', color: '#85B7EB', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>{docTypeLabel[doc.documentType]}</span></div>
+                      <div className="hide-mobile" style={{ fontSize: '12px', color: '#a1a1aa' }}>{doc.vendorName}</div>
+                      <div className="hide-mobile"><span style={{ background: 'rgba(55,138,221,0.1)', color: '#85B7EB', fontSize: '10px', padding: '2px 6px', borderRadius: '4px' }}>{docTypeLabel[doc.documentType]}</span></div>
                       <div style={{ fontSize: '12px', color: '#e4e4e7' }}>{formatCurrencyIDR(doc.amount)}</div>
                       <div style={{ textAlign: 'right' }}>
                         <span style={{ 
@@ -231,10 +239,10 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
               <section>
                 <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.08em', marginBottom: '8px', fontWeight: 500 }}>REQUEST FOR PAYMENT (RFP)</div>
                 <div style={{ background: '#111113', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 100px 120px 140px', padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                  <div className="pm-table-header-rfp" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 100px 120px 140px', padding: '10px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>RFP ID</div>
-                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>PAYEE</div>
-                    <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>METODE</div>
+                    <div className="hide-mobile" style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>PAYEE</div>
+                    <div className="hide-mobile" style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>METODE</div>
                     <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em' }}>NOMINAL</div>
                     <div style={{ fontSize: '10px', color: '#52525b', letterSpacing: '0.05em', textAlign: 'right' }}>STATUS</div>
                   </div>
@@ -243,10 +251,10 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
                       Tidak ada RFP yang sesuai filter
                     </div>
                   ) : filteredProjectRfps.map(rfp => (
-                    <div key={rfp.id} style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 100px 120px 140px', padding: '12px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
+                    <div key={rfp.id} className="pm-row-rfp" style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 100px 120px 140px', padding: '12px 14px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
                       <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#e4e4e7' }}>#{rfp.id.substring(0, 8)}</div>
-                      <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{rfp.payeeName}</div>
-                      <div style={{ fontSize: '11px', color: '#71717a' }}>{rfp.paymentType}</div>
+                      <div className="hide-mobile" style={{ fontSize: '12px', color: '#a1a1aa' }}>{rfp.payeeName}</div>
+                      <div className="hide-mobile" style={{ fontSize: '11px', color: '#71717a' }}>{rfp.paymentType}</div>
                       <div style={{ fontSize: '12px', color: '#e4e4e7', fontWeight: 500 }}>{formatCurrencyIDR(rfp.totalAmount)}</div>
                       <div style={{ textAlign: 'right' }}>
                         <span style={{ 
@@ -282,6 +290,39 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        @media (max-width: 1024px) {
+          .pm-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .pm-split-pane {
+            grid-template-columns: 1fr !important;
+          }
+          .pm-left-panel {
+            height: 300px !important;
+            border-bottom: 0.5px solid rgba(255,255,255,0.1);
+          }
+          .pm-right-panel {
+            height: auto !important;
+          }
+          .pm-table-header, .pm-row {
+            grid-template-columns: 1fr 100px 100px !important;
+          }
+          .pm-table-header-rfp, .pm-row-rfp {
+            grid-template-columns: 1fr 100px 100px !important;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .pm-stat-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </WorkspaceShell>
   );
 }

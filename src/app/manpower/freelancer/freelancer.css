@@ -24,13 +24,58 @@
 .freelancer-header-premium {
   background: var(--freelancer-header-bg);
   border-bottom: 0.5px solid var(--freelancer-border);
-  padding: 14px 20px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(12px);
+}
+
+.header-left-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-title-premium {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--freelancer-text-main);
+  margin: 0;
+  white-space: nowrap;
+}
+
+.back-icon-mobile {
+  display: none;
+}
+
+.add-icon-mobile {
+  display: none;
+}
+
+.add-freelancer-btn-premium {
+  background: var(--freelancer-primary);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .back-btn-premium {
@@ -507,3 +552,91 @@
   to { transform: scale(1); opacity: 1; }
 }
 
+/* Responsive Styles */
+@media (max-width: 1024px) {
+  .freelancer-main-layout {
+    flex-direction: column;
+  }
+  
+  .freelancer-sidebar-filter {
+    width: 100%;
+    height: auto;
+    position: static;
+    border-left: none;
+    border-bottom: 0.5px solid var(--freelancer-border);
+  }
+  
+  .stat-grid-premium {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .bulk-action-bar {
+    right: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .freelancer-header-premium {
+    padding: 10px 16px;
+  }
+  
+  .header-left-section {
+    gap: 8px;
+  }
+  
+  .header-title-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+  
+  .header-title-premium {
+    font-size: 16px;
+  }
+  
+  .count-chip-premium {
+    margin-left: 0;
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+  
+  .back-text {
+    display: none;
+  }
+  
+  .back-icon-mobile {
+    display: block;
+  }
+  
+  .add-text {
+    display: none;
+  }
+  
+  .add-icon-mobile {
+    display: block;
+  }
+  
+  .add-freelancer-btn-premium {
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+  
+  .back-btn-premium {
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    justify-content: center;
+  }
+  
+  .stat-grid-premium {
+    grid-template-columns: 1fr;
+  }
+  
+  .freelancer-content-area {
+    padding: 16px;
+  }
+}

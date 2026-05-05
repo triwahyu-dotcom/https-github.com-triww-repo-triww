@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { 
   FileText, 
   CreditCard, 
@@ -57,6 +57,14 @@ const getDocDisplayAmount = (doc: ExpenseDocument) => {
 export function DirectorApprovals({ initialData }: Props) {
   const [activeTab, setActiveTab] = useState<"docs" | "rfps" | "history">("docs");
   const [viewProofUrl, setViewProofUrl] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // PO/Doc approval state
   const [selectedDoc, setSelectedDoc] = useState<ExpenseDocument | null>(null);
@@ -165,17 +173,17 @@ export function DirectorApprovals({ initialData }: Props) {
 
   return (
     <WorkspaceShell title="Management Authorization" eyebrow="C-LEVEL WORKSPACE">
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
-        <SummaryCard label="Pending Docs" value={String(pendingDocs.length)} description="PO/SPK/Kontrak/CA" icon={<FileText size={20} />} trendType="up" />
-        <SummaryCard label="Pending RFP" value={String(pendingRfps.length)} description="Payment authorization" icon={<CreditCard size={20} />} trendType="up" />
-        <SummaryCard label="Auth History" value={String(historyDocs.length + historyRfps.length)} description="Released commitments" icon={<ShieldCheck size={20} />} trendType="neutral" />
+      <section className="director-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
+        <SummaryCard label="Pending Docs" value={String(pendingDocs.length)} description={isMobile ? "PO/SPK" : "PO/SPK/Kontrak/CA"} icon={<FileText size={20} />} trendType="up" />
+        <SummaryCard label="Pending RFP" value={String(pendingRfps.length)} description={isMobile ? "Payment" : "Payment authorization"} icon={<CreditCard size={20} />} trendType="up" />
+        <SummaryCard label="Auth History" value={String(historyDocs.length + historyRfps.length)} description={isMobile ? "Released" : "Released commitments"} icon={<ShieldCheck size={20} />} trendType="neutral" />
       </section>
 
-      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
+      <div className="director-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px", overflowX: 'auto', paddingBottom: '4px' }}>
         {[
-          { id: 'docs', label: 'Approve Dokumen', count: pendingDocs.length, icon: <FileText size={14} /> },
-          { id: 'rfps', label: 'Otorisasi RFP', count: pendingRfps.length, icon: <CreditCard size={14} /> },
-          { id: 'history', label: 'History Otorisasi', count: null, icon: <History size={14} /> },
+          { id: 'docs', label: isMobile ? 'Docs' : 'Approve Dokumen', count: pendingDocs.length, icon: <FileText size={14} /> },
+          { id: 'rfps', label: isMobile ? 'RFP' : 'Otorisasi RFP', count: pendingRfps.length, icon: <CreditCard size={14} /> },
+          { id: 'history', label: isMobile ? 'Hist.' : 'History Otorisasi', count: null, icon: <History size={14} /> },
         ].map(t => (
           <button 
             key={t.id}
@@ -192,7 +200,9 @@ export function DirectorApprovals({ initialData }: Props) {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              flexShrink: 0,
+              whiteSpace: 'nowrap'
             }}
           >
             {t.icon} {t.label} {t.count !== null && <span style={{ opacity: 0.8, fontSize: '11px', background: activeTab === t.id ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: '4px' }}>{t.count}</span>}
@@ -207,32 +217,32 @@ export function DirectorApprovals({ initialData }: Props) {
       </div>
 
       <div style={{ background: '#111113', borderRadius: '14px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden', marginTop: '20px' }}>
-         <div style={{ 
-           display: 'grid', 
-           gridTemplateColumns: activeTab === 'rfps' ? "1.5fr 2fr 1.5fr 1fr 1.2fr" : "1.8fr 1.5fr 1.2fr 1fr 1fr 1.2fr",
-           background: '#111113',
-           padding: '12px 20px',
-           borderBottom: '0.5px solid rgba(255,255,255,0.06)'
-         }}>
-           {activeTab === 'rfps' ? (
-             <>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>RFP ID</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>PROJECT / VENDOR</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>REQ DATE</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>AMOUNT</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600, textAlign: 'right' }}>ACTIONS</div>
-             </>
-           ) : (
-             <>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>DOCUMENT NO</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>VENDOR</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>PROJECT</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>TYPE</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>VALUE</div>
-               <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600, textAlign: 'right' }}>ACTIONS</div>
-             </>
-           )}
-         </div>
+          <div className="director-table-header" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: activeTab === 'rfps' ? "1.5fr 2fr 1.5fr 1fr 1.2fr" : "1.8fr 1.5fr 1.2fr 1fr 1fr 1.2fr",
+            background: '#111113',
+            padding: '12px 20px',
+            borderBottom: '0.5px solid rgba(255,255,255,0.06)'
+          }}>
+            {activeTab === 'rfps' ? (
+              <>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>RFP ID</div>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>PROJECT / VENDOR</div>
+                <div className="hide-mobile" style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>REQ DATE</div>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>AMOUNT</div>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600, textAlign: 'right' }}>ACTIONS</div>
+              </>
+            ) : (
+              <>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>DOCUMENT NO</div>
+                <div className="hide-mobile" style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>VENDOR</div>
+                <div className="hide-mobile" style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>PROJECT</div>
+                <div className="hide-mobile" style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>TYPE</div>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600 }}>VALUE</div>
+                <div style={{ fontSize: '11px', color: '#52525b', fontWeight: 600, textAlign: 'right' }}>ACTIONS</div>
+              </>
+            )}
+          </div>
 
          {((activeTab === 'docs' && filteredDocs.length === 0) || (activeTab === 'rfps' && filteredRfps.length === 0)) ? (
             <div style={{ padding: '80px', textAlign: 'center', color: '#3f3f46' }}>
@@ -242,7 +252,7 @@ export function DirectorApprovals({ initialData }: Props) {
          ) : (
            <>
              {activeTab === 'rfps' ? filteredRfps.map(rfp => (
-               <div key={rfp.id} className="list-row-premium" style={{ 
+               <div key={rfp.id} className="list-row-premium director-row" style={{ 
                  display: 'grid', gridTemplateColumns: "1.5fr 2fr 1.5fr 1fr 1.2fr", 
                  alignItems: "center", padding: '14px 20px', borderBottom: '0.5px solid rgba(255,255,255,0.05)' 
                }}>
@@ -251,25 +261,25 @@ export function DirectorApprovals({ initialData }: Props) {
                     <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{rfp.projectName}</div>
                     <div style={{ fontSize: '11px', color: '#52525b' }}>Payee: {rfp.payeeName}</div>
                  </div>
-                 <div style={{ fontSize: '12px', color: '#71717a' }}>{formatDateFullID(rfp.requestDate)}</div>
+                 <div className="hide-mobile" style={{ fontSize: '12px', color: '#71717a' }}>{formatDateFullID(rfp.requestDate)}</div>
                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#e4e4e7' }}>{formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</div>
                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', color: '#71717a', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer' }}>View</button>
-                    {activeTab !== 'history' && <button onClick={() => { setSelectedRfp(rfp); setIsRfpReviewOpen(true); }} style={{ background: '#378ADD', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Sign</button>}
+                    <button onClick={() => window.open(`/finance/print/${rfp.id}`, "_blank")} className="hide-mobile" style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', color: '#71717a', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer' }}>View</button>
+                    <button onClick={() => { setSelectedRfp(rfp); setIsRfpReviewOpen(true); }} style={{ background: '#378ADD', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Sign</button>
                  </div>
                </div>
              )) : filteredDocs.map(doc => (
-               <div key={doc.id} className="list-row-premium" style={{ 
+               <div key={doc.id} className="list-row-premium director-row" style={{ 
                  display: 'grid', gridTemplateColumns: "1.8fr 1.5fr 1.2fr 1fr 1fr 1.2fr", 
                  alignItems: "center", padding: '14px 20px', borderBottom: '0.5px solid rgba(255,255,255,0.05)' 
                }}>
                  <div style={{ fontFamily: 'monospace', fontSize: '12px', color: '#e4e4e7' }}>{doc.id}</div>
-                 <div style={{ fontSize: '13px', color: '#e4e4e7' }}>{doc.vendorName}</div>
-                 <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{doc.projectName}</div>
-                 <div><span style={{ fontSize: '10px', background: 'rgba(55,138,221,0.1)', color: '#85B7EB', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{doc.documentType}</span></div>
+                 <div className="hide-mobile" style={{ fontSize: '13px', color: '#e4e4e7' }}>{doc.vendorName}</div>
+                 <div className="hide-mobile" style={{ fontSize: '12px', color: '#a1a1aa' }}>{doc.projectName}</div>
+                 <div className="hide-mobile"><span style={{ fontSize: '10px', background: 'rgba(55,138,221,0.1)', color: '#85B7EB', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>{doc.documentType}</span></div>
                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#e4e4e7' }}>{formatCurrencyIDR(getDocDisplayAmount(doc))}</div>
                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                    <button onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', color: '#71717a', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer' }}>View</button>
+                    <button onClick={() => window.open(`/finance/print/${doc.id}`, "_blank")} className="hide-mobile" style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.1)', color: '#71717a', borderRadius: '6px', padding: '6px 12px', fontSize: '11px', cursor: 'pointer' }}>View</button>
                     {activeTab !== 'history' && <button onClick={() => { setSelectedDoc(doc); setIsDocReviewOpen(true); }} style={{ background: '#378ADD', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 16px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>Sign</button>}
                  </div>
                </div>
@@ -413,6 +423,29 @@ export function DirectorApprovals({ initialData }: Props) {
       {rejectionTarget && (
         <RejectionModal title={`Reject ${rejectionTarget.type}`} onClose={() => setRejectionTarget(null)} onConfirm={confirmRejection} />
       )}
+
+      <style jsx global>{`
+        @media (max-width: 1024px) {
+          .director-stat-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+          }
+          .director-table-header {
+            grid-template-columns: 1fr 100px 80px !important;
+          }
+          .director-row {
+            grid-template-columns: 1fr 100px 80px !important;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .director-stat-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </WorkspaceShell>
   );
 }

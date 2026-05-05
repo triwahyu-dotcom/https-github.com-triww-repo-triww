@@ -314,19 +314,24 @@ export default function FreelancerDatabasePage() {
   return (
     <div className="freelancer-page-container">
       <header className="freelancer-header-premium">
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Link href="/projects">
-            <button className="back-btn-premium">← Kembali ke Project</button>
+        <div className="header-left-section">
+          <Link href="/projects" className="back-link-mobile">
+            <button className="back-btn-premium">
+              <span className="back-text">← Kembali ke Project</span>
+              <ArrowLeft className="back-icon-mobile" size={18} />
+            </button>
           </Link>
-          <h1 style={{ fontSize: '18px', fontWeight: 500, color: '#f4f4f5', marginLeft: '12px', marginBlock: 0 }}>Freelancer Database</h1>
-          <span className="count-chip-premium">{filteredFreelancers.length} tampil / {allFreelancers.length} total</span>
+          <div className="header-title-group">
+            <h1 className="header-title-premium">Freelancer Database</h1>
+            <span className="count-chip-premium">{filteredFreelancers.length} tampil / {allFreelancers.length} total</span>
+          </div>
         </div>
         <button 
-          className="primary-button" 
-          style={{ background: '#378ADD', color: '#fff', borderRadius: '8px', padding: '6px 16px', fontSize: '13px', border: 'none', cursor: 'pointer' }}
+          className="add-freelancer-btn-premium" 
           onClick={() => { setEditingFreelancer(null); setIsModalOpen(true); }}
         >
-          + Tambah Freelancer
+          <Plus className="add-icon-mobile" size={18} />
+          <span className="add-text">+ Tambah Freelancer</span>
         </button>
       </header>
 

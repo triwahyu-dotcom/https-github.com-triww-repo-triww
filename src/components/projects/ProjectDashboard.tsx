@@ -53,7 +53,8 @@ import {
   Settings,
   Circle,
   X,
-  Printer
+  Printer,
+  Book
 } from "lucide-react";
 import { PresenceIndicator } from "@/components/PresenceIndicator";
 
@@ -654,6 +655,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           <Link href="/manpower/freelancer" className="sidebar-item-premium"><Users size={18} /> Man Power</Link>
           <Link href="/finance" className="sidebar-item-premium"><FileText size={18} /> Finance & RFP</Link>
           <Link href="/docs" className="sidebar-item-premium"><FolderOpen size={18} /> Document Center</Link>
+          <Link href="/docs/manual" className="sidebar-item-premium" style={{ color: '#85B7EB' }}><Book size={18} /> User Manual</Link>
 
           <div style={{ marginTop: '32px', marginBottom: '8px', padding: '0 12px' }}>
             <span style={{ fontSize: '10px', color: '#3f3f46', letterSpacing: '0.08em' }}>ACTIVE IDENTITY</span>

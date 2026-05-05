@@ -14,6 +14,7 @@ const PUBLIC_PATHS = [
   "/api/vendor-status",
   "/api/vendor-revision",
   "/api/vendor-identity",
+  "/docs",
   "/_next",
   "/favicon.ico",
 ];

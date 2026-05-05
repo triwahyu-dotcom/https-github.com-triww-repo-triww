@@ -13,7 +13,8 @@
     "projectName": "Heppiii Skate Day",
     "serviceLine": "Event Management",
     "currentStage": "lead",
-    "projectValue": 0
+    "projectValue": 0,
+    "section": "leads"
   },
   {
     "id": "1773805404790",
@@ -1426,91 +1427,91 @@
         "id": "brief-task-0",
         "stage": "qualified",
         "title": "Brief Status",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "brief-task-1",
         "stage": "qualified",
         "title": "TOR / Brief Deck",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "brief-task-2",
         "stage": "qualified",
         "title": "Document A",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "pitching-task-0",
         "stage": "pitching",
         "title": "Pitching Status",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "pitching-task-1",
         "stage": "pitching",
         "title": "Pitching Deadline",
-        "status": "pending",
+        "status": "done",
         "required": false
       },
       {
         "id": "pitching-task-2",
         "stage": "pitching",
         "title": "Proposal",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "pitching-task-3",
         "stage": "pitching",
         "title": "Quotation",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "pitching-task-4",
         "stage": "pitching",
         "title": "Presentation",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "revision-task-0",
         "stage": "negotiation",
         "title": "Revision Status",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "revision-task-1",
         "stage": "negotiation",
         "title": "Revision Deadline",
-        "status": "pending",
+        "status": "done",
         "required": false
       },
       {
         "id": "revision-task-2",
         "stage": "negotiation",
         "title": "Revision Proposal",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "revision-task-3",
         "stage": "negotiation",
         "title": "Revision Quotation",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "execution-task-0",
         "stage": "execution",
         "title": "Execution Status",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
@@ -1524,7 +1525,7 @@
         "id": "execution-task-2",
         "stage": "execution",
         "title": "PO to Vendor",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
@@ -1601,7 +1602,7 @@
         "id": "finance-task-4",
         "stage": "finance",
         "title": "Invoice",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
@@ -1612,10 +1613,11 @@
         "required": true
       }
     ],
-    "client": "PT DJARUM",
+    "client": "PT Djarum",
     "health": "watch",
     "owners": [
-      "Rombeng"
+      "Rombeng",
+      "widya"
     ],
     "phases": [
       {
@@ -2110,7 +2112,7 @@
     "resultLabel": "In progress",
     "serviceLine": "Event Management",
     "currentStage": "execution",
-    "projectValue": 121489500,
+    "projectValue": 67150000,
     "sectionLabel": "Ongoing Projects",
     "contactPerson": "",
     "financeStatus": "-",
@@ -2119,7 +2121,39 @@
     "vendorShortlist": [],
     "currentStageLabel": "Execution",
     "projectValueLabel": "Rp 121.489.500",
-    "vendorRequirements": []
+    "vendorRequirements": [
+      {
+        "label": "Service Fit",
+        "summary": "Prioritaskan vendor dengan layanan Event Management."
+      },
+      {
+        "label": "Coverage",
+        "summary": "Pastikan vendor available pada tanggal event dan area kerja relevan."
+      },
+      {
+        "label": "Compliance",
+        "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
+      }
+    ],
+    "projectInitial": "DRV",
+    "mainFolder": "",
+    "updatedAt": "2026-05-05T10:55:22.440Z",
+    "termOfPayment": [
+      {
+        "id": "top_1777978233586",
+        "label": "DP",
+        "percentage": 50,
+        "amount": 33575000,
+        "status": "paid"
+      },
+      {
+        "id": "top_1777978266184",
+        "label": "Pelunasan",
+        "percentage": 50,
+        "amount": 33575000,
+        "status": "pending"
+      }
+    ]
   },
   {
     "id": "we-do-bca-bca-wealth-summit-2026-4db27bd7",
@@ -2754,7 +2788,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "18/03/2026",
+    "eventDate": "2026-03-18",
     "milestones": [
       {
         "id": "brief-received",
@@ -3469,7 +3503,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "27/04/2026",
+    "eventDate": "2026-04-27",
     "milestones": [
       {
         "id": "brief-received",
@@ -4184,7 +4218,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "04/01/2026",
+    "eventDate": "2026-01-04",
     "milestones": [
       {
         "id": "brief-received",
@@ -4911,7 +4945,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "11/3/26",
+    "eventDate": "2026-03-11",
     "milestones": [
       {
         "id": "brief-received",
@@ -6334,7 +6368,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "17/03/2026",
+    "eventDate": "2026-03-17",
     "milestones": [
       {
         "id": "brief-received",
@@ -7066,7 +7100,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "31/01/2026",
+    "eventDate": "2026-01-31",
     "milestones": [
       {
         "id": "brief-received",
@@ -9204,7 +9238,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "1/4/26",
+    "eventDate": "2026-04-01",
     "mainFolder": "",
     "milestones": [
       {
@@ -9932,7 +9966,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "1/4/26",
+    "eventDate": "2026-04-01",
     "mainFolder": "",
     "milestones": [
       {
@@ -10057,7 +10091,7 @@
         "id": "pitching-task-2",
         "stage": "pitching",
         "title": "Proposal",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
@@ -10078,42 +10112,42 @@
         "id": "revision-task-0",
         "stage": "negotiation",
         "title": "Revision Status",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "revision-task-1",
         "stage": "negotiation",
         "title": "Revision Deadline",
-        "status": "pending",
+        "status": "done",
         "required": false
       },
       {
         "id": "revision-task-2",
         "stage": "negotiation",
         "title": "Revision Proposal",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "revision-task-3",
         "stage": "negotiation",
         "title": "Revision Quotation",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "execution-task-0",
         "stage": "execution",
         "title": "Execution Status",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
         "id": "execution-task-1",
         "stage": "execution",
         "title": "Contract / SPK Client",
-        "status": "pending",
+        "status": "done",
         "required": true
       },
       {
@@ -10660,7 +10694,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "1/4/26",
+    "eventDate": "2026-04-01",
     "mainFolder": "",
     "milestones": [
       {
@@ -10671,7 +10705,7 @@
       },
       {
         "id": "proposal-sent",
-        "done": false,
+        "done": true,
         "label": "Proposal Sent",
         "value": ""
       },
@@ -10683,13 +10717,13 @@
       },
       {
         "id": "contract-signed",
-        "done": false,
+        "done": true,
         "label": "Contract Signed",
         "value": ""
       },
       {
         "id": "event-day",
-        "done": false,
+        "done": true,
         "label": "Event Day",
         "value": "1/4/26"
       },
@@ -10741,7 +10775,9 @@
         "label": "Compliance",
         "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
       }
-    ]
+    ],
+    "updatedAt": "2026-05-05T11:07:46.150Z",
+    "projectInitial": ""
   },
   {
     "id": "we-do-generali-untitled-project-3d124403",
@@ -14964,7 +15000,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "11/4/26",
+    "eventDate": "2026-04-11",
     "milestones": [
       {
         "id": "brief-received",
@@ -15679,7 +15715,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "5/4/26",
+    "eventDate": "2026-04-05",
     "milestones": [
       {
         "id": "brief-received",
@@ -16400,7 +16436,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "18/03/2026",
+    "eventDate": "2026-03-18",
     "milestones": [
       {
         "id": "brief-received",
@@ -16675,10 +16711,11 @@
         "required": true
       }
     ],
-    "client": "SKK MIGAS ",
+    "client": "SKK MIGAS",
     "health": "watch",
     "owners": [
-      "TRI"
+      "TRI",
+      "widya"
     ],
     "phases": [
       {
@@ -17170,11 +17207,11 @@
     "phaseLabel": "Discovery",
     "credentials": "",
     "numberLabel": "",
-    "projectName": "Pengadaan Kontrak Payung Bersyarat Jasa EO dan Pengadaan Barang dan Jasa Pameran SKK Migas\t\t \t \t",
+    "projectName": "Pengadaan Kontrak Payung Bersyarat Jasa EO dan Pengadaan Barang dan Jasa Pameran SKK Migas",
     "resultLabel": "In progress",
     "serviceLine": "Event Management",
     "currentStage": "pitching",
-    "projectValue": 10000000000,
+    "projectValue": 5000000000,
     "sectionLabel": "Leads Projects",
     "contactPerson": "",
     "financeStatus": "-",
@@ -17183,7 +17220,22 @@
     "vendorShortlist": [],
     "currentStageLabel": "Pitching",
     "projectValueLabel": "Rp 10.000.000.000",
-    "vendorRequirements": []
+    "vendorRequirements": [
+      {
+        "label": "Service Fit",
+        "summary": "Prioritaskan vendor dengan layanan Event Management."
+      },
+      {
+        "label": "Coverage",
+        "summary": "Pastikan vendor available pada tanggal event dan area kerja relevan."
+      },
+      {
+        "label": "Compliance",
+        "summary": "Utamakan vendor dengan dokumen valid, tidak expired, dan status lifecycle approved/verified."
+      }
+    ],
+    "projectInitial": "",
+    "updatedAt": "2026-05-05T10:19:33.102Z"
   },
   {
     "id": "djarum-super-on-ground-djarum-rockin-surabaya-showcase-35bc0f1d",
@@ -17824,7 +17876,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "1/4/26",
+    "eventDate": "2026-04-01",
     "milestones": [
       {
         "id": "brief-received",
@@ -18551,7 +18603,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "1/4/26",
+    "eventDate": "2026-04-01",
     "mainFolder": "",
     "milestones": [
       {
@@ -19265,7 +19317,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "7/2/26",
+    "eventDate": "2026-02-07",
     "milestones": [
       {
         "id": "brief-received",
@@ -20013,7 +20065,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "1/4/26",
+    "eventDate": "2026-04-01",
     "mainFolder": "",
     "milestones": [
       {
@@ -20739,7 +20791,7 @@
         "phaseKey": "finance"
       }
     ],
-    "eventDate": "17/10/2026",
+    "eventDate": "2026-10-17",
     "milestones": [
       {
         "id": "brief-received",

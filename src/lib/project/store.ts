@@ -118,6 +118,37 @@ export async function saveProjects(projects: ProjectRecord[]) {
   await writeFile(PROJECTS_PATH, JSON.stringify(projects, null, 2));
 }
 
+export async function saveClients(clients: CRMClient[]) {
+  await ensureDataDir();
+  await writeFile(CLIENTS_PATH, JSON.stringify(clients, null, 2));
+}
+
+export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMClient> {
+  const clients = await getJsonClients();
+  const index = clients.findIndex(c => c.id === client.id);
+  
+  if (index === -1) {
+    const newClient = {
+      ...client,
+      id: client.id || `cli_${Date.now()}`,
+      name: client.name || "Unknown Client",
+      contactPerson: client.contactPerson || "",
+      email: client.email || "",
+    } as CRMClient;
+    clients.push(newClient);
+    await saveClients(clients);
+    return newClient;
+  } else {
+    const updated = {
+      ...clients[index],
+      ...client,
+    } as CRMClient;
+    clients[index] = updated;
+    await saveClients(clients);
+    return updated;
+  }
+}
+
 export async function updateJsonProject(project: Partial<ProjectRecord>): Promise<ProjectRecord> {
   const projects = await getJsonProjects();
   const index = projects.findIndex(p => p.id === project.id);

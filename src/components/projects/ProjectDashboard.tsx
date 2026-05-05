@@ -52,14 +52,15 @@ import {
   Minimize2,
   Settings,
   Circle,
-  X
+  X,
+  Printer
 } from "lucide-react";
+import { PresenceIndicator } from "@/components/PresenceIndicator";
 
-type ViewMode = "overview" | "list" | "table" | "board";
+type ViewMode = "overview" | "table" | "board";
 
 const VIEW_OPTIONS: { id: ViewMode; label: string }[] = [
   { id: "overview", label: "Overview" },
-  { id: "list", label: "List" },
   { id: "table", label: "Table" },
   { id: "board", label: "Board" },
 ];
@@ -114,13 +115,97 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProject = projects.find(p => p.id === selectedId) || null;
   const [detailOpen, setDetailOpen] = useState(false);
-  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "tasks" | "docs" | "vendors" | "execution" | "manpower">("overview");
+  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "tasks" | "docs" | "vendors" | "execution" | "manpower" | "billing" | "activity">("overview");
   const [expandedPhase, setExpandedPhase] = useState<WorkflowStage | null>(null);
 
   // Sorting
   const [sortConfig, setSortConfig] = useState<{ key: keyof ProjectRecord; direction: 'asc' | 'desc' } | null>(null);
 
+  const [newToPLabel, setNewToPLabel] = useState("");
+  const [newToPPercentage, setNewToPPercentage] = useState<number>(0);
+  const [isMounted, setIsMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ name: string; role: string } | null>(null);
+  const [filterClient, setFilterClient] = useState("");
+  const [filterAE, setFilterAE] = useState("");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const normalizeName = (name: string) => {
+    if (!name) return "";
+    const n = name.trim();
+    if (n.toLowerCase() === "ubaidullah" || n.toLowerCase() === "ubaid") return "Ubaid";
+    return n;
+  };
+
+  const handleLogout = () => {
+    document.cookie = "juara_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    document.cookie = "juara_user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    window.location.href = "/";
+  };
+
+  const handleAddClient = async () => {
+    const name = prompt("Enter new client name:");
+    if (!name) return;
+    
+    try {
+      const res = await fetch("/api/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name })
+      });
+      if (res.ok) {
+        const result = await res.json();
+        // Update local state if needed, but since initialData is props, we might need a local copy or just refetch
+        // For simplicity, we can just alert and suggest refresh, or better:
+        setNewProjectClient(result.client.name);
+        alert("Client added successfully! Please refresh to see it in the dropdown if it doesn't appear.");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAddLog = (project: ProjectRecord, message: string) => {
+    const newLog = {
+      id: `act_${Date.now()}`,
+      type: "stage_change" as any,
+      message,
+      timestampLabel: new Date().toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+    };
+    return {
+      ...project,
+      activity: [newLog, ...(project.activity || [])]
+    };
+  };
+
+  const handleExportCSV = () => {
+    const headers = ["Project Name", "Client", "Stage", "Date", "Value", "PIC"];
+    const rows = sortedProjects.map(p => [
+      p.projectName || (p as any).name || "Untitled",
+      p.client,
+      p.currentStage,
+      p.eventDate,
+      p.projectValue,
+      (p.owners || []).join(", ")
+    ]);
+
+    const csvContent = [
+      headers.join(","),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Juara_Project_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   useEffect(() => {
     const cookies = document.cookie.split(';');
@@ -135,29 +220,83 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     }
   }, []);
 
+  const formatDate = (dateStr: string) => {
+    if (!isMounted) return "...";
+    if (!dateStr || dateStr === "-") return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  const getPaymentStatus = (p: ProjectRecord) => {
+    if (!p.termOfPayment || p.termOfPayment.length === 0) return { label: "N/A", color: "#52525b", percent: 0 };
+    
+    const totalValue = p.projectValue || 0;
+    const paidAmount = p.termOfPayment
+      .filter(t => t.status === 'paid')
+      .reduce((sum, t) => sum + (t.amount || (t.percentage / 100 * totalValue)), 0);
+    
+    const paidPercent = totalValue > 0 ? Math.round((paidAmount / totalValue) * 100) : 0;
+    const invoiced = p.termOfPayment.filter(t => t.status === 'invoiced').length;
+    const paidCount = p.termOfPayment.filter(t => t.status === 'paid').length;
+    const totalCount = p.termOfPayment.length;
+
+    if (paidCount === totalCount && totalCount > 0) return { label: "PAID", color: "#5DCAA5", percent: 100 };
+    if (paidAmount > 0) return { label: `PARTIAL (${paidPercent}%)`, color: "#EF9F27", percent: paidPercent };
+    if (invoiced > 0) return { label: "INVOICED", color: "#378ADD", percent: 0 };
+    return { label: "PENDING", color: "#71717a", percent: 0 };
+  };
+
   const filteredProjects = projects.filter(p => {
     // RBAC Filter: Disabled temporarily
     // const isRestrictedRole = currentUser && ["pm", "ae"].includes(currentUser.role);
     // const isOwner = currentUser && (p.owners || []).includes(currentUser.name);
     
     // if (isRestrictedRole && !isOwner) return false;
-
     const matchesSearch = 
       (p.projectName || (p as any).name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.client || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.owners || []).some(o => o.toLowerCase().includes(searchQuery.toLowerCase()));
+      (p.owners || []).some(o => normalizeName(o).toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesStage = selectedStage ? p.currentStage === selectedStage : true;
-    return matchesSearch && matchesStage;
+    const matchesClient = !filterClient || p.client === filterClient;
+    const matchesAE = !filterAE || (p.owners || []).some(o => normalizeName(o) === filterAE);
+
+    return matchesSearch && matchesStage && matchesClient && matchesAE;
   });
+
+  const handlePrintReport = () => {
+    window.print();
+  };
+
+  const STAGE_ORDER: Record<string, number> = {
+    lead: 0, pitching: 1, negotiation: 2, execution: 3, reporting: 4, finance: 5, completed: 6, lost: 7
+  };
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
     if (!sortConfig) return 0;
     const { key, direction } = sortConfig;
-    const aVal = a[key];
-    const bVal = b[key];
+    
+    let aVal: any = a[key];
+    let bVal: any = b[key];
+
+    // Specialized sorting logic
+    if (key === 'projectValue') {
+      aVal = Number(aVal) || 0;
+      bVal = Number(bVal) || 0;
+    } else if (key === 'eventDate') {
+      aVal = aVal ? new Date(aVal).getTime() : 0;
+      bVal = bVal ? new Date(bVal).getTime() : 0;
+    } else if (key === 'currentStage') {
+      aVal = STAGE_ORDER[aVal as string] ?? 99;
+      bVal = STAGE_ORDER[bVal as string] ?? 99;
+    } else {
+      aVal = (aVal || "").toString().toLowerCase();
+      bVal = (bVal || "").toString().toLowerCase();
+    }
+
     if (aVal === bVal) return 0;
-    const res = (aVal || "") > (bVal || "") ? 1 : -1;
+    const res = aVal > bVal ? 1 : -1;
     return direction === 'asc' ? res : -res;
   });
 
@@ -209,8 +348,22 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     { label: "Events Minggu Ini", value: upcomingCount, icon: <Calendar size={14} />, color: "#5DCAA5" },
   ];
 
-  const aeStats = Array.from(new Set(projects.flatMap(p => p.owners || []))).map(ae => {
-    const aeProjects = projects.filter(p => (p.owners || []).includes(ae));
+  // AR Calculations
+  const allTerms = projects.flatMap(p => (p.termOfPayment || []).map(t => ({ ...t, projectName: p.projectName, projectValue: p.projectValue })));
+  const totalAR = allTerms.filter(t => t.status !== 'paid').reduce((sum, t) => sum + (t.amount || (t.percentage / 100 * t.projectValue)), 0);
+  const overdueAR = allTerms.filter(t => {
+    if (t.status !== 'invoiced' || !t.dueDate) return false;
+    const due = new Date(t.dueDate);
+    return due < new Date();
+  }).reduce((sum, t) => sum + (t.amount || (t.percentage / 100 * t.projectValue)), 0);
+
+  const arStats = [
+    { label: "Total Outstanding AR", value: totalAR, icon: <ArrowUpRight size={14} />, color: "#378ADD" },
+    { label: "Overdue (Menunggak)", value: overdueAR, icon: <X size={14} />, color: "#EF4444" },
+  ];
+
+  const aeStats = Array.from(new Set(projects.flatMap(p => (p.owners || []).map(o => normalizeName(o))))).map(ae => {
+    const aeProjects = projects.filter(p => (p.owners || []).some(o => normalizeName(o) === ae));
     const activeProjects = aeProjects.filter(p => !['completed', 'lost'].includes(p.currentStage));
     const val = activeProjects.reduce((sum, p) => sum + getVal(p), 0);
     return {
@@ -237,63 +390,80 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     setDetailOpen(true);
   };
 
+  const persistUpdate = async (updatedProject: ProjectRecord) => {
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedProject)
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setProjects(prev => prev.map(p => p.id === result.project.id ? result.project : p));
+        if (selectedId === result.project.id) {
+          // If we're viewing the detail, we might want to update local state if needed
+        }
+      }
+    } catch (error) {
+      console.error("Failed to persist update:", error);
+    }
+  };
+
   const toggleTask = (projectId: string, taskId: string) => {
-    setProjects(prev => prev.map(p => {
-      if (p.id !== projectId) return p;
-      return {
-        ...p,
-        tasks: p.tasks.map(t => t.id === taskId ? { ...t, status: t.status === "done" ? "pending" : "done" } : t)
-      };
-    }));
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    const updated = {
+      ...project,
+      tasks: project.tasks.map(t => t.id === taskId ? { ...t, status: (t.status === "done" ? "pending" : "done") as any } : t)
+    };
+    persistUpdate(updated);
   };
 
   const handleAssignVendor = (projectId: string) => {
     if (!vendorToAssign) return;
     const vendor = initialData.availableVendors.find(v => v.id === vendorToAssign);
-    if (!vendor) return;
+    const project = projects.find(p => p.id === projectId);
+    if (!vendor || !project) return;
 
-    setProjects(prev => prev.map(p => {
-      if (p.id !== projectId) return p;
-      const alreadyAssigned = (p.assignedVendors || []).some(v => v.vendorId === vendor.id);
-      if (alreadyAssigned) return p;
-      
-      const newAssignment = {
-        vendorId: vendor.id,
-        vendorName: vendor.name,
-        vendorType: (vendor as any).serviceNames?.[0] || "General",
-        businessAddress: (vendor as any).businessAddress || "",
-        whatsappPhone: (vendor as any).whatsappPhone || "",
-        averageScore: (vendor as any).averageScore || 0,
-        linkId: `lnk_${Date.now()}`,
-        quotedPrice: 0,
-      };
-      
-      return {
-        ...p,
-        assignedVendors: [...(p.assignedVendors || []), newAssignment]
-      };
-    }));
+    const newAssignment = {
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+      vendorType: (vendor as any).serviceNames?.[0] || "General",
+      businessAddress: (vendor as any).businessAddress || "",
+      whatsappPhone: (vendor as any).whatsappPhone || "",
+      averageScore: (vendor as any).averageScore || 0,
+      linkId: `lnk_${Date.now()}`,
+      quotedPrice: 0,
+    };
+    
+    const updated = {
+      ...project,
+      assignedVendors: [...(project.assignedVendors || []), newAssignment]
+    };
+    persistUpdate(updated);
     setIsAssignVendorOpen(false);
+    setVendorToAssign("");
   };
 
   const handleRemoveVendor = (projectId: string, linkId: string) => {
-    setProjects(prev => prev.map(p => {
-      if (p.id !== projectId) return p;
-      return {
-        ...p,
-        assignedVendors: (p.assignedVendors || []).filter(v => v.linkId !== linkId)
-      };
-    }));
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const updated = {
+      ...project,
+      assignedVendors: (project.assignedVendors || []).filter(v => v.linkId !== linkId)
+    };
+    persistUpdate(updated);
   };
 
   const handleRemoveShortlist = (projectId: string, linkId: string) => {
-    setProjects(prev => prev.map(p => {
-      if (p.id !== projectId) return p;
-      return {
-        ...p,
-        vendorShortlist: (p.vendorShortlist || []).filter(v => v.linkId !== linkId)
-      };
-    }));
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const updated = {
+      ...project,
+      vendorShortlist: (project.vendorShortlist || []).filter(v => v.linkId !== linkId)
+    };
+    persistUpdate(updated);
   };
 
   const handleAssignManpower = (projectId: string) => {
@@ -304,25 +474,22 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     const finalPosition = selectedPositionToAssign === "Custom" ? customPosition : selectedPositionToAssign;
     if (!finalPosition) return;
 
-    setProjects(prev => prev.map(p => {
-      if (p.id !== projectId) return p;
-      // Allow multiple assignments of the same person if the position is different
-      const alreadyAssignedSamePosition = (p.assignedFreelancers || []).some(f => f.id === manpowerToAssign && f.position === finalPosition);
-      if (alreadyAssignedSamePosition) return p;
-      
-      return {
-        ...p,
-        assignedFreelancers: [
-          ...(p.assignedFreelancers || []),
-          {
-            id: mpObj.id,
-            name: mpObj.nama,
-            position: finalPosition || mpObj.posisi_utama[0] || "Crew",
-            phone: mpObj.no_hp
-          }
-        ]
-      };
-    }));
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    const updated = {
+      ...project,
+      assignedFreelancers: [
+        ...(project.assignedFreelancers || []),
+        {
+          id: mpObj.id,
+          name: mpObj.nama,
+          position: finalPosition || mpObj.posisi_utama[0] || "Crew",
+          phone: mpObj.no_hp
+        }
+      ]
+    };
+    persistUpdate(updated);
     setIsAssignManpowerOpen(false);
     setManpowerToAssign("");
     setSelectedPositionToAssign("");
@@ -330,13 +497,59 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   };
 
   const handleRemoveManpower = (projectId: string, freelancerId: string) => {
-    setProjects(prev => prev.map(p => {
-      if (p.id !== projectId) return p;
-      return {
-        ...p,
-        assignedFreelancers: (p.assignedFreelancers || []).filter(f => f.id !== freelancerId)
-      };
-    }));
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const updated = {
+      ...project,
+      assignedFreelancers: (project.assignedFreelancers || []).filter(f => f.id !== freelancerId)
+    };
+    persistUpdate(updated);
+  };
+
+  const toggleMilestone = (projectId: string, milestoneId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const updated = {
+      ...project,
+      milestones: (project.milestones || []).map(m => m.id === milestoneId ? { ...m, done: !m.done } : m)
+    };
+    persistUpdate(updated);
+  };
+
+  const updateMilestone = (projectId: string, milestoneId: string, value: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const updated = {
+      ...project,
+      milestones: (project.milestones || []).map(m => m.id === milestoneId ? { ...m, value } : m)
+    };
+    persistUpdate(updated);
+  };
+
+  const addMilestone = (projectId: string, label: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project || !label) return;
+    const newM: ProjectMilestone = {
+      id: `ms_${Date.now()}`,
+      label,
+      value: "",
+      done: false
+    };
+    const updated = {
+      ...project,
+      milestones: [...(project.milestones || []), newM]
+    };
+    persistUpdate(updated);
+  };
+
+  const removeMilestone = (projectId: string, milestoneId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+    const updated = {
+      ...project,
+      milestones: (project.milestones || []).filter(m => m.id !== milestoneId)
+    };
+    persistUpdate(updated);
   };
 
   const handleSaveProject = async () => {
@@ -449,13 +662,6 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             Project Manager (Viewer) <ChevronDown size={14} />
           </div>
 
-          <div style={{ marginTop: '24px', marginBottom: '8px', padding: '0 12px' }}>
-            <span style={{ fontSize: '10px', color: '#3f3f46', letterSpacing: '0.08em' }}>THEME</span>
-          </div>
-          <div style={{ display: 'flex', background: '#111113', borderRadius: '8px', padding: '2px', margin: '0 4px' }}>
-            <button style={{ flex: 1, padding: '4px', background: '#378ADD', color: 'white', borderRadius: '6px', fontSize: '11px' }}>Dark</button>
-            <button style={{ flex: 1, padding: '4px', color: '#52525b', fontSize: '11px' }}>Monday</button>
-          </div>
         </nav>
       </aside>
 
@@ -468,10 +674,14 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(99,153,34,0.1)', color: '#639922', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>DATABASE READY</div>
               <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>JUARA'S PROJECTS 2026</h1>
             </div>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button className="ghost-button" style={{ fontSize: '12px', padding: '6px 14px', border: '0.5px solid rgba(255,255,255,0.15)', color: '#a1a1aa' }}>Open detail</button>
-              <button className="primary-button" style={{ fontSize: '12px', padding: '6px 14px', background: '#378ADD' }} onClick={() => setIsAddingProject(true)}>+ Add Project</button>
-              <button className="ghost-button" style={{ fontSize: '12px', color: '#71717a' }}>Logout</button>
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <PresenceIndicator />
+              {isMounted && (
+                <>
+                  <button className="primary-button" style={{ fontSize: '12px', padding: '6px 14px', background: '#378ADD' }} onClick={() => setIsAddingProject(true)}>+ Add Project</button>
+                  <button className="ghost-button" style={{ fontSize: '12px', color: '#71717a' }} onClick={handleLogout}>Logout</button>
+                </>
+              )}
             </div>
           </div>
         </header>
@@ -508,6 +718,26 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             ))}
           </div>
 
+          <div style={{ padding: '0 24px', marginBottom: '32px' }}>
+            <h3 style={{ fontSize: '11px', color: '#52525b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '16px' }}>AR Monitoring (Account Receivable)</h3>
+            <div className="stat-grid-premium" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+              {arStats.map((s, idx) => (
+                <div key={idx} className="section-card-premium" style={{ padding: '20px', borderLeft: `4px solid ${s.color}`, background: 'rgba(255,255,255,0.01)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <span style={{ fontSize: '11px', color: '#71717a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</span>
+                    <div style={{ color: s.color, opacity: 0.8 }}>{s.icon}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+                     <span style={{ fontSize: '14px', fontWeight: 700, color: s.color, opacity: 0.9 }}>Rp</span>
+                     <div style={{ fontSize: '20px', fontWeight: 600, color: '#f4f4f5', letterSpacing: '-0.01em' }}>
+                       {mounted ? s.value.toLocaleString('id-ID') : "---"}
+                     </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Sticky Toolbar */}
           <div className="view-toolbar-premium">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
@@ -536,39 +766,6 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <span style={{ fontSize: '12px', color: '#52525b' }}>Rp {totalValue.toLocaleString('id-ID')}</span>
               </div>
             </div>
-
-            {/* Search + Filter Row */}
-            <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <Search size={14} style={{ position: 'absolute', left: '12px', top: '10px', color: '#52525b' }} />
-                <input 
-                  className="mini-input"
-                  style={{ width: '100%', paddingLeft: '36px', height: '36px', background: '#111113' }}
-                  placeholder="Search client, project, PIC, service, status, or stage"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <div style={{ position: 'relative', width: '160px' }}>
-                <Filter size={14} style={{ position: 'absolute', left: '12px', top: '10px', color: '#52525b' }} />
-                <select className="mini-input" style={{ width: '100%', paddingLeft: '36px', height: '36px', background: '#111113' }}>
-                  <option>All stages</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Stage Filter Chips */}
-          <div className="stage-filter-scroll">
-            {STAGE_OPTIONS.map(stage => (
-              <button 
-                key={stage.key}
-                className={`stage-chip-premium ${selectedStage === stage.key ? 'active' : ''}`}
-                onClick={() => setSelectedStage(selectedStage === stage.key ? null : stage.key)}
-              >
-                {stage.label}
-              </button>
-            ))}
           </div>
 
           {/* View Renderers */}
@@ -593,7 +790,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                           <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '12px' }}>{p.client}</div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <span style={{ fontSize: '12px', color: '#52525b' }}>{p.eventDate || "TBD"}</span>
-                            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>{p.projectValueLabel}</span>
+                            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>
+                              {isMounted && p.projectValue > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(p.projectValue) : (p.projectValue > 0 ? "..." : "-")}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -618,7 +817,9 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                               <td style={{ padding: '12px 16px', color: '#f4f4f5', fontWeight: 500 }}>{ae.name}</td>
                               <td style={{ padding: '12px 16px', textAlign: 'center', color: '#378ADD', fontWeight: 600 }}>{ae.active}</td>
                               <td style={{ padding: '12px 16px', textAlign: 'center', color: '#71717a' }}>{ae.total}</td>
-                              <td style={{ padding: '12px 16px', textAlign: 'right', color: '#f4f4f5', fontWeight: 600 }}>Rp {ae.value.toLocaleString('id-ID')}</td>
+                              <td style={{ padding: '12px 16px', textAlign: 'right', color: '#f4f4f5', fontWeight: 600 }}>
+                                Rp {isMounted ? ae.value.toLocaleString('id-ID') : "..."}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -639,54 +840,122 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
             )}
 
-            {viewMode === "list" && (
-              <div className="tab-content-fade">
-                {sortedProjects.map(p => (
-                  <div key={p.id} className="list-row-premium" onClick={() => openProject(p)}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: getStageColor(p.currentStage) }} />
-                      <div>
-                        <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
-                        <div style={{ fontSize: '12px', color: '#71717a' }}>{p.client}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-                      <div className="stage-pill-premium" style={{ background: 'rgba(255,255,255,0.05)', color: '#71717a' }}>{p.currentStage.toUpperCase()}</div>
-                      <div style={{ fontSize: '12px', color: '#a1a1aa', width: '120px', textAlign: 'right' }}>{p.projectValueLabel}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+
 
             {viewMode === "table" && (
-              <div className="tab-content-fade" style={{ overflowX: 'auto' }}>
+              <div className="tab-content-fade">
+                {/* TOOLBAR */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', gap: '16px', flexWrap: 'wrap' }}>
+                  <div className="search-container-premium" style={{ flex: 1, minWidth: '300px', position: 'relative' }}>
+                    <Search size={18} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: '#52525b' }} />
+                    <input 
+                      placeholder="Search projects, clients, or AEs..." 
+                      className="search-input-premium"
+                      style={{ paddingLeft: '44px', width: '100%', height: '42px' }}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                  
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <select 
+                      className="mini-input" 
+                      style={{ height: '42px', width: '160px', borderRadius: '12px' }}
+                      value={filterClient}
+                      onChange={(e) => setFilterClient(e.target.value)}
+                    >
+                      <option value="">All Clients</option>
+                      {[...new Set(projects.map(p => p.client))].sort().map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+
+                    <select 
+                      className="mini-input" 
+                      style={{ height: '42px', width: '160px', borderRadius: '12px' }}
+                      value={filterAE}
+                      onChange={(e) => setFilterAE(e.target.value)}
+                    >
+                      <option value="">All AEs</option>
+                      {[...new Set(projects.flatMap(p => (p.owners || []).map(o => normalizeName(o))))].sort().map(ae => (
+                        <option key={ae} value={ae}>{ae}</option>
+                      ))}
+                    </select>
+
+                    <button className="primary-button" style={{ borderRadius: '12px', height: '42px' }} onClick={() => setIsAddingProject(true)}>+ New Project</button>
+                    <button className="secondary-button-premium" style={{ borderRadius: '12px', height: '42px' }} onClick={handlePrintReport}>
+                      <Printer size={14} style={{ marginRight: '8px' }} />
+                      Print PDF Report
+                    </button>
+                    <button className="secondary-button-premium" style={{ borderRadius: '12px', height: '42px' }} onClick={handleAddClient}>+ Add Client</button>
+                  </div>
+                </div>
+
+                {/* Stage Filter Chips (Only in Table Mode) */}
+                <div className="stage-filter-scroll" style={{ marginBottom: '24px' }}>
+                  {STAGE_OPTIONS.map(stage => (
+                    <button 
+                      key={stage.key}
+                      className={`stage-chip-premium ${selectedStage === stage.key ? 'active' : ''}`}
+                      onClick={() => setSelectedStage(selectedStage === stage.key ? null : stage.key)}
+                    >
+                      {stage.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ overflowX: 'auto' }}>
                 <table className="table-premium">
                   <thead>
                     <tr>
-                      <th onClick={() => setSortConfig({ key: 'projectName', direction: sortConfig?.direction === 'asc' ? 'desc' : 'asc' })}>PROJECT ↕</th>
-                      <th onClick={() => setSortConfig({ key: 'client', direction: sortConfig?.direction === 'asc' ? 'desc' : 'asc' })}>CLIENT ↕</th>
-                      <th>STAGE</th>
-                      <th>EVENT DATE</th>
-                      <th style={{ textAlign: 'right' }}>VALUE</th>
+                      <th onClick={() => setSortConfig({ key: 'projectName', direction: sortConfig?.key === 'projectName' && sortConfig?.direction === 'asc' ? 'desc' : 'asc' })} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>PROJECT {sortConfig?.key === 'projectName' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}</th>
+                      <th onClick={() => setSortConfig({ key: 'client', direction: sortConfig?.key === 'client' && sortConfig?.direction === 'asc' ? 'desc' : 'asc' })} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>CLIENT {sortConfig?.key === 'client' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}</th>
+                      <th onClick={() => setSortConfig({ key: 'currentStage', direction: sortConfig?.key === 'currentStage' && sortConfig?.direction === 'asc' ? 'desc' : 'asc' })} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>STAGE {sortConfig?.key === 'currentStage' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}</th>
+                      <th onClick={() => setSortConfig({ key: 'eventDate', direction: sortConfig?.key === 'eventDate' && sortConfig?.direction === 'asc' ? 'desc' : 'asc' })} style={{ cursor: 'pointer', whiteSpace: 'nowrap' }}>EVENT DATE {sortConfig?.key === 'eventDate' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}</th>
+                      <th onClick={() => setSortConfig({ key: 'projectValue', direction: sortConfig?.key === 'projectValue' && sortConfig?.direction === 'asc' ? 'desc' : 'asc' })} style={{ textAlign: 'right', cursor: 'pointer', whiteSpace: 'nowrap' }}>VALUE {sortConfig?.key === 'projectValue' ? (sortConfig.direction === 'asc' ? '↑' : '↓') : '↕'}</th>
+                      <th style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>PAYMENT</th>
                     </tr>
                   </thead>
                   <tbody>
                     {sortedProjects.map(p => (
-                      <tr key={p.id} onClick={() => openProject(p)}>
-                        <td>{p.projectName || (p as any).name || "Untitled Project"}</td>
+                      <tr key={p.id} className="table-row-premium" onClick={() => openProject(p)} style={{ cursor: 'pointer' }}>
+                        <td style={{ padding: '16px 12px' }}>
+                          <div style={{ fontWeight: 600, color: '#f4f4f5' }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
+                          <div style={{ fontSize: '11px', color: '#52525b', marginTop: '2px' }}>{p.serviceLine}</div>
+                        </td>
                         <td>{p.client}</td>
                         <td>
-                          <span className="stage-pill-premium" style={{ background: 'rgba(255,255,255,0.05)', color: getStageColor(p.currentStage) }}>
+                          <span className="stage-pill-premium" style={{ background: `${getStageColor(p.currentStage)}15`, color: getStageColor(p.currentStage) }}>
                             {p.currentStage.toUpperCase()}
                           </span>
                         </td>
-                        <td>{p.eventDate || "–"}</td>
-                        <td style={{ textAlign: 'right' }}>{p.projectValueLabel || "–"}</td>
+                        <td>{p.eventDate ? formatDate(p.eventDate) : "-"}</td>
+                        <td style={{ padding: '16px 12px', fontSize: '13px', color: '#f4f4f5', fontWeight: 500, whiteSpace: 'nowrap', textAlign: 'right' }}>
+                          {isMounted && p.projectValue > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(p.projectValue) : (p.projectValue > 0 ? "..." : "-")}
+                        </td>
+                        <td style={{ padding: '16px 12px', textAlign: 'center' }}>
+                          {(() => {
+                            const status = getPaymentStatus(p);
+                            return (
+                              <span style={{ 
+                                fontSize: '10px', 
+                                fontWeight: 700, 
+                                padding: '4px 8px', 
+                                borderRadius: '6px', 
+                                background: `${status.color}15`, 
+                                color: status.color,
+                                border: `0.5px solid ${status.color}30`
+                              }}>
+                                {status.label}
+                              </span>
+                            );
+                          })()}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             )}
 
@@ -696,7 +965,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span style={{ fontSize: '12px', color: '#71717a' }}>Board zoom</span>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#111113', padding: '4px 12px', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.08)' }}>
-                      <button onClick={() => setBoardZoom(z => Math.max(50, z - 10))} style={{ color: '#71717a', border: 'none', background: 'none', cursor: 'pointer' }}>–</button>
+                      <button onClick={() => setBoardZoom(z => Math.max(50, z - 10))} style={{ color: '#71717a', border: 'none', background: 'none', cursor: 'pointer' }}>-</button>
                       <span style={{ fontSize: '12px', color: '#e4e4e7', minWidth: '40px', textAlign: 'center' }}>{boardZoom}%</span>
                       <button onClick={() => setBoardZoom(z => Math.min(150, z + 10))} style={{ color: '#71717a', border: 'none', background: 'none', cursor: 'pointer' }}>+</button>
                     </div>
@@ -756,10 +1025,33 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                                 </div>
                                 <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7', marginTop: '4px' }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
                                 <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '8px' }}>{p.client}</div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
-                                  <span style={{ color: '#52525b' }}>{p.eventDate || "–"}</span>
-                                  <span style={{ color: '#a1a1aa' }}>{p.projectValueLabel}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '8px' }}>
+                                  <span style={{ color: '#52525b' }}>{p.eventDate || "-"}</span>
+                                  <span style={{ color: '#a1a1aa' }}>
+                                    {isMounted && p.projectValue > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(p.projectValue) : (p.projectValue > 0 ? "..." : "-")}
+                                  </span>
                                 </div>
+                                {isMounted && (
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                                    {(() => {
+                                      const status = getPaymentStatus(p);
+                                      if (status.label === "N/A") return null;
+                                      return (
+                                        <div style={{ 
+                                          fontSize: '9px', 
+                                          fontWeight: 800, 
+                                          color: status.color, 
+                                          background: `${status.color}15`, 
+                                          padding: '2px 6px', 
+                                          borderRadius: '4px',
+                                          border: `0.5px solid ${status.color}20`
+                                        }}>
+                                          {status.label}
+                                        </div>
+                                      );
+                                    })()}
+                                  </div>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -811,18 +1103,34 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   >
                     <Edit size={14} /> Edit
                   </button>
-                  <button 
-                    className="ghost-button" 
-                    onClick={() => setDetailOpen(false)}
-                    style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}
-                  >
-                    Close
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <select 
+                      className="mini-input"
+                      style={{ height: '32px', fontSize: '11px', background: 'rgba(55,138,221,0.1)', color: '#378ADD', border: '0.5px solid rgba(55,138,221,0.3)', borderRadius: '6px' }}
+                      value={selectedProject.currentStage}
+                      onChange={(e) => {
+                        const newStage = e.target.value as WorkflowStage;
+                        const updated = handleAddLog(selectedProject, `Stage changed from ${selectedProject.currentStage} to ${newStage}`);
+                        persistUpdate({ ...updated, currentStage: newStage });
+                      }}
+                    >
+                      {STAGE_OPTIONS.map(opt => (
+                        <option key={opt.key} value={opt.key}>{opt.label}</option>
+                      ))}
+                    </select>
+                    <button 
+                      className="ghost-button" 
+                      onClick={() => setDetailOpen(false)}
+                      style={{ height: '32px', padding: '0 12px', fontSize: '11px' }}
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </div>
               
-              <div style={{ marginTop: '24px', display: 'flex', gap: '24px', borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
-                {["overview", "tasks", "docs", "vendors", "execution", "manpower"].map(tab => (
+              <div style={{ marginTop: '24px', display: 'flex', gap: '20px', borderBottom: '0.5px solid rgba(255,255,255,0.06)', overflowX: 'auto' }}>
+                {["overview", "tasks", "docs", "vendors", "manpower", "billing", "activity"].map(tab => (
                   <button 
                     key={tab} 
                     className={`detail-tab-item ${activeDetailTab === tab ? 'is-active' : ''}`}
@@ -854,15 +1162,15 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
                       <div>
                         <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>EVENT DATE</div>
-                        <div style={{ fontSize: '14px' }}>{selectedProject.eventDate || "–"}</div>
+                        <div style={{ fontSize: '14px' }}>{selectedProject.eventDate || "-"}</div>
                       </div>
                       <div>
                         <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>VALUE</div>
-                        <div style={{ fontSize: '14px' }}>{selectedProject.projectValueLabel || "–"}</div>
+                        <div style={{ fontSize: '14px' }}>{isMounted && selectedProject.projectValue > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(selectedProject.projectValue) : (selectedProject.projectValue > 0 ? "..." : "-")}</div>
                       </div>
                       <div>
                         <div style={{ fontSize: '11px', color: '#52525b', marginBottom: '4px' }}>PIC</div>
-                        <div style={{ fontSize: '14px' }}>{(selectedProject.owners || []).join(", ") || "–"}</div>
+                        <div style={{ fontSize: '14px' }}>{(selectedProject.owners || []).join(", ") || "-"}</div>
                       </div>
                     </div>
                   </div>
@@ -914,16 +1222,44 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   </div>
 
                   <div className="section-card-premium">
-                    <div className="section-header-premium" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between' }}>
+                    <div className="section-header-premium" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span style={{ fontSize: '13px', fontWeight: 500 }}>Milestones</span>
-                      <button className="ghost-button" style={{ fontSize: '11px', color: '#378ADD' }} onClick={() => alert("Fitur edit milestone sedang disiapkan. Milestones akan otomatis terupdate berdasarkan progress task.")}>Edit milestones</button>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <input 
+                          id="new-milestone-input"
+                          className="mini-input" 
+                          placeholder="+ Add milestone" 
+                          style={{ height: '26px', fontSize: '11px', width: '120px' }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              addMilestone(selectedProject.id, (e.target as HTMLInputElement).value);
+                              (e.target as HTMLInputElement).value = "";
+                            }
+                          }}
+                        />
+                      </div>
                     </div>
                     <div style={{ padding: '0 16px 16px' }}>
                       {(selectedProject.milestones || []).map(m => (
                         <div key={m.id} className="item-row-premium" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '0.5px solid rgba(255,255,255,0.05)' }}>
-                          <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: m.done ? '#97C459' : '#3f3f46' }} />
-                          <span style={{ fontSize: '13px' }}>{m.label}</span>
-                          <span style={{ marginLeft: 'auto', fontSize: '12px', color: '#71717a' }}>{m.value}</span>
+                          <div 
+                            style={{ width: '10px', height: '10px', borderRadius: '50%', background: m.done ? '#97C459' : '#3f3f46', cursor: 'pointer', border: m.done ? 'none' : '1px solid #52525b' }} 
+                            onClick={() => toggleMilestone(selectedProject.id, m.id)}
+                          />
+                          <span style={{ fontSize: '13px', flex: 1 }}>{m.label}</span>
+                          <input 
+                            className="mini-input"
+                            value={m.value}
+                            placeholder="TBD"
+                            onChange={(e) => updateMilestone(selectedProject.id, m.id, e.target.value)}
+                            style={{ width: '100px', height: '24px', fontSize: '11px', textAlign: 'right', border: 'none', background: 'transparent', padding: 0 }}
+                          />
+                          <button 
+                            onClick={() => removeMilestone(selectedProject.id, m.id)}
+                            style={{ background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', padding: '0 4px' }}
+                          >
+                            <X size={12} />
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -1149,6 +1485,192 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   </div>
                 </div>
               )}
+
+              {activeDetailTab === "billing" && (
+                <div className="tab-content-fade">
+                  <div className="overall-completion-card" style={{ background: 'rgba(93,202,165,0.05)', border: '0.5px solid rgba(93,202,165,0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontSize: '12px', color: '#5DCAA5', fontWeight: 600 }}>Billing Progress</span>
+                      <span style={{ fontSize: '12px', fontWeight: 700, color: '#f4f4f5' }}>
+                        {Math.round(((selectedProject.termOfPayment || []).filter(t => t.status === 'paid').reduce((sum, t) => sum + t.percentage, 0)))}% Collected
+                      </span>
+                    </div>
+                    <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div 
+                        style={{ 
+                          height: '100%', 
+                          background: '#5DCAA5', 
+                          width: `${(selectedProject.termOfPayment || []).filter(t => t.status === 'paid').reduce((sum, t) => sum + t.percentage, 0)}%`,
+                          transition: 'width 0.5s ease'
+                        }} 
+                      />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', color: '#71717a' }}>
+                      <span>Total Value: Rp {isMounted ? selectedProject.projectValue.toLocaleString('id-ID') : "..."}</span>
+                      <span>Paid: Rp {isMounted ? ((selectedProject.termOfPayment || []).filter(t => t.status === 'paid').reduce((sum, t) => sum + t.amount, 0)).toLocaleString('id-ID') : "..."}</span>
+                    </div>
+                  </div>
+
+                  <div className="section-card-premium" style={{ marginTop: '24px' }}>
+                    <div className="section-header-premium" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 600 }}>Term of Payment (ToP)</span>
+                      <span style={{ fontSize: '11px', color: '#71717a' }}>Define billing milestones</span>
+                    </div>
+                    
+                    <div style={{ padding: '0 16px 16px' }}>
+                      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                        <thead>
+                          <tr style={{ borderBottom: '0.5px solid rgba(255,255,255,0.06)' }}>
+                            <th style={{ padding: '12px 8px', textAlign: 'left', color: '#52525b' }}>LABEL</th>
+                            <th style={{ padding: '12px 8px', textAlign: 'center', color: '#52525b' }}>%</th>
+                            <th style={{ padding: '12px 8px', textAlign: 'right', color: '#52525b' }}>AMOUNT</th>
+                            <th style={{ padding: '12px 8px', textAlign: 'center', color: '#52525b' }}>STATUS</th>
+                            <th style={{ padding: '12px 8px', textAlign: 'right', color: '#52525b' }}></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {(selectedProject.termOfPayment || []).map((term) => (
+                            <tr key={term.id} style={{ borderBottom: '0.5px solid rgba(255,255,255,0.04)' }}>
+                              <td style={{ padding: '12px 8px', color: '#e4e4e7' }}>{term.label}</td>
+                              <td style={{ padding: '12px 8px', textAlign: 'center', color: '#a1a1aa' }}>{term.percentage}%</td>
+                              <td style={{ padding: '12px 8px', textAlign: 'right', color: '#f4f4f5', fontWeight: 500 }}>
+                                Rp {isMounted ? term.amount.toLocaleString('id-ID') : "..."}
+                              </td>
+                              <td style={{ padding: '12px 8px', textAlign: 'center' }}>
+                                <select 
+                                  value={term.status}
+                                  onChange={(e) => {
+                                    const newStatus = e.target.value as any;
+                                    const updated = {
+                                      ...selectedProject,
+                                      termOfPayment: (selectedProject.termOfPayment || []).map(t => t.id === term.id ? { ...t, status: newStatus } : t)
+                                    };
+                                    persistUpdate(updated);
+                                  }}
+                                  style={{ 
+                                    background: term.status === 'paid' ? 'rgba(93,202,165,0.1)' : term.status === 'invoiced' ? 'rgba(55,138,221,0.1)' : 'rgba(255,255,255,0.05)',
+                                    color: term.status === 'paid' ? '#5DCAA5' : term.status === 'invoiced' ? '#378ADD' : '#71717a',
+                                    border: 'none',
+                                    padding: '2px 8px',
+                                    borderRadius: '4px',
+                                    fontSize: '10px',
+                                    fontWeight: 600,
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  <option value="pending">PENDING</option>
+                                  <option value="invoiced">INVOICED</option>
+                                  <option value="paid">PAID</option>
+                                </select>
+                              </td>
+                              <td style={{ padding: '12px 8px', textAlign: 'right' }}>
+                                <button 
+                                  onClick={() => {
+                                    const updated = {
+                                      ...selectedProject,
+                                      termOfPayment: (selectedProject.termOfPayment || []).filter(t => t.id !== term.id)
+                                    };
+                                    persistUpdate(updated);
+                                  }}
+                                  style={{ background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer' }}
+                                >
+                                  <Trash2 size={12} />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+
+                      <div style={{ marginTop: '16px', display: 'grid', gridTemplateColumns: '1fr 60px 100px 32px', gap: '8px', alignItems: 'center', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
+                        <input 
+                          className="mini-input"
+                          placeholder="Term name (e.g. DP 30%)"
+                          value={newToPLabel}
+                          onChange={(e) => setNewToPLabel(e.target.value)}
+                          style={{ height: '32px' }}
+                        />
+                        <input 
+                          type="number"
+                          className="mini-input"
+                          placeholder="%"
+                          value={newToPPercentage || ""}
+                          onChange={(e) => setNewToPPercentage(Number(e.target.value))}
+                          style={{ height: '32px', textAlign: 'center' }}
+                        />
+                        <div style={{ fontSize: '11px', color: '#71717a', textAlign: 'right' }}>
+                          Rp {isMounted ? Math.round((selectedProject.projectValue * (newToPPercentage / 100))).toLocaleString('id-ID') : "..."}
+                        </div>
+                        <button 
+                          className="primary-button"
+                          style={{ height: '32px', width: '32px', padding: 0, display: 'grid', placeItems: 'center' }}
+                          onClick={() => {
+                            if (!newToPLabel || !newToPPercentage) return;
+                            const newTerm = {
+                              id: `top_${Date.now()}`,
+                              label: newToPLabel,
+                              percentage: newToPPercentage,
+                              amount: Math.round(selectedProject.projectValue * (newToPPercentage / 100)),
+                              status: 'pending' as const
+                            };
+                            const updated = {
+                              ...selectedProject,
+                              termOfPayment: [...(selectedProject.termOfPayment || []), newTerm]
+                            };
+                            persistUpdate(updated);
+                            setNewToPLabel("");
+                            setNewToPPercentage(0);
+                          }}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '24px' }}>
+                    <h3 style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7', marginBottom: '16px' }}>Financial Health Rule</h3>
+                    <div className="section-card-premium" style={{ padding: '16px', background: 'rgba(239,159,39,0.05)', border: '0.5px solid rgba(239,159,39,0.1)' }}>
+                      <p style={{ margin: 0, fontSize: '12px', color: '#EF9F27', lineHeight: 1.5 }}>
+                        <strong>Operational Insight:</strong> Aktivasi durasi panjang sangat bergantung pada cashflow. 
+                        Pastikan DP minimal 30% sudah berstatus <strong>PAID</strong> sebelum memulai fase eksekusi lapangan untuk menjaga keamanan dana operasional.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeDetailTab === "activity" && (
+                <div className="tab-content-fade">
+                  <div className="section-card-premium" style={{ padding: '0', overflow: 'hidden' }}>
+                    <div className="section-header-premium" style={{ padding: '16px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 500 }}>Activity History</span>
+                    </div>
+                    <div style={{ padding: '0 16px 16px' }}>
+                      {(!selectedProject.activity || selectedProject.activity.length === 0) ? (
+                        <div style={{ padding: '40px 0', textAlign: 'center', color: '#52525b', fontSize: '13px' }}>
+                          No activity recorded yet
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '10px' }}>
+                          {selectedProject.activity.map((act, idx) => (
+                            <div key={act.id || idx} style={{ display: 'flex', gap: '16px', position: 'relative' }}>
+                              {idx !== selectedProject.activity.length - 1 && (
+                                <div style={{ position: 'absolute', left: '7px', top: '20px', bottom: '-20px', width: '1px', background: 'rgba(255,255,255,0.06)' }} />
+                              )}
+                              <div style={{ width: '15px', height: '15px', borderRadius: '50%', background: '#378ADD20', border: '2px solid #378ADD', zIndex: 1, marginTop: '2px' }} />
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '13px', color: '#e4e4e7', marginBottom: '4px' }}>{act.message}</div>
+                                <div style={{ fontSize: '11px', color: '#52525b' }}>{act.timestampLabel}</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -1205,7 +1727,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                       ))}
                     </select>
                   </div>
-                  <button className="btn-add-client-premium">
+                  <button className="btn-add-client-premium" onClick={handleAddClient}>
                     + Add New Client
                   </button>
                 </div>
@@ -1364,6 +1886,99 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           </div>
         </div>
       )}
+      {/* PRINT ONLY SECTION */}
+      <div className="print-only-report">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', borderBottom: '2px solid #111', paddingBottom: '20px' }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '28px', color: '#000' }}>PROJECT SUMMARY REPORT</h1>
+            <p style={{ margin: '5px 0 0', color: '#666', fontSize: '14px' }}>Generated on {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#b45309' }}>JUARA</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>Workspace Management System</div>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '40px' }}>
+          <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Total Projects</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sortedProjects.length}</div>
+          </div>
+          <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Total Portfolio Value</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold', color: '#378ADD' }}>Rp {totalValue.toLocaleString('id-ID')}</div>
+          </div>
+          <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Active Projects</div>
+            <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sortedProjects.filter(p => !['completed', 'lost'].includes(p.currentStage)).length}</div>
+          </div>
+          <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
+            <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Current Filter</div>
+            <div style={{ fontSize: '12px', fontWeight: '500' }}>{filterClient || "All Clients"} / {filterAE || "All AEs"}</div>
+          </div>
+        </div>
+
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr style={{ background: '#f8f9fa', borderBottom: '2px solid #eee' }}>
+              <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px' }}>PROJECT NAME</th>
+              <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px' }}>CLIENT</th>
+              <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px' }}>STAGE</th>
+              <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px' }}>EVENT DATE</th>
+              <th style={{ padding: '12px', textAlign: 'right', fontSize: '12px' }}>VALUE (RP)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedProjects.map((p, idx) => (
+              <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: '12px', fontSize: '12px', fontWeight: 'bold' }}>{p.projectName || (p as any).name}</td>
+                <td style={{ padding: '12px', fontSize: '12px' }}>{p.client}</td>
+                <td style={{ padding: '12px', fontSize: '11px', textTransform: 'uppercase' }}>{p.currentStage}</td>
+                <td style={{ padding: '12px', fontSize: '12px' }}>{p.eventDate}</td>
+                <td style={{ padding: '12px', fontSize: '12px', textAlign: 'right' }}>{p.projectValue?.toLocaleString('id-ID')}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <div style={{ marginTop: '60px', display: 'flex', justifyContent: 'flex-end' }}>
+          <div style={{ textAlign: 'center', width: '200px' }}>
+            <p style={{ fontSize: '12px', color: '#666', marginBottom: '60px' }}>Approved by,</p>
+            <div style={{ borderTop: '1px solid #000', paddingTop: '10px', fontSize: '14px', fontWeight: 'bold' }}>JUARA MANAGEMENT</div>
+          </div>
+        </div>
+      </div>
+
+      <style jsx global>{`
+        .print-only-report {
+          display: none;
+        }
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          .print-only-report, .print-only-report * {
+            visibility: visible;
+          }
+          .print-only-report {
+            display: block !important;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 20px;
+            background: white !important;
+            color: black !important;
+          }
+          .sidebar-premium, .top-header-premium, .view-toolbar-premium, .stat-grid-premium, .tab-content-fade, .app-layout-premium aside, .app-layout-premium header {
+            display: none !important;
+          }
+          @page {
+            size: A4 landscape;
+            margin: 10mm;
+          }
+        }
+      `}</style>
     </div>
   );
 }

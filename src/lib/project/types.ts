@@ -142,6 +142,16 @@ export interface ProjectRecord {
     phone: string;
     rate?: number;
   }[];
+  termOfPayment?: {
+    id: string;
+    label: string;
+    percentage: number;
+    amount: number;
+    status: 'pending' | 'invoiced' | 'paid';
+    dueDate?: string;
+  }[];
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export type CRMClientType = "brand" | "agency" | "government" | "partner";

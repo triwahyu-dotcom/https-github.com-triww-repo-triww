@@ -4729,10 +4729,7 @@ strong.tone-critical {
 .trend-neutral { color: #71717a; background: rgba(255, 255, 255, 0.05); }
 
 .view-toolbar-premium {
-  position: sticky;
-  top: 84px; /* after header */
-  background: var(--bg-premium);
-  z-index: 90;
+  background: transparent;
   padding: 0 24px 12px 24px;
   border-bottom: 0.5px solid var(--border-premium);
 }
@@ -4880,11 +4877,8 @@ strong.tone-critical {
 .trend-neutral { background: rgba(255, 255, 255, 0.05); color: #71717a; }
 
 .view-toolbar-premium {
-  background: #111113;
+  background: transparent;
   padding: 0 24px 16px 24px;
-  position: sticky;
-  top: 84px; /* Adjust based on header height */
-  z-index: 80;
   border-bottom: 0.5px solid rgba(255, 255, 255, 0.08);
   margin-bottom: 24px;
 }

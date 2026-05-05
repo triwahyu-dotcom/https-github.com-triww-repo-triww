@@ -149,6 +149,18 @@ export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMC
   }
 }
 
+export async function deleteJsonClient(id: string) {
+  const clients = await getJsonClients();
+  const filtered = clients.filter(c => c.id !== id);
+  await saveClients(filtered);
+}
+
+export async function deleteJsonProject(id: string) {
+  const projects = await getJsonProjects();
+  const filtered = projects.filter(p => p.id !== id);
+  await saveProjects(filtered);
+}
+
 export async function updateJsonProject(project: Partial<ProjectRecord>): Promise<ProjectRecord> {
   const projects = await getJsonProjects();
   const index = projects.findIndex(p => p.id === project.id);

@@ -1,97 +1,84 @@
-# JUARA WORKSPACE: PANDUAN OPERASIONAL TERPADU (V1.0)
-*Dokumentasi Resmi untuk Seluruh Divisi: AE, PM, Finance, & Management*
+# 📘 MANUAL OPERASIONAL: JUARA PROJECT TRACKER
+**Versi 1.0 (Mei 2026)**
+*Satu Sumber Kebenaran untuk Efisiensi & Transparansi Operasional*
 
 ---
 
-## BAB 1: DASHBOARD UTAMA (THE COMMAND CENTER)
-Dashboard adalah wajah pertama aplikasi yang merangkum kesehatan bisnis JUARA secara real-time.
-
-### 1.1 Barisan Statistik Utama (Top Widgets)
-- **Leads & Pitching**: Total nilai Rupiah dari proyek yang statusnya masih 'Lead' atau 'Pitching'. Angka ini membantu Management melihat potensi omzet ke depan.
-- **On Going Projects**: Nilai proyek yang sedang berjalan (Status: Negotiation, Execution, Reporting, Finance).
-- **Billed / Completed**: Total nilai proyek yang sudah selesai 100%.
-- **Grand Total Value**: Akumulasi seluruh proyek yang pernah masuk ke sistem.
-
-### 1.2 Widget Monitoring AR (Account Receivable) - *Sangat Penting!*
-Ini adalah fitur baru untuk mengontrol arus kas:
-- **Total Outstanding AR**: Jumlah tagihan yang belum dibayar klien (Status Invoiced + Pending).
-- **Overdue (Menunggak)**: Tagihan yang sudah dikirim (**Invoiced**) tapi sudah melewati **Due Date** (Tanggal Jatuh Tempo). Jika widget ini berwarna **Merah**, tim Finance/AE harus segera melakukan penagihan.
+## 🚀 PENDAHULUAN
+JUARA Project Tracker adalah ekosistem digital yang dirancang untuk mengintegrasikan alur kerja **CRM, Procurement, Project Management, dan Finance**. Manual ini disusun agar setiap anggota tim (AE, PM, Finance, & Procurement) memiliki standar kerja yang sama.
 
 ---
 
-## BAB 2: MODUL PROJECT TRACKER (DIVISI AE & PM)
-Modul ini digunakan untuk melacak perjalanan sebuah proyek dari ide hingga pelunasan.
+## 📂 1. PENGADAAN (PO, SPK, & KONTRAK)
+Setiap pengeluaran dana untuk pihak ketiga wajib melalui modul Procurement.
 
-### 2.1 Menambah Proyek Baru
-1. Klik **"+ Add Project"** (Tombol Biru, Kanan Atas).
-2. **Project Name**: Masukkan nama yang unik.
-3. **Client Selection**: Jika klien belum ada, klik **"+ Add New Client"**. Jangan memaksakan memilih klien yang salah.
-4. **Project Value**: Masukkan angka bersih (misal: 150000000). Sistem akan otomatis mengubahnya menjadi Rp 150.000.000.
-5. **Owners (AE)**: Ketik nama AE yang menangani. Jika lebih dari satu, pisahkan dengan koma (Contoh: `Ubaid, Yudi`). Nama **Ubaidullah** akan otomatis disinkronkan menjadi **Ubaid** untuk konsistensi data.
+### 1.1 Tipe Dokumen
+- **PO (Purchase Order)**: Untuk pembelian/sewa barang atau alat (misal: Sewa LED, Sound System).
+- **SPK (Surat Perintah Kerja)**: Untuk jasa tenaga kerja perorangan atau spesialis (misal: Freelance Crew, MC).
+- **KONTRAK**: Untuk kerjasama jangka panjang atau nilai proyek yang besar.
 
-### 2.2 Mengelola Detail Proyek (Project Card)
-Klik nama proyek untuk membuka jendela detail. Di sini ada 4 tab utama:
-- **TAB ACTIVITY**: Mencatat otomatis setiap kali status proyek berubah. Berguna untuk audit jika ada proyek yang "stuck" terlalu lama di satu tahap.
-- **TAB TASKS**: Daftar periksa (Checklist) operasional. Centang setiap tugas yang selesai. Progres bar di atas akan bergerak otomatis.
-- **TAB MILESTONES**: Titik pencapaian penting.
-    - Input: `Technical Meeting`, `Loading Barang`, `Event Day`.
-    - Klik lingkaran di sebelah kiri hingga menjadi hijau untuk menandai "Done".
-- **TAB BILLING (Kunci Data AR)**:
-    - Masukkan Termin (Contoh: `DP 50%`, `Pelunasan`).
-    - **Status PENDING**: Baru rencana.
-    - **Status INVOICED**: Tagihan sudah dikirim ke klien (Wajib isi *Due Date*).
-    - **Status PAID**: Uang sudah masuk (Otomatis mengupdate status *Partial/Paid* di dashboard).
+### 1.2 Logika Pajak & Gross Up
+Sistem secara otomatis menghitung pajak berdasarkan pilihan Anda:
+| Pajak | Tarif | Penggunaan |
+| :--- | :--- | :--- |
+| **PPN** | 11% | Menambah nilai total (untuk Vendor PKP). |
+| **PPh 21** | 2.5% | Potongan untuk Jasa Perorangan/Freelancer. |
+| **PPh 23** | 2.0% | Potongan untuk Jasa Vendor (Badan Usaha). |
+
+**Mode Pajak:**
+- **Potong PPh (Normal)**: Vendor menerima nominal bersih setelah dipotong pajak.
+- **Gross Up (Ditanggung JUARA)**: Sistem menaikkan nilai DPP sehingga vendor menerima uang utuh sesuai harga kesepakatan. 
+  *Rumus: Subtotal / (1 - Tarif PPh)*.
 
 ---
 
-## BAB 3: MODUL CRM (CUSTOMER RELATIONSHIP)
-Pusat database klien untuk strategi marketing ke depan.
+## 🗂️ 2. PROJECT CARD (COMMAND CENTER)
+Project Card adalah tempat AE/PM memantau kesehatan proyek secara real-time.
 
-### 3.1 Profil Klien
-- Setiap klien memiliki **Lifetime Value** (Total uang yang pernah dibayarkan ke JUARA).
-- **AE Assigned**: Mengetahui AE mana yang memegang akun klien tersebut secara dominan.
-- **Contact List**: Simpan nomor WhatsApp dan email PIC klien di sini agar AE lain bisa tetap memantau jika AE utama berhalangan.
+### 2.1 Tab Tasks & Milestones
+- **Stage Checklist**: Wajib dicentang setiap kali tugas selesai (Execution, Reporting, dll). Ini menentukan persentase progres di dashboard utama.
+- **Custom Milestones**: Masukkan tanggal penting (misal: "Final Layout", "Loading"). Milestone yang terlewat akan ditandai oleh sistem.
 
----
-
-## BAB 4: MODUL FINANCE & RFP (REQUEST FOR PAYMENT)
-Alur pengajuan uang keluar untuk vendor atau freelancer.
-
-### 4.1 Langkah PM (Pengajuan)
-1. Buka menu **Finance & RFP**.
-2. Pilih Proyek yang sedang dijalankan.
-3. Upload dokumen pendukung (PO dari klien atau Kontrak Vendor).
-4. Klik **Create RFP**. Pilih Vendor dan masukkan nominal.
-
-### 4.2 Langkah Approver (Management/Director)
-1. Buka dashboard Finance bagian **Operational**.
-2. Lihat daftar RFP yang berstatus `Submitted`.
-3. Klik **Approve** untuk memberikan lampu hijau bagi Finance untuk membayar.
-
-### 4.3 Langkah Finance (Pembayaran)
-1. Setelah status RFP menjadi `Approved`, Finance melakukan transfer bank.
-2. Upload bukti transfer ke sistem.
-3. Ubah status menjadi `Paid`. Status ini akan terlihat oleh PM secara real-time, sehingga PM tahu vendor sudah dibayar.
+### 2.2 Tab Billing (Term of Payment)
+- **Status Invoice**: PENDING (Belum ditagih) -> INVOICED (Sudah kirim invoice) -> PAID (Duit masuk).
+- **Aturan Emas**: **DP minimal 30%** harus berstatus **PAID** sebelum proyek diizinkan masuk ke fase eksekusi lapangan demi keamanan cashflow.
 
 ---
 
-## BAB 5: MODUL VENDOR MANAGEMENT
-Database seluruh supplier dan mitra kerja JUARA.
+## 🤝 3. VENDOR & RESOURCE MANAGEMENT
+JUARA tidak lagi mendaftarkan vendor secara manual, melainkan melalui sistem kurasi.
 
-### 5.1 Registrasi Vendor
-- Vendor mendaftar mandiri via **`partner.juaraevent.id`**.
-- Mereka akan mengisi legalitas (NPWP, NIB) dan profil perusahaan.
+### 3.1 Alur Pendaftaran (Intake)
+1. Vendor mendaftar mandiri via link portal.
+2. Vendor mengisi data legalitas, bank, pajak, dan **Link Folder Cloud (Google Drive)**.
+3. Vendor mendapatkan **Registration Code** sebagai bukti pendaftaran.
 
-### 5.2 Approval & Rating
-- Tim Procurement memeriksa dokumen vendor baru di menu **Vendors**.
-- **Rating (1-5 Bintang)**: Sangat penting diisi setelah event selesai. Vendor dengan rating rendah (di bawah 3.5) akan muncul dengan peringatan agar tidak digunakan lagi di proyek selanjutnya.
+### 3.2 Kebijakan Penyimpanan Data
+- **Data Only**: Sistem hanya menyimpan teks (NPWP, Rekening, dll).
+- **File Fisik**: Foto KTP/NPWP/Portofolio tetap berada di folder Drive vendor. Sistem hanya menyimpan link-nya. Hal ini dilakukan agar aplikasi tetap cepat dan ringan.
 
----
-
-## BAB 6: FITUR KOLABORASI
-- **Presence**: Di pojok kanan atas, jika ada avatar rekan Anda, berarti mereka sedang online. Arahkan mouse untuk melihat nama mereka.
-- **Logout**: Selalu gunakan tombol **Logout** saat selesai, terutama jika menggunakan komputer kantor, untuk melindungi data sensitif keuangan perusahaan.
+### 3.3 Penilaian (Rating)
+Setelah proyek selesai, PM wajib memberikan rating (1-5 bintang). Vendor dengan rating **< 3.0** akan masuk daftar merah (*blacklist*) untuk proyek selanjutnya.
 
 ---
 
-*Hak Cipta © 2026 JUARA Workspace. Dokumen ini bersifat rahasia dan hanya untuk penggunaan internal.*
+## 💰 4. FINANCE & SETTLEMENT
+Setiap dana yang keluar melalui **Cash Advance (CA)** wajib dipertanggungjawabkan (Settlement).
+
+### 4.1 Proses Settlement (STL)
+Sistem membandingkan dana yang diminta (**Requested**) dengan nota asli (**Actual Spending**):
+- **Under Budget**: Ada sisa uang? Wajib dikembalikan ke Finance.
+- **Over Budget**: Pengeluaran melebihi budget? Wajib menyertakan catatan alasan untuk approval Director.
+- **Nota**: Input deskripsi nota satu per satu agar tercatat di laporan keuangan digital.
+
+---
+
+## 📖 5. CARA MENGAKSES MANUAL INI
+Manual ini bersifat interaktif dan dapat diakses kapan saja:
+1. Klik Ikon **Buku (User Manual)** di sidebar aplikasi.
+2. Gunakan fitur **Pencarian (Ctrl+F)** untuk mencari topik spesifik.
+3. **Cetak PDF**: Klik tombol "Print Manual" di pojok kanan atas halaman web manual untuk mendapatkan versi cetak/offline.
+
+---
+
+**© 2026 JUARA Project Tracker. Seluruh hak cipta dilindungi.**

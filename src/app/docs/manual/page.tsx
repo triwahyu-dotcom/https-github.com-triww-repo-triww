@@ -60,26 +60,26 @@ export default function ManualPage() {
       case "projects":
         return (
           <div className="manual-content-fade">
-            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f4f4f5', marginBottom: '24px' }}>Bab 2: Modul Project Tracker</h2>
+            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f4f4f5', marginBottom: '24px' }}>Bab 2: Modul Project Tracker (Command Center)</h2>
             <div style={{ background: '#378ADD20', borderLeft: '4px solid #378ADD', padding: '16px', borderRadius: '4px', marginBottom: '24px' }}>
-              <p style={{ color: '#85B7EB', fontSize: '13px', margin: 0 }}><strong>Pro Tip:</strong> Gunakan tombol "+ Add New Client" langsung dari form proyek jika klien belum terdaftar untuk menghemat waktu.</p>
+              <p style={{ color: '#85B7EB', fontSize: '13px', margin: 0 }}><strong>Financial Health Rule:</strong> Pastikan DP minimal 30% sudah berstatus <strong>PAID</strong> di Tab Billing sebelum memulai eksekusi lapangan.</p>
             </div>
             
-            <h3 style={{ fontSize: '18px', color: '#f4f4f5', marginBottom: '16px' }}>2.1 Alur Pengisian Project Card</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#378ADD', color: 'white', display: 'grid', placeItems: 'center', fontSize: '12px', fontWeight: 'bold', flexShrink: 0 }}>1</div>
-                <div>
-                  <h4 style={{ color: '#e4e4e7', fontSize: '14px', marginBottom: '4px' }}>Tab Tasks (Checklist)</h4>
-                  <p style={{ color: '#71717a', fontSize: '13px' }}>Digunakan untuk melacak progres operasional harian tim di lapangan.</p>
-                </div>
+            <h3 style={{ fontSize: '18px', color: '#f4f4f5', marginBottom: '16px' }}>2.1 Mengelola Project Card</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px' }}>
+                <h4 style={{ color: '#e4e4e7', fontSize: '14px', marginBottom: '10px' }}>Tasks & Milestones</h4>
+                <ul style={{ color: '#71717a', fontSize: '12px', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <li><strong>Stage Checklist</strong>: Update harian untuk akurasi progres dashboard.</li>
+                  <li><strong>Custom Milestones</strong>: Tandai tanggal krusial (Loading, Show, BAST).</li>
+                </ul>
               </div>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#378ADD', color: 'white', display: 'grid', placeItems: 'center', fontSize: '12px', fontWeight: 'bold', flexShrink: 0 }}>2</div>
-                <div>
-                  <h4 style={{ color: '#e4e4e7', fontSize: '14px', marginBottom: '4px' }}>Tab Billing (Data AR)</h4>
-                  <p style={{ color: '#71717a', fontSize: '13px' }}>Wajib mengubah status ke <strong>Invoiced</strong> saat menagih dan <strong>Paid</strong> saat uang masuk agar dashboard AR tetap akurat.</p>
-                </div>
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '20px' }}>
+                <h4 style={{ color: '#e4e4e7', fontSize: '14px', marginBottom: '10px' }}>Billing & ToP</h4>
+                <ul style={{ color: '#71717a', fontSize: '12px', paddingLeft: '18px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <li><strong>Status Invoiced</strong>: Saat invoice fisik/email dikirim ke klien.</li>
+                  <li><strong>Status Paid</strong>: Saat dana masuk (Trigger AR widget di dashboard).</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -87,30 +87,49 @@ export default function ManualPage() {
       case "finance":
         return (
           <div className="manual-content-fade">
-            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f4f4f5', marginBottom: '24px' }}>Bab 4: Alur Keuangan (RFP Flow)</h2>
-            <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', padding: '32px', border: '0.5px solid rgba(255,255,255,0.08)' }}>
-               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(55,138,221,0.1)', color: '#378ADD', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}><Zap size={24} /></div>
-                    <div style={{ fontSize: '13px', color: '#f4f4f5', fontWeight: 600 }}>PM Create</div>
-                  </div>
-                  <ChevronRight style={{ color: '#3f3f46' }} />
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(167,139,250,0.1)', color: '#a78bfa', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}><Search size={24} /></div>
-                    <div style={{ fontSize: '13px', color: '#f4f4f5', fontWeight: 600 }}>Procurement Review</div>
-                  </div>
-                  <ChevronRight style={{ color: '#3f3f46' }} />
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(239,159,39,0.1)', color: '#EF9F27', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}><ShieldCheck size={24} /></div>
-                    <div style={{ fontSize: '13px', color: '#f4f4f5', fontWeight: 600 }}>Director Approve</div>
-                  </div>
-                  <ChevronRight style={{ color: '#3f3f46' }} />
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(93,202,165,0.1)', color: '#5DCAA5', display: 'grid', placeItems: 'center', margin: '0 auto 12px' }}><FileText size={24} /></div>
-                    <div style={{ fontSize: '13px', color: '#f4f4f5', fontWeight: 600 }}>Finance Pay</div>
-                  </div>
-               </div>
-               <p style={{ color: '#71717a', fontSize: '13px', textAlign: 'center', margin: 0 }}>Setiap status (Draft, Submitted, Approved, Paid) dapat dipantau langsung oleh PM di dashboard mereka.</p>
+            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f4f4f5', marginBottom: '24px' }}>Bab 4: Keuangan & Pengadaan</h2>
+            
+            <h3 style={{ fontSize: '18px', color: '#f4f4f5', marginBottom: '16px' }}>4.1 Pembuatan PO/SPK & Pajak</h3>
+            <p style={{ color: '#a1a1aa', fontSize: '13px', lineHeight: 1.6, marginBottom: '20px' }}>
+              Setiap pengadaan wajib memilih Tipe Pajak yang tepat. Gunakan fitur <strong>Gross Up</strong> jika kesepakatan dengan vendor adalah nilai bersih (pajak ditanggung JUARA).
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '32px' }}>
+              <div style={{ background: 'rgba(239,159,39,0.05)', border: '0.5px solid rgba(239,159,39,0.1)', borderRadius: '12px', padding: '20px' }}>
+                <h4 style={{ color: '#EF9F27', fontSize: '14px', marginBottom: '10px' }}>Logika PPh</h4>
+                <p style={{ color: '#71717a', fontSize: '12px', margin: 0 }}>
+                  Sistem mendukung <strong>PPh 21 (2.5%)</strong> untuk freelancer dan <strong>PPh 23 (2.0%)</strong> untuk badan usaha.
+                </p>
+              </div>
+              <div style={{ background: 'rgba(93,202,165,0.05)', border: '0.5px solid rgba(93,202,165,0.1)', borderRadius: '12px', padding: '20px' }}>
+                <h4 style={{ color: '#5DCAA5', fontSize: '14px', marginBottom: '10px' }}>Settlement (STL)</h4>
+                <p style={{ color: '#71717a', fontSize: '12px', margin: 0 }}>
+                  Wajib rekonsiliasi pengeluaran asli vs budget yang diterima. Sistem mendeteksi otomatis status <strong>Over/Under Budget</strong>.
+                </p>
+              </div>
+            </div>
+          </div>
+        );
+      case "vendors":
+        return (
+          <div className="manual-content-fade">
+            <h2 style={{ fontSize: '24px', fontWeight: 600, color: '#f4f4f5', marginBottom: '24px' }}>Bab 5: Manajemen Vendor & Manpower</h2>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              <div style={{ display: 'flex', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(55,138,221,0.1)', color: '#378ADD', display: 'grid', placeItems: 'center', flexShrink: 0 }}><Building2 size={20} /></div>
+                <div>
+                  <h4 style={{ color: '#e4e4e7', fontSize: '14px', marginBottom: '6px' }}>Self-Registration (Intake)</h4>
+                  <p style={{ color: '#71717a', fontSize: '12px', lineHeight: 1.5 }}>Vendor mendaftar mandiri via portal. Verifikasi dilakukan oleh tim Procurement sebelum status diubah menjadi "Disetujui".</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '16px', background: 'rgba(255,255,255,0.02)', padding: '20px', borderRadius: '12px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(93,202,165,0.1)', color: '#5DCAA5', display: 'grid', placeItems: 'center', flexShrink: 0 }}><ShieldCheck size={20} /></div>
+                <div>
+                  <h4 style={{ color: '#e4e4e7', fontSize: '14px', marginBottom: '6px' }}>Kebijakan Data-Only</h4>
+                  <p style={{ color: '#71717a', fontSize: '12px', lineHeight: 1.5 }}>JUARA tidak menyimpan scan fisik dokumen di database internal. Seluruh file wajib diunggah ke folder Drive vendor dan ditautkan via "Document Link".</p>
+                </div>
+              </div>
             </div>
           </div>
         );

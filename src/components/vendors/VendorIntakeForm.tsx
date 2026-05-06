@@ -17,8 +17,8 @@ const INITIAL_FORM = {
   services: "",
   email: "",
   businessAddress: "",
-  legalStatus: "Freelance/Perorangan" as LegalStatus,
-  taxStatus: "Non-PKP" as TaxStatus,
+  legalStatus: "Unknown" as LegalStatus,
+  taxStatus: "Unknown" as TaxStatus,
   bankName: "",
   bankAccountNumber: "",
   bankAccountHolder: "",
@@ -105,6 +105,14 @@ export function VendorIntakeForm({
     if (!form.services.trim()) errors.push(locale === "id" ? "Layanan wajib diisi." : "Services are required.");
     if (!form.picName.trim()) errors.push(locale === "id" ? "Nama PIC wajib diisi." : "PIC name is required.");
     if (!form.picPhone.trim()) errors.push(locale === "id" ? "No. WA PIC wajib diisi." : "PIC phone is required.");
+    
+    if (form.legalStatus === "Unknown") {
+      errors.push(locale === "id" ? "Silakan pilih status legalitas perusahaan/bisnis Anda." : "Please select your business legal status.");
+    }
+    
+    if (form.taxStatus === "Unknown") {
+      errors.push(locale === "id" ? "Silakan pilih status perpajakan (PKP/Non-PKP)." : "Please select your tax status (PKP/Non-PKP).");
+    }
 
     const normalizedPhone = normalizePhoneToWhatsApp(form.picPhone);
     if (!/^62\d{8,14}$/.test(normalizedPhone)) {
@@ -277,7 +285,8 @@ export function VendorIntakeForm({
         <section className="form-grid-3" style={{ marginBottom: '32px' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             {t(locale, "legalStatus")}
-            <select value={form.legalStatus} onChange={(event) => updateField("legalStatus", event.target.value as LegalStatus)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
+            <select required value={form.legalStatus} onChange={(event) => updateField("legalStatus", event.target.value as LegalStatus)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
+              <option value="Unknown" disabled>{locale === "id" ? "-- Pilih Legalitas --" : "-- Select Legality --"}</option>
               <option value="Freelance/Perorangan">{locale === "id" ? "Freelance / Perorangan" : "Freelance / Individual"}</option>
               <option value="PT/CV">PT / CV (Company)</option>
               <option value="Lainnya">{locale === "id" ? "Lainnya" : "Other"}</option>
@@ -285,7 +294,8 @@ export function VendorIntakeForm({
           </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             {t(locale, "taxStatus")}
-            <select value={form.taxStatus} onChange={(event) => updateField("taxStatus", event.target.value as TaxStatus)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
+            <select required value={form.taxStatus} onChange={(event) => updateField("taxStatus", event.target.value as TaxStatus)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }}>
+              <option value="Unknown" disabled>{locale === "id" ? "-- Pilih Status Pajak --" : "-- Select Tax Status --"}</option>
               <option value="Non-PKP">Non-PKP</option>
               <option value="PKP">PKP</option>
             </select>

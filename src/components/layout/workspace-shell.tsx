@@ -63,13 +63,13 @@ export function WorkspaceShell({
   }, []);
 
   const navItems = [
-    { label: "Workspace Hub", href: "/", icon: <Home size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director", "member"] },
+    { label: "Workspace Hub", href: "/", icon: <Home size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director", "member", "hcga"] },
     { label: "Projects", href: "/projects", icon: <LayoutDashboard size={18} />, roles: ["admin", "pm", "ae", "procurement", "director"] },
     { label: "CRM", href: "/crm", icon: <Users size={18} />, roles: ["admin", "pm", "ae", "director"] },
-    { label: "Vendors", href: "/vendors", icon: <Building2 size={18} />, roles: ["admin", "procurement", "director"] },
-    { label: "Man Power", href: "/manpower/freelancer", icon: <HardHat size={18} />, roles: ["admin", "pm", "ae", "director"] },
+    { label: "Vendors", href: "/vendors", icon: <Building2 size={18} />, roles: ["admin", "procurement", "director", "hcga"] },
+    { label: "Man Power", href: "/manpower/freelancer", icon: <HardHat size={18} />, roles: ["admin", "pm", "ae", "director", "hcga"] },
     { label: "Finance & RFP", href: "/finance", icon: <Receipt size={18} />, roles: ["admin", "finance", "director"] },
-    { label: "Document Center", href: "/docs", icon: <FolderSearch size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director"] },
+    { label: "Document Center", href: "/docs", icon: <FolderSearch size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director", "hcga"] },
   ];
 
   const filteredNavItems = navItems; // RBAC Disabled: All items visible
@@ -111,7 +111,7 @@ export function WorkspaceShell({
         >
           {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
-
+ 
          <div className="pm-sidebar-group">
            <p className="pm-sidebar-label">JUARA Workspace</p>
            {filteredNavItems.map((item) => (
@@ -148,6 +148,7 @@ export function WorkspaceShell({
             >
               <option value="admin">Super Admin</option>
               <option value="procurement">Procurement Division</option>
+              <option value="hcga">HCGA (Human Capital)</option>
               <option value="pm">Project Manager</option>
               <option value="finance">Finance Admin</option>
               <option value="director">Director (C-Level)</option>

@@ -491,10 +491,15 @@ async function readState() {
 async function writeState(state: VendorState) {
   if (isSupabaseConfigured()) {
     try {
-      await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
-      return;
+      const { error } = await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
+      if (error) {
+        console.error("Supabase vendor state update error:", error.message);
+        throw new Error(`Gagal menyimpan data vendor ke database: ${error.message}`);
+      }
+      if (process.env.VERCEL) return;
     } catch (e) {
       console.warn("Failed to write state to Supabase", e);
+      throw e;
     }
   }
 
@@ -502,7 +507,9 @@ async function writeState(state: VendorState) {
     await ensureDataDir();
     await writeFile(STATE_PATH, JSON.stringify(state, null, 2));
   } catch (e) {
-    console.warn("Failed to write state locally (read-only filesystem?)", e);
+    if (!isSupabaseConfigured()) {
+      console.warn("Failed to write state locally (read-only filesystem?)", e);
+    }
   }
 }
 

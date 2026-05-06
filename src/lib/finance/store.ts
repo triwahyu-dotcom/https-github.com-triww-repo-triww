@@ -73,37 +73,51 @@ export async function getFinanceDashboardData(): Promise<FinanceDashboardData> {
 export async function saveDocument(doc: ExpenseDocument) {
   if (isSupabaseConfigured()) {
     const { error } = await supabase!.from('finance_documents').upsert({ id: doc.id, data: doc });
-    if (error) console.error("Supabase finance document update error:", error.message);
-    return;
+    if (error) {
+      console.error("Supabase finance document update error:", error.message);
+      throw new Error(`Gagal menyimpan dokumen: ${error.message}`);
+    }
+    if (process.env.VERCEL) return;
   }
 
-  ensureDataDir();
-  const docs = await readDocuments();
-  const index = docs.findIndex(d => d.id === doc.id);
-  if (index >= 0) {
-    docs[index] = doc;
-  } else {
-    docs.push(doc);
+  try {
+    ensureDataDir();
+    const docs = await readDocuments();
+    const index = docs.findIndex(d => d.id === doc.id);
+    if (index >= 0) {
+      docs[index] = doc;
+    } else {
+      docs.push(doc);
+    }
+    writeFileSync(DOCS_PATH, JSON.stringify(docs, null, 2));
+  } catch (e) {
+    if (!isSupabaseConfigured()) throw e;
   }
-  writeFileSync(DOCS_PATH, JSON.stringify(docs, null, 2));
 }
 
 export async function saveRFP(rfp: RequestForPayment) {
   if (isSupabaseConfigured()) {
     const { error } = await supabase!.from('finance_rfps').upsert({ id: rfp.id, data: rfp });
-    if (error) console.error("Supabase finance RFP update error:", error.message);
-    return;
+    if (error) {
+      console.error("Supabase finance RFP update error:", error.message);
+      throw new Error(`Gagal menyimpan RFP: ${error.message}`);
+    }
+    if (process.env.VERCEL) return;
   }
 
-  ensureDataDir();
-  const rfps = await readRFPs();
-  const index = rfps.findIndex(r => r.id === rfp.id);
-  if (index >= 0) {
-    rfps[index] = rfp;
-  } else {
-    rfps.push(rfp);
+  try {
+    ensureDataDir();
+    const rfps = await readRFPs();
+    const index = rfps.findIndex(r => r.id === rfp.id);
+    if (index >= 0) {
+      rfps[index] = rfp;
+    } else {
+      rfps.push(rfp);
+    }
+    writeFileSync(RFPS_PATH, JSON.stringify(rfps, null, 2));
+  } catch (e) {
+    if (!isSupabaseConfigured()) throw e;
   }
-  writeFileSync(RFPS_PATH, JSON.stringify(rfps, null, 2));
 }
 
 export async function deleteDocument(id: string) {

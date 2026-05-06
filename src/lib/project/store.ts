@@ -164,8 +164,14 @@ export async function saveProjects(projects: ProjectRecord[]) {
 }
 
 export async function saveClients(clients: CRMClient[]) {
-  await ensureDataDir();
-  await writeFile(CLIENTS_PATH, JSON.stringify(clients, null, 2));
+  try {
+    await ensureDataDir();
+    await writeFile(CLIENTS_PATH, JSON.stringify(clients, null, 2));
+  } catch (e) {
+    if (!isSupabaseConfigured()) {
+      console.warn("Failed to save clients locally and Supabase not configured", e);
+    }
+  }
 }
 
 export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMClient> {
@@ -195,21 +201,28 @@ export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMC
     clients[index] = updatedClient;
   }
 
-  // Persist
+  // Persist to Supabase as primary source
   if (isSupabaseConfigured()) {
     try {
-      await supabase!
+      const { error } = await supabase!
         .from('clients')
         .upsert({
           id: updatedClient.id,
           data: updatedClient,
           updated_at: now
         }, { onConflict: 'id' });
+      
+      if (error) {
+        console.error("Supabase client upsert error:", error);
+        throw new Error(`Gagal menyimpan ke database: ${error.message}`);
+      }
     } catch (e) {
       console.error("Failed to save client to Supabase", e);
+      throw e; // Rethrow to let the UI know about the failure
     }
   }
 
+  // Fallback to local JSON (will fail silently on Vercel)
   await saveClients(clients);
   return updatedClient;
 }

@@ -878,12 +878,37 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                           {!isEditing ? (
                             <span style={{ color: row.color || '#f4f4f5', textAlign: 'right' }}>{row.value}</span>
                           ) : (
-                            <input 
-                              className="mini-input"
-                              style={{ background: '#111113', width: '280px', height: '32px', textAlign: 'right', border: '1px solid rgba(255,255,255,0.1)' }}
-                              value={row.value === '–' ? '' : row.value}
-                              onChange={(e) => setEditFormData({ ...editFormData, [row.key]: e.target.value })}
-                            />
+                            row.key === 'taxStatus' ? (
+                              <select 
+                                className="mini-input"
+                                style={{ background: '#111113', width: '280px', height: '32px', border: '1px solid rgba(255,255,255,0.1)', color: '#f4f4f5' }}
+                                value={editFormData?.taxStatus || 'Unknown'}
+                                onChange={(e) => setEditFormData({ ...editFormData, taxStatus: e.target.value })}
+                              >
+                                <option value="Unknown">Unknown</option>
+                                <option value="Non-PKP">Non-PKP</option>
+                                <option value="PKP">PKP</option>
+                              </select>
+                            ) : row.key === 'legalStatus' ? (
+                              <select 
+                                className="mini-input"
+                                style={{ background: '#111113', width: '280px', height: '32px', border: '1px solid rgba(255,255,255,0.1)', color: '#f4f4f5' }}
+                                value={editFormData?.legalStatus || 'Unknown'}
+                                onChange={(e) => setEditFormData({ ...editFormData, legalStatus: e.target.value })}
+                              >
+                                <option value="Unknown">Unknown</option>
+                                <option value="Freelance/Perorangan">Freelance / Perorangan</option>
+                                <option value="PT/CV">PT / CV</option>
+                                <option value="Lainnya">Lainnya</option>
+                              </select>
+                            ) : (
+                              <input 
+                                className="mini-input"
+                                style={{ background: '#111113', width: '280px', height: '32px', textAlign: 'right', border: '1px solid rgba(255,255,255,0.1)' }}
+                                value={row.value === '–' ? '' : row.value}
+                                onChange={(e) => setEditFormData({ ...editFormData, [row.key]: e.target.value })}
+                              />
+                            )
                           )}
                         </div>
                       ))}

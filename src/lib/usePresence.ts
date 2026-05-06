@@ -5,9 +5,10 @@ export interface PresenceUser {
   name: string;
   role: string;
   onlineAt: string;
+  activity?: string; // e.g., "Viewing Projects", "In Finance Modal"
 }
 
-export function usePresence(userName: string | undefined, userRole: string | undefined) {
+export function usePresence(userName: string | undefined, userRole: string | undefined, activity?: string) {
   const [onlineUsers, setOnlineUsers] = useState<Record<string, PresenceUser>>({});
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export function usePresence(userName: string | undefined, userRole: string | und
             name: presence.name,
             role: presence.role,
             onlineAt: presence.onlineAt,
+            activity: presence.activity,
           };
         });
         
@@ -43,6 +45,7 @@ export function usePresence(userName: string | undefined, userRole: string | und
             name: userName,
             role: userRole || 'User',
             onlineAt: new Date().toISOString(),
+            activity: activity || 'Active',
           });
         }
       });
@@ -50,7 +53,7 @@ export function usePresence(userName: string | undefined, userRole: string | und
     return () => {
       channel.unsubscribe();
     };
-  }, [userName, userRole]);
+  }, [userName, userRole, activity]);
 
   return {
     onlineUsers: Object.values(onlineUsers),

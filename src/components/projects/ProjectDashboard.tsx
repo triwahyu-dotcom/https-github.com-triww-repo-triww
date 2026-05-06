@@ -689,7 +689,13 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             </div>
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
               <div className="desktop-only-presence">
-                <PresenceIndicator />
+                <PresenceIndicator 
+                  currentActivity={
+                    detailOpen 
+                      ? (activeDetailTab === 'billing' ? `Finance: ${selectedProject?.projectName}` : `Project: ${selectedProject?.projectName}`)
+                      : isAddingProject ? "Creating New Project" : "Dashboard Overview"
+                  } 
+                />
               </div>
               {isMounted && (
                 <>

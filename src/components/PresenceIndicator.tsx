@@ -3,7 +3,7 @@
 import { usePresence, PresenceUser } from "@/lib/usePresence";
 import { useEffect, useState } from "react";
 
-export function PresenceIndicator() {
+export function PresenceIndicator({ currentActivity }: { currentActivity?: string }) {
   const [currentUser, setCurrentUser] = useState<{ name: string; role: string } | null>(null);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ export function PresenceIndicator() {
     setIsMounted(true);
   }, []);
 
-  const { onlineUsers, onlineCount } = usePresence(currentUser?.name, currentUser?.role);
+  const { onlineUsers, onlineCount } = usePresence(currentUser?.name, currentUser?.role, currentActivity);
 
   if (!currentUser || !isMounted) return null;
 
@@ -39,7 +39,7 @@ export function PresenceIndicator() {
               zIndex: 10 - idx,
               backgroundColor: getAvatarColor(user.name)
             }}
-            title={`${user.name} (${user.role})`}
+            title={`${user.name} (${user.role})${user.activity ? ` — ${user.activity}` : ''}`}
           >
             {user.name.charAt(0).toUpperCase()}
           </div>

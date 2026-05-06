@@ -203,6 +203,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     setSelectedVendorId(id.toString());
     setIsDetailOpen(true);
     setIsEditing(false);
+    setEditFormData(null); // Reset stale edit data
   };
 
   const startEditing = () => {
@@ -801,10 +802,10 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                     </div>
                     <div style={{ padding: '0 24px' }}>
                       {[
-                        { key: 'picName', label: 'Nama PIC', value: editFormData?.contacts?.[0]?.name || selectedVendorDetail.contacts?.[0]?.name || '–' },
-                        { key: 'phone', label: 'WhatsApp PIC', value: editFormData?.contacts?.[0]?.phone || selectedVendorDetail.contacts?.[0]?.phone || '–', color: '#22c55e' },
-                        { key: 'email', label: 'Business Email', value: editFormData?.email || selectedVendorDetail.email || '–' },
-                        { key: 'location', label: 'Alamat Usaha', value: editFormData?.location || selectedVendorDetail.location || '–' },
+                        { key: 'picName', label: 'Nama PIC', value: (isEditing ? editFormData?.contacts?.[0]?.name : null) || selectedVendorDetail.contacts?.[0]?.name || '–' },
+                        { key: 'phone', label: 'WhatsApp PIC', value: (isEditing ? editFormData?.contacts?.[0]?.phone : null) || selectedVendorDetail.contacts?.[0]?.phone || '–', color: '#22c55e' },
+                        { key: 'email', label: 'Business Email', value: (isEditing ? editFormData?.email : null) || selectedVendorDetail.email || '–' },
+                        { key: 'location', label: 'Alamat Usaha', value: (isEditing ? editFormData?.location : null) || selectedVendorDetail.location || '–' },
                       ].map((row, idx, arr) => (
                         <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
                           <span style={{ color: '#71717a' }}>{row.label}</span>
@@ -865,12 +866,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                     </div>
                     <div style={{ padding: '0 24px' }}>
                       {[
-                        { key: 'bankName', label: 'Nama Bank', value: editFormData?.bankName || selectedVendorDetail.bankName || '–' },
-                        { key: 'bankAccountNumber', label: 'Nomor Rekening', value: editFormData?.bankAccountNumber || selectedVendorDetail.bankAccountNumber || '–', color: '#378ADD' },
-                        { key: 'bankAccountHolder', label: 'Atas Nama', value: editFormData?.bankAccountHolder || selectedVendorDetail.bankAccountHolder || '–' },
-                        { key: 'npwpNumber', label: 'Nomor NPWP', value: editFormData?.npwpNumber || selectedVendorDetail.npwpNumber || '–' },
-                        { key: 'taxStatus', label: 'Tax Status', value: editFormData?.taxStatus || selectedVendorDetail.taxStatus || 'Unknown' },
-                        { key: 'legalStatus', label: 'Legal Status', value: editFormData?.legalStatus || selectedVendorDetail.legalStatus || 'Unknown' },
+                        { key: 'bankName', label: 'Nama Bank', value: (isEditing ? editFormData?.bankName : null) || selectedVendorDetail.bankName || '–' },
+                        { key: 'bankAccountNumber', label: 'Nomor Rekening', value: (isEditing ? editFormData?.bankAccountNumber : null) || selectedVendorDetail.bankAccountNumber || '–', color: '#378ADD' },
+                        { key: 'bankAccountHolder', label: 'Atas Nama', value: (isEditing ? editFormData?.bankAccountHolder : null) || selectedVendorDetail.bankAccountHolder || '–' },
+                        { key: 'npwpNumber', label: 'Nomor NPWP', value: (isEditing ? editFormData?.npwpNumber : null) || selectedVendorDetail.npwpNumber || '–' },
+                        { key: 'taxStatus', label: 'Tax Status', value: (isEditing ? editFormData?.taxStatus : null) || selectedVendorDetail.taxStatus || 'Unknown' },
+                        { key: 'legalStatus', label: 'Legal Status', value: (isEditing ? editFormData?.legalStatus : null) || selectedVendorDetail.legalStatus || 'Unknown' },
                       ].map((row, idx, arr) => (
                         <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
                           <span style={{ color: '#71717a' }}>{row.label}</span>

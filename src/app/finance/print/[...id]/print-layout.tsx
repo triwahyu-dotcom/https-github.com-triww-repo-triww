@@ -245,6 +245,16 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
                   {formatCurrency(rfp.totalAmount)}
                 </td>
               </tr>
+              {(doc?.discount || 0) > 0 && (
+                <tr>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f' }}>
+                    Discount / Potongan
+                  </td>
+                  <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f' }}>
+                    - {formatCurrency(doc?.discount || 0)}
+                  </td>
+                </tr>
+              )}
               {(rfp.taxAmount || 0) > 0 && (
                 <tr>
                   <td style={{ border: "1px solid #000", padding: "8px", textAlign: "right", color: '#d32f2f', fontWeight: '500' }}>
@@ -740,7 +750,17 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
               </tbody>
               <tfoot>
                 <tr style={{ background: '#f0f0f0', fontWeight: 'bold' }}>
-                  <td colSpan={5} style={{ textAlign: 'right', padding: '10px' }}>Jumlah</td>
+                  <td colSpan={5} style={{ textAlign: 'right', padding: '10px' }}>Subtotal</td>
+                  <td style={{ textAlign: 'right', padding: '10px' }}>{new Intl.NumberFormat("id-ID").format(doc.amount + (doc.discount || 0))}</td>
+                </tr>
+                {(doc.discount || 0) > 0 && (
+                  <tr style={{ color: '#d32f2f', fontWeight: 'bold' }}>
+                    <td colSpan={5} style={{ textAlign: 'right', padding: '10px' }}>Discount</td>
+                    <td style={{ textAlign: 'right', padding: '10px' }}>- {new Intl.NumberFormat("id-ID").format(doc.discount || 0)}</td>
+                  </tr>
+                )}
+                <tr style={{ background: '#f0f0f0', fontWeight: 'bold' }}>
+                  <td colSpan={5} style={{ textAlign: 'right', padding: '10px' }}>Jumlah Bersih (Net)</td>
                   <td style={{ textAlign: 'right', padding: '10px' }}>{new Intl.NumberFormat("id-ID").format(doc.amount)}</td>
                 </tr>
               </tfoot>

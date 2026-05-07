@@ -49,3 +49,43 @@ export async function updateDocStatus(docId: string, status: string, additionalD
   }
 }
 
+export async function deleteExpenseDocument(docId: string) {
+  try {
+    const res = await fetch(`/api/finance/status?docId=${docId}`, {
+      method: "DELETE"
+    });
+    if (res.ok) {
+      logger.info("FinanceAction", "DELETE_DOCUMENT", { docId });
+      window.location.reload();
+      return { success: true };
+    } else {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to delete document");
+    }
+  } catch (e: any) {
+    logger.error("FinanceAction", "DELETE_DOCUMENT_FAILED", { error: e });
+    alert(`Error: ${e.message}`);
+    return { success: false, error: e.message };
+  }
+}
+
+export async function deleteRFP(rfpId: string) {
+  try {
+    const res = await fetch(`/api/finance/status?rfpId=${rfpId}`, {
+      method: "DELETE"
+    });
+    if (res.ok) {
+      logger.info("FinanceAction", "DELETE_RFP", { rfpId });
+      window.location.reload();
+      return { success: true };
+    } else {
+      const err = await res.json();
+      throw new Error(err.error || "Failed to delete RFP");
+    }
+  } catch (e: any) {
+    logger.error("FinanceAction", "DELETE_RFP_FAILED", { error: e });
+    alert(`Error: ${e.message}`);
+    return { success: false, error: e.message };
+  }
+}
+

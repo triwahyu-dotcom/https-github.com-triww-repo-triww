@@ -7,6 +7,13 @@ import { WorkspaceShell } from "../layout/workspace-shell";
 import { SummaryCard } from "../ui/summary-card";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 
+import { POCreatorModal } from "./po-creator-modal";
+import { CashAdvanceModal } from "./cash-advance-modal";
+import { RfpFromDocModal } from "./rfp-from-doc-modal";
+import { SettlementModal } from "./settlement-modal";
+
+import { FilterBar } from "./filter-bar";
+import { updateDocStatus, updateRFPStatus, deleteExpenseDocument, deleteRFP } from "@/lib/finance/actions";
 import { 
   ClipboardList, 
   Clock, 
@@ -19,16 +26,9 @@ import {
   Undo2,
   Plus,
   Printer,
-  Edit
+  Edit,
+  Trash2
 } from "lucide-react";
-
-import { POCreatorModal } from "./po-creator-modal";
-import { CashAdvanceModal } from "./cash-advance-modal";
-import { RfpFromDocModal } from "./rfp-from-doc-modal";
-import { SettlementModal } from "./settlement-modal";
-
-import { FilterBar } from "./filter-bar";
-import { updateDocStatus, updateRFPStatus } from "@/lib/finance/actions";
 
 interface Props {
   initialData: FinanceDashboardData;
@@ -334,9 +334,21 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                 
                 <div style={{ display: 'flex', gap: '4px' }}>
                   {doc.status === "draft" && (
-                    <button onClick={() => setEditDocData(doc)} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
-                      Edit
-                    </button>
+                    <>
+                      <button onClick={() => setEditDocData(doc)} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Edit size={10} /> Edit
+                      </button>
+                      <button 
+                        onClick={async () => { 
+                          if(confirm(`Hapus dokumen ${doc.id}? Tindakan ini permanen.`)) { 
+                            await deleteExpenseDocument(doc.id); 
+                          } 
+                        }} 
+                        style={{ background: 'rgba(226,75,74,0.1)', color: '#F09595', border: '0.5px solid rgba(226,75,74,0.2)', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <Trash2 size={10} /> Hapus
+                      </button>
+                    </>
                   )}
                   {(doc.status === "pending_finance" || doc.status === "pending_c_level") && (
                     <button onClick={async () => { if(confirm("Tarik dokumen?")) { await updateDocStatus(doc.id, "draft"); reload(); } }} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
@@ -420,9 +432,21 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                 
                 <div style={{ display: 'flex', gap: '4px' }}>
                   {rfp.status === "draft" && (
-                    <button onClick={() => setEditRfpData(rfp)} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
-                      Edit
-                    </button>
+                    <>
+                      <button onClick={() => setEditRfpData(rfp)} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Edit size={10} /> Edit
+                      </button>
+                      <button 
+                        onClick={async () => { 
+                          if(confirm(`Hapus RFP #${rfp.id.substring(0,8)}? Tindakan ini permanen.`)) { 
+                            await deleteRFP(rfp.id); 
+                          } 
+                        }} 
+                        style={{ background: 'rgba(226,75,74,0.1)', color: '#F09595', border: '0.5px solid rgba(226,75,74,0.2)', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      >
+                        <Trash2 size={10} /> Hapus
+                      </button>
+                    </>
                   )}
                   {(rfp.status === "pending_finance" || rfp.status === "pending_c_level") && (
                     <button onClick={async () => { if(confirm("Tarik RFP?")) { await updateRFPStatus(rfp.id, "draft"); reload(); } }} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>

@@ -106,3 +106,30 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const rfpId = searchParams.get("rfpId");
+    const docId = searchParams.get("docId");
+
+    if (docId) {
+      const { deleteDocument } = await import("@/lib/finance/store");
+      await deleteDocument(docId);
+      logger.audit("FinanceAPI", "DOCUMENT_DELETED", { docId });
+      return NextResponse.json({ success: true });
+    }
+
+    if (rfpId) {
+      const { deleteRFP } = await import("@/lib/finance/store");
+      await deleteRFP(rfpId);
+      logger.audit("FinanceAPI", "RFP_DELETED", { rfpId });
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: "ID is required" }, { status: 400 });
+  } catch (error: any) {
+    logger.error("FinanceAPI", "DELETE_FAILED", { error });
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

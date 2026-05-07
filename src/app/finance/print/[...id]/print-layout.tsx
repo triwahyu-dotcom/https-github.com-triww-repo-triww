@@ -111,8 +111,8 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
     ? (doc?.taxAmount || 0) 
     : (isGrossUp ? (scheduleTotal > 0 ? (scheduleTotal - calculatedTotal - (doc?.ppnAmount || 0)) : (calculatedTotal / (1 - pphRate)) - calculatedTotal) : 0);
   
-  const ppnToDisplay = (doc?.ppnAmount || 0) > 0 ? (doc?.ppnAmount || 0) : (doc?.usePPN ? (calculatedTotal + taxToDisplay) * 0.11 : 0);
-  const finalTotalPO = Math.max((doc as any)?.totalPO || 0, doc?.amount || 0, scheduleTotal, calculatedTotal + taxToDisplay + ppnToDisplay);
+  const ppnToDisplay = (doc?.ppnAmount || 0) > 0 ? (doc?.ppnAmount || 0) : (doc?.usePPN ? (calculatedTotal - (doc?.discount || 0) + taxToDisplay) * 0.11 : 0);
+  const finalTotalPO = Math.max((doc as any)?.totalPO || 0, doc?.amount || 0, scheduleTotal, calculatedTotal - (doc?.discount || 0) + taxToDisplay + ppnToDisplay);
 
   const displayFactor = isGrossUp && calculatedTotal > 0 ? (calculatedTotal + taxToDisplay) / calculatedTotal : 1;
 
@@ -404,6 +404,12 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
                       <td colSpan={10} style={{ textAlign: 'right', padding: '10px' }}>SUBTOTAL</td>
                       <td style={{ textAlign: 'right', padding: '10px', fontSize: '13px' }}>{formatCurrency(calculatedTotal * displayFactor)}</td>
                     </tr>
+                    {(doc?.discount || 0) > 0 && (
+                      <tr style={{ color: '#d32f2f' }}>
+                        <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>DISCOUNT</td>
+                        <td style={{ textAlign: 'right', padding: '8px 10px', fontSize: '11px' }}>- {formatCurrency(doc.discount || 0)}</td>
+                      </tr>
+                    )}
                     {(doc as any).usePPN && (
                       <tr style={{ color: '#ff9900' }}>
                         <td colSpan={10} style={{ textAlign: 'right', padding: '8px 10px' }}>PPN (11%)</td>
@@ -596,6 +602,13 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
                   <div style={{ display: 'grid', gridTemplateColumns: 'min-content 1fr', gap: '8px 15px', fontSize: '12px' }}>
                     <div style={{ whiteSpace: 'nowrap' }}>Subtotal</div>
                     <div>: <strong>{formatCurrency(calculatedTotal * displayFactor)}</strong></div>
+
+                    {(doc?.discount || 0) > 0 && (
+                      <>
+                        <div style={{ whiteSpace: 'nowrap', color: '#d32f2f' }}>Potongan / Diskon</div>
+                        <div style={{ color: '#d32f2f' }}>: - {formatCurrency(doc.discount || 0)}</div>
+                      </>
+                    )}
 
 
                     {(doc as any).usePPN && (

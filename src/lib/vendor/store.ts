@@ -13,12 +13,15 @@ import {
   LegalStatus,
   ReviewStatus,
   TaxStatus,
+  EntityType,
+  RelationshipType,
   Vendor,
   VendorClassification,
   VendorContact,
   VendorComplianceSummary,
   VendorDetail,
   VendorDocument,
+  VendorIntakeV2Payload,
   VendorReview,
   VendorService,
   VendorState,
@@ -461,7 +464,7 @@ async function ensureDataDir() {
   }
 }
 
-async function readState() {
+export async function readState() {
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase!.from('vendor_state').select('data').limit(1).single();
@@ -488,7 +491,7 @@ async function readState() {
   }
 }
 
-async function writeState(state: VendorState) {
+export async function writeState(state: VendorState) {
   if (isSupabaseConfigured()) {
     try {
       const { error } = await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
@@ -766,6 +769,11 @@ function buildVendorSummary(
     accountManager: profile?.accountManager ?? "",
     sourceTimestamp: vendor.sourceTimestamp,
     linkedProjects: [],
+
+    // V2: Propagate to summary for filtering/chips
+    entityType: vendor.entityType,
+    relationshipType: vendor.relationshipType,
+    submissionMetadata: vendor.submissionMetadata,
   };
 }
 
@@ -800,6 +808,38 @@ function buildVendorDetail(
     activeRevisionRequest:
       opsState.revisionRequests.find((request) => request.vendorId === vendor.id && request.status === "open") ?? null,
     notifications: opsState.notifications.filter((item) => item.vendorId === vendor.id).slice(0, 20),
+
+    // V2: Granular Details
+    rentalCategories: vendor.rentalCategories,
+    rentalSubcategories: vendor.rentalSubcategories,
+    withOperator: vendor.withOperator,
+    includedServices: vendor.includedServices,
+    addonServices: vendor.addonServices,
+    pricingModel: vendor.pricingModel,
+    capacityNotes: vendor.capacityNotes,
+    minimumOrderQty: vendor.minimumOrderQty,
+    leadTime: vendor.leadTime,
+    performerType: vendor.performerType,
+    genre: vendor.genre,
+    experienceCount: vendor.experienceCount,
+    languages: vendor.languages,
+    riderNotes: vendor.riderNotes,
+    teamComposition: vendor.teamComposition,
+    teamSize: vendor.teamSize,
+    teamExperience: vendor.teamExperience,
+    teamDayRate: vendor.teamDayRate,
+    teamResponsibilityAccepted: vendor.teamResponsibilityAccepted,
+    crewRole: vendor.crewRole,
+    dayRate: vendor.dayRate,
+    certifications: vendor.certifications,
+    creativeSpecialty: vendor.creativeSpecialty,
+    softwareSkills: vendor.softwareSkills,
+    ratePerProject: vendor.ratePerProject,
+    turnaroundTime: vendor.turnaroundTime,
+    workingStyle: vendor.workingStyle,
+    services: vendor.services,
+    subServices: vendor.subServices,
+    operatingCities: vendor.operatingCities,
   };
 }
 
@@ -1421,4 +1461,214 @@ export async function resubmitVendorRevision(token: string, payload: VendorIntak
 
   const opsState = await ensureVendorOpsState(state.vendors);
   return buildVendorDetail(state, vendor, opsState);
+}
+export async function submitVendorIntakeV2(
+  payload: VendorIntakeV2Payload
+): Promise<Vendor & { registrationCode: string }> {
+  const state = await readState();
+  const timestamp = nowIso();
+  
+  // 1. Check for duplicates
+  const vendorKey = `${slug(payload.name)}-${slug(payload.email || payload.picPhone || timestamp)}`;
+  if (state.vendors.find((v) => v.vendorKey === vendorKey)) {
+    throw new Error("Vendor dengan nama/email ini sudah terdaftar.");
+  }
+
+  // 2. Generate IDs
+  const vendorId = randomUUID();
+  const registrationCode = `JU-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
+  
+  // 3. Prepare rawSource for audit
+  const rawSource = {
+    ...payload,
+    "Submission Source": "Partner Intake V2",
+    "Registration Code": registrationCode,
+    Timestamp: timestamp
+  } as any;
+
+  // 4. Map V2 Payload to canonical Vendor object (Top Level)
+  const newVendor: Vendor = {
+    // Standard Identifiers
+    id: vendorId,
+    vendorKey,
+    name: payload.name.trim(),
+    email: (payload.email || "").trim().toLowerCase(),
+    portalUsername: (payload.email || payload.picPhone || "").trim(),
+    emailVerifiedAt: "",
+    phoneVerifiedAt: "",
+    
+    // V2 Core Dimensions
+    entityType: payload.entityType,
+    relationshipType: payload.relationshipType,
+    submissionMetadata: payload.submissionMetadata || {
+      formVersion: "v2.0",
+      submittedAt: timestamp
+    },
+
+    // Legacy Mappings (for backward compatibility)
+    classification: mapToLegacyClassification(payload.entityType, payload.relationshipType),
+    displayType: payload.relationshipType,
+    legalStatus: payload.entityType === "business" ? "PT/CV" : "Freelance/Perorangan",
+    taxStatus: (payload.taxStatus || "Unknown") as TaxStatus,
+    
+    // Identity Details (Adaptive)
+    legalEntityForm: payload.legalEntityForm,
+    establishedYear: payload.establishedYear,
+    nibNumber: payload.nibNumber,
+    nikNumber: payload.nikNumber,
+    personalNpwpNumber: payload.personalNpwpNumber,
+    stageBrandName: payload.stageBrandName,
+    npwpNumber: payload.npwpNumber || "",
+    
+    // Capability Details (Adaptive)
+    rentalCategories: payload.rentalCategories,
+    rentalSubcategories: payload.rentalSubcategories,
+    withOperator: payload.withOperator,
+    includedServices: payload.includedServices,
+    addonServices: payload.addonServices,
+    pricingModel: payload.pricingModel,
+    capacityNotes: payload.capacityNotes,
+    minimumOrderQty: payload.minimumOrderQty,
+    leadTime: payload.leadTime,
+    performerType: payload.performerType,
+    genre: payload.genre,
+    experienceCount: payload.experienceCount,
+    languages: payload.languages,
+    riderNotes: payload.riderNotes,
+    teamComposition: payload.teamComposition,
+    teamSize: payload.teamSize,
+    teamExperience: payload.teamExperience,
+    teamDayRate: payload.teamDayRate,
+    teamResponsibilityAccepted: payload.teamResponsibilityAccepted,
+    crewRole: payload.crewRole,
+    dayRate: payload.dayRate,
+    certifications: payload.certifications,
+    creativeSpecialty: payload.creativeSpecialty,
+    softwareSkills: payload.softwareSkills,
+    ratePerProject: payload.ratePerProject,
+    turnaroundTime: payload.turnaroundTime,
+    workingStyle: payload.workingStyle,
+    operatingCities: payload.operatingCities,
+    services: payload.services,
+    subServices: payload.subServices,
+
+    // Finance & Business
+    businessAddress: payload.businessAddress || "",
+    bankName: payload.bankName,
+    bankAccountNumber: payload.bankAccountNumber,
+    bankAccountHolder: payload.bankAccountHolder,
+    
+    // Social Media
+    websiteUrl: payload.websiteUrl || "",
+    instagramUrl: payload.instagramUrl || "",
+    tiktokUrl: payload.tiktokUrl || "",
+    linkedinUrl: payload.linkedinUrl || "",
+    
+    // Document Reference
+    documentsFolderUrl: payload.documentsFolderUrl,
+    
+    // System fields
+    sourceTimestamp: timestamp,
+    sourceRowHash: hashRow(rawSource),
+    rawSource,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  // 5. Handle Contacts (PIC)
+  const contacts: VendorContact[] = [];
+  if (payload.picName || payload.picPhone || payload.picEmail) {
+    contacts.push({
+      id: randomUUID(),
+      vendorId,
+      name: payload.picName || "",
+      title: payload.picTitle || "PIC",
+      phone: payload.picPhone || "",
+      email: payload.picEmail || "",
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    });
+  }
+
+  // 6. Handle Services (for dashboard filtering)
+  const services: VendorService[] = [];
+  const serviceNames = payload.services || payload.rentalCategories || [payload.relationshipType];
+  serviceNames.forEach(name => {
+    services.push({
+      id: randomUUID(),
+      vendorId,
+      name: normalizeServiceName(name),
+    });
+  });
+
+  // 7. Update State
+  state.vendors.push(newVendor);
+  state.vendorContacts.push(...contacts);
+  state.vendorServices.push(...services);
+  state.vendorReviews.push({
+    id: randomUUID(),
+    vendorId,
+    status: "new",
+    note: "Submitted via V2 Registration Form",
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  });
+  
+  // Maintain import-style audit row
+  state.importSourceRows.push({
+    id: randomUUID(),
+    vendorId,
+    rowHash: newVendor.sourceRowHash!,
+    rowNumber: 0,
+    sourceTimestamp: timestamp,
+    importedAt: timestamp,
+    rawSource,
+  });
+
+  // 8. Persist
+  await writeState(state);
+  
+  // 9. Handle Ops Side (Registration Code & Profile)
+  const opsState = await ensureVendorOpsState(state.vendors);
+  const profileIndex = opsState.profiles.findIndex(p => p.vendorId === vendorId);
+  if (profileIndex >= 0) {
+    opsState.profiles[profileIndex].registrationCode = registrationCode;
+  } else {
+    opsState.profiles.push({
+      vendorId,
+      registrationCode,
+      lifecycleStatus: "submitted",
+      rateCardNotes: "",
+      availabilityNotes: "",
+      cities: payload.operatingCities || [],
+      accountManager: "",
+      emailNotifications: true,
+      whatsappNotifications: true,
+      createdAt: timestamp,
+      updatedAt: timestamp
+    });
+  }
+  
+  await appendVendorAuditEntry(vendorId, "portal_submission", "Vendor submitted profile through V2 self-service portal.", "Partner V2");
+  
+  // 10. Notifications
+  await queueVendorNotification({
+    vendorId,
+    audience: "admin",
+    channel: "email",
+    subject: `[V2] Vendor Baru: ${payload.name}`,
+    message: `Vendor V2 baru masuk (${payload.relationshipType}). Nama: ${payload.name}. Cek dashboard admin untuk detail.`,
+    recipient: process.env.ADMIN_EMAIL ?? "admin@juara.local",
+  });
+
+  return { ...newVendor, registrationCode };
+}
+
+function mapToLegacyClassification(
+  entity: EntityType,
+  rel: RelationshipType
+): VendorClassification {
+  if (rel === "talent" || rel === "talent_agency") return "Talent/Manpower";
+  if (rel === "vendor_supply" || rel === "vendor_rental") return "Penyedia Barang";
+  return "Penyedia Jasa";
 }

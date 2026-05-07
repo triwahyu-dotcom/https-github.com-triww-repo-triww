@@ -86,10 +86,11 @@ export function RfpFromDocModal({ doc, editRfp, allRfps = [], availableVendors, 
   });
 
   const subtotalLineItems = doc.lineItems?.reduce((sum, li) => sum + li.amount, 0) || 0;
+  const effectiveSubtotal = Math.max(0, subtotalLineItems - (doc.discount || 0));
   const isGrossedUp = doc.pph21Mode === "grossup";
   const grossFactor = (isGrossedUp && doc.grossAmount && subtotalLineItems > 0) 
     ? (doc.grossAmount / subtotalLineItems) 
-    : 1;
+    : (subtotalLineItems > 0 ? effectiveSubtotal / subtotalLineItems : 1);
 
   const ratio = doc.amount > 0 ? rfpAmount / doc.amount : 0;
   const pphRate = pphType === "PPH21" ? 0.025 : (pphType === "PPH23" ? 0.02 : 0);

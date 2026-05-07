@@ -18,6 +18,34 @@ export type VendorClassification = "Penyedia Jasa" | "Penyedia Barang" | "Talent
 export type LegalStatus = "PT/CV" | "Freelance/Perorangan" | "Lainnya" | "Unknown";
 export type TaxStatus = "PKP" | "Non-PKP" | "Unknown";
 
+export type EntityType = "business" | "individual";
+
+export type RelationshipType =
+  | "vendor_rental"      // Sewa peralatan: sound, lighting, LED, rigging, tenda, furniture, kendaraan
+  | "vendor_service"     // Jasa skill-based: security, catering, cleaning, legal
+  | "vendor_supply"      // Jual barang habis pakai: merchandise, konsumsi
+  | "eo_partner"         // EO Partner (bisa business atau individual)
+  | "talent_agency"      // Manajemen artis (selalu business)
+  | "talent"             // Performer individu (MC, artis, dancer)
+  | "crew_lead"          // Pemimpin tim event yang bawa tim sendiri
+  | "crew_individual"    // Crew satuan (Floor Manager, LO, Operator teknis)
+  | "freelance";         // Creative freelance (designer, photographer)
+
+export type RentalCategory =
+  | "sound_system"
+  | "lighting"
+  | "led_video_wall"
+  | "rigging_truss"
+  | "stage_booth"
+  | "tent_decoration"
+  | "furniture"
+  | "genset_power"
+  | "communication"
+  | "vehicle"
+  | "other";
+
+export type PricingModel = "bundled" | "unbundled" | "hybrid";
+
 export type DocumentType =
   | "company_profile"
   | "catalog"
@@ -56,6 +84,74 @@ export interface Vendor {
   rawSource: Record<string, string>;
   createdAt: string;
   updatedAt: string;
+
+  // === NEW FIELDS for v2 form ===
+  entityType?: EntityType;
+  relationshipType?: RelationshipType;
+  relationshipTypes?: RelationshipType[]; // for vendors with multiple relationships
+  
+  // For business: legal entity details
+  legalEntityForm?: "PT" | "CV" | "UD" | "Lainnya";
+  establishedYear?: string;
+  nibNumber?: string; // Nomor Induk Berusaha
+  
+  // For individual: personal details
+  nikNumber?: string; // KTP number
+  personalNpwpNumber?: string; // NPWP pribadi (different from npwpNumber which is for business)
+  stageBrandName?: string; // for talent or freelance brand name
+  
+  // For vendor_rental
+  rentalCategories?: RentalCategory[];
+  rentalSubcategories?: string[];
+  withOperator?: "always" | "optional" | "dry_hire_only";
+  includedServices?: string[];   // services included in rental price
+  addonServices?: string[];      // services available as add-on
+  pricingModel?: PricingModel;
+  capacityNotes?: string;
+  
+  // For vendor_supply
+  minimumOrderQty?: string;
+  leadTime?: string;
+  
+  // For talent
+  performerType?: string;
+  genre?: string;
+  experienceCount?: string;
+  languages?: string;
+  riderNotes?: string;
+  
+  // For crew_lead
+  teamComposition?: string;
+  teamSize?: string;
+  teamExperience?: string;
+  teamDayRate?: string;
+  teamResponsibilityAccepted?: boolean; // crew lead accepts payment responsibility for team
+  
+  // For crew_individual
+  crewRole?: string;
+  dayRate?: string;
+  certifications?: string;
+  
+  // For freelance
+  creativeSpecialty?: string;
+  softwareSkills?: string;
+  ratePerProject?: string;
+  turnaroundTime?: string;
+  workingStyle?: "remote" | "on_site" | "hybrid";
+  
+  // V2: services list
+  services?: string[];
+  subServices?: string[];
+  
+  // Common: operating cities (replaces cities field but optional)
+  operatingCities?: string[];
+  
+  // Submission metadata for spam detection
+  submissionMetadata?: {
+    formVersion: string;       // "v2.0" for new form
+    submittedAt: string;
+    completionTimeSeconds?: number;
+  };
 }
 
 export interface VendorContact {
@@ -166,7 +262,7 @@ export interface VendorOpsProfile {
 
 export interface VendorAuditEntry {
   id: string;
-  vendorId: string;
+  vendorId?: string;
   action: string;
   actor: string;
   message: string;
@@ -267,6 +363,15 @@ export interface VendorSummary {
   performance: VendorPerformanceSummary;
   compliance: VendorComplianceSummary;
   cities: string[];
+
+  // V2 Fields for Dashboard
+  entityType?: EntityType;
+  relationshipType?: RelationshipType;
+  submissionMetadata?: {
+    formVersion: string;
+    submittedAt: string;
+    completionTimeSeconds?: number;
+  };
   rateCardNotes: string;
   availabilityNotes: string;
   accountManager: string;
@@ -300,6 +405,38 @@ export interface VendorDetail extends VendorSummary {
   scorecards: VendorScorecard[];
   activeRevisionRequest: VendorRevisionRequest | null;
   notifications: VendorNotification[];
+
+  // V2 Granular Details
+  rentalCategories?: RentalCategory[];
+  rentalSubcategories?: string[];
+  withOperator?: "always" | "optional" | "dry_hire_only";
+  includedServices?: string[];
+  addonServices?: string[];
+  pricingModel?: PricingModel;
+  capacityNotes?: string;
+  minimumOrderQty?: string;
+  leadTime?: string;
+  performerType?: string;
+  genre?: string;
+  experienceCount?: string;
+  languages?: string;
+  riderNotes?: string;
+  teamComposition?: string;
+  teamSize?: string;
+  teamExperience?: string;
+  teamDayRate?: string;
+  teamResponsibilityAccepted?: boolean;
+  crewRole?: string;
+  dayRate?: string;
+  certifications?: string;
+  creativeSpecialty?: string;
+  softwareSkills?: string;
+  ratePerProject?: string;
+  turnaroundTime?: string;
+  workingStyle?: "remote" | "on_site" | "hybrid";
+  services?: string[];
+  subServices?: string[];
+  operatingCities?: string[];
 }
 
 export interface DashboardData {
@@ -312,4 +449,99 @@ export interface DashboardData {
   locations: string[];
   sourcePath: string;
   sourceAvailable: boolean;
+}
+
+export interface VendorIntakeV2Payload {
+  // Step 1: Type selection
+  entityType: EntityType;
+  relationshipType: RelationshipType;
+  
+  // Step 2: Identity (varies by entity type)
+  name: string;
+  stageBrandName?: string;
+  legalEntityForm?: "PT" | "CV" | "UD" | "Lainnya";
+  establishedYear?: string;
+  nikNumber?: string;
+  nibNumber?: string;
+  npwpNumber?: string;        // for business
+  personalNpwpNumber?: string; // for individual
+  taxStatus?: TaxStatus;
+  
+  // Step 3: Capability (varies by relationship type)
+  // Rental
+  rentalCategories?: RentalCategory[];
+  rentalSubcategories?: string[];
+  withOperator?: "always" | "optional" | "dry_hire_only";
+  includedServices?: string[];
+  addonServices?: string[];
+  pricingModel?: PricingModel;
+  // Service / EO Partner
+  services?: string[];
+  subServices?: string[];
+  capacityNotes?: string;
+  // Supply
+  productList?: string;
+  minimumOrderQty?: string;
+  leadTime?: string;
+  // Talent
+  performerType?: string;
+  genre?: string;
+  experienceCount?: string;
+  languages?: string;
+  riderNotes?: string;
+  // Crew Lead
+  crewLeadRole?: string;
+  teamComposition?: string;
+  teamSize?: string;
+  teamExperience?: string;
+  teamDayRate?: string;
+  teamResponsibilityAccepted?: boolean;
+  // Crew Individual
+  crewRole?: string;
+  dayRate?: string;
+  certifications?: string;
+  // Freelance
+  creativeSpecialty?: string;
+  softwareSkills?: string;
+  ratePerProject?: string;
+  turnaroundTime?: string;
+  workingStyle?: "remote" | "on_site" | "hybrid";
+  
+  operatingCities?: string[];
+  
+  // Step 4: Contact
+  email: string;
+  businessAddress?: string;
+  officePhone?: string;
+  picName?: string;
+  picTitle?: string;
+  picPhone: string;       // for individual, this is their personal phone
+  picEmail?: string;
+  picBackupName?: string;
+  picBackupPhone?: string;
+  domicileCity?: string; // for individual
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  
+  // Step 5: Bank
+  bankName: string;
+  bankAccountNumber: string;
+  bankAccountHolder: string;
+  
+  // Step 6: Documents
+  documentsFolderUrl: string;
+  declaredDocuments?: string[]; // checklist of documents user confirms exist in folder
+  
+  // Social media (optional, for any type)
+  websiteUrl?: string;
+  instagramUrl?: string;
+  tiktokUrl?: string;
+  linkedinUrl?: string;
+  
+  // Metadata
+  submissionMetadata?: {
+    formVersion: string;
+    submittedAt: string;
+    completionTimeSeconds?: number;
+  };
 }

@@ -58,6 +58,7 @@ export interface ExpenseDocument {
   ppnAmount?: number;
   netAmount?: number;
   totalPO?: number;
+  discount?: number;
   
   // SPK Specific fields
   workScope?: string[];

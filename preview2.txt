@@ -1,0 +1,197 @@
+[dotenv@17.3.1] injecting env (0) from .env.local -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+=== JUARA VENDOR MIGRATION DRY-RUN ===
+
+This is a PREVIEW. No changes will be saved.
+
+Total vendors in DB: 83
+
+=== SUMMARY ===
+To DELETE (dummy/test): 5
+To CLASSIFY (legacy): 76
+SKIP (already V2): 2
+
+=== ENTRIES TO DELETE ===
+1. "Partner" (Dedipirnom313@gmail.com) — dummy/test entry detected (name: "Partner", email: "Dedipirnom313@gmail.com")
+2. "Vendor" (Wendywardani08@gmail.com) — dummy/test entry detected (name: "Vendor", email: "Wendywardani08@gmail.com")
+3. "Vendor juara" (ditoimam90@gmail.com) — dummy/test entry detected (name: "Vendor juara", email: "ditoimam90@gmail.com")
+4. "TEST Vendor Flow QA 20260310-223721" (test.vendor.20260310-223721@example.com) — dummy/test entry detected (name: "TEST Vendor Flow QA 20260310-223721", email: "test.vendor.20260310-223721@example.com")
+5. "TEST UI Flow 20260310-224445" (test.ui.20260310-224445@example.com) — dummy/test entry detected (name: "TEST UI Flow 20260310-224445", email: "test.ui.20260310-224445@example.com")
+
+=== HIGH CONFIDENCE (will auto-classify) ===
+1. "PT.RAJA ADHIPRAMANA SEMESTA" → business / vendor_service
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: service keywords
+2. "JPROJEX EVENTS" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+3. "PT. PERFORMA MAHAKARYA INDONESIA" → business / vendor_rental
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: rental/equipment/transport keywords
+4. "Produksi Bersama" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+5. "69 Show Management" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+6. "Gudang Production" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+7. "BRAY MANAGEMENT" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+8. "ARTOY.INC" → business / vendor_service
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: creative keywords + business
+9. "SON VIDEO WORKS" → business / vendor_service
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: service keywords
+10. "anak ragil production" → business / vendor_service
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: service keywords
+11. "PT. Abhinaya Visual Radhikasakti" → business / vendor_rental
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: rental/equipment/transport keywords
+12. "Kael Event" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+13. "PT. Sewatoilet Jakarta" → business / vendor_rental
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: rental/equipment/transport keywords
+14. "Pitoe Production" → business / vendor_service
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: service keywords
+15. "Java Management" → business / talent_agency
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: talent keywords + business → likely agency
+16. "CV KRISHNA COMMUNICATION CENTER" → business / talent_agency
+   reason: Entity: name has PT/CV/Tbk; name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: talent keywords + business → likely agency
+17. "PT.Kontraktor Booth Indonesia" → business / vendor_rental
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: rental/equipment/transport keywords
+18. "Colony Rental" → business / vendor_rental
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: rental/equipment/transport keywords
+
+Total HIGH: 18
+
+=== MEDIUM CONFIDENCE (will classify but flag for review) ===
+1. "BLACK Rndr" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+2. "EL BRAMO" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: rental/equipment/transport keywords
+3. "Aldo Printing" → individual / eo_partner [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: EO/production/management keywords
+4. "Aprilia Fatimah" → individual / talent [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: talent performer keywords
+5. "Maulani Rasyid" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+6. "Dedi Purnomo" → individual / vendor_service [REVIEW]
+   reason: Entity: looks like personal name | Rel: service keywords
+7. "MC CINTHIA KARANI" → individual / talent [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: talent performer keywords
+8. "Ferry Permit" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+9. "Mahardika Pariwisata" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: rental/equipment/transport keywords
+10. "Stevenson K. Tanaka" → individual / vendor_rental [REVIEW]
+   reason: Entity: looks like personal name | Rel: rental/equipment/transport keywords
+11. "Image Dance Crew" → individual / talent [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: talent performer keywords
+12. "HighLight" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length | Rel: service keywords
+13. "Friday Timothy" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+14. "Kolaboratix" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length | Rel: service keywords
+15. "Dua Arah Kreasitama" → individual / talent [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: talent performer keywords
+16. "Flicker Frame" → individual / freelance [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: freelance/creative keywords + individual
+17. "Senapati Guard" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+18. "GEOMETRIX (CV KARUNIA BUMI)" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: rental/equipment/transport keywords
+19. "PT. Hasbi Jaya Abadi" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: business fallback (no clear signal)
+20. "CV Duta Raya Makmur" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: business fallback (no clear signal)
+21. "kusuma dekorasi" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+22. "PT jakarta komunikasi Indonesia (jakartaHT)" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: business fallback (no clear signal)
+23. "PT SURYA TIRTA NANGGALA (M-QUA)" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: business fallback (no clear signal)
+24. "Suken trans" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: rental/equipment/transport keywords
+25. "CV. GEMAR JAYA" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: business fallback (no clear signal)
+26. "Mitra Djaya Sukses" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: rental/equipment/transport keywords
+27. "ANSPRO" → individual / vendor_rental [REVIEW]
+   reason: Entity:  | Rel: rental/equipment/transport keywords
+28. "LAPAN NAM COMM" → individual / freelance [REVIEW]
+   reason: Entity: name contains business word (Production/Rental/Services/etc) | Rel: individual fallback (no clear signal)
+29. "SRI LESTARI RENT CAR" → individual / vendor_rental [REVIEW]
+   reason: Entity: looks like personal name | Rel: rental/equipment/transport keywords
+30. "Jakarta" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length | Rel: service keywords
+31. "Logistik team" → individual / vendor_service [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: service keywords
+32. "Juara" → individual / vendor_service [REVIEW]
+   reason: Entity:  | Rel: service keywords
+33. "Qasha living" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: rental/equipment/transport keywords
+34. "CV Afifah Kreatif" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: business fallback (no clear signal)
+35. "PT. Sahabat Prima Abadi" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: business fallback (no clear signal)
+36. "PT IAS Support Indonesia" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; has valid NPWP length | Rel: business fallback (no clear signal)
+37. "WBS1911" → individual / vendor_rental [REVIEW]
+   reason: Entity:  | Rel: rental/equipment/transport keywords
+38. "Genset" → individual / vendor_rental [REVIEW]
+   reason: Entity: has valid NPWP length | Rel: rental/equipment/transport keywords
+39. "Widia Wahyu Nursanty" → individual / freelance [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: freelance/creative keywords + individual
+40. "Bima Nazuardi" → individual / freelance [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: freelance/creative keywords + individual
+41. "Laskar communication" → business / vendor_service [REVIEW]
+   reason: Entity: name contains business word (Production/Rental/Services/etc); has valid NPWP length | Rel: business fallback (no clear signal)
+42. "Deri Permana freelance" → individual / freelance [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: freelance/creative keywords + individual
+43. "Addiksi Kreatif Imagi" → individual / freelance [REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: freelance/creative keywords + individual
+44. "Manunggal Sumber Daya PT" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; legalStatus is PT/CV | Rel: business fallback (no clear signal)
+45. "PT Manunggal Sumber Daya" → business / vendor_service [REVIEW]
+   reason: Entity: name has PT/CV/Tbk; legalStatus is PT/CV; has valid NPWP length | Rel: business fallback (no clear signal)
+
+Total MEDIUM: 45
+
+=== LOW CONFIDENCE (will classify but URGENT review needed) ===
+1. "GServices" → individual / freelance [URGENT REVIEW]
+   reason: Entity:  | Rel: individual fallback (no clear signal)
+2. "Dodo" → individual / freelance [URGENT REVIEW]
+   reason: Entity:  | Rel: individual fallback (no clear signal)
+3. "AGATA PRO" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+4. "THE ALANA SENTUL CITY" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+5. "Adam Pratama" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+6. "Fortuna Azaria Valenska" → individual / freelance [URGENT REVIEW]
+   reason: Entity: looks like personal name | Rel: individual fallback (no clear signal)
+7. "Starys Marvella Firsda" → individual / freelance [URGENT REVIEW]
+   reason: Entity: looks like personal name | Rel: individual fallback (no clear signal)
+8. "Andy raharjo" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+9. "Ardhi Rosanto" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+10. "fatma nabila" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+11. "Sayyidah Hanifah Kahayandi" → individual / freelance [URGENT REVIEW]
+   reason: Entity: has valid NPWP length; looks like personal name | Rel: individual fallback (no clear signal)
+12. "Angelysia Kusuma Dewi Rizky" → individual / freelance [URGENT REVIEW]
+   reason: Entity: looks like personal name | Rel: individual fallback (no clear signal)
+13. "Lezhico Putra" → individual / freelance [URGENT REVIEW]
+   reason: Entity: looks like personal name | Rel: individual fallback (no clear signal)
+
+Total LOW: 13
+
+=== DISTRIBUTION BY RELATIONSHIP TYPE ===
+  vendor_service: 28
+  vendor_rental: 22
+  freelance: 19
+  talent: 4
+  talent_agency: 2
+  eo_partner: 1
+
+=== END DRY-RUN ===
+
+No changes were saved. Review output above.
+If everything looks good, run: npx tsx scripts/migrate-legacy-vendors-apply.ts
+

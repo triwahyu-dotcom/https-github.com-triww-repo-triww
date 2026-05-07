@@ -39,7 +39,10 @@ import {
   FileText,
   Menu
 } from "lucide-react";
-import { DashboardData, VendorSummary, ReviewStatus, VendorClassification } from "@/lib/vendor/types";
+import { DashboardData, VendorSummary, ReviewStatus, VendorClassification, Vendor } from "@/lib/vendor/types";
+import { VendorTypeChip } from "./VendorTypeChip";
+import { isV2Vendor, getCapabilityDisplay, getTaxTreatment, getVendorTypeLabel } from "@/lib/vendor/v2-helpers";
+import { ShieldCheck } from "lucide-react";
 
 type ViewMode = "all" | "status" | "type" | "directory";
 
@@ -49,7 +52,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [scoreFilter, setScoreFilter] = useState<string>("all");
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "docs" | "projects" | "history">("overview");
+  const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "docs" | "projects" | "history" | "profile" | "finance" | "ops" | "audit">("overview");
   const [selectedVendorIds, setSelectedVendorIds] = useState<string[]>([]);
   const [lang, setLang] = useState<"ID" | "EN">("ID");
   const [isMobile, setIsMobile] = useState(false);
@@ -87,7 +90,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         location: v.businessAddress || "–",
         docs: { done: v.documentCompletion?.complete || 0, total: v.documentCompletion?.required || 3 },
         compliance: v.compliance?.status === "ok" ? "OK" : "Pending",
-        registered: v.createdAt ? v.createdAt.split('T')[0] : new Date().toISOString().split('T')[0]
+        registered: v.sourceTimestamp ? v.sourceTimestamp.split('T')[0] : new Date().toISOString().split('T')[0]
       };
     });
     setVendors(processed);
@@ -110,8 +113,31 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   const [classificationFilter, setClassificationFilter] = useState<string>("all");
   const [servicesFilter, setServicesFilter] = useState<string>("all");
+  const [relationshipTypeFilter, setRelationshipTypeFilter] = useState<string>("all");
+  const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all");
+
   const [showClassDropdown, setShowClassDropdown] = useState(false);
   const [showServiceDropdown, setShowServiceDropdown] = useState(false);
+  const [showRelTypeDropdown, setShowRelTypeDropdown] = useState(false);
+  const [showEntityTypeDropdown, setShowEntityTypeDropdown] = useState(false);
+
+  // V2 Labels
+  const RELATIONSHIP_LABELS: Record<string, string> = {
+    vendor_rental: "Vendor Rental",
+    vendor_service: "Vendor Jasa",
+    vendor_supply: "Vendor Supply",
+    eo_partner: "EO Partner",
+    talent_agency: "Talent Agency",
+    talent: "Talent",
+    crew_lead: "Crew Lead",
+    crew_individual: "Crew Individu",
+    freelance: "Freelance",
+  };
+
+  const ENTITY_LABELS: Record<string, string> = {
+    business: "Badan Usaha",
+    individual: "Perorangan",
+  };
 
   // Get dynamic unique services for the filter
   const allServiceTypes = useMemo(() => {
@@ -140,12 +166,20 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       const matchService = 
         servicesFilter === 'all' ? true :
         v.type === servicesFilter;
+
+      const matchRelType = 
+        relationshipTypeFilter === 'all' ? true :
+        v.relationshipType === relationshipTypeFilter;
+
+      const matchEntityType = 
+        entityTypeFilter === 'all' ? true :
+        v.entityType === entityTypeFilter;
       
       const matchSearch = searchQuery === '' ? true :
         v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         v.category.toLowerCase().includes(searchQuery.toLowerCase());
       
-      return matchScore && matchClass && matchService && matchSearch;
+      return matchScore && matchClass && matchService && matchRelType && matchEntityType && matchSearch;
     }).sort((a, b) => {
       const order = sortOrder === "asc" ? 1 : -1;
       if (sortKey === "registered") {
@@ -422,7 +456,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   <button 
                     className="mini-input" 
                     style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: servicesFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
-                    onClick={() => { setShowServiceDropdown(!showServiceDropdown); setShowClassDropdown(false); }}
+                    onClick={() => { setShowServiceDropdown(!showServiceDropdown); setShowClassDropdown(false); setShowRelTypeDropdown(false); setShowEntityTypeDropdown(false); }}
                   >
                     {servicesFilter === 'all' ? 'Services' : servicesFilter} <ChevronDown size={14} />
                   </button>
@@ -434,7 +468,64 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                           className={`dropdown-item-premium ${servicesFilter === opt ? 'active' : ''}`}
                           onClick={() => { setServicesFilter(opt); setShowServiceDropdown(false); }}
                         >
-                          {opt === 'all' ? 'All Services' : opt}
+                          <span style={{ flex: 1 }}>{opt === 'all' ? 'All Services' : opt}</span>
+                          <span style={{ fontSize: '10px', opacity: 0.5 }}>
+                            {opt === 'all' ? vendors.length : vendors.filter(v => v.type === opt).length}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* V2: Tipe Mitra Filter */}
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <button 
+                    className="mini-input" 
+                    style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: relationshipTypeFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
+                    onClick={() => { setShowRelTypeDropdown(!showRelTypeDropdown); setShowClassDropdown(false); setShowServiceDropdown(false); setShowEntityTypeDropdown(false); }}
+                  >
+                    {relationshipTypeFilter === 'all' ? 'Tipe Mitra' : (RELATIONSHIP_LABELS[relationshipTypeFilter] || relationshipTypeFilter)} <ChevronDown size={14} />
+                  </button>
+                  {showRelTypeDropdown && (
+                    <div className="dropdown-panel-premium" style={{ width: '240px' }}>
+                      {['all', ...Object.keys(RELATIONSHIP_LABELS)].map(opt => (
+                        <div 
+                          key={opt} 
+                          className={`dropdown-item-premium ${relationshipTypeFilter === opt ? 'active' : ''}`}
+                          onClick={() => { setRelationshipTypeFilter(opt); setShowRelTypeDropdown(false); }}
+                        >
+                          <span style={{ flex: 1 }}>{opt === 'all' ? 'Semua Tipe' : RELATIONSHIP_LABELS[opt]}</span>
+                          <span style={{ fontSize: '10px', opacity: 0.5 }}>
+                            {opt === 'all' ? vendors.length : vendors.filter(v => v.relationshipType === opt).length}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* V2: Bentuk Entitas Filter */}
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <button 
+                    className="mini-input" 
+                    style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: entityTypeFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
+                    onClick={() => { setShowEntityTypeDropdown(!showEntityTypeDropdown); setShowClassDropdown(false); setShowServiceDropdown(false); setShowRelTypeDropdown(false); }}
+                  >
+                    {entityTypeFilter === 'all' ? 'Bentuk Entitas' : (ENTITY_LABELS[entityTypeFilter] || entityTypeFilter)} <ChevronDown size={14} />
+                  </button>
+                  {showEntityTypeDropdown && (
+                    <div className="dropdown-panel-premium" style={{ width: '200px' }}>
+                      {['all', ...Object.keys(ENTITY_LABELS)].map(opt => (
+                        <div 
+                          key={opt} 
+                          className={`dropdown-item-premium ${entityTypeFilter === opt ? 'active' : ''}`}
+                          onClick={() => { setEntityTypeFilter(opt); setShowEntityTypeDropdown(false); }}
+                        >
+                          <span style={{ flex: 1 }}>{opt === 'all' ? 'Semua Entitas' : ENTITY_LABELS[opt]}</span>
+                          <span style={{ fontSize: '10px', opacity: 0.5 }}>
+                            {opt === 'all' ? vendors.length : vendors.filter(v => v.entityType === opt).length}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -511,10 +602,21 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                         />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '11px', fontWeight: 500, color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>{v.category}</div>
-                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7' }}>{v.name}</div>
+                        <div style={{ fontSize: '11px', fontWeight: 500, color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>
+                          {v.category}
+                          {isV2Vendor(v) && <span style={{ marginLeft: '8px', color: '#378ADD', fontSize: '9px', fontWeight: 700 }}>V2</span>}
+                        </div>
+                        <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {v.name}
+                          {v.entityType && (
+                            <span style={{ fontSize: '10px', color: '#71717a', fontWeight: 400 }}>
+                              ({ENTITY_LABELS[v.entityType]})
+                            </span>
+                          )}
+                        </div>
                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
-                          <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text }}>{v.classification}</span>
+                          <VendorTypeChip vendor={v} size="sm" />
+                          {v.relationshipType && <span style={{ fontSize: '10px', color: '#52525b' }}>• {v.classification}</span>}
                         </div>
                       </div>
                       <div>
@@ -567,8 +669,8 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                                 <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>{v.category}</div>
                                 <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '12px' }}>{v.name}</div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                  <div style={{ display: 'flex', gap: '6px' }}>
-                                    <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text, fontSize: '10px' }}>{v.classification}</span>
+                                  <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                    <VendorTypeChip vendor={v} size="sm" />
                                     <span className="stage-pill-premium" style={{ background: statusInfo.bg, color: statusInfo.text, fontSize: '10px' }}>{statusInfo.label}</span>
                                   </div>
                                   <div style={{ fontSize: '14px', fontWeight: 600, color: scoreColor }}>{v.score === null ? '–' : v.score.toFixed(1)}</div>
@@ -633,11 +735,11 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                               {v.category}
                             </div>
                             <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>
-                              {v.name}
+                              {v.name} {v.entityType && <span style={{ fontSize: '10px', color: '#71717a' }}>({ENTITY_LABELS[v.entityType]})</span>}
                             </div>
                             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                              <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text }}>{v.classification}</span>
-                              <span className="stage-pill-premium" style={{ background: status.bg, color: status.text }}>{status.label}</span>
+                               <VendorTypeChip vendor={v} size="sm" />
+                               <span className="stage-pill-premium" style={{ background: status.bg, color: status.text }}>{status.label}</span>
                             </div>
                             <div style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>
                               {v.docs.done}/{v.docs.total}
@@ -666,7 +768,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                         <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', marginBottom: '4px' }}>{v.category}</div>
                         <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '12px' }}>{v.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                          <span className="stage-pill-premium" style={{ background: classification.bg, color: classification.text, fontSize: '10px' }}>{v.classification}</span>
+                          <VendorTypeChip vendor={v} size="sm" />
                           <div style={{ textAlign: 'right' }}>
                             <div style={{ fontSize: '14px', fontWeight: 600, color: scoreColor }}>{v.score === null ? '–' : v.score.toFixed(1)}</div>
                           </div>
@@ -751,8 +853,15 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                 </div>
               </div>
 
-              <div style={{ fontSize: '13px', color: '#a1a1aa', marginTop: '8px' }}>
-                {selectedVendorDetail.classification === 'Services / Specialist' ? 'Penyedia Jasa' : 'Penyedia Barang'} · Score {selectedVendorDetail.score || '–'}
+              <div style={{ fontSize: '13px', color: '#a1a1aa', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <VendorTypeChip vendor={selectedVendorDetail} />
+                {selectedVendorDetail.entityType && (
+                  <span style={{ color: '#52525b' }}>• {ENTITY_LABELS[selectedVendorDetail.entityType]}</span>
+                )}
+                <span style={{ color: '#52525b' }}>• Score {selectedVendorDetail.score || '–'}</span>
+                {isV2Vendor(selectedVendorDetail) && (
+                   <span style={{ marginLeft: 'auto', background: 'rgba(55,138,221,0.1)', color: '#378ADD', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>V2 SCHEMA</span>
+                )}
               </div>
             </div>
 
@@ -839,20 +948,43 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                     <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <BarChart3 size={16} color="#71717a" />
-                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>KLASIFIKASI</span>
+                      <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>KLASIFIKASI & METADATA</span>
                     </div>
                     <div style={{ padding: '0 24px' }}>
                       {[
-                        { label: 'Tipe Bisnis', value: selectedVendorDetail.classification || '–' },
+                        { label: 'Klasifikasi Legacy', value: selectedVendorDetail.classification || '–' },
+                        { label: 'Tipe Mitra (V2)', value: getVendorTypeLabel(selectedVendorDetail) },
+                        { label: 'Bentuk Entitas', value: selectedVendorDetail.entityType ? ENTITY_LABELS[selectedVendorDetail.entityType] : 'Unknown' },
                         { label: 'Registration Date', value: new Date(selectedVendorDetail.registered).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace('.', ':') },
+                        { label: 'Form Version', value: selectedVendorDetail.submissionMetadata?.formVersion || 'v1.0 (Legacy)' },
                       ].map((row, idx, arr) => (
-                        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
+                        <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
                           <span style={{ color: '#71717a' }}>{row.label}</span>
                           <span style={{ color: '#f4f4f5', textAlign: 'right' }}>{row.value}</span>
                         </div>
                       ))}
                     </div>
                   </div>
+
+                  {/* V2: Adaptive Capability Sections */}
+                  {isV2Vendor(selectedVendorDetail) && getCapabilityDisplay(selectedVendorDetail).map((section) => (
+                    <div key={section.section} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                      <div style={{ padding: '16px 24px', background: 'rgba(55,138,221,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Zap size={16} color="#378ADD" />
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#378ADD', letterSpacing: '0.05em' }}>{section.section.toUpperCase()}</span>
+                      </div>
+                      <div style={{ padding: '0 24px' }}>
+                        {section.fields.filter(f => f.value && (Array.isArray(f.value) ? f.value.length > 0 : true)).map((field, idx, arr) => (
+                          <div key={field.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
+                            <span style={{ color: '#71717a' }}>{field.label}</span>
+                            <span style={{ color: '#f4f4f5', textAlign: 'right', maxWidth: '60%' }}>
+                              {Array.isArray(field.value) ? field.value.join(", ") : field.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -872,6 +1004,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                         { key: 'npwpNumber', label: 'Nomor NPWP', value: (isEditing ? editFormData?.npwpNumber : null) || selectedVendorDetail.npwpNumber || '–' },
                         { key: 'taxStatus', label: 'Tax Status', value: (isEditing ? editFormData?.taxStatus : null) || selectedVendorDetail.taxStatus || 'Unknown' },
                         { key: 'legalStatus', label: 'Legal Status', value: (isEditing ? editFormData?.legalStatus : null) || selectedVendorDetail.legalStatus || 'Unknown' },
+                        { key: 'taxTreatment', label: 'Estimasi Pajak', value: getTaxTreatment(selectedVendorDetail), color: '#EF9F27' },
                       ].map((row, idx, arr) => (
                         <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
                           <span style={{ color: '#71717a' }}>{row.label}</span>

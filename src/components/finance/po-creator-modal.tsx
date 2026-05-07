@@ -88,6 +88,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const [usePPN, setUsePPN] = useState(false);
   const [isGrossUp, setIsGrossUp] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [discount, setDiscount] = useState(0);
 
   // SPK Specific
   const [venue, setVenue] = useState("");
@@ -128,6 +129,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         "Sudah menandatangani Perjanjian Kerahasiaan (Non-Disclosure Agreement)"
       ]);
       setPenaltyMemoUrl(editDoc.penaltyMemoUrl || "");
+      setDiscount(editDoc.discount || 0);
       setStep(2); 
     }
   }, [editDoc, activeProjects]);
@@ -151,11 +153,12 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
   const removeLine = (idx: number) => setLineItems(prev => prev.filter((_, i) => i !== idx));
 
   const subtotalItems = lineItems.reduce((s, l) => s + (l.amount || 0), 0);
+  const taxBase = Math.max(0, subtotalItems - discount);
   
   // PPh Calculation
   const pphRate = pphType === "PPH21" ? 0.025 : pphType === "PPH23" ? 0.02 : 0;
-  const pphAmount = isGrossUp ? (subtotalItems / (1 - pphRate)) - subtotalItems : 0;
-  const docGross = subtotalItems + pphAmount;
+  const pphAmount = isGrossUp ? (taxBase / (1 - pphRate)) - taxBase : 0;
+  const docGross = taxBase + pphAmount;
 
   const ppnAmount = usePPN ? docGross * 0.11 : 0;
   const totalPO = docGross + ppnAmount;
@@ -247,6 +250,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         deliveryDate, shipTo, billingInstruction, billingTerms, notes, venue, duration, lampiran, workScope,
         paymentKeterangan, penaltyMemoUrl: finalMemoUrl, description: lineItems[0]?.description || "",
         pphType, usePPh21: pphType !== "NONE", pph21Mode: isGrossUp ? "grossup" : "none", usePPN, grossAmount: docGross, taxAmount: pphAmount, ppnAmount, netAmount: grandTotal, totalPO,
+        discount,
         preparedBy: { name: "Procurement Division", date: new Date().toISOString() },
       };
 
@@ -454,6 +458,17 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                     <div style={{ textAlign: 'right' }}>
                       <div style={{ fontSize: '10px', color: '#52525b' }}>Subtotal</div>
                       <div style={{ fontSize: '14px', color: '#e4e4e7' }}>{formatCurrencyIDR(subtotalItems)}</div>
+                    </div>
+                    <div style={{ textAlign: 'right', width: '120px' }}>
+                      <div style={{ fontSize: '10px', color: '#f87171', fontWeight: 600 }}>Discount</div>
+                      <input 
+                        type="number" 
+                        className="cell-input text-right" 
+                        style={{ fontSize: '14px', color: '#f87171', borderBottom: '1px dashed rgba(248,113,113,0.3)', padding: '2px 0' }} 
+                        value={discount} 
+                        onChange={e => setDiscount(Number(e.target.value))} 
+                        placeholder="0"
+                      />
                     </div>
                     {isGrossUp && pphType !== "NONE" && (
                       <div style={{ textAlign: 'right' }}>

@@ -1,0 +1,718 @@
+{
+  "mode": "DRY-RUN",
+  "generated_at": "2026-05-07T17:57:26.327Z",
+  "review_file": "/Users/yudiqitrick/Desktop/PROJECT TRACKER JUARA/vendor-management-app/scripts/data/vendor_classifications_final.json",
+  "summary": {
+    "update": 72,
+    "archive": 9,
+    "skip_needs_info": 0,
+    "active_before": 83,
+    "active_after": 74,
+    "archived_before": 0,
+    "archived_after": 9
+  },
+  "plan": [
+    {
+      "name": "Partner",
+      "action": "archive",
+      "archive_reason": "test_dummy",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=delete"
+    },
+    {
+      "name": "Vendor",
+      "action": "archive",
+      "archive_reason": "test_dummy",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=delete"
+    },
+    {
+      "name": "Vendor juara",
+      "action": "archive",
+      "archive_reason": "test_dummy",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=delete"
+    },
+    {
+      "name": "TEST Vendor Flow QA 20260310-223721",
+      "action": "archive",
+      "archive_reason": "test_dummy",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=delete"
+    },
+    {
+      "name": "TEST UI Flow 20260310-224445",
+      "action": "archive",
+      "archive_reason": "test_dummy",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=delete"
+    },
+    {
+      "name": "PT.RAJA ADHIPRAMANA SEMESTA",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "JPROJEX EVENTS",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "PT. PERFORMA MAHAKARYA INDONESIA",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "Produksi Bersama",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "69 Show Management",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Gudang Production",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "BRAY MANAGEMENT",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "ARTOY.INC",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_supply"
+      }
+    },
+    {
+      "name": "SON VIDEO WORKS",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "anak ragil production",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "PT. Abhinaya Visual Radhikasakti",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "Kael Event",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "PT. Sewatoilet Jakarta",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Pitoe Production",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "Java Management",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "CV KRISHNA COMMUNICATION CENTER",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "PT.Kontraktor Booth Indonesia",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Colony Rental",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "BLACK Rndr",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "EL BRAMO",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Aldo Printing",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_supply"
+      }
+    },
+    {
+      "name": "Aprilia Fatimah",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "talent"
+      }
+    },
+    {
+      "name": "Maulani Rasyid",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Dedi Purnomo",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "MC CINTHIA KARANI",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "talent"
+      }
+    },
+    {
+      "name": "Ferry Permit",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "Mahardika Pariwisata",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Stevenson K. Tanaka",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Image Dance Crew",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "talent"
+      }
+    },
+    {
+      "name": "HighLight",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "Friday Timothy",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Kolaboratix",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "Dua Arah Kreasitama",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "talent"
+      }
+    },
+    {
+      "name": "Flicker Frame",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "Senapati Guard",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "GEOMETRIX (CV KARUNIA BUMI)",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "PT. Hasbi Jaya Abadi",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "CV Duta Raya Makmur",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "kusuma dekorasi",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "PT jakarta komunikasi Indonesia (jakartaHT)",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "PT SURYA TIRTA NANGGALA (M-QUA)",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_supply"
+      }
+    },
+    {
+      "name": "Suken trans",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "CV. GEMAR JAYA",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "Mitra Djaya Sukses",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "ANSPRO",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "eo_partner"
+      }
+    },
+    {
+      "name": "LAPAN NAM COMM",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "SRI LESTARI RENT CAR",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Jakarta",
+      "action": "archive",
+      "archive_reason": "manual",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=medium"
+    },
+    {
+      "name": "Logistik team",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Juara",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Qasha living",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "CV Afifah Kreatif",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "PT. Sahabat Prima Abadi",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "PT IAS Support Indonesia",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "WBS1911",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Genset",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "Widia Wahyu Nursanty",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "freelance"
+      }
+    },
+    {
+      "name": "Bima Nazuardi",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "freelance"
+      }
+    },
+    {
+      "name": "Laskar communication",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "Deri Permana freelance",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "freelance"
+      }
+    },
+    {
+      "name": "Addiksi Kreatif Imagi",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "freelance"
+      }
+    },
+    {
+      "name": "Manunggal Sumber Daya PT",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_service"
+      }
+    },
+    {
+      "name": "PT Manunggal Sumber Daya",
+      "action": "archive",
+      "archive_reason": "duplicate",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=medium"
+    },
+    {
+      "name": "GServices",
+      "action": "archive",
+      "archive_reason": "manual",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=low"
+    },
+    {
+      "name": "Dodo",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "talent_agency"
+      }
+    },
+    {
+      "name": "AGATA PRO",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "badan_usaha",
+        "relationshipType": "vendor_rental"
+      }
+    },
+    {
+      "name": "THE ALANA SENTUL CITY",
+      "action": "archive",
+      "archive_reason": "out_of_scope_venue",
+      "archive_note": "From migration 2026-05-07T17:57:26.325Z: source_table=low"
+    },
+    {
+      "name": "Adam Pratama",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_individu"
+      }
+    },
+    {
+      "name": "Fortuna Azaria Valenska",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_individu"
+      }
+    },
+    {
+      "name": "Starys Marvella Firsda",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Andy raharjo",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Ardhi Rosanto",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "fatma nabila",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_individu"
+      }
+    },
+    {
+      "name": "Sayyidah Hanifah Kahayandi",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Angelysia Kusuma Dewi Rizky",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_lead"
+      }
+    },
+    {
+      "name": "Lezhico Putra",
+      "action": "update",
+      "before": {},
+      "after": {
+        "entityType": "perorangan",
+        "relationshipType": "crew_individu"
+      }
+    }
+  ]
+}

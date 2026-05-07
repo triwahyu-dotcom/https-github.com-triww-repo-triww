@@ -1,0 +1,1296 @@
+{
+  "generated_at": "2026-05-07T16:18:33.825Z",
+  "total_vendors": 81,
+  "summary": {
+    "approved": 72,
+    "deleted": 9,
+    "needs_info": 0,
+    "unreviewed": 0
+  },
+  "classifications": [
+    {
+      "name": "Partner",
+      "source_table": "delete",
+      "decision": "delete",
+      "final_entity": null,
+      "final_relationship": null,
+      "sys_suggestion": "test/dummy → HAPUS",
+      "ops_correction": "(kosong, tim ops tidak konfirmasi)",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak konfirmasi HAPUS — kamu harus approve manual"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Vendor",
+      "source_table": "delete",
+      "decision": "delete",
+      "final_entity": null,
+      "final_relationship": null,
+      "sys_suggestion": "test/dummy → HAPUS",
+      "ops_correction": "(kosong, tim ops tidak konfirmasi)",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak konfirmasi HAPUS — kamu harus approve manual"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Vendor juara",
+      "source_table": "delete",
+      "decision": "delete",
+      "final_entity": null,
+      "final_relationship": null,
+      "sys_suggestion": "test/dummy → HAPUS",
+      "ops_correction": "(kosong, tim ops tidak konfirmasi)",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak konfirmasi HAPUS — kamu harus approve manual"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "TEST Vendor Flow QA 20260310-223721",
+      "source_table": "delete",
+      "decision": "delete",
+      "final_entity": null,
+      "final_relationship": null,
+      "sys_suggestion": "test/dummy → HAPUS",
+      "ops_correction": "(kosong, tim ops tidak konfirmasi)",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak konfirmasi HAPUS — kamu harus approve manual"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "TEST UI Flow 20260310-224445",
+      "source_table": "delete",
+      "decision": "delete",
+      "final_entity": null,
+      "final_relationship": null,
+      "sys_suggestion": "test/dummy → HAPUS",
+      "ops_correction": "(kosong, tim ops tidak konfirmasi)",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak konfirmasi HAPUS — kamu harus approve manual"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT.RAJA ADHIPRAMANA SEMESTA",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "badan +vendor_jasa",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "JPROJEX EVENTS",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Perorangan +EO Partner",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama brand-like (mengandung kata seperti 'production'/'events'/'management') tapi di-tag perorangan"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_rental → eo_partner"
+        },
+        {
+          "sev": "high",
+          "msg": "Case dual-entity dari handoff: Joko Santoso ↔ CV JPROJEX (same owner, same bank). Schema V2 belum cover linked entity."
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT. PERFORMA MAHAKARYA INDONESIA",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Badan + Eo Partner",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_rental → eo_partner"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Produksi Bersama",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Perorangan + CrewLead",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_rental → crew_lead"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "69 Show Management",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Badan + CrewLead",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_rental → crew_lead"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Gudang Production",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Perorangan + vendor rental",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama brand-like (mengandung kata seperti 'production'/'events'/'management') tapi di-tag perorangan"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "BRAY MANAGEMENT",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Perorangan +Crewlead",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama brand-like (mengandung kata seperti 'production'/'events'/'management') tapi di-tag perorangan"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_rental → crew_lead"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "ARTOY.INC",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_supply",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "Perorangan + Vendor Supply",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Nama mengandung indikator badan usaha (PT/CV/UD/Inc) tapi di-tag perorangan"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_service → vendor_supply"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "SON VIDEO WORKS",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "Badan + Vendor_jasa",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "anak ragil production",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "Perorangan + EO Partner",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama brand-like (mengandung kata seperti 'production'/'events'/'management') tapi di-tag perorangan"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_service → eo_partner"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT. Abhinaya Visual Radhikasakti",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Badan + Vendor Jasa",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_rental → vendor_service"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Kael Event",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Perorangan + Vendor_Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "PT. Sewatoilet Jakarta",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Badan + Vendor Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "Pitoe Production",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "Perorangan + EO _Partner",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama brand-like (mengandung kata seperti 'production'/'events'/'management') tapi di-tag perorangan"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_service → eo_partner"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Java Management",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + talent_agency",
+      "ops_correction": "Badan + EO Partner",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: talent_agency → eo_partner"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "CV KRISHNA COMMUNICATION CENTER",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + talent_agency",
+      "ops_correction": "Badan +Eo Partner",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: talent_agency → eo_partner"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT.Kontraktor Booth Indonesia",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Badan +Vendor Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "Colony Rental",
+      "source_table": "high",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "Badan  +Vendor Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "BLACK Rndr",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "EL BRAMO",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Aldo Printing",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_supply",
+      "sys_suggestion": "perorangan + Vendor Supply",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Aprilia Fatimah",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "talent",
+      "sys_suggestion": "perorangan + talent",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Maulani Rasyid",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + CrewLead",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Dedi Purnomo",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "MC CINTHIA KARANI",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "talent",
+      "sys_suggestion": "perorangan + talent",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Ferry Permit",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Mahardika Pariwisata",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Stevenson K. Tanaka",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Image Dance Crew",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "talent",
+      "sys_suggestion": "perorangan + talent",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "HighLight",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Friday Timothy",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Kolaboratix",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "Badan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Dua Arah Kreasitama",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "talent",
+      "sys_suggestion": "perorangan + talent",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Flicker Frame",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan + Vendor Jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Senapati Guard",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "Badan+ vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "GEOMETRIX (CV KARUNIA BUMI)",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan+ vendor_rental",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT. Hasbi Jaya Abadi",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + EO Partner",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "CV Duta Raya Makmur",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "kusuma dekorasi",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT jakarta komunikasi Indonesia (jakartaHT)",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT SURYA TIRTA NANGGALA (M-QUA)",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_supply",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Suken trans",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "perorangan + vendor_rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "CV. GEMAR JAYA",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "badan + EO Partner",
+      "ops_correction": "badan + EO Partner",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "Mitra Djaya Sukses",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "badan + vendor_rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "ANSPRO",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "eo_partner",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "LAPAN NAM COMM",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crewlead",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → crew_lead"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "SRI LESTARI RENT CAR",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Jakarta",
+      "source_table": "medium",
+      "decision": "delete",
+      "final_entity": "perorangan",
+      "final_relationship": "freelance",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        },
+        {
+          "sev": "med",
+          "msg": "Nama generic/single word — kemungkinan placeholder atau perlu rename"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Logistik team",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Juara",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "Perorangan + Crewlead",
+      "ops_correction": "Perorangan Crew Lead",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama generic/single word — kemungkinan placeholder atau perlu rename"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Qasha living",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "Badan + vendor_rental",
+      "ops_correction": "Badan + Vendor Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "CV Afifah Kreatif",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "badan + vendor_rental",
+      "ops_correction": "badan +vendor Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "PT. Sahabat Prima Abadi",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "Perorangan + vendor_jasa",
+      "ops_correction": "Badan + Vendor Rental",
+      "issues": [
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: vendor_service → vendor_rental"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT IAS Support Indonesia",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "badan + vendor_jasa",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "WBS1911",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "perorangan + vendor_rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "Genset",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "perorangan + vendor_rental",
+      "ops_correction": "perorangan + vendor_rental",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Nama generic/single word — kemungkinan placeholder atau perlu rename"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Widia Wahyu Nursanty",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "freelance",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Bima Nazuardi",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "freelance",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Laskar communication",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "perorangan+ vendor_jasa",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Deri Permana freelance",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "freelance",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "",
+      "issues": [
+        {
+          "sev": "med",
+          "msg": "Tim ops tidak isi koreksi → assumed setuju saran sistem (yang punya 10-15% false positive)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Addiksi Kreatif Imagi",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "freelance",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + freelance",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "Manunggal Sumber Daya PT",
+      "source_table": "medium",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "badan + vendor_jasa",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Kemungkinan duplikat dengan vendor lain (Manunggal Sumber Daya PT vs PT Manunggal Sumber Daya)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "PT Manunggal Sumber Daya",
+      "source_table": "medium",
+      "decision": "delete",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "badan + vendor_jasa",
+      "ops_correction": "badan + vendor_jasa",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Kemungkinan duplikat dengan vendor lain (Manunggal Sumber Daya PT vs PT Manunggal Sumber Daya)"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "GServices",
+      "source_table": "low",
+      "decision": "delete",
+      "final_entity": "perorangan",
+      "final_relationship": null,
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Dodo",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "talent_agency",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + freelance",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "AGATA PRO",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_rental",
+      "sys_suggestion": "Badan+ Vendor Rental",
+      "ops_correction": "Badan+ Vendor Rental",
+      "issues": [],
+      "note": ""
+    },
+    {
+      "name": "THE ALANA SENTUL CITY",
+      "source_table": "low",
+      "decision": "delete",
+      "final_entity": "badan_usaha",
+      "final_relationship": "vendor_service",
+      "sys_suggestion": "Badan + Vendor jasa",
+      "ops_correction": "Badan + Vendor jasa",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Hotel/venue (THE ALANA SENTUL CITY) — schema V2 belum punya kategori venue partner. Pertimbangkan HAPUS atau marker khusus."
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Adam Pratama",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_individu",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Fortuna Azaria Valenska",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_individu",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Starys Marvella Firsda",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Andy raharjo",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Ardhi Rosanto",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "fatma nabila",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_individu",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Sayyidah Hanifah Kahayandi",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Angelysia Kusuma Dewi Rizky",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_lead",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    },
+    {
+      "name": "Lezhico Putra",
+      "source_table": "low",
+      "decision": "approve",
+      "final_entity": "perorangan",
+      "final_relationship": "crew_individu",
+      "sys_suggestion": "perorangan + freelance",
+      "ops_correction": "perorangan + Crew",
+      "issues": [
+        {
+          "sev": "high",
+          "msg": "Tim ops tag 'Crew' tanpa spesifikasi: crew_lead atau crew_individu?"
+        },
+        {
+          "sev": "low",
+          "msg": "Tim ops koreksi tipe: freelance → AMBIGUOUS_CREW"
+        }
+      ],
+      "note": ""
+    }
+  ]
+}

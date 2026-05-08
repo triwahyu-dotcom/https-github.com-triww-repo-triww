@@ -34,7 +34,7 @@ export function middleware(request: NextRequest) {
   if (hostname === partnerDomain) {
     // Arahkan root domain partner langsung ke portal pendaftaran
     if (pathname === '/') {
-      return NextResponse.rewrite(new URL('/partner', request.url));
+      return NextResponse.rewrite(new URL('/partner/v2', request.url));
     }
 
     // Jika vendor mencoba akses login atau dashboard internal di domain partner

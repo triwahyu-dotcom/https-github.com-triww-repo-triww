@@ -116,7 +116,7 @@ export async function updateDocument(doc: ExpenseDocument): Promise<void> {
 
   if (error) throw error;
   if (count === 0) {
-    throw new Error(`Document with id ${doc.id} not found in database`);
+    throw new Error(`Dokumen dengan id ${doc.id} tidak ditemukan di database`);
   }
 }
 
@@ -145,7 +145,7 @@ export async function updateRFP(rfp: RequestForPayment): Promise<void> {
 
   if (error) throw error;
   if (count === 0) {
-    throw new Error(`RFP with id ${rfp.id} not found in database`);
+    throw new Error(`RFP dengan id ${rfp.id} tidak ditemukan di database`);
   }
 }
 

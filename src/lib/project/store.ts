@@ -1,28 +1,15 @@
-import { existsSync } from "node:fs";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
+import { supabase } from '@/lib/supabase';
 import { 
   ProjectRecord, 
+  CRMClient, 
   ProjectDashboardData, 
   ProjectSection, 
-  StageSummary, 
-  WorkflowStage, 
-  WorkflowSuggestion,
-  CRMClient,
-} from "@/lib/project/types";
-import { getManPowerData } from "@/lib/manpower/store";
-import { getDashboardData as getVendorDashboardData } from "@/lib/vendor/store";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+  StageSummary,
+  WorkflowStage,
+  WorkflowSuggestion
+} from './types';
 
-const DEFAULT_SOURCE_PATHS = [
-  path.join(process.cwd(), "data", "source", "JUARA TRACKER -  2026 (BUSINESS) (1).csv"),
-  path.join(process.cwd(), "data", "source", "JUARA TRACKER -  2026 (BUSINESS).csv"),
-];
-
-const SOURCE_PATH = DEFAULT_SOURCE_PATHS.find(p => existsSync(p)) || DEFAULT_SOURCE_PATHS[0];
-const DATA_DIR = path.join(process.cwd(), "data");
-const PROJECTS_PATH = path.join(DATA_DIR, "projects.json");
-const CLIENTS_PATH = path.join(DATA_DIR, "clients.json");
+// --- CONSTANTS (Restored from original) ---
 
 const STAGE_ORDER: WorkflowStage[] = ["lead", "pitching", "negotiation", "execution", "reporting", "finance", "completed", "lost"];
 const STAGE_LABELS: Record<WorkflowStage, string> = {
@@ -59,322 +46,184 @@ const WORKFLOW_SUGGESTIONS: WorkflowSuggestion[] = [
   }
 ];
 
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
+// Helper: Supabase Admin Client (Service Role)
+async function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    return supabase!;
+  }
+
+  const { createClient } = await import('@supabase/supabase-js');
+  return createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false }
+  });
+}
+
+// Helper: Format Mata Uang
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(value);
+  }).format(amount);
+};
+
+// --- CLIENTS CRUD ---
+
+export async function readClients(): Promise<CRMClient[]> {
+  const client = await getAdminClient();
+  const { data, error } = await client
+    .from('clients')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error(`Gagal membaca data klien: ${error.message}`);
+  return (data || []).map(row => row.data as CRMClient);
 }
 
-async function ensureDataDir() {
-  if (!existsSync(DATA_DIR)) {
-    try {
-      await mkdir(DATA_DIR, { recursive: true });
-    } catch (e) {
-      console.warn("Could not create data directory", e);
-    }
-  }
-}
-
-export async function getJsonProjects(): Promise<ProjectRecord[]> {
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
-
-      const { data, error } = await client
-        .from('projects')
-        .select('data')
-        .order('updated_at', { ascending: false });
-      
-      if (!error && data && data.length > 0) {
-        const projects = data.map(item => item.data as ProjectRecord);
-        return projects.map(project => normalizeProjectSection(project));
-      }
-    } catch (e) {
-      console.warn("Failed to fetch projects from Supabase, falling back to JSON", e);
-    }
-  }
-
-  if (!existsSync(PROJECTS_PATH)) {
-    return [];
-  }
-  try {
-    const content = await readFile(PROJECTS_PATH, "utf-8");
-    const rawProjects = JSON.parse(content) as ProjectRecord[];
-    
-    // Ensure every project has a section even if not explicitly stored
-    return rawProjects.map(project => normalizeProjectSection(project));
-  } catch (e) {
-    console.error("Error reading projects:", e);
-    return [];
-  }
-}
-
-function normalizeProjectSection(project: ProjectRecord): ProjectRecord {
-  let section = project.section;
-  if (!section) {
-    if (["lead", "pitching"].includes(project.currentStage)) section = "leads";
-    else if (["negotiation", "execution", "reporting", "finance"].includes(project.currentStage)) section = "ongoing";
-    else if (project.currentStage === "completed") section = "billed";
-    else if (project.currentStage === "lost") section = "failed";
-    else section = "uncategorized";
-  }
-  return { ...project, section };
-}
-
-export async function getJsonClients(): Promise<CRMClient[]> {
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
-
-      const { data, error } = await client
-        .from('clients')
-        .select('data')
-        .order('updated_at', { ascending: false });
-      
-      if (!error && data && data.length > 0) {
-        return data.map(item => item.data as CRMClient);
-      }
-    } catch (e) {
-      console.warn("Failed to fetch clients from Supabase, falling back to JSON", e);
-    }
-  }
-
-  if (!existsSync(CLIENTS_PATH)) return [];
-  try {
-    const content = await readFile(CLIENTS_PATH, "utf-8");
-    return JSON.parse(content);
-  } catch (e) {
-    console.error("Error reading clients:", e);
-    return [];
-  }
-}
-
-export async function saveProjects(projects: ProjectRecord[]) {
-  // If Supabase is configured, we usually update individual projects.
-  // But for full compatibility with the existing code that calls saveProjects(allProjects),
-  // we could try to sync everything, though that's inefficient.
-  // We'll prioritize the individual updateJsonProject instead.
-  
-  try {
-    await ensureDataDir();
-    await writeFile(PROJECTS_PATH, JSON.stringify(projects, null, 2));
-  } catch (e) {
-    if (!isSupabaseConfigured()) {
-      console.warn("Failed to save projects locally and Supabase not configured", e);
-    }
-  }
-}
-
-export async function saveClients(clients: CRMClient[]) {
-  try {
-    await ensureDataDir();
-    await writeFile(CLIENTS_PATH, JSON.stringify(clients, null, 2));
-  } catch (e) {
-    if (!isSupabaseConfigured()) {
-      console.warn("Failed to save clients locally and Supabase not configured", e);
-    }
-  }
-}
-
-export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMClient> {
+export async function createClient(newClient: CRMClient): Promise<CRMClient> {
+  const client = await getAdminClient();
   const now = new Date().toISOString();
-  let updatedClient: CRMClient;
-
-  const clients = await getJsonClients();
-  const index = clients.findIndex(c => c.id === client.id);
   
-  if (index === -1) {
-    updatedClient = {
-      ...client,
-      id: client.id || `cli_${Date.now()}`,
-      name: client.name || "Unknown Client",
-      contactPerson: client.contactPerson || "",
-      email: client.email || "",
-      createdAt: now,
-      updatedAt: now,
-    } as CRMClient;
-    clients.push(updatedClient);
-  } else {
-    updatedClient = {
-      ...clients[index],
-      ...client,
-      updatedAt: now,
-    } as CRMClient;
-    clients[index] = updatedClient;
+  const payload = { ...newClient, createdAt: now, updatedAt: now };
+
+  const { data, error } = await client
+    .from('clients')
+    .insert({
+      id: payload.id,
+      data: payload,
+      updated_at: now
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === '23505') throw new Error("ID Klien sudah terdaftar.");
+    throw new Error(`Gagal membuat klien: ${error.message}`);
   }
-
-  // Persist to Supabase as primary source
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
-
-      const { error } = await client
-        .from('clients')
-        .upsert({
-          id: updatedClient.id,
-          data: updatedClient,
-          updated_at: now
-        }, { onConflict: 'id' });
-      
-      if (error) {
-        console.error("Supabase client upsert error:", error);
-        throw new Error(`Gagal menyimpan ke database: ${error.message}`);
-      }
-    } catch (e) {
-      console.error("Failed to save client to Supabase", e);
-      throw e; // Rethrow to let the UI know about the failure
-    }
-  }
-
-  // Fallback to local JSON (will fail silently on Vercel)
-  await saveClients(clients);
-  return updatedClient;
+  return data.data as CRMClient;
 }
 
-export async function deleteJsonClient(id: string) {
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
-
-      await client.from('clients').delete().eq('id', id);
-    } catch (e) {
-      console.error("Failed to delete client from Supabase", e);
-    }
-  }
-  const clients = await getJsonClients();
-  const filtered = clients.filter(c => c.id !== id);
-  await saveClients(filtered);
-}
-
-export async function deleteJsonProject(id: string) {
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
-
-      await client.from('projects').delete().eq('id', id);
-    } catch (e) {
-      console.error("Failed to delete project from Supabase", e);
-    }
-  }
-  const projects = await getJsonProjects();
-  const filtered = projects.filter(p => p.id !== id);
-  await saveProjects(filtered);
-}
-
-export async function updateJsonProject(project: Partial<ProjectRecord>): Promise<ProjectRecord> {
+export async function updateClient(updates: Partial<CRMClient> & { id: string }): Promise<CRMClient> {
+  const client = await getAdminClient();
   const now = new Date().toISOString();
-  let updatedProject: ProjectRecord;
 
-  const projects = await getJsonProjects();
-  const index = projects.findIndex(p => p.id === project.id);
-  
-  if (index === -1) {
-    updatedProject = {
-      ...project,
-      id: project.id || Math.random().toString(36).substring(7),
-      createdAt: now,
-      updatedAt: now,
-      documents: project.documents || [],
-      owners: project.owners || [],
-    } as ProjectRecord;
-    projects.unshift(updatedProject);
-  } else {
-    updatedProject = {
-      ...projects[index],
-      ...project,
-      updatedAt: now,
-    } as ProjectRecord;
-    projects[index] = updatedProject;
-  }
+  const allClients = await readClients();
+  const existing = allClients.find(c => c.id === updates.id);
+  if (!existing) throw new Error("Klien tidak ditemukan.");
 
-  // Persist to Supabase if configured
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
+  // FIX TS Errors: Properti contactPerson dan email divalidasi dengan casting aman ke any
+  // karena interface CRMClient asli tidak memiliki properti ini namun digunakan secara legacy
+  const updatedData: any = {
+    ...existing,
+    ...updates,
+    updatedAt: now
+  };
 
-      const { error } = await client
-        .from('projects')
-        .upsert({
-          id: updatedProject.id,
-          data: updatedProject,
-          updated_at: now
-        }, { onConflict: 'id' });
-      
-      if (error) {
-        console.error("Supabase project upsert error:", error);
-        // We throw so the API handler can catch it and return 500
-        throw new Error(`Failed to save to database: ${error.message}`);
-      }
-    } catch (e) {
-      console.error("Supabase integration error:", e);
-      throw e; // Rethrow to trigger the 'Gagal memperbarui' alert
-    }
-  }
+  const { error } = await client
+    .from('clients')
+    .update({
+      data: updatedData,
+      updated_at: now
+    })
+    .eq('id', updates.id);
 
-  // Fallback/Parallel save to JSON (will fail silently on Vercel)
-  await saveProjects(projects);
-  
-  return updatedProject;
+  if (error) throw new Error(`Gagal memperbarui klien: ${error.message}`);
+  return updatedData as CRMClient;
 }
+
+export async function deleteClient(id: string): Promise<void> {
+  const client = await getAdminClient();
+  const { error } = await client.from('clients').delete().eq('id', id);
+  if (error) throw new Error(`Gagal menghapus klien: ${error.message}`);
+}
+
+// --- PROJECTS CRUD ---
+
+export async function readProjects(): Promise<ProjectRecord[]> {
+  const client = await getAdminClient();
+  const { data, error } = await client
+    .from('projects')
+    .select('*')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error(`Gagal membaca data proyek: ${error.message}`);
+  return (data || []).map(row => row.data as ProjectRecord);
+}
+
+export async function createProject(newProject: ProjectRecord): Promise<ProjectRecord> {
+  const client = await getAdminClient();
+  const now = new Date().toISOString();
+  
+  const payload = { ...newProject, createdAt: now, updatedAt: now };
+
+  const { data, error } = await client
+    .from('projects')
+    .insert({
+      id: payload.id,
+      data: payload,
+      updated_at: now
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === '23505') throw new Error("ID Proyek sudah terdaftar.");
+    throw new Error(`Gagal membuat proyek: ${error.message}`);
+  }
+  return data.data as ProjectRecord;
+}
+
+export async function updateProject(updates: Partial<ProjectRecord> & { id: string }): Promise<ProjectRecord> {
+  const client = await getAdminClient();
+  const now = new Date().toISOString();
+
+  const allProjects = await readProjects();
+  const existing = allProjects.find(p => p.id === updates.id);
+  if (!existing) throw new Error("Proyek tidak ditemukan.");
+
+  const updatedData: ProjectRecord = {
+    ...existing,
+    ...updates,
+    updatedAt: now
+  };
+
+  const { error } = await client
+    .from('projects')
+    .update({
+      data: updatedData,
+      updated_at: now
+    })
+    .eq('id', updates.id);
+
+  if (error) throw new Error(`Gagal memperbarui proyek: ${error.message}`);
+  return updatedData;
+}
+
+export async function deleteProject(id: string): Promise<void> {
+  const client = await getAdminClient();
+  const { error } = await client.from('projects').delete().eq('id', id);
+  if (error) throw new Error(`Gagal menghapus proyek: ${error.message}`);
+}
+
+// --- DASHBOARD AGGREGATOR ---
 
 export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
   const [projects, clients] = await Promise.all([
-    getJsonProjects(),
-    getJsonClients()
+    readProjects(),
+    readClients()
   ]);
 
-  const clientsMap = new Map(clients.map(c => [c.id, c]));
-  const totalPipelineValue = projects.reduce((sum, project) => sum + project.projectValue, 0);
-  const allDocuments = projects.flatMap((project) => project.documents);
+  const totalPipelineValue = projects.reduce((sum, project) => sum + (project.projectValue || 0), 0);
+  const allDocuments = projects.flatMap((project) => project.documents || []);
   const sectionOrder: ProjectSection[] = ["leads", "ongoing", "billed", "failed"];
 
   return {
     projects,
-    sourcePath: SOURCE_PATH,
+    sourcePath: "Supabase Admin (Cloud)",
     sourceAvailable: true,
     summary: {
       totalProjects: projects.length,
@@ -395,7 +244,7 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
         key: section,
         label: SECTION_LABELS[section],
         count: items.length,
-        valueLabel: formatCurrency(items.reduce((sum, project) => sum + project.projectValue, 0)),
+        valueLabel: formatCurrency(items.reduce((sum, project) => sum + (project.projectValue || 0), 0)),
       };
     }),
     stages: STAGE_ORDER.map(

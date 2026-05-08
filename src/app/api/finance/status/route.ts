@@ -1,108 +1,174 @@
 import { NextRequest, NextResponse } from "next/server";
-import { readRFPs, saveRFP, readDocuments, saveDocument } from "@/lib/finance/store";
+import { readRFPs, updateRFP, readDocuments, updateDocument, deleteRFP, deleteDocument } from "@/lib/finance/store";
 import { logger } from "@/lib/logger";
 
 export async function PATCH(req: NextRequest) {
   try {
-    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl, verifiedBy } = await req.json();
+    const body = await req.json();
+    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl, verifiedBy } = body;
     const today = new Date().toISOString();
 
-    // ── Handle Document (PO/SPK/Kontrak/CA) approval by Director ──
+    // ── PATH A: Handle Document (PO/SPK/Kontrak/CA) approval ──
     if (docId) {
-      if (!status) return NextResponse.json({ error: "Status is required" }, { status: 400 });
+      if (!status) return NextResponse.json({ error: "Status diperlukan" }, { status: 400 });
       const docs = await readDocuments();
-      const idx = docs.findIndex(d => d.id === docId);
-      if (idx === -1) return NextResponse.json({ error: "Document not found" }, { status: 404 });
-
-      docs[idx].status = status as any;
-      if (status === "approved" && digitalSignature) {
-        docs[idx].approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
-        docs[idx].rejectionReason = ""; // Clear on approval
-      } else if (status === "pending_c_level" && verifiedBy) {
-        docs[idx].verifiedBy = verifiedBy;
-        docs[idx].rejectionReason = ""; // Clear on forwarding
-      } else if (rejectionReason) {
-        docs[idx].rejectionReason = rejectionReason;
-      }
-      await saveDocument(docs[idx]);
+      const doc = docs.find(d => d.id === docId);
       
-      if (status === "approved") {
-        logger.audit("FinanceAPI", "DOCUMENT_APPROVED", { docId, by: "Director", status });
-      } else if (status === "rejected") {
-        logger.audit("FinanceAPI", "DOCUMENT_REJECTED", { docId, reason: rejectionReason, status });
-      } else {
-        logger.audit("FinanceAPI", "DOCUMENT_STATUS_CHANGED", { docId, status });
+      if (!doc) {
+        return NextResponse.json({ error: "Dokumen tidak ditemukan" }, { status: 404 });
       }
 
-      return NextResponse.json({ success: true, doc: docs[idx] });
+      // Object Cloning (No Mutation)
+      const updatedDoc = { 
+        ...doc, 
+        status: status as any,
+        rejectionReason: rejectionReason || (status === "approved" ? "" : doc.rejectionReason)
+      };
+
+      if (status === "approved" && digitalSignature) {
+        // TODO: Replace hardcoded name with session auth user (Tech Debt)
+        updatedDoc.approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
+        updatedDoc.rejectionReason = ""; 
+      } else if (status === "pending_c_level" && verifiedBy) {
+        updatedDoc.verifiedBy = verifiedBy;
+        updatedDoc.rejectionReason = "";
+      } else if (rejectionReason) {
+        updatedDoc.rejectionReason = rejectionReason;
+      }
+
+      try {
+        await updateDocument(updatedDoc);
+        
+        if (status === "approved") {
+          logger.audit("FinanceAPI", "DOCUMENT_APPROVED", { docId, by: "Director", status });
+        } else if (status === "rejected") {
+          logger.audit("FinanceAPI", "DOCUMENT_REJECTED", { docId, reason: rejectionReason, status });
+        } else {
+          logger.audit("FinanceAPI", "DOCUMENT_STATUS_CHANGED", { docId, status });
+        }
+
+        return NextResponse.json({ success: true, doc: updatedDoc });
+      } catch (e: any) {
+        if (e.message.includes("tidak ditemukan")) {
+          return NextResponse.json({ error: "Dokumen tidak ditemukan di database." }, { status: 404 });
+        }
+        throw e;
+      }
     }
 
-    // ── Handle RFP status update ──
+    // ── PATH B + C: Handle RFP status update with Cascade ──
     if (!rfpId || !status) {
-      return NextResponse.json({ error: "rfpId or docId and status are required" }, { status: 400 });
+      return NextResponse.json({ error: "rfpId atau docId dan status diperlukan" }, { status: 400 });
     }
 
     const rfps = await readRFPs();
-    const rfpIndex = rfps.findIndex(r => r.id === rfpId);
-    if (rfpIndex === -1) {
-      return NextResponse.json({ error: "RFP not found" }, { status: 404 });
+    const rfp = rfps.find(r => r.id === rfpId);
+    if (!rfp) {
+      return NextResponse.json({ error: "RFP tidak ditemukan" }, { status: 404 });
     }
 
-    const rfp = rfps[rfpIndex];
-    rfp.status = status;
-    if (rejectionReason) {
-      rfp.rejectionReason = rejectionReason;
-    } else if (status !== "draft" && status !== "pending_finance") {
-      // Clear rejection reason when moving to C-level or Paid
-      rfp.rejectionReason = "";
-    }
-    await saveRFP(rfp);
+    const originalRfpStatus = rfp.status;
+    const successfulDocUpdates: { doc: any, oldStatus: any }[] = [];
+    let rfpUpdated = false;
 
-    // Cascade status to linked documents
-    const docs = await readDocuments();
-    let docsUpdated = 0;
+    try {
+      // Step 1: Update RFP status (Cloning)
+      const updatedRfp = {
+        ...rfp,
+        status: status as any,
+        rejectionReason: rejectionReason || (status !== "draft" && status !== "pending_finance" ? "" : rfp.rejectionReason)
+      };
 
-    for (const doc of docs) {
-      // Check if this doc is linked to this RFP (checking both legacy ID and new documentIds array)
-      const isLinked = doc.rfpId === rfpId || (rfp.documentIds && rfp.documentIds.includes(doc.id));
+      await updateRFP(updatedRfp);
+      rfpUpdated = true;
 
-      if (isLinked) {
-        if (status === "approved") {
-          doc.status = "approved";
-          doc.approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
-        } else if (status === "paid") {
-          // Special logic for Cash Advance: after payment, it becomes "Pending Settlement"
-          if (doc.documentType === "CASH_ADVANCE") {
-            doc.status = "settlement_pending";
-          } else {
-            doc.status = "paid";
-          }
-        } else if (status === "settled") {
-          if (doc.documentType === "CASH_ADVANCE" && rfp.settlementDetails) {
-            const diff = rfp.settlementDetails.difference || 0;
-            if (diff > 0) {
-              doc.status = "approved";
-              doc.amount = rfp.settlementDetails.actualAmount;
+      // Step 2: Cascade status to linked documents
+      const docs = await readDocuments();
+      for (const doc of docs) {
+        // Support legacy rfpId and new documentIds array
+        const isLinked = doc.rfpId === rfpId || (rfp.documentIds && rfp.documentIds.includes(doc.id));
+
+        if (isLinked) {
+          const oldStatus = doc.status;
+          const updatedDoc = { ...doc };
+          let shouldUpdateDoc = false;
+
+          if (status === "approved") {
+            updatedDoc.status = "approved" as any;
+            // TODO: Replace hardcoded name with session auth user (Tech Debt)
+            updatedDoc.approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };
+            shouldUpdateDoc = true;
+          } else if (status === "paid") {
+            // Special logic for Cash Advance: after payment, it becomes "Pending Settlement"
+            updatedDoc.status = doc.documentType === "CASH_ADVANCE" ? "settlement_pending" as any : "paid" as any;
+            shouldUpdateDoc = true;
+          } else if (status === "settled") {
+            if (doc.documentType === "CASH_ADVANCE" && rfp.settlementDetails) {
+              const diff = rfp.settlementDetails.difference || 0;
+              if (diff > 0) {
+                updatedDoc.status = "approved" as any;
+                updatedDoc.amount = rfp.settlementDetails.actualAmount;
+              } else {
+                updatedDoc.status = "paid" as any;
+                if (diff < 0) updatedDoc.amount = rfp.settlementDetails.actualAmount;
+              }
             } else {
-              doc.status = "paid";
-              if (diff < 0) doc.amount = rfp.settlementDetails.actualAmount;
+              updatedDoc.status = "paid" as any;
             }
-          } else {
-            doc.status = "paid";
+            shouldUpdateDoc = true;
+          } else if (status === "pending_finance") {
+            updatedDoc.status = "pending_finance" as any;
+            shouldUpdateDoc = true;
           }
-        } else if (status === "pending_finance") {
-          doc.status = "pending_finance";
+
+          if (shouldUpdateDoc) {
+            await updateDocument(updatedDoc);
+            successfulDocUpdates.push({ doc, oldStatus });
+          }
         }
-        await saveDocument(doc);
-        docsUpdated++;
       }
+
+      logger.audit("FinanceAPI", "RFP_STATUS_CHANGED", { rfpId, status, rejectionReason, docsImpacted: successfulDocUpdates.length });
+      return NextResponse.json({ success: true, rfp: updatedRfp, docsUpdated: successfulDocUpdates.length });
+
+    } catch (innerError: any) {
+      // ROLLBACK FLOW (Best Effort Consistency)
+      console.error("[Status API] Cascade processing failed, starting rollback:", innerError.message);
+      const rollbackErrors: any[] = [];
+
+      // Revert documents (Reverse order)
+      for (const item of successfulDocUpdates.reverse()) {
+        try {
+          await updateDocument({ ...item.doc, status: item.oldStatus });
+        } catch (rbErr: any) {
+          rollbackErrors.push({ type: 'doc', id: item.doc.id, error: rbErr.message });
+          console.error(`[Status API] CRITICAL: Rollback failed for doc ${item.doc.id}: ${rbErr.message}`);
+        }
+      }
+
+      // Revert RFP
+      if (rfpUpdated) {
+        try {
+          await updateRFP({ ...rfp, status: originalRfpStatus });
+        } catch (rbErr: any) {
+          rollbackErrors.push({ type: 'rfp', id: rfp.id, error: rbErr.message });
+          console.error(`[Status API] CRITICAL: Rollback failed for RFP ${rfp.id}: ${rbErr.message}`);
+        }
+      }
+
+      if (rollbackErrors.length > 0) {
+        console.error(`[Status API] PARTIAL ROLLBACK FAILURE: Manual intervention required.`);
+      }
+
+      if (innerError.message?.includes("tidak ditemukan")) {
+        return NextResponse.json({ error: "Data tidak ditemukan di database." }, { status: 404 });
+      }
+      throw innerError;
     }
 
-    logger.audit("FinanceAPI", "RFP_STATUS_CHANGED", { rfpId, status, rejectionReason, docsImpacted: docsUpdated });
-    return NextResponse.json({ success: true, rfp, docsUpdated });
   } catch (error: any) {
     logger.error("FinanceAPI", "STATUS_UPDATE_FAILED", { error });
-    console.error("Status Update Error:", error);
+    console.error("[PATCH /api/finance/status]", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -114,22 +180,21 @@ export async function DELETE(req: NextRequest) {
     const docId = searchParams.get("docId");
 
     if (docId) {
-      const { deleteDocument } = await import("@/lib/finance/store");
       await deleteDocument(docId);
       logger.audit("FinanceAPI", "DOCUMENT_DELETED", { docId });
       return NextResponse.json({ success: true });
     }
 
     if (rfpId) {
-      const { deleteRFP } = await import("@/lib/finance/store");
       await deleteRFP(rfpId);
       logger.audit("FinanceAPI", "RFP_DELETED", { rfpId });
       return NextResponse.json({ success: true });
     }
 
-    return NextResponse.json({ error: "ID is required" }, { status: 400 });
+    return NextResponse.json({ error: "ID diperlukan" }, { status: 400 });
   } catch (error: any) {
     logger.error("FinanceAPI", "DELETE_FAILED", { error });
+    console.error("[DELETE /api/finance/status]", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 import { ProjectDashboard } from "@/components/projects/ProjectDashboard";
 import { buildIntegratedDashboards } from "@/lib/integration/view-models";
-import { getProjectDashboardData, getJsonClients, getJsonProjects } from "@/lib/project/store";
+import { getProjectDashboardData, readClients, readProjects } from "@/lib/project/store";
 import { getDashboardData } from "@/lib/vendor/store";
 import { getManPowerData } from "@/lib/manpower/store";
 import { getTeamMembers } from "@/lib/auth";
@@ -12,7 +12,7 @@ export default async function ProjectsPage() {
     getProjectDashboardData(),
     getDashboardData(),
     getManPowerData(),
-    getJsonClients(),
+    readClients(),
     getTeamMembers()
   ]);
   

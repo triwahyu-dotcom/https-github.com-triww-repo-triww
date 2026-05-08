@@ -1,5 +1,5 @@
 import { ProjectRecord, CRMClient, CRMDashboardData } from "@/lib/project/types";
-import { getJsonClients } from "@/lib/project/store";
+import { readClients } from "@/lib/project/store";
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -18,7 +18,7 @@ function getOfficialClient(clientName: string, officialClients: CRMClient[]): CR
 }
 
 export async function getCRMDashboardData(projects: ProjectRecord[]): Promise<CRMDashboardData> {
-  const officialClients = await getJsonClients();
+  const officialClients = await readClients();
 
   const clientsMap = new Map<string, CRMClient>();
 

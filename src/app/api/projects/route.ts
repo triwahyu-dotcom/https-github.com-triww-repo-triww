@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getJsonProjects, updateJsonProject } from "@/lib/project/store";
+import { readProjects, createProject, updateProject } from "@/lib/project/store";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const projects = await getJsonProjects();
+  const projects = await readProjects();
   return NextResponse.json(projects);
 }
 
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     const project = await req.json();
     
     // Normalize before saving to ensure ID and all fields are present
-    const normalized = await updateJsonProject(project);
+    const normalized = await createProject(project);
     
     return NextResponse.json({ success: true, project: normalized });
   } catch (err: unknown) {
@@ -28,7 +28,7 @@ export async function PUT(req: Request) {
     const project = await req.json();
     
     // Normalize before saving
-    const normalized = await updateJsonProject(project);
+    const normalized = await updateProject(project);
     
     return NextResponse.json({ success: true, project: normalized });
   } catch (err: unknown) {

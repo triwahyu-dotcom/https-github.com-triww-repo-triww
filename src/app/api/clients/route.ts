@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
-import { getJsonClients, updateJsonClient, deleteJsonClient } from "@/lib/project/store";
+import { readClients, createClient, updateClient, deleteClient } from "@/lib/project/store";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const clients = await getJsonClients();
+  const clients = await readClients();
   return NextResponse.json(clients);
 }
 
 export async function POST(req: Request) {
   try {
     const newClient = await req.json();
-    const normalized = await updateJsonClient(newClient);
+    const normalized = await createClient(newClient);
     
     // Force Next.js to re-fetch data for the dashboard
     revalidatePath("/crm");
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const updatedClient = await req.json();
-    const normalized = await updateJsonClient(updatedClient);
+    const normalized = await updateClient(updatedClient);
     
     // Force Next.js to re-fetch data for the dashboard
     revalidatePath("/crm");
@@ -49,7 +49,7 @@ export async function DELETE(req: Request) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ success: false, error: "Missing ID" }, { status: 400 });
 
-    await deleteJsonClient(id);
+    await deleteClient(id);
     
     // Force Next.js to re-fetch data for the dashboard
     revalidatePath("/crm");

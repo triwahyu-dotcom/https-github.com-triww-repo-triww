@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { deleteJsonProject } from "@/lib/project/store";
+import { deleteProject } from "@/lib/project/store";
 
 export async function DELETE(
   req: Request,
@@ -11,7 +11,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: "Missing project ID" }, { status: 400 });
     }
 
-    await deleteJsonProject(id);
+    await deleteProject(id);
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     console.error("API DELETE project error:", err);

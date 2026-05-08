@@ -18,7 +18,21 @@ export async function POST(request: NextRequest) {
       last_events,
     } = body;
 
-    if (!supabase) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    
+    // Fail loudly in production if key is missing
+    if (process.env.VERCEL && !serviceKey) {
+      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required in production");
+    }
+
+    let client = supabase!;
+    if (supabaseUrl && serviceKey) {
+      const { createClient } = await import('@supabase/supabase-js');
+      client = createClient(supabaseUrl, serviceKey);
+    }
+
+    if (!client) {
       throw new Error("Supabase is not initialized");
     }
 
@@ -46,7 +60,7 @@ export async function POST(request: NextRequest) {
     };
 
     // Map form to JSONB table structure
-    const { data, error } = await supabase
+    const { data, error } = await client
       .from("freelancers")
       .insert({
         id: newId,
@@ -57,13 +71,13 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Supabase error:", error);
+      console.error("[API manpower-intake] Supabase error:", error.message);
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
 
     return NextResponse.json({ ok: true, data });
   } catch (error: any) {
-    console.error("API error:", error);
+    console.error("[API manpower-intake] error:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

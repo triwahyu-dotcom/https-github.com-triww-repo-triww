@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import * as XLSX from "xlsx";
+import { createClient } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 import {
@@ -465,6 +466,29 @@ async function ensureDataDir() {
 }
 
 
+// --- Database Admin Client ---
+
+/**
+ * Helper to get a Supabase client with the service role key.
+ * Used for backend operations that need to bypass RLS.
+ */
+async function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    throw new Error("Supabase Admin configuration missing (URL or Service Key)");
+  }
+
+  return createClient(supabaseUrl, serviceKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+    },
+  });
+}
+
+
 // --- In-Memory Cache ---
 let cachedState: { data: VendorState; timestamp: number } | null = null;
 const CACHE_TTL = 30000; // 30 seconds
@@ -475,75 +499,52 @@ export async function readState() {
     return structuredClone(cachedState.data);
   }
 
-  if (isSupabaseConfigured()) {
-    try {
-      const { data, error } = await supabase!.from('vendor_state').select('data').limit(1).single();
-      if (!error && data) {
-        const state = data.data as VendorState;
-        cachedState = { data: state, timestamp: now };
-        return structuredClone(state);
-      }
-    } catch (e) {
-      console.warn("Error reading vendor_state from Supabase", e);
-    }
-  }
-
-  await ensureDataDir();
-
-  if (!existsSync(STATE_PATH)) {
-    return structuredClone(EMPTY_STATE);
-  }
-
   try {
-    const content = await readFile(STATE_PATH, "utf8");
-    const state = JSON.parse(content) as VendorState;
-    cachedState = { data: state, timestamp: now };
-    return structuredClone(state);
+    const adminClient = await getAdminClient();
+    const { data, error } = await adminClient
+      .from('vendor_state')
+      .select('data')
+      .eq('id', 'current')
+      .single();
+
+    if (!error && data) {
+      const state = data.data as VendorState;
+      cachedState = { data: state, timestamp: now };
+      return structuredClone(state);
+    }
+
+    if (error && error.code !== 'PGRST116') {
+      console.error("Supabase readState error:", error.message);
+    }
   } catch (e) {
-    console.warn("Could not read local state", e);
-    return structuredClone(EMPTY_STATE);
+    console.warn("Falling back to empty state due to read error:", e);
   }
+
+  return structuredClone(EMPTY_STATE);
 }
 
 export async function writeState(state: VendorState) {
   // Update cache immediately
   cachedState = { data: structuredClone(state), timestamp: Date.now() };
 
-  if (isSupabaseConfigured()) {
-    try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        const adminClient = createClient(supabaseUrl, serviceKey);
-        
-        const { error } = await adminClient.from('vendor_state').upsert({ id: 'current', data: state });
-        if (error) {
-          console.error("Supabase vendor state update error:", error.message);
-          throw new Error(`Gagal menyimpan data vendor ke database: ${error.message}`);
-        }
-      } else {
-        // Fallback to default client if service key missing
-        const { error } = await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
-        if (error) throw error;
-      }
-      
-      if (process.env.VERCEL) return;
-    } catch (e) {
-      console.warn("Failed to write state to Supabase", e);
-      throw e;
-    }
-  }
-
-
   try {
-    await ensureDataDir();
-    await writeFile(STATE_PATH, JSON.stringify(state, null, 2));
-  } catch (e) {
-    if (!isSupabaseConfigured()) {
-      console.warn("Failed to write state locally (read-only filesystem?)", e);
+    const adminClient = await getAdminClient();
+    
+    const { error } = await adminClient
+      .from('vendor_state')
+      .upsert({ 
+        id: 'current', 
+        data: state,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error("Supabase writeState error:", error.message);
+      throw new Error(`Gagal menyimpan data vendor ke database: ${error.message}`);
     }
+  } catch (e) {
+    console.error("Critical: Failed to persist vendor state", e);
+    throw e;
   }
 }
 

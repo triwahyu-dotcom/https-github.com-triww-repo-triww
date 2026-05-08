@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readDocuments, readRFPs, saveDocument, saveRFP, deleteRFP } from "@/lib/finance/store";
+import { readDocuments, readRFPs, updateDocument, createRFP, updateRFP, deleteRFP } from "@/lib/finance/store";
 import { RequestForPayment } from "@/lib/finance/types";
 import { logger } from "@/lib/logger";
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     if (!sourceDoc) {
       console.log("RFP ERROR: Source document not found", { documentId });
-      return NextResponse.json({ error: "Source document not found" }, { status: 404 });
+      return NextResponse.json({ error: "Gagal membuat RFP: Dokumen sumber tidak ditemukan." }, { status: 404 });
     }
 
     if (sourceDoc.status !== "approved" && sourceDoc.status !== "pending_finance" && sourceDoc.status !== "pending_c_level") {
@@ -101,11 +101,35 @@ export async function POST(request: Request) {
     if (!sourceDoc.rfpIds) sourceDoc.rfpIds = [];
     sourceDoc.rfpIds.push(rfpId);
 
-    await saveDocument(sourceDoc);
-    await saveRFP(newRFP);
+    let rfpCreated = false;
+    try {
+      // Step 1: Create RFP first
+      await createRFP(newRFP);
+      rfpCreated = true;
 
-    logger.audit("FinanceAPI", "RFP_CREATED", { rfpId, amount: Number(rfpAmount), documentId });
-    return NextResponse.json({ success: true, rfpId });
+      // Step 2: Update parent doc with link
+      await updateDocument(sourceDoc);
+
+      logger.audit("FinanceAPI", "RFP_CREATED", { rfpId, amount: Number(rfpAmount), documentId });
+      return NextResponse.json({ success: true, rfpId });
+    } catch (e: any) {
+      // Rollback: delete RFP if parent update fails
+      if (rfpCreated) {
+        try {
+          await deleteRFP(newRFP.id);
+          console.warn(`[RFP API] Rolled back orphan RFP ${newRFP.id} due to parent update failure`);
+        } catch (rollbackErr: any) {
+          console.error(`[RFP API] CRITICAL: Rollback failed for ${newRFP.id}: ${rollbackErr.message}`);
+        }
+      }
+
+      if (e.message.includes("tidak ditemukan")) {
+        return NextResponse.json({ 
+          error: "Gagal membuat RFP: Dokumen sumber tidak ditemukan." 
+        }, { status: 404 });
+      }
+      throw e;
+    }
   } catch (error: any) {
     logger.error("FinanceAPI", "RFP_CREATE_FAILED", { error });
     console.error("[/api/finance/rfp]", error);
@@ -126,7 +150,7 @@ export async function PATCH(request: Request) {
     const rfpIndex = allRFPs.findIndex(r => r.id === id);
 
     if (rfpIndex === -1) {
-      return NextResponse.json({ error: "RFP not found" }, { status: 404 });
+      return NextResponse.json({ error: "RFP tidak ditemukan." }, { status: 404 });
     }
 
     const rfp = allRFPs[rfpIndex];
@@ -137,10 +161,16 @@ export async function PATCH(request: Request) {
       rejectionReason: "", 
     };
 
-    await saveRFP(updatedRFP);
-
-    logger.audit("FinanceAPI", "RFP_UPDATED", { rfpId: id, updates });
-    return NextResponse.json({ success: true, rfp: updatedRFP });
+    try {
+      await updateRFP(updatedRFP);
+      logger.audit("FinanceAPI", "RFP_UPDATED", { rfpId: id, updates });
+      return NextResponse.json({ success: true, rfp: updatedRFP });
+    } catch (e: any) {
+      if (e.message.includes("tidak ditemukan")) {
+        return NextResponse.json({ error: "RFP tidak ditemukan." }, { status: 404 });
+      }
+      throw e;
+    }
   } catch (error: any) {
     logger.error("FinanceAPI", "RFP_UPDATE_FAILED", { error });
     console.error("[PATCH /api/finance/rfp]", error);

@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { readDocuments, saveDocument, deleteDocument } from "@/lib/finance/store";
+import { readDocuments, createDocument, updateDocument, deleteDocument } from "@/lib/finance/store";
 import { ExpenseDocument } from "@/lib/finance/types";
 import { getProjectDashboardData } from "@/lib/project/store";
 import { logger } from "@/lib/logger";
+
 /** API for Finance Documents (PO, SPK, CA, KONTRAK) */
 export async function POST(request: Request) {
   try {
@@ -17,15 +18,19 @@ export async function POST(request: Request) {
       pphType, usePPN, ppnAmount, totalPO,
       projectInitial,
     } = body;
+
     if (!projectId || !documentType) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
+
     const { projects } = await getProjectDashboardData();
     const project = projects.find(p => p.id === projectId);
     const projectName = project ? project.projectName : "Unknown Project";
+
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
+
     let docId = "";
     if (documentType === "CASH_ADVANCE") {
       const allDocs = await readDocuments();
@@ -39,9 +44,9 @@ export async function POST(request: Request) {
       const initialPart = projectInitial ? `/${projectInitial}` : "";
       docId = `${sequence}/JBBS/${documentType}${initialPart}/${month}/${year}`;
     }
+
     const subtotalItems = lineItems?.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0) ?? 0;
     
-    // Calculate PPh Gross Up if applicable
     const pphRate = pphType === "PPH21" ? 0.025 : pphType === "PPH23" ? 0.02 : 0;
     const isGrossUp = pph21Mode === "grossup";
     const calculatedTaxAmount = isGrossUp ? (subtotalItems / (1 - pphRate)) - subtotalItems : (Number(taxAmount) || 0);
@@ -52,8 +57,6 @@ export async function POST(request: Request) {
 
     const finalAmount = totalPOValue || Number(documentTotal) || 0;
     
-    // Determine initial status based on document type
-    // PO, SPK, KONTRAK bypass Finance verification and go direct to C-level
     const initialStatus = (documentType === "PO" || documentType === "SPK" || documentType === "KONTRAK") 
       ? "pending_c_level" 
       : "pending_finance";
@@ -77,26 +80,37 @@ export async function POST(request: Request) {
       netAmount: subtotalWithTax, 
       totalPO: totalPOValue,
     };
-    await saveDocument(newDoc);
-    logger.audit("FinanceAPI", "DOCUMENT_CREATED", { docId, projectId, documentType });
-    return NextResponse.json({ success: true, docId, document: newDoc });
+
+    try {
+      const result = await createDocument(newDoc);
+      logger.audit("FinanceAPI", "DOCUMENT_CREATED", { docId: result.id, projectId, documentType });
+      return NextResponse.json({ success: true, docId: result.id, document: result });
+    } catch (e: any) {
+      if (e.message.includes("DATABASE_CONCURRENCY_ERROR")) {
+        return NextResponse.json({ 
+          error: "Terjadi antrian penomoran dokumen. Silakan klik Simpan kembali." 
+        }, { status: 409 });
+      }
+      throw e;
+    }
   } catch (error: any) {
     logger.error("FinanceAPI", "DOCUMENT_CREATE_FAILED", { error });
     console.error("[/api/finance/document]", error);
     return NextResponse.json({ error: "Failed to create document" }, { status: 500 });
   }
 }
+
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
     const { id, ...updates } = body;
     if (!id) return NextResponse.json({ error: "Missing document id" }, { status: 400 });
+
     const allDocs = await readDocuments();
     const docIndex = allDocs.findIndex(d => d.id === id);
-    if (docIndex === -1) return NextResponse.json({ error: "Document not found" }, { status: 404 });
+    if (docIndex === -1) return NextResponse.json({ error: "Dokumen tidak ditemukan." }, { status: 404 });
     const doc = allDocs[docIndex];
     
-    // Recalculate amounts if any tax or items change
     let calculatedGross = doc.grossAmount;
     let calculatedTax = doc.taxAmount;
     let calculatedPPN = doc.ppnAmount;
@@ -118,7 +132,6 @@ export async function PATCH(request: Request) {
       updatedTotalPO = calculatedGross + calculatedPPN;
     }
 
-    // Determine status based on document type
     const resetStatus = (doc.documentType === "PO" || doc.documentType === "SPK" || doc.documentType === "KONTRAK") 
       ? "pending_c_level" 
       : "pending_finance";
@@ -134,9 +147,17 @@ export async function PATCH(request: Request) {
       status: resetStatus,
       rejectionReason: "", 
     };
-    await saveDocument(updatedDoc);
-    logger.audit("FinanceAPI", "DOCUMENT_UPDATED", { docId: id, updates });
-    return NextResponse.json({ success: true, document: updatedDoc });
+
+    try {
+      await updateDocument(updatedDoc);
+      logger.audit("FinanceAPI", "DOCUMENT_UPDATED", { docId: id, updates });
+      return NextResponse.json({ success: true, document: updatedDoc });
+    } catch (e: any) {
+      if (e.message.includes("tidak ditemukan")) {
+        return NextResponse.json({ error: "Dokumen tidak ditemukan." }, { status: 404 });
+      }
+      throw e;
+    }
   } catch (error: any) {
     logger.error("FinanceAPI", "DOCUMENT_UPDATE_FAILED", { error });
     console.error("[PATCH /api/finance/document]", error);

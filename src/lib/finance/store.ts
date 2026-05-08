@@ -1,29 +1,6 @@
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { ExpenseDocument, RequestForPayment, FinanceDashboardData } from "./types";
-
-/**
- * HELPER: Mengambil Admin Client dengan Service Role Key.
- * Menjamin akses privileged untuk operasi tulis dan bypass RLS.
- */
-async function getAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
-  if (process.env.VERCEL && !serviceKey) {
-    console.error("[FinanceStore] CRITICAL: SUPABASE_SERVICE_ROLE_KEY is missing in Vercel.");
-    throw new Error("Konfigurasi keamanan database (Service Role) tidak ditemukan di server produksi.");
-  }
-
-  if (!supabaseUrl || !serviceKey) {
-    if (isSupabaseConfigured()) return supabase!;
-    throw new Error("Kredensial Supabase tidak ditemukan. Periksa file .env.local");
-  }
-
-  const { createClient } = await import('@supabase/supabase-js');
-  return createClient(supabaseUrl, serviceKey, {
-    auth: { persistSession: false, autoRefreshToken: false }
-  });
-}
 
 /**
  * HELPER: Menaikkan angka urut pada ID dokumen (Race Condition Mitigation).

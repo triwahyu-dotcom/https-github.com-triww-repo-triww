@@ -1,23 +1,12 @@
 import { MOCK_FREELANCERS } from "@/app/manpower/freelancer/_data/mockFreelancers";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getAdminClient } from "@/lib/supabase-admin";
 import { Freelancer } from "@/app/manpower/freelancer/_types/freelancer";
 
 export async function getManPowerData(): Promise<Freelancer[]> {
   if (isSupabaseConfigured()) {
     try {
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      // Fail loudly in production if key is missing
-      if (process.env.VERCEL && !serviceKey) {
-        throw new Error("SUPABASE_SERVICE_ROLE_KEY is required in production");
-      }
-
-      let client = supabase!;
-      if (supabaseUrl && serviceKey) {
-        const { createClient } = await import('@supabase/supabase-js');
-        client = createClient(supabaseUrl, serviceKey);
-      }
+      const client = await getAdminClient();
 
       const { data, error } = await client
         .from('freelancers')
@@ -43,19 +32,7 @@ export async function saveManPowerData(freelancer: Freelancer): Promise<void> {
   }
 
   try {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    
-    // Fail loudly in production
-    if (process.env.VERCEL && !serviceKey) {
-      throw new Error("SUPABASE_SERVICE_ROLE_KEY is required in production");
-    }
-
-    let client = supabase!;
-    if (supabaseUrl && serviceKey) {
-      const { createClient } = await import('@supabase/supabase-js');
-      client = createClient(supabaseUrl, serviceKey);
-    }
+    const client = await getAdminClient();
 
     const { error } = await client
       .from('freelancers')

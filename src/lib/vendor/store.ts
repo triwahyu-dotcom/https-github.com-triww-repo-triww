@@ -5,6 +5,7 @@ import path from "node:path";
 import * as XLSX from "xlsx";
 import { createClient } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { getAdminClient } from "@/lib/supabase-admin";
 
 import {
   DashboardData,
@@ -466,27 +467,6 @@ async function ensureDataDir() {
 }
 
 
-// --- Database Admin Client ---
-
-/**
- * Helper to get a Supabase client with the service role key.
- * Used for backend operations that need to bypass RLS.
- */
-async function getAdminClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceKey) {
-    throw new Error("Supabase Admin configuration missing (URL or Service Key)");
-  }
-
-  return createClient(supabaseUrl, serviceKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  });
-}
 
 
 // --- In-Memory Cache ---

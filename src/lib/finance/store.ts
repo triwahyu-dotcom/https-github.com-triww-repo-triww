@@ -173,32 +173,6 @@ export async function deleteRFP(id: string): Promise<void> {
   }
 }
 
-// --- TEMPORARY WRAPPERS FOR BACKWARD COMPATIBILITY (REMOVE IN 3C) ---
-
-export async function saveDocument(doc: ExpenseDocument): Promise<void> {
-  try {
-    await updateDocument(doc);
-  } catch (e: any) {
-    if (e.message.includes("not found")) {
-      await createDocument(doc);
-    } else {
-      throw e;
-    }
-  }
-}
-
-export async function saveRFP(rfp: RequestForPayment): Promise<void> {
-  try {
-    await updateRFP(rfp);
-  } catch (e: any) {
-    if (e.message.includes("not found")) {
-      await createRFP(rfp);
-    } else {
-      throw e;
-    }
-  }
-}
-
 // --- DASHBOARD DATA ---
 
 export async function getFinanceDashboardData(): Promise<FinanceDashboardData> {

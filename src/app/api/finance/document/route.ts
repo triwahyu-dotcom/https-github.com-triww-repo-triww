@@ -111,8 +111,8 @@ export async function PATCH(request: Request) {
     if (docIndex === -1) return NextResponse.json({ error: "Dokumen tidak ditemukan." }, { status: 404 });
     const doc = allDocs[docIndex];
     
-    let calculatedGross = doc.grossAmount;
-    let calculatedTax = doc.taxAmount;
+    let calculatedGross = doc.grossAmount || 0;
+    let calculatedTax = doc.taxAmount || 0;
     let calculatedPPN = doc.ppnAmount;
     let updatedTotalPO = doc.totalPO;
 

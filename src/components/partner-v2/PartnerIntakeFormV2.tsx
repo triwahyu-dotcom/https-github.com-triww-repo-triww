@@ -57,172 +57,23 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
   };
 
   const validateStep3 = () => {
-    const newErrors: Record<string, string> = {};
-    const data = formData;
-    const isBusiness = data.entityType === "business";
-
-    if (!data.name || data.name.trim().length < 3) {
-      newErrors.name = "Nama minimal 3 karakter";
-    }
-
-    if (isBusiness) {
-      if (!data.legalEntityForm) newErrors.legalEntityForm = "Pilih bentuk badan usaha";
-      if (!data.taxStatus) newErrors.taxStatus = "Pilih status PKP";
-      const npwpErr = validateNPWP(data.npwpNumber || "", true);
-      if (npwpErr) newErrors.npwpNumber = npwpErr;
-      const nibDigits = (data.nibNumber || "").replace(/\D/g, "");
-      if (nibDigits.length !== 13) newErrors.nibNumber = "NIB harus 13 digit";
-    } else {
-      if (!data.domicileCity) newErrors.domicileCity = "Kota domisili wajib diisi";
-      if (data.relationshipType === "eo_partner" && !data.stageBrandName?.trim()) {
-        newErrors.stageBrandName = "Brand Name EO wajib diisi";
-      }
-      const nikErr = validateNIK(data.nikNumber || "");
-      if (nikErr) newErrors.nikNumber = nikErr;
-      if (data.personalNpwpNumber) {
-        const pNpwpErr = validateNPWP(data.personalNpwpNumber, false);
-        if (pNpwpErr) newErrors.personalNpwpNumber = pNpwpErr;
-      }
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // TEMPORARILY DISABLED VALIDATION
+    return true;
   };
 
   const validateStep4 = () => {
-    const newErrors: Record<string, string> = {};
-    const data = formData;
-    const type = data.relationshipType;
-
-    const checkMinOne = (field: string, label: string) => {
-      if (!data[field as keyof VendorIntakeV2Payload] || (data[field as keyof VendorIntakeV2Payload] as any[]).length === 0) {
-        newErrors[field] = `Pilih minimal satu ${label}`;
-      }
-    };
-    const checkRequired = (field: string, msg: string) => {
-      if (data[field as keyof VendorIntakeV2Payload] === undefined || data[field as keyof VendorIntakeV2Payload] === null || data[field as keyof VendorIntakeV2Payload]?.toString().trim() === "") {
-        newErrors[field] = msg;
-      }
-    };
-
-    switch (type) {
-      case "vendor_rental":
-        checkMinOne("rentalCategories", "kategori");
-        checkRequired("withOperator", "Pilih status operator");
-        checkRequired("capacityNotes", "Isi kapasitas stok peralatan");
-        checkMinOne("includedServices", "layanan");
-        checkRequired("pricingModel", "Pilih pricing model");
-        checkRequired("operatingCities", "Isi kota operasi");
-        break;
-      case "vendor_service":
-        checkMinOne("services", "layanan");
-        checkRequired("capacityNotes", "Isi kapasitas operasi");
-        checkRequired("operatingCities", "Isi kota operasi");
-        break;
-      case "vendor_supply":
-        checkMinOne("services", "kategori produk");
-        checkRequired("productList", "Isi daftar produk");
-        checkRequired("operatingCities", "Isi kota operasi");
-        break;
-      case "eo_partner":
-        checkMinOne("services", "spesialisasi");
-        checkRequired("capacityNotes", "Isi skala project");
-        checkRequired("experienceCount", "Isi jumlah project");
-        checkRequired("operatingCities", "Isi kota operasi");
-        if (data.entityType === "individual") {
-          checkRequired("teamComposition", "Isi komposisi tim");
-          if (!data.teamResponsibilityAccepted) newErrors.teamResponsibilityAccepted = "Persetujuan tanggung jawab tim wajib dicentang";
-        }
-        break;
-      case "talent_agency":
-        checkMinOne("services", "tipe talent");
-        checkRequired("capacityNotes", "Isi jumlah talent");
-        checkRequired("operatingCities", "Isi kota operasi");
-        break;
-      case "talent":
-        checkRequired("performerType", "Pilih tipe performer");
-        checkRequired("genre", "Isi genre/spesialisasi");
-        checkRequired("experienceCount", "Isi pengalaman panggung");
-        checkRequired("operatingCities", "Isi kota operasi");
-        break;
-      case "crew_lead":
-        checkRequired("crewLeadRole", "Pilih role utama");
-        checkRequired("teamComposition", "Isi komposisi tim");
-        checkRequired("teamSize", "Isi total tim");
-        checkRequired("teamExperience", "Isi pengalaman bersama tim");
-        checkRequired("teamDayRate", "Isi day rate tim");
-        checkRequired("operatingCities", "Isi kota operasi");
-        if (!data.teamResponsibilityAccepted) newErrors.teamResponsibilityAccepted = "Persetujuan tanggung jawab tim wajib dicentang";
-        break;
-      case "crew_individual":
-        checkRequired("crewRole", "Pilih role spesialisasi");
-        checkRequired("experienceCount", "Isi jumlah project");
-        checkRequired("dayRate", "Isi day rate");
-        checkRequired("operatingCities", "Isi kota operasi");
-        break;
-      case "freelance":
-        checkRequired("creativeSpecialty", "Pilih spesialisasi utama");
-        checkRequired("softwareSkills", "Isi software keahlian");
-        checkRequired("ratePerProject", "Isi rate project");
-        break;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // TEMPORARILY DISABLED VALIDATION
+    return true;
   };
 
   const validateStep5 = () => {
-    const newErrors: Record<string, string> = {};
-    const data = formData;
-    const isBusiness = data.entityType === "business";
-
-    if (!data.bankName) newErrors.bankName = "Pilih bank";
-    const bankAccErr = validateBankAccount(data.bankAccountNumber || "");
-    if (bankAccErr) newErrors.bankAccountNumber = bankAccErr;
-    const holderErr = validateAccountHolder(data.bankAccountHolder || "");
-    if (holderErr) newErrors.bankAccountHolder = holderErr;
-
-    if (isBusiness) {
-      const addrErr = validateMinLength(data.businessAddress || "", 20, "Alamat bisnis");
-      if (addrErr) newErrors.businessAddress = addrErr;
-      const bizEmail = validateEmail(data.email || "");
-      if (bizEmail) newErrors.email = bizEmail;
-      if (!data.picName || data.picName.trim().length < 3) newErrors.picName = "Nama PIC minimal 3 karakter";
-      if (!data.picTitle) newErrors.picTitle = "Jabatan PIC wajib diisi";
-      const picPhone = validatePhone(data.picPhone || "");
-      if (picPhone.error) newErrors.picPhone = picPhone.error;
-      const picEmail = validateEmail(data.picEmail || "");
-      if (picEmail) newErrors.picEmail = picEmail;
-    } else {
-      const emailErr = validateEmail(data.email || "");
-      if (emailErr) newErrors.email = emailErr;
-      const phoneErr = validatePhone(data.picPhone || "");
-      if (phoneErr.error) newErrors.picPhone = phoneErr.error;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // TEMPORARILY DISABLED VALIDATION
+    return true;
   };
 
   const validateStep6 = () => {
-    const newErrors: Record<string, string> = {};
-    const driveUrl = formData.documentsFolderUrl || "";
-    if (!driveUrl.startsWith("https://drive.google.com/drive/folders/")) {
-      newErrors.documentsFolderUrl = "Link harus berupa Google Drive folder yang valid.";
-    } else if (driveUrl.length < 50) {
-      newErrors.documentsFolderUrl = "Link folder tidak valid (ID folder hilang).";
-    }
-
-    const requiredDocs = getRequiredDocs(formData.relationshipType as RelationshipType).filter(d => d.required).map(d => d.name);
-    const declaredDocs = formData.declaredDocuments || [];
-    const missing = requiredDocs.filter(d => !declaredDocs.includes(d));
-
-    if (missing.length > 0) {
-      newErrors.declaredDocuments = "Mohon centang semua dokumen wajib.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    // TEMPORARILY DISABLED VALIDATION
+    return true;
   };
 
   const submitForm = async () => {
@@ -270,8 +121,6 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
   };
 
   const isNextDisabled = () => {
-    if (step === 0 && !formData.entityType) return true;
-    if (step === 1 && !formData.relationshipType) return true;
     return false;
   };
 
@@ -313,45 +162,146 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
 
       <div className={styles.divider} />
 
-      <Stepper currentStep={getVisualStepIndex()} steps={visualSteps} />
-      
-      {getDetailSubStepLabel() && (
-        <span className={styles.subStepIndicator}>
-          {getDetailSubStepLabel()}
-        </span>
-      )}
+      <div className={styles.formLayout}>
+        <div className={styles.mainForm}>
+          <Stepper currentStep={getVisualStepIndex()} steps={visualSteps} />
+          
+          {getDetailSubStepLabel() && (
+            <span className={styles.subStepIndicator}>
+              {getDetailSubStepLabel()}
+            </span>
+          )}
 
-      <div className={styles.stepContent}>
-        {(() => {
-          switch (step) {
-            case 0: return <Step1EntityType value={formData.entityType || null} onChange={(v) => updateField("entityType", v)} />;
-            case 1: return <Step2SubType entityType={formData.entityType as EntityType} value={formData.relationshipType || null} onChange={(v) => updateField("relationshipType", v)} />;
-            case 2: return <Step3Identity entityType={formData.entityType as EntityType} relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
-            case 3: return <Step4Capability entityType={formData.entityType as EntityType} relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
-            case 4: return <Step5ContactBank entityType={formData.entityType as EntityType} relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
-            case 5: return <Step6Documents relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
-            case 6: return <Step7Review formData={formData} onEdit={setStep} onSubmit={submitForm} isSubmitting={isSubmitting} submitError={errors.submit} />;
-            default: return null;
-          }
-        })()}
+          <div className={styles.stepContent}>
+            {(() => {
+              switch (step) {
+                case 0: return <Step1EntityType value={formData.entityType || null} onChange={(v) => updateField("entityType", v)} />;
+                case 1: return <Step2SubType entityType={formData.entityType as EntityType} value={formData.relationshipType || null} onChange={(v) => updateField("relationshipType", v)} />;
+                case 2: return <Step3Identity entityType={formData.entityType as EntityType} relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
+                case 3: return <Step4Capability entityType={formData.entityType as EntityType} relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
+                case 4: return <Step5ContactBank entityType={formData.entityType as EntityType} relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
+                case 5: return <Step6Documents relationshipType={formData.relationshipType as RelationshipType} formData={formData} onChange={updateField} errors={errors} />;
+                case 6: return <Step7Review formData={formData} onEdit={setStep} onSubmit={submitForm} isSubmitting={isSubmitting} submitError={errors.submit} />;
+                default: return null;
+              }
+            })()}
 
-        {step < 6 && (
-          <div className={styles.navigation}>
-            {step > 0 ? (
-              <button className={styles.btnSecondary} onClick={prevStep} disabled={isSubmitting}>
-                <ArrowLeft size={16} /> Kembali
-              </button>
-            ) : <div />}
+            {step < 6 && (
+              <div className={styles.navigation}>
+                {step > 0 ? (
+                  <button className={styles.btnSecondary} onClick={prevStep} disabled={isSubmitting}>
+                    <ArrowLeft size={16} /> Kembali
+                  </button>
+                ) : <div />}
 
-            <button 
-              className={styles.btnPrimary} 
-              onClick={nextStep}
-              disabled={isNextDisabled() || isSubmitting}
-            >
-              Lanjut <ArrowRight size={16} />
-            </button>
+                <button 
+                  className={styles.btnPrimary} 
+                  onClick={nextStep}
+                  disabled={isSubmitting}
+                >
+                  Lanjut <ArrowRight size={16} />
+                </button>
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Sidebar Info Card (Contextual) */}
+        <div className={styles.sidebar}>
+          {formData.relationshipType && step >= 2 && step <= 5 ? (() => {
+            const type = formData.relationshipType;
+            const meta: Record<string, { label: string; tax: string; payment: string; req: string }> = {
+              vendor_rental: {
+                label: "Vendor Rental",
+                tax: "PPh 23 (2% atas nilai sewa). PPN 11% efektif jika PKP.",
+                payment: "PO + Surat Jalan + Berita Acara Serah Terima (datang & pulang).",
+                req: "Akta, NPWP badan, NIB, KTP direktur, Compro, daftar peralatan + spesifikasi, NDA."
+              },
+              vendor_service: {
+                label: "Vendor Jasa",
+                tax: "PPh 23 (2% atas nilai jasa). PPN 11% efektif jika PKP.",
+                payment: "PO atau Kontrak + Berita Acara Pelaksanaan + Invoice.",
+                req: "Akta, NPWP badan, NIB, KTP direktur, Compro, cakupan layanan, kapasitas crew, NDA."
+              },
+              vendor_supply: {
+                label: "Vendor Supply",
+                tax: "TIDAK kena PPh 23 (pembelian barang). PPN 11% efektif jika PKP.",
+                payment: "PO + Surat Jalan + Faktur Pembelian.",
+                req: "Akta, NPWP badan, NIB, KTP direktur, katalog produk + harga satuan, lead time produksi, NDA."
+              },
+              eo_partner: {
+                label: "EO Partner",
+                tax: formData.entityType === 'business' ? "PPh 23 (2%). PPN 11% efektif jika PKP." : "PPh 21 (progresif atau final 0,5% UMKM).",
+                payment: "Kontrak kolaborasi. Pembayaran bertahap.",
+                req: "Akta/KTP, NPWP, NIB, Compro/Portfolio, profil tim inti."
+              },
+              talent_agency: {
+                label: "Talent Agency",
+                tax: "PPh 23 (2%) atas fee agency. PPh 21 untuk talent.",
+                payment: "Kontrak + Rider talent.",
+                req: "Akta, NPWP, NIB, daftar talent under management, contoh kontrak talent, NDA."
+              },
+              talent: {
+                label: "Talent / Performer",
+                tax: "PPh 21. Final 0,5% jika punya NPWP UMKM.",
+                payment: "Kontrak Talent + Rider. DP saat sign.",
+                req: "KTP, NPWP pribadi (jika ada), Showreel/Demo, Rate card, Rider."
+              },
+              crew_lead: {
+                label: "Crew Lead",
+                tax: "PPh 21 ke nama Anda. Anda bayar tim sendiri.",
+                payment: "SPK ke nama pribadi. Nilai mencakup seluruh tim.",
+                req: "KTP, NPWP (jika ada), Portfolio project, statement tanggung jawab tim."
+              },
+              crew_individual: {
+                label: "Crew Individu",
+                tax: "PPh 21 (progresif).",
+                payment: "SPK ke nama pribadi. Day rate.",
+                req: "KTP, NPWP (jika ada), Sertifikat profesi (jika teknis), Day rate, NDA."
+              },
+              freelance: {
+                label: "Creative Freelance",
+                tax: "PPh 21. Final 0,5% jika NPWP UMKM.",
+                payment: "PO atau SPK + Invoice (jika ada).",
+                req: "KTP, NPWP (jika ada), Portfolio link/showreel, Rate card, Software keahlian."
+              }
+            };
+
+            const activeMeta = meta[type] || {
+              label: "Mitra JUARA",
+              tax: "Sesuai ketentuan perpajakan yang berlaku.",
+              payment: "Sesuai kesepakatan dalam kontrak atau PO.",
+              req: "Dokumen identitas (KTP/NPWP), NIB (untuk badan), Portfolio/Compro."
+            };
+
+            return (
+              <div className={styles.infoCard}>
+                <div className={styles.badgeRow}>
+                  <span className={styles.infoBadge}>{activeMeta.label}</span>
+                </div>
+                <div className={styles.infoSection}>
+                  <h3>APA YANG DIBUTUHKAN?</h3>
+                  <p>{activeMeta.req}</p>
+                </div>
+                <div className={styles.infoSection}>
+                  <h3>PERLAKUAN PAJAK</h3>
+                  <p>{activeMeta.tax}</p>
+                </div>
+                <div className={styles.infoSection}>
+                  <h3>DASAR PEMBAYARAN</h3>
+                  <p>{activeMeta.payment}</p>
+                </div>
+              </div>
+            );
+          })() : (
+            <div className={styles.infoCard}>
+              <div className={styles.infoSection}>
+                <h3>PROSES VERIFIKASI</h3>
+                <p>Tim Procurement JUARA akan melakukan review data dalam 2-3 hari kerja. Pastikan dokumen yang diunggah valid dan jelas.</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

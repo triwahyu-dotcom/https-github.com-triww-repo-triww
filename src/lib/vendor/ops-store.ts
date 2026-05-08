@@ -92,13 +92,22 @@ async function ensureDataDir() {
   }
 }
 
+// --- In-Memory Cache ---
+let cachedOpsState: { data: VendorOpsState; timestamp: number } | null = null;
+const CACHE_TTL = 30000; // 30 seconds
+
 async function readOpsState() {
+  const now = Date.now();
+  if (cachedOpsState && (now - cachedOpsState.timestamp < CACHE_TTL)) {
+    return structuredClone(cachedOpsState.data);
+  }
+
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase!.from('vendor_ops_state').select('data').limit(1).single();
       if (!error && data) {
         const parsed = data.data as Partial<VendorOpsState>;
-        return {
+        const state = {
           profiles: parsed.profiles ?? [],
           scorecards: parsed.scorecards ?? [],
           compliance: parsed.compliance ?? [],
@@ -107,6 +116,8 @@ async function readOpsState() {
           notifications: parsed.notifications ?? [],
           portalAccessTokens: parsed.portalAccessTokens ?? [],
         } satisfies VendorOpsState;
+        cachedOpsState = { data: state, timestamp: now };
+        return structuredClone(state);
       }
     } catch (e) {
       console.warn("Error reading vendor_ops_state from Supabase", e);
@@ -123,7 +134,7 @@ async function readOpsState() {
     const content = await readFile(OPS_STATE_PATH, "utf8");
     const parsed = JSON.parse(content) as Partial<VendorOpsState>;
 
-    return {
+    const state = {
       profiles: parsed.profiles ?? [],
       scorecards: parsed.scorecards ?? [],
       compliance: parsed.compliance ?? [],
@@ -132,6 +143,8 @@ async function readOpsState() {
       notifications: parsed.notifications ?? [],
       portalAccessTokens: parsed.portalAccessTokens ?? [],
     } satisfies VendorOpsState;
+    cachedOpsState = { data: state, timestamp: now };
+    return structuredClone(state);
   } catch (e) {
     console.warn("Could not read local ops state", e);
     return structuredClone(EMPTY_OPS_STATE);
@@ -139,6 +152,9 @@ async function readOpsState() {
 }
 
 async function writeOpsState(state: VendorOpsState) {
+  // Update cache immediately
+  cachedOpsState = { data: structuredClone(state), timestamp: Date.now() };
+
   if (isSupabaseConfigured()) {
     try {
       await supabase!.from('vendor_ops_state').upsert({ id: 'current', data: state });

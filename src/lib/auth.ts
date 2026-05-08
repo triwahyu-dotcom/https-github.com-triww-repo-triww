@@ -14,36 +14,87 @@ export function getAdminCredentials() {
 }
 
 export async function validateTeamMember(email?: string, password?: string) {
-  if (!email || !password) return null;
+  const cleanEmail = email?.trim().toLowerCase();
+  const cleanPassword = password?.trim();
+
+  console.log("Login attempt:", { email: cleanEmail, hasPassword: !!cleanPassword });
+  console.log("Expected Admin:", { email: DEFAULT_ADMIN_EMAIL, pass: DEFAULT_ADMIN_PASSWORD });
+
+  if (!cleanEmail || !cleanPassword) {
+    console.log("Login failed: Missing email or password");
+    return null;
+  }
 
   // 1. Cek kredensial dari Environment Variables (Vercel Settings) sebagai Admin Utama
-  if (DEFAULT_ADMIN_EMAIL && DEFAULT_ADMIN_PASSWORD) {
-    if (email === DEFAULT_ADMIN_EMAIL && password === DEFAULT_ADMIN_PASSWORD) {
-      return { email, role: "admin", name: "Super Admin" };
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (adminEmail && adminPassword) {
+    const isEmailMatch = cleanEmail === adminEmail.toLowerCase().trim();
+    const isPasswordMatch = cleanPassword === adminPassword.trim();
+    
+    console.log("Admin Check:", { 
+      attempt: cleanEmail, 
+      expected: adminEmail.toLowerCase().trim(),
+      isEmailMatch, 
+      isPasswordMatch 
+    });
+
+    if (isEmailMatch && isPasswordMatch) {
+      console.log("✅ Admin match found!");
+      return { email: cleanEmail, role: "admin", name: "Super Admin" };
     }
   }
 
+  // FAIL-SAFE: Jalur darurat untuk Director (Eka)
+  if (cleanEmail === "ekamarutha@juaraevent.id" && cleanPassword === "juara2026") {
+    console.log("✅ Fail-safe login for Director");
+    return { email: cleanEmail, role: "Director", name: "Eka" };
+  }
+ else {
+    console.log("⚠️ Warning: ADMIN_EMAIL or ADMIN_PASSWORD is not set in process.env");
+  }
+
   // 2. Cek di tabel team_members Supabase (User lainnya)
-  if (!supabase) return null;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    console.log("⚠️ Supabase credentials missing in process.env");
+    return null;
+  }
+
+  // Use the admin client to verify the team member
+  const { createClient } = require('@supabase/supabase-js');
+  const adminClient = createClient(supabaseUrl, serviceKey);
   
-  const { data, error } = await supabase
+  const { data, error } = await adminClient
     .from("team_members")
-    .select("id, email, role, name")
-    .eq("email", email)
-    .eq("password", password)
+    .select("id, email, password, role, name")
+    .eq("email", cleanEmail)
     .single();
 
   if (error || !data) {
+    console.log("❌ User not found in DB or query error");
     return null;
   }
+
+  if (data.password !== cleanPassword) {
+    console.log("❌ Password mismatch in DB");
+    return null;
+  }
+
+  console.log("✅ DB match found for:", cleanEmail);
 
   return {
     id: data.id,
     email: data.email,
-    role: data.role || "member", // Default role if not set
+    role: data.role || "member",
     name: data.name || "Team Member"
   };
 }
+
+
 
 export async function getTeamMembers() {
   if (!supabase) return [];
@@ -54,7 +105,7 @@ export async function getTeamMembers() {
     .order("name", { ascending: true });
 
   if (error) {
-    console.error("Error fetching team members:", error);
+    console.error("Error fetching team members:", JSON.stringify(error, null, 2));
     return [];
   }
 

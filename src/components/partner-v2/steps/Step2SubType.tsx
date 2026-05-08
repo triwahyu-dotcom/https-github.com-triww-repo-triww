@@ -30,6 +30,10 @@ export function Step2SubType({ entityType, value, onChange }: Step2Props) {
         { id: "talent_agency", title: "Talent Agency", desc: "Manajemen artis & talent", icon: <Mic size={24} />, badge: "Management" },
       ]
     : [
+        { id: "vendor_rental", title: "Vendor Rental", desc: "Sewa alat: Sound, Lighting, LED, dll", icon: <Sliders size={24} />, badge: "Equipment" },
+        { id: "vendor_service", title: "Vendor Service", desc: "Jasa: Catering, Security, Cleaning", icon: <Settings size={24} />, badge: "Service" },
+        { id: "vendor_supply", title: "Vendor Supply", desc: "Jual barang: Merchandise, Konsumsi", icon: <Package size={24} />, badge: "Supply" },
+        { id: "talent_agency", title: "Talent Agency", desc: "Manajemen artis & talent", icon: <Mic size={24} />, badge: "Management" },
         { id: "eo_partner", title: "EO Partner", desc: "Profesional independen / Freelance PM", icon: <Handshake size={24} />, badge: "Partner" },
         { id: "talent", title: "Individual Talent", desc: "MC, Performer, Artist", icon: <Music size={24} />, badge: "Talent" },
         { id: "crew_lead", title: "Crew Lead", desc: "Leader tim teknis / Koordinator", icon: <Users size={24} />, badge: "Leader" },

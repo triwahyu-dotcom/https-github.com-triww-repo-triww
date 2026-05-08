@@ -464,12 +464,24 @@ async function ensureDataDir() {
   }
 }
 
+
+// --- In-Memory Cache ---
+let cachedState: { data: VendorState; timestamp: number } | null = null;
+const CACHE_TTL = 30000; // 30 seconds
+
 export async function readState() {
+  const now = Date.now();
+  if (cachedState && (now - cachedState.timestamp < CACHE_TTL)) {
+    return structuredClone(cachedState.data);
+  }
+
   if (isSupabaseConfigured()) {
     try {
       const { data, error } = await supabase!.from('vendor_state').select('data').limit(1).single();
       if (!error && data) {
-        return data.data as VendorState;
+        const state = data.data as VendorState;
+        cachedState = { data: state, timestamp: now };
+        return structuredClone(state);
       }
     } catch (e) {
       console.warn("Error reading vendor_state from Supabase", e);
@@ -484,7 +496,9 @@ export async function readState() {
 
   try {
     const content = await readFile(STATE_PATH, "utf8");
-    return JSON.parse(content) as VendorState;
+    const state = JSON.parse(content) as VendorState;
+    cachedState = { data: state, timestamp: now };
+    return structuredClone(state);
   } catch (e) {
     console.warn("Could not read local state", e);
     return structuredClone(EMPTY_STATE);
@@ -492,19 +506,36 @@ export async function readState() {
 }
 
 export async function writeState(state: VendorState) {
+  // Update cache immediately
+  cachedState = { data: structuredClone(state), timestamp: Date.now() };
+
   if (isSupabaseConfigured()) {
     try {
-      const { error } = await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
-      if (error) {
-        console.error("Supabase vendor state update error:", error.message);
-        throw new Error(`Gagal menyimpan data vendor ke database: ${error.message}`);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        const adminClient = createClient(supabaseUrl, serviceKey);
+        
+        const { error } = await adminClient.from('vendor_state').upsert({ id: 'current', data: state });
+        if (error) {
+          console.error("Supabase vendor state update error:", error.message);
+          throw new Error(`Gagal menyimpan data vendor ke database: ${error.message}`);
+        }
+      } else {
+        // Fallback to default client if service key missing
+        const { error } = await supabase!.from('vendor_state').upsert({ id: 'current', data: state });
+        if (error) throw error;
       }
+      
       if (process.env.VERCEL) return;
     } catch (e) {
       console.warn("Failed to write state to Supabase", e);
       throw e;
     }
   }
+
 
   try {
     await ensureDataDir();
@@ -1139,10 +1170,21 @@ export async function updateVendorIdentity(
     name?: string;
     email?: string;
     classification?: VendorClassification;
+    legalStatus?: LegalStatus;
+    taxStatus?: TaxStatus;
+    entityType?: EntityType;
+    relationshipType?: RelationshipType;
     businessAddress?: string;
     websiteUrl?: string;
+    bankName?: string;
+    bankAccountNumber?: string;
+    bankAccountHolder?: string;
+    npwpNumber?: string;
     serviceNames?: string[];
     documentsFolderUrl?: string;
+    nikNumber?: string;
+    personalNpwpNumber?: string;
+    nibNumber?: string;
   },
 ) {
   const state = await ensureSeededState();
@@ -1156,8 +1198,19 @@ export async function updateVendorIdentity(
   if (updates.name !== undefined) vendor.name = updates.name;
   if (updates.email !== undefined) vendor.email = updates.email;
   if (updates.classification !== undefined) vendor.classification = updates.classification;
+  if (updates.legalStatus !== undefined) vendor.legalStatus = updates.legalStatus;
+  if (updates.taxStatus !== undefined) vendor.taxStatus = updates.taxStatus;
+  if (updates.entityType !== undefined) vendor.entityType = updates.entityType;
+  if (updates.relationshipType !== undefined) vendor.relationshipType = updates.relationshipType;
   if (updates.businessAddress !== undefined) vendor.businessAddress = updates.businessAddress;
   if (updates.websiteUrl !== undefined) vendor.websiteUrl = updates.websiteUrl;
+  if (updates.bankName !== undefined) vendor.bankName = updates.bankName;
+  if (updates.bankAccountNumber !== undefined) vendor.bankAccountNumber = updates.bankAccountNumber;
+  if (updates.bankAccountHolder !== undefined) vendor.bankAccountHolder = updates.bankAccountHolder;
+  if (updates.npwpNumber !== undefined) vendor.npwpNumber = updates.npwpNumber;
+  if (updates.nikNumber !== undefined) vendor.nikNumber = updates.nikNumber;
+  if (updates.personalNpwpNumber !== undefined) vendor.personalNpwpNumber = updates.personalNpwpNumber;
+  if (updates.nibNumber !== undefined) vendor.nibNumber = updates.nibNumber;
   if (updates.documentsFolderUrl !== undefined) vendor.documentsFolderUrl = updates.documentsFolderUrl;
 
   if (updates.serviceNames !== undefined) {

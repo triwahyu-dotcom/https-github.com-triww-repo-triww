@@ -80,6 +80,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   useEffect(() => {
     // Rely ONLY on real production data from initialData
     const processed = initialData.vendorDetails.map((v) => {
+      const registeredDate = v.sourceTimestamp ? new Date(v.sourceTimestamp) : new Date();
       return {
         ...v,
         category: v.classification === "Penyedia Barang" ? "PENYEDIA BARANG" : "PENYEDIA JASA",
@@ -90,7 +91,9 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         location: v.businessAddress || "–",
         docs: { done: v.documentCompletion?.complete || 0, total: v.documentCompletion?.required || 3 },
         compliance: v.compliance?.status === "ok" ? "OK" : "Pending",
-        registered: v.sourceTimestamp ? v.sourceTimestamp.split('T')[0] : new Date().toISOString().split('T')[0]
+        registered: registeredDate.toISOString().split('T')[0],
+        registeredTimestamp: registeredDate.getTime(),
+        formattedRegistered: registeredDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
       };
     });
     setVendors(processed);
@@ -183,11 +186,11 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     }).sort((a, b) => {
       const order = sortOrder === "asc" ? 1 : -1;
       if (sortKey === "registered") {
-        return (new Date(a.registered).getTime() - new Date(b.registered).getTime()) * order;
+        return (a.registeredTimestamp - b.registeredTimestamp) * order;
       }
       return 0;
     });
-  }, [vendors, scoreFilter, searchQuery, sortKey, sortOrder, classificationFilter, servicesFilter]);
+  }, [vendors, scoreFilter, searchQuery, sortKey, sortOrder, classificationFilter, servicesFilter, relationshipTypeFilter, entityTypeFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -255,6 +258,17 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
           name: editFormData.name,
           classification: editFormData.classification,
           businessAddress: editFormData.location,
+          email: editFormData.email,
+          bankName: editFormData.bankName,
+          bankAccountNumber: editFormData.bankAccountNumber,
+          bankAccountHolder: editFormData.bankAccountHolder,
+          npwpNumber: editFormData.npwpNumber,
+          taxStatus: editFormData.taxStatus,
+          legalStatus: editFormData.legalStatus,
+          entityType: editFormData.entityType,
+          relationshipType: editFormData.relationshipType,
+          websiteUrl: editFormData.websiteUrl,
+          documentsFolderUrl: editFormData.documentsFolderUrl,
         })
       });
 
@@ -614,16 +628,73 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                             </span>
                           )}
                         </div>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '6px' }}>
+                        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '6px', flexWrap: 'wrap' }}>
                           <VendorTypeChip vendor={v} size="sm" />
-                          {v.relationshipType && <span style={{ fontSize: '10px', color: '#52525b' }}>• {v.classification}</span>}
+                          
+                          {/* Location Badge */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#71717a', fontSize: '11px' }}>
+                            <MapPin size={10} style={{ opacity: 0.7 }} />
+                            <span>{v.location === '–' ? 'Lokasi Belum Diisi' : v.location.split(',')[0]}</span>
+                          </div>
+
+                          {/* Capability Tags */}
+                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            {(() => {
+                              const caps: string[] = [];
+                              
+                              // 1. Cek Data V2 (Granular)
+                              if (v.relationshipType === 'vendor_rental' && v.rentalSubcategories) {
+                                caps.push(...(Array.isArray(v.rentalSubcategories) ? v.rentalSubcategories : [v.rentalSubcategories]));
+                              } else if (v.relationshipType === 'crew_individual' && v.crewRole) {
+                                caps.push(v.crewRole);
+                              } else if (v.relationshipType === 'talent' && v.performerType) {
+                                caps.push(v.performerType);
+                              } else if (v.relationshipType === 'freelance' && v.creativeSpecialty) {
+                                caps.push(v.creativeSpecialty);
+                              } 
+                              
+                              // 2. Fallback ke Data V1 / Umum jika V2 kosong
+                              if (caps.length === 0) {
+                                if (v.serviceNames && v.serviceNames.length > 0) {
+                                  caps.push(...v.serviceNames);
+                                } else if (v.type && v.type !== 'Others') {
+                                  caps.push(v.type);
+                                } else {
+                                  caps.push(v.classification);
+                                }
+                              }
+                              
+                              // Bersihkan & Unikkan
+                              const uniqueCaps = Array.from(new Set(caps)).filter(Boolean);
+                              
+                              return uniqueCaps.slice(0, 3).map((cap, i) => (
+                                <span key={i} style={{ 
+                                  fontSize: '9px', 
+                                  background: 'rgba(255,255,255,0.05)', 
+                                  border: '0.5px solid rgba(255,255,255,0.08)',
+                                  color: '#a1a1aa',
+                                  padding: '1px 6px', 
+                                  borderRadius: '4px',
+                                  whiteSpace: 'nowrap'
+                                }}>
+                                  {cap}
+                                </span>
+                              ));
+                            })()}
+                            
+                            {v.status === 'Disetujui' && (
+                              <div title="Verified Partner" style={{ color: '#378ADD', display: 'flex', alignItems: 'center' }}>
+                                <ShieldCheck size={12} />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                       <div>
                         <span className="stage-pill-premium" style={{ background: status.bg, color: status.text }}>{status.label}</span>
                       </div>
                       <div style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>
-                        {new Date(v.registered).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
+                        {v.formattedRegistered}
                       </div>
                       <div style={{ textAlign: 'right', width: '80px' }}>
                         <div style={{ fontSize: '15px', fontWeight: 500, color: scoreColor }}>{v.score === null ? '–' : v.score.toFixed(1)}</div>

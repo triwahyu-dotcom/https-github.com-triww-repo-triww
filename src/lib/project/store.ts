@@ -80,7 +80,16 @@ async function ensureDataDir() {
 export async function getJsonProjects(): Promise<ProjectRecord[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase!
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      const { data, error } = await client
         .from('projects')
         .select('data')
         .order('updated_at', { ascending: false });
@@ -124,7 +133,16 @@ function normalizeProjectSection(project: ProjectRecord): ProjectRecord {
 export async function getJsonClients(): Promise<CRMClient[]> {
   if (isSupabaseConfigured()) {
     try {
-      const { data, error } = await supabase!
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      const { data, error } = await client
         .from('clients')
         .select('data')
         .order('updated_at', { ascending: false });
@@ -204,7 +222,16 @@ export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMC
   // Persist to Supabase as primary source
   if (isSupabaseConfigured()) {
     try {
-      const { error } = await supabase!
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      const { error } = await client
         .from('clients')
         .upsert({
           id: updatedClient.id,
@@ -230,7 +257,16 @@ export async function updateJsonClient(client: Partial<CRMClient>): Promise<CRMC
 export async function deleteJsonClient(id: string) {
   if (isSupabaseConfigured()) {
     try {
-      await supabase!.from('clients').delete().eq('id', id);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      await client.from('clients').delete().eq('id', id);
     } catch (e) {
       console.error("Failed to delete client from Supabase", e);
     }
@@ -243,7 +279,16 @@ export async function deleteJsonClient(id: string) {
 export async function deleteJsonProject(id: string) {
   if (isSupabaseConfigured()) {
     try {
-      await supabase!.from('projects').delete().eq('id', id);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      await client.from('projects').delete().eq('id', id);
     } catch (e) {
       console.error("Failed to delete project from Supabase", e);
     }
@@ -282,7 +327,16 @@ export async function updateJsonProject(project: Partial<ProjectRecord>): Promis
   // Persist to Supabase if configured
   if (isSupabaseConfigured()) {
     try {
-      const { error } = await supabase!
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      const { error } = await client
         .from('projects')
         .upsert({
           id: updatedProject.id,

@@ -16,9 +16,22 @@ function ensureDataDir() {
 
 export async function readDocuments(): Promise<ExpenseDocument[]> {
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase!.from('finance_documents').select('data');
-    if (!error && data) {
-      return data.map(item => item.data);
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      const { data, error } = await client.from('finance_documents').select('data');
+      if (!error && data) {
+        return data.map(item => item.data);
+      }
+    } catch (e) {
+      console.warn("Error reading finance_documents from Supabase", e);
     }
   }
 
@@ -34,9 +47,22 @@ export async function readDocuments(): Promise<ExpenseDocument[]> {
 
 export async function readRFPs(): Promise<RequestForPayment[]> {
   if (isSupabaseConfigured()) {
-    const { data, error } = await supabase!.from('finance_rfps').select('data');
-    if (!error && data) {
-      return data.map(item => item.data);
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      let client = supabase!;
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        client = createClient(supabaseUrl, serviceKey);
+      }
+
+      const { data, error } = await client.from('finance_rfps').select('data');
+      if (!error && data) {
+        return data.map(item => item.data);
+      }
+    } catch (e) {
+      console.warn("Error reading finance_rfps from Supabase", e);
     }
   }
 
@@ -72,12 +98,25 @@ export async function getFinanceDashboardData(): Promise<FinanceDashboardData> {
 
 export async function saveDocument(doc: ExpenseDocument) {
   if (isSupabaseConfigured()) {
-    const { error } = await supabase!.from('finance_documents').upsert({ id: doc.id, data: doc });
-    if (error) {
-      console.error("Supabase finance document update error:", error.message);
-      throw new Error(`Gagal menyimpan dokumen: ${error.message}`);
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        const adminClient = createClient(supabaseUrl, serviceKey);
+        const { error } = await adminClient.from('finance_documents').upsert({ id: doc.id, data: doc });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase!.from('finance_documents').upsert({ id: doc.id, data: doc });
+        if (error) throw error;
+      }
+      
+      if (process.env.VERCEL) return;
+    } catch (e: any) {
+      console.error("Supabase finance document update error:", e.message);
+      throw new Error(`Gagal menyimpan dokumen: ${e.message}`);
     }
-    if (process.env.VERCEL) return;
   }
 
   try {
@@ -97,12 +136,25 @@ export async function saveDocument(doc: ExpenseDocument) {
 
 export async function saveRFP(rfp: RequestForPayment) {
   if (isSupabaseConfigured()) {
-    const { error } = await supabase!.from('finance_rfps').upsert({ id: rfp.id, data: rfp });
-    if (error) {
-      console.error("Supabase finance RFP update error:", error.message);
-      throw new Error(`Gagal menyimpan RFP: ${error.message}`);
+    try {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      
+      if (supabaseUrl && serviceKey) {
+        const { createClient } = await import('@supabase/supabase-js');
+        const adminClient = createClient(supabaseUrl, serviceKey);
+        const { error } = await adminClient.from('finance_rfps').upsert({ id: rfp.id, data: rfp });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase!.from('finance_rfps').upsert({ id: rfp.id, data: rfp });
+        if (error) throw error;
+      }
+      
+      if (process.env.VERCEL) return;
+    } catch (e: any) {
+      console.error("Supabase finance RFP update error:", e.message);
+      throw new Error(`Gagal menyimpan RFP: ${e.message}`);
     }
-    if (process.env.VERCEL) return;
   }
 
   try {

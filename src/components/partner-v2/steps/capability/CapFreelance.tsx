@@ -27,7 +27,7 @@ export function CapFreelance({ formData, onChange, errors }: Props) {
           onChange={(e) => onChange("creativeSpecialty", e.target.value)}
         >
           <option value="">-- Pilih --</option>
-          {["Designer 2D / Grafis", "Designer 3D / Motion", "Videographer / Editor", "Photographer", "Copywriter", "Music Producer", "Web/UI Designer", "Lainnya"].map(opt => (
+          {["Event Planner", "Designer 2D / Grafis", "Designer 3D / Motion", "Videographer / Editor", "Photographer", "Content Creator", "Copywriter", "Music Producer", "Web/UI Designer", "Lainnya"].map(opt => (
             <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>

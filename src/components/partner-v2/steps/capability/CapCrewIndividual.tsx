@@ -28,21 +28,18 @@ export function CapCrewIndividual({ formData, onChange, errors }: Props) {
         >
           <option value="">-- Pilih --</option>
           {[
-            // Management & Creative
-            "Event Planner", "Show Director (Freelance)", "Script Writer", "Content Creator", "Graphic Designer", "Editor (Video/Audio)",
+            // Management & Strategic
+            "Show Director (Freelance)", "Script Writer", "Event Coordinator", "Production Assistant",
             
             // Production & Field
-            "Floor Manager / Floor Director", "Stage Manager", "Liaison Officer (LO)", "Runner / Production Crew", "Event Coordinator", "Production Assistant",
-            
-            // Talent & Creative Content
-            "MC (Master of Ceremony)", "Talent (Singer/Dancer/Performer)", "Voice Over Artist", "Photographer", "Videographer", "Drone Pilot",
+            "Floor Manager / Floor Director", "Stage Manager", "Liaison Officer (LO)", "Runner / Production Crew",
             
             // Hospitality & Support
             "Guest Relation Officer (GRO)", "Protocoler (VVIP/Government)", "VIP Usher", "Usher / SPG / SPB", "Translator / Interpreter", 
             "Make-Up Artist (MUA)", "Hair Stylist", "Wardrobe / Stylist", "Admin Event", "Registration Staff",
             
-            // Specialist
-            "Signage Coordinator", "Ticketing Manager", "Traffic Manager (Festival/Concert)", "Security / Crowd Control", "Lainnya"
+            // Specialist Field
+            "Signage Coordinator", "Ticketing Manager", "Traffic Manager (Festival/Concert)", "Drone Pilot", "Security / Crowd Control", "Lainnya"
           ].map(opt => (
             <option key={opt} value={opt}>{opt}</option>
           ))}

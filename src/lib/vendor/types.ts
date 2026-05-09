@@ -18,7 +18,7 @@ export type VendorClassification = "Penyedia Jasa" | "Penyedia Barang" | "Talent
 export type LegalStatus = "PT/CV" | "Freelance/Perorangan" | "Lainnya" | "Unknown";
 export type TaxStatus = "PKP" | "Non-PKP" | "Unknown";
 
-export type EntityType = "business" | "individual";
+export type EntityType = "business" | "eo" | "individual";
 
 export type RelationshipType =
   | "vendor_rental"      // Sewa peralatan: sound, lighting, LED, rigging, tenda, furniture, kendaraan
@@ -84,6 +84,7 @@ export interface Vendor {
   rawSource: Record<string, string>;
   createdAt: string;
   updatedAt: string;
+  is_eo?: boolean;
 
   // === NEW FIELDS for v2 form ===
   entityType?: EntityType;
@@ -455,6 +456,7 @@ export interface VendorIntakeV2Payload {
   // Step 1: Type selection
   entityType: EntityType;
   relationshipType: RelationshipType;
+  is_eo?: boolean;
   
   // Step 2: Identity (varies by entity type)
   name: string;

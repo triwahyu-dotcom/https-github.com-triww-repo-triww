@@ -28,16 +28,21 @@ export function CapCrewIndividual({ formData, onChange, errors }: Props) {
         >
           <option value="">-- Pilih --</option>
           {[
-            "Floor Manager / Floor Director", "Stage Manager", "Liaison Officer (LO)",
-            "Runner / Production Crew", "Usher / SPG / SPB", "Security / Crowd Control",
-            "Sound: Front of House (FOH) Engineer", "Sound: Monitor Engineer", "Sound: System Engineer",
-            "Lighting: Lighting Designer (LD)", "Lighting: Programmer / Operator",
-            "LED: VJ / Media Server Operator", "LED: Programmer / Processor Op", "LED: Technician",
-            "Video: Camera Operator", "Video: Switcher / Vision Mixer", "Video: Broadcast Engineer",
-            "Streaming: Live Stream Op / OBS / vMix", "Power: Genset Operator",
-            "Technical: Rigger (Certified)", "Technical: Electrician", "Technical: Scaffolding / Stage Builder",
-            "Creative: Photographer", "Creative: Videographer", "Creative: Editor",
-            "Lainnya"
+            // Management & Creative
+            "Event Planner", "Show Director (Freelance)", "Script Writer", "Content Creator", "Graphic Designer", "Editor (Video/Audio)",
+            
+            // Production & Field
+            "Floor Manager / Floor Director", "Stage Manager", "Liaison Officer (LO)", "Runner / Production Crew", "Event Coordinator", "Production Assistant",
+            
+            // Talent & Creative Content
+            "MC (Master of Ceremony)", "Talent (Singer/Dancer/Performer)", "Voice Over Artist", "Photographer", "Videographer", "Drone Pilot",
+            
+            // Hospitality & Support
+            "Guest Relation Officer (GRO)", "Protocoler (VVIP/Government)", "VIP Usher", "Usher / SPG / SPB", "Translator / Interpreter", 
+            "Make-Up Artist (MUA)", "Hair Stylist", "Wardrobe / Stylist", "Admin Event", "Registration Staff",
+            
+            // Specialist
+            "Signage Coordinator", "Ticketing Manager", "Traffic Manager (Festival/Concert)", "Security / Crowd Control", "Lainnya"
           ].map(opt => (
             <option key={opt} value={opt}>{opt}</option>
           ))}

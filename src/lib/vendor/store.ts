@@ -1265,6 +1265,10 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     sourceTimestamp: timestamp,
     sourceRowHash: rowHash,
     rawSource,
+    rawSource: {
+      ...payload,
+      is_eo: payload.is_eo || false,
+    },
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -1534,6 +1538,7 @@ export async function submitVendorIntakeV2(
     // V2 Core Dimensions
     entityType: payload.entityType,
     relationshipType: payload.relationshipType,
+    is_eo: payload.is_eo || false,
     submissionMetadata: payload.submissionMetadata || {
       formVersion: "v2.0",
       submittedAt: timestamp

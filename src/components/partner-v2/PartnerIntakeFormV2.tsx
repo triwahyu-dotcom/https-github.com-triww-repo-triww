@@ -90,15 +90,10 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
     };
     
     try {
-      const submissionData = {
-        ...payload,
-        is_eo: formData.entityType === "eo"
-      };
-
       const res = await fetch("/api/vendor-intake-v2", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(submissionData),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Gagal submit");

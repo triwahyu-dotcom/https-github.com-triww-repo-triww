@@ -18,7 +18,7 @@ export type VendorClassification = "Penyedia Jasa" | "Penyedia Barang" | "Talent
 export type LegalStatus = "PT/CV" | "Freelance/Perorangan" | "Lainnya" | "Unknown";
 export type TaxStatus = "PKP" | "Non-PKP" | "Unknown";
 
-export type EntityType = "business" | "eo" | "individual";
+export type EntityType = "business" | "individual";
 
 export type RelationshipType =
   | "vendor_rental"      // Sewa peralatan: sound, lighting, LED, rigging, tenda, furniture, kendaraan

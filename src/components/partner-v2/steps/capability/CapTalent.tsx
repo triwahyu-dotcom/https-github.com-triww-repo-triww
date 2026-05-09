@@ -27,7 +27,22 @@ export function CapTalent({ formData, onChange, errors }: Props) {
           onChange={(e) => onChange("performerType", e.target.value)}
         >
           <option value="">-- Pilih --</option>
-          {["MC Formal", "MC Entertainment", "Singer", "Band", "DJ", "Dancer", "Magician", "Stand-up Comedian", "Performer Tradisional", "Lainnya"].map(opt => (
+          {[
+            // Host & Voice
+            "Professional MC (Formal/Corporate)", "Interactive Host (Gamified/Casual)", "Live Commerce Host", "Voice Over Artist",
+            
+            // Modern Music
+            "DJ (Specialty: EDM/House/Hip-Hop)", "Solo Instrumentalist (Saxophone/Violin)", "Beatboxer",
+            
+            // Physical Performance
+            "Aerial Performer (Silk/Lyra/Hoop)", "Fire & Pyrotechnic Performer", "LED / Light Painter Performer", "Magician / Mentalist",
+            
+            // Modern Visual & Tech
+            "Live Digital Painter", "Cosplayer Professional", "Mascot / Character Performer",
+            
+            // Specialty
+            "VR/AR Experience Guide", "Game Master (Booth/Interactive)", "Brand Ambassador (Premium Look)", "Lainnya"
+          ].map(opt => (
             <option key={opt} value={opt}>{opt}</option>
           ))}
         </select>

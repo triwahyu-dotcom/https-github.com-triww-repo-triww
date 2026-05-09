@@ -22,7 +22,22 @@ export function CapTalentAgency({ formData, onChange, errors }: Props) {
         error={errors.services}
       >
         <CheckboxGrid 
-          options={["MC", "Singer / Vokalis", "Band", "DJ", "Dancer / Choreographer", "Magician", "Stand-up Comedian", "Public Figure", "Performer Tradisional", "Lainnya"]}
+          options={[
+            // Entertainment Groups
+            "Music Band (All Genre)", "Orchestra / Chamber Music", "Choir / Acapella Group", "Dance Company (Modern/Contemporary)", "K-Pop Cover Group",
+            
+            // Creative & Tech Agency
+            "Content Creator Management", "Influencer Agency (Mid-tier/Mega)", "VTuber Agency", "Live Streaming Agency", "Projection Mapping Studio", "Gamification Agency (Game Builders)",
+            
+            // Human Resource Specialty
+            "Professional Usher Agency", "Translator / Interpreter Agency", "Model Agency (Runway/Commercial)", "Traditional Performing Arts (Sanggar)",
+            
+            // Atmosphere & Immersive
+            "Drone Show Operator Team", "Aerial / Acrobatic Troupe", "Marching Band / Brass Band", "Professional Cosplay Community",
+            
+            // Lainnya
+            "Lainnya"
+          ]}
           selected={formData.services || []}
           onChange={(val) => onChange("services", val)}
         />

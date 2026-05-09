@@ -6,7 +6,6 @@ import {
   Users, 
   Package, 
   CheckCircle, 
-  Star, 
   Search, 
   Plus, 
   Trash2, 
@@ -26,17 +25,15 @@ import {
   FolderOpen,
   ArrowUpDown,
   Mail,
-  Zap,
-  BarChart3,
-  MapPin,
-  Clock,
-  ExternalLink,
-  Check,
-  MoreVertical,
-  X,
-  PlusCircle,
-  TrendingUp,
-  FileText,
+  MapPin, 
+  Clock, 
+  ExternalLink, 
+  Check, 
+  MoreVertical, 
+  X, 
+  PlusCircle, 
+  TrendingUp, 
+  FileText, 
   Menu
 } from "lucide-react";
 import { DashboardData, VendorSummary, ReviewStatus, VendorClassification, Vendor } from "@/lib/vendor/types";
@@ -49,12 +46,10 @@ type ViewMode = "all" | "status" | "type" | "directory";
 export function VendorDashboard({ initialData }: { initialData: DashboardData }) {
   const [viewMode, setViewMode] = useState<ViewMode>("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [scoreFilter, setScoreFilter] = useState<string>("all");
   const [selectedVendorId, setSelectedVendorId] = useState<string | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "docs" | "projects" | "history" | "profile" | "finance" | "ops" | "audit">("overview");
   const [selectedVendorIds, setSelectedVendorIds] = useState<string[]>([]);
-  const [lang, setLang] = useState<"ID" | "EN">("ID");
   const [isMobile, setIsMobile] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
@@ -71,7 +66,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [sortKey, setSortKey] = useState<string>("registered");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
 
-  const [isSyncing, setIsSyncing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<any>(null);
 
@@ -99,14 +93,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     setVendors(processed);
   }, [initialData.vendorDetails]);
 
-
-  const handleSync = () => {
-    setIsSyncing(true);
-    setTimeout(() => {
-      setIsSyncing(false);
-      alert("Sinkronisasi database vendor berhasil!");
-    }, 1500);
-  };
 
   const handleLogout = () => {
     window.location.href = "/login";
@@ -155,13 +141,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   const filteredVendors = useMemo(() => {
     return vendors.filter(v => {
-      const matchScore = 
-        scoreFilter === 'all' ? true :
-        scoreFilter === 'top' ? (v.score !== null && v.score >= 4.5) :
-        scoreFilter === 'mid' ? (v.score !== null && v.score >= 3.5 && v.score < 4.5) :
-        scoreFilter === 'low' ? (v.score !== null && v.score < 3.5) :
-        scoreFilter === 'unrated' ? v.score === null : true;
-      
       const matchClass = 
         classificationFilter === 'all' ? true :
         v.classification === classificationFilter;
@@ -182,7 +161,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         v.category.toLowerCase().includes(searchQuery.toLowerCase());
       
-      return matchScore && matchClass && matchService && matchRelType && matchEntityType && matchSearch;
+      return matchClass && matchService && matchRelType && matchEntityType && matchSearch;
     }).sort((a, b) => {
       const order = sortOrder === "asc" ? 1 : -1;
       if (sortKey === "registered") {
@@ -190,7 +169,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       }
       return 0;
     });
-  }, [vendors, scoreFilter, searchQuery, sortKey, sortOrder, classificationFilter, servicesFilter, relationshipTypeFilter, entityTypeFilter]);
+  }, [vendors, searchQuery, sortKey, sortOrder, classificationFilter, servicesFilter, relationshipTypeFilter, entityTypeFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -367,20 +346,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
               </div>
             </div>
             <div className="desktop-only-presence" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <div style={{ display: 'flex', background: '#111113', borderRadius: '8px', padding: '2px', border: '0.5px solid rgba(255,255,255,0.08)' }}>
-                <button onClick={() => setLang("ID")} style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px', background: lang === "ID" ? "#1f1f23" : "transparent", color: lang === "ID" ? "#f4f4f5" : "#52525b", border: 'none' }}>ID</button>
-                <button onClick={() => setLang("EN")} style={{ padding: '4px 10px', fontSize: '11px', borderRadius: '6px', background: lang === "EN" ? "#1f1f23" : "transparent", color: lang === "EN" ? "#f4f4f5" : "#52525b", border: 'none' }}>EN</button>
-              </div>
-              <button className="ghost-button" style={{ fontSize: '12px', padding: '6px 14px', border: '0.5px solid rgba(255,255,255,0.12)', color: '#a1a1aa' }} onClick={() => alert("Membuka log sinkronisasi vendor...")}>Sync Log</button>
-              <button className="ghost-button" style={{ fontSize: '12px', padding: '6px 14px', border: '0.5px solid rgba(255,255,255,0.12)', color: '#a1a1aa' }} onClick={() => alert("Membuka outbox email vendor...")}>Outbox</button>
-              <button 
-                className="primary-button" 
-                style={{ fontSize: '12px', padding: '6px 16px', background: isSyncing ? '#1f2937' : '#378ADD', opacity: isSyncing ? 0.7 : 1 }}
-                onClick={handleSync}
-                disabled={isSyncing}
-              >
-                {isSyncing ? "Menyinkronkan..." : "Sinkronkan sekarang"}
-              </button>
               <button className="ghost-button" style={{ fontSize: '12px', color: '#71717a' }} onClick={handleLogout}>Logout</button>
             </div>
           </div>
@@ -388,13 +353,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {/* Stat Cards Row */}
-          <div className="vendor-grid-premium responsive-grid-4" style={{ padding: isMobile ? '0 16px' : '0 24px' }}>
+          <div className="vendor-grid-premium responsive-grid-4" style={{ padding: isMobile ? '0 16px' : '0 24px', gridTemplateColumns: 'repeat(4, 1fr)' }}>
             {[
               { label: "Total Vendors", value: vendors.length, sub: "Registered suppliers", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <Users size={16} /> },
               { label: "Penyedia Jasa", value: vendors.filter(v => v.category === "PENYEDIA JASA").length, sub: "Service providers", trend: "↑ 2 dari bulan lalu", trendType: 'up', icon: <User size={16} /> },
               { label: "Penyedia Barang", value: vendors.filter(v => v.category === "PENYEDIA BARANG").length, sub: "Equipment/Goods", trend: "sama", trendType: 'neutral', icon: <Package size={16} /> },
               { label: "Approved", value: vendors.filter(v => v.status === "Disetujui").length, sub: "Verified and ready", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <CheckCircle size={16} /> },
-              { label: "Top Rated", value: vendors.filter(v => v.score && v.score >= 4.5).length, sub: "Score >= 4.5", trend: "↑ 3 dari bulan lalu", trendType: 'up', icon: <Star size={16} /> },
             ].map((s, idx) => (
               <div key={idx} className="section-card-premium" style={{ padding: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -559,23 +523,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
               </div>
             </div>
 
-            {/* Score Filter Row */}
-            <div className="score-chip-row" style={{ marginTop: '8px' }}>
-              {[
-                { id: 'all', label: 'All scores' },
-                { id: 'top', label: '4.5 – 5.0 (Top Rated)' },
-                { id: 'mid', label: '3.5 – 4.4' },
-                { id: 'low', label: 'Below 3.5' },
-                { id: 'unrated', label: 'Not yet rated' }
-              ].map(chip => (
-                <button 
-                  key={chip.id}
-                  className={`score-chip ${scoreFilter === chip.id ? 'active' : ''}`}
-                  onClick={() => setScoreFilter(chip.id)}
-                >
-                  {chip.label}
-                </button>
-              ))}
             </div>
           </div>
 

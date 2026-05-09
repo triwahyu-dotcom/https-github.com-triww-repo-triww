@@ -522,8 +522,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                 </button>
               </div>
             </div>
-
-            </div>
           </div>
 
           {/* View Renderers */}
@@ -890,7 +888,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   { id: 'profile', label: 'Profile', icon: <User size={16} /> },
                   { id: 'finance', label: 'Finance', icon: <Building2 size={16} /> },
                   { id: 'docs', label: 'Docs', icon: <FileText size={16} /> },
-                  { id: 'ops', label: 'Operations', icon: <Zap size={16} /> },
+                  { id: 'ops', label: 'Operations', icon: <Grid size={16} /> },
                   { id: 'audit', label: 'Audit', icon: <Clock size={16} /> }
                 ].map(t => (
                   <button 
@@ -965,7 +963,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   {/* Klasifikasi Section */}
                   <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                     <div style={{ padding: '16px 24px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <BarChart3 size={16} color="#71717a" />
+                      <Filter size={16} color="#71717a" />
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>KLASIFIKASI & METADATA</span>
                     </div>
                     <div style={{ padding: '0 24px' }}>
@@ -988,7 +986,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   {isV2Vendor(selectedVendorDetail) && getCapabilityDisplay(selectedVendorDetail).map((section) => (
                     <div key={section.section} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                       <div style={{ padding: '16px 24px', background: 'rgba(55,138,221,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Zap size={16} color="#378ADD" />
+                        <CheckCircle size={16} color="#378ADD" />
                         <span style={{ fontSize: '11px', fontWeight: 600, color: '#378ADD', letterSpacing: '0.05em' }}>{section.section.toUpperCase()}</span>
                       </div>
                       <div style={{ padding: '0 24px' }}>

@@ -265,10 +265,10 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       services: selectedVendorDetail.services || [],
       subServices: selectedVendorDetail.subServices || [],
       crewLeadRole: selectedVendorDetail.crewLeadRole || "",
-      talentSpecialty: selectedVendorDetail.talentSpecialty || [],
-      crewSpecialty: selectedVendorDetail.crewSpecialty || [],
-      creativeSpecialty: selectedVendorDetail.creativeSpecialty || [],
-      supplyCategory: selectedVendorDetail.supplyCategory || [],
+      talentSpecialty: selectedVendorDetail.talentSpecialty || "",
+      crewSpecialty: selectedVendorDetail.crewSpecialty || "",
+      creativeSpecialty: selectedVendorDetail.creativeSpecialty || "",
+      supplyCategory: selectedVendorDetail.supplyCategory || "",
       
       // PIC defaults
       picName: selectedVendorDetail.picName || "",

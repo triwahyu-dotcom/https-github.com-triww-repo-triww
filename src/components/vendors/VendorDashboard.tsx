@@ -40,6 +40,14 @@ import { DashboardData, VendorSummary, ReviewStatus, VendorClassification, Vendo
 import { VendorTypeChip } from "./VendorTypeChip";
 import { isV2Vendor, getCapabilityDisplay, getTaxTreatment, getVendorTypeLabel } from "@/lib/vendor/v2-helpers";
 import { ShieldCheck } from "lucide-react";
+import { CapVendorRental } from "@/components/partner-v2/steps/capability/CapVendorRental";
+import { CapVendorService } from "@/components/partner-v2/steps/capability/CapVendorService";
+import { CapVendorSupply } from "@/components/partner-v2/steps/capability/CapVendorSupply";
+import { CapEoPartner } from "@/components/partner-v2/steps/capability/CapEoPartner";
+import { CapCrewLead } from "@/components/partner-v2/steps/capability/CapCrewLead";
+import { CapTalent } from "@/components/partner-v2/steps/capability/CapTalent";
+import { CapCrewIndividual } from "@/components/partner-v2/steps/capability/CapCrewIndividual";
+import { CapFreelance } from "@/components/partner-v2/steps/capability/CapFreelance";
 
 type ViewMode = "all" | "status" | "type" | "directory";
 
@@ -224,39 +232,109 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   const startEditing = () => {
     if (!selectedVendorDetail) return;
-    setEditFormData({ ...selectedVendorDetail });
+    setEditFormData({
+      ...selectedVendorDetail,
+      // Identity defaults
+      name: selectedVendorDetail.name || "",
+      email: selectedVendorDetail.email || "",
+      phone: selectedVendorDetail.phone || "",
+      businessAddress: selectedVendorDetail.businessAddress || "",
+      websiteUrl: selectedVendorDetail.websiteUrl || "",
+      documentsFolderUrl: selectedVendorDetail.documentsFolderUrl || "",
+      operatingCities: selectedVendorDetail.operatingCities || [],
+      
+      // Legal & Tax defaults
+      legalStatus: selectedVendorDetail.legalStatus || "",
+      entityType: selectedVendorDetail.entityType || "",
+      taxStatus: selectedVendorDetail.taxStatus || "",
+      npwpNumber: selectedVendorDetail.npwpNumber || "",
+      npwpName: selectedVendorDetail.npwpName || "",
+      npwpAddress: selectedVendorDetail.npwpAddress || "",
+      
+      // Banking defaults
+      bankName: selectedVendorDetail.bankName || "",
+      bankAccountNumber: selectedVendorDetail.bankAccountNumber || "",
+      bankAccountName: selectedVendorDetail.bankAccountName || "",
+      
+      // Classification defaults
+      classification: selectedVendorDetail.classification || "",
+      relationshipType: selectedVendorDetail.relationshipType || "",
+      
+      // Capability defaults (UTAMA untuk Phase 2)
+      rentalSubcategories: selectedVendorDetail.rentalSubcategories || [],
+      services: selectedVendorDetail.services || [],
+      subServices: selectedVendorDetail.subServices || [],
+      crewLeadRole: selectedVendorDetail.crewLeadRole || "",
+      talentSpecialty: selectedVendorDetail.talentSpecialty || [],
+      crewSpecialty: selectedVendorDetail.crewSpecialty || [],
+      creativeSpecialty: selectedVendorDetail.creativeSpecialty || [],
+      supplyCategory: selectedVendorDetail.supplyCategory || [],
+      
+      // PIC defaults
+      picName: selectedVendorDetail.picName || "",
+      picRole: selectedVendorDetail.picRole || "",
+      picPhone: selectedVendorDetail.picPhone || "",
+      picEmail: selectedVendorDetail.picEmail || "",
+    });
     setIsEditing(true);
   };
 
   const handleSaveVendor = async () => {
+    if (!editFormData?.id) return;
+    
     try {
+      // Build whitelisted payload (sync with backend ALLOWED_VENDOR_FIELDS)
+      const payload: Record<string, any> = {};
+      
+      // Identity
+      const identityFields = ["name", "email", "phone", "businessAddress", "websiteUrl", "documentsFolderUrl", "operatingCities"];
+      identityFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
+      
+      // Legal & Tax
+      const legalFields = ["legalStatus", "entityType", "taxStatus", "npwpNumber", "npwpName", "npwpAddress"];
+      legalFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
+      
+      // Banking
+      const bankingFields = ["bankName", "bankAccountNumber", "bankAccountName"];
+      bankingFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
+      
+      // Classification
+      const classFields = ["classification", "relationshipType"];
+      classFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
+      
+      // Capability (NEW)
+      const capFields = ["rentalSubcategories", "services", "subServices", "crewLeadRole", "talentSpecialty", "crewSpecialty", "creativeSpecialty", "supplyCategory"];
+      capFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
+      
+      // PIC (NEW)
+      const picFields = ["picName", "picRole", "picPhone", "picEmail"];
+      picFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
+
       const response = await fetch(`/api/vendors/${editFormData.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: editFormData.name,
-          classification: editFormData.classification,
-          businessAddress: editFormData.location,
-          email: editFormData.email,
-          bankName: editFormData.bankName,
-          bankAccountNumber: editFormData.bankAccountNumber,
-          bankAccountHolder: editFormData.bankAccountHolder,
-          npwpNumber: editFormData.npwpNumber,
-          taxStatus: editFormData.taxStatus,
-          legalStatus: editFormData.legalStatus,
-          entityType: editFormData.entityType,
-          relationshipType: editFormData.relationshipType,
-          websiteUrl: editFormData.websiteUrl,
-          documentsFolderUrl: editFormData.documentsFolderUrl,
-        })
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
-        setVendors(prev => prev.map(v => v.id === editFormData.id ? editFormData : v));
+        const result = await response.json();
+        const updatedVendor = result.vendor || editFormData;
+        
+        // Update local state to reflect changes immediately
+        setVendors(prev => prev.map(v => v.id === editFormData.id ? {
+          ...v,
+          ...updatedVendor,
+          // Sync UI-specific derived fields
+          category: updatedVendor.classification === "Penyedia Barang" ? "PENYEDIA BARANG" : "PENYEDIA JASA",
+          type: updatedVendor.serviceNames?.[0] || v.type,
+          location: updatedVendor.businessAddress || v.location
+        } : v));
+        
         setIsEditing(false);
         alert("Profil vendor berhasil diperbarui!");
       } else {
-        alert("Gagal memperbarui profil vendor.");
+        const errorData = await response.json();
+        alert(`Gagal memperbarui profil vendor: ${errorData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error saving vendor:", error);
@@ -266,6 +344,51 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   const toggleSelect = (id: string) => {
     setSelectedVendorIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
+
+  const renderCapabilityEditor = () => {
+    if (!editFormData) return null;
+    
+    const handleCapabilityChange = (field: string, value: any) => {
+      setEditFormData((prev: any) => ({ ...prev, [field]: value }));
+    };
+    
+    const props = {
+      entityType: editFormData.entityType,
+      formData: editFormData,
+      onChange: handleCapabilityChange,
+      errors: {},
+    };
+    
+    const relType = editFormData.relationshipType;
+    
+    switch (relType) {
+      case "vendor_rental":
+        return <CapVendorRental {...props} />;
+      case "vendor_service":
+        return <CapVendorService {...props} />;
+      case "vendor_supply":
+        return <CapVendorSupply {...props} />;
+      case "eo_partner":
+        return <CapEoPartner {...props} />;
+      case "crew_lead":
+        return <CapCrewLead {...props} />;
+      case "individual_talent":
+      case "talent":
+        return <CapTalent {...props} />;
+      case "individual_crew":
+      case "crew_individual":
+        return <CapCrewIndividual {...props} />;
+      case "creative_freelance":
+      case "freelance":
+        return <CapFreelance {...props} />;
+      default:
+        return (
+          <div style={{ padding: '12px', color: '#71717a', fontSize: '13px' }}>
+            Capability editor tidak tersedia untuk tipe: {relType || 'tidak ditentukan'}
+          </div>
+        );
+    }
   };
 
   const selectedVendorDetail = vendors.find(v => v.id.toString() === selectedVendorId);
@@ -983,24 +1106,58 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   </div>
 
                   {/* V2: Adaptive Capability Sections */}
-                  {isV2Vendor(selectedVendorDetail) && getCapabilityDisplay(selectedVendorDetail).map((section) => (
-                    <div key={section.section} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                      <div style={{ padding: '16px 24px', background: 'rgba(55,138,221,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <CheckCircle size={16} color="#378ADD" />
-                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#378ADD', letterSpacing: '0.05em' }}>{section.section.toUpperCase()}</span>
+                  {isV2Vendor(selectedVendorDetail) && (
+                    <div style={{ 
+                      marginTop: '16px',
+                      padding: '14px',
+                      background: 'rgba(55,138,221,0.05)',
+                      border: '0.5px solid rgba(55,138,221,0.15)',
+                      borderRadius: '8px',
+                    }}>
+                      <div style={{ 
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        color: '#378ADD',
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        marginBottom: '10px',
+                      }}>
+                        <CheckCircle size={12} style={{ verticalAlign: 'middle', marginRight: '4px' }} />
+                        Layanan & Kapabilitas
                       </div>
-                      <div style={{ padding: '0 24px' }}>
-                        {section.fields.filter(f => f.value && (Array.isArray(f.value) ? f.value.length > 0 : true)).map((field, idx, arr) => (
-                          <div key={field.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
-                            <span style={{ color: '#71717a' }}>{field.label}</span>
-                            <span style={{ color: '#f4f4f5', textAlign: 'right', maxWidth: '60%' }}>
-                              {Array.isArray(field.value) ? field.value.join(", ") : field.value}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
+                      
+                      {isEditing ? (
+                        <div style={{ 
+                          background: '#0a0a0a', 
+                          padding: '16px',
+                          borderRadius: '8px',
+                          border: '1px solid rgba(255,255,255,0.05)'
+                        }}>
+                          {renderCapabilityEditor()}
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                          {getCapabilityDisplay(selectedVendorDetail).map((section) => (
+                            <div key={section.section}>
+                              <div style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', marginBottom: '8px' }}>
+                                {section.section.toUpperCase()}
+                              </div>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {section.fields.filter(f => f.value && (Array.isArray(f.value) ? f.value.length > 0 : true)).map((field) => (
+                                  <div key={field.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                                    <span style={{ color: '#71717a' }}>{field.label}</span>
+                                    <span style={{ color: '#f4f4f5', textAlign: 'right', maxWidth: '60%' }}>
+                                      {Array.isArray(field.value) ? field.value.join(", ") : field.value}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  ))}
+                  )}
                 </div>
               )}
 

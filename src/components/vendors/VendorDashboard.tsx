@@ -241,7 +241,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       businessAddress: selectedVendorDetail.businessAddress || "",
       websiteUrl: selectedVendorDetail.websiteUrl || "",
       documentsFolderUrl: selectedVendorDetail.documentsFolderUrl || "",
-      operatingCities: selectedVendorDetail.operatingCities || [],
       
       // Legal & Tax defaults
       legalStatus: selectedVendorDetail.legalStatus || "",
@@ -260,15 +259,27 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       classification: selectedVendorDetail.classification || "",
       relationshipType: selectedVendorDetail.relationshipType || "",
       
-      // Capability defaults (UTAMA untuk Phase 2)
-      rentalSubcategories: selectedVendorDetail.rentalSubcategories || [],
-      services: selectedVendorDetail.services || [],
-      subServices: selectedVendorDetail.subServices || [],
-      crewLeadRole: selectedVendorDetail.crewLeadRole || "",
-      talentSpecialty: selectedVendorDetail.talentSpecialty || "",
-      crewSpecialty: selectedVendorDetail.crewSpecialty || "",
-      creativeSpecialty: selectedVendorDetail.creativeSpecialty || "",
-      supplyCategory: selectedVendorDetail.supplyCategory || "",
+      // Capability defaults (UTAMA untuk Phase 2) - Forced Scalar for select components
+      rentalSubcategories: Array.isArray(selectedVendorDetail.rentalSubcategories) ? selectedVendorDetail.rentalSubcategories : [],
+      services: Array.isArray(selectedVendorDetail.services) ? selectedVendorDetail.services : [],
+      subServices: Array.isArray(selectedVendorDetail.subServices) ? selectedVendorDetail.subServices : [],
+      
+      // Scalar fields (Force to string if array/null)
+      crewLeadRole: typeof selectedVendorDetail.crewLeadRole === 'string' ? selectedVendorDetail.crewLeadRole : "",
+      creativeSpecialty: typeof selectedVendorDetail.creativeSpecialty === 'string' ? selectedVendorDetail.creativeSpecialty : "",
+      workingStyle: typeof selectedVendorDetail.workingStyle === 'string' ? selectedVendorDetail.workingStyle : "",
+      pricingModel: typeof selectedVendorDetail.pricingModel === 'string' ? selectedVendorDetail.pricingModel : "",
+      
+      // Other capability fields
+      talentSpecialty: typeof selectedVendorDetail.talentSpecialty === 'string' ? selectedVendorDetail.talentSpecialty : "",
+      crewSpecialty: typeof selectedVendorDetail.crewSpecialty === 'string' ? selectedVendorDetail.crewSpecialty : "",
+      supplyCategory: typeof selectedVendorDetail.supplyCategory === 'string' ? selectedVendorDetail.supplyCategory : "",
+      
+      // Array fields
+      operatingCities: Array.isArray(selectedVendorDetail.operatingCities) ? selectedVendorDetail.operatingCities : [],
+      rentalCategories: Array.isArray(selectedVendorDetail.rentalCategories) ? selectedVendorDetail.rentalCategories : [],
+      includedServices: Array.isArray(selectedVendorDetail.includedServices) ? selectedVendorDetail.includedServices : [],
+      addonServices: Array.isArray(selectedVendorDetail.addonServices) ? selectedVendorDetail.addonServices : [],
       
       // PIC defaults
       picName: selectedVendorDetail.picName || "",
@@ -303,7 +314,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       classFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
       
       // Capability (NEW)
-      const capFields = ["rentalSubcategories", "services", "subServices", "crewLeadRole", "talentSpecialty", "crewSpecialty", "creativeSpecialty", "supplyCategory"];
+      const capFields = ["rentalSubcategories", "services", "subServices", "crewLeadRole", "talentSpecialty", "crewSpecialty", "creativeSpecialty", "supplyCategory", "workingStyle", "pricingModel"];
       capFields.forEach(f => { if (f in editFormData) payload[f] = editFormData[f]; });
       
       // PIC (NEW)

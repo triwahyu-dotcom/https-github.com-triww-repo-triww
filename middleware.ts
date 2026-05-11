@@ -11,6 +11,7 @@ const PUBLIC_PATHS = [
   "/vendor/my",
   "/api/auth/login",
   "/api/vendor-intake",
+  "/api/vendor-intake-v2",
   "/api/vendor-status",
   "/api/vendor-revision",
   "/api/vendor-identity",

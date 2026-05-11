@@ -100,6 +100,7 @@ export type VendorIntakePayload = {
   picEmail: string;
   businessAddress: string;
   documentsFolderUrl: string;
+  is_eo?: boolean;
 };
 
 function slug(value: string) {
@@ -786,6 +787,22 @@ function buildVendorSummary(
     entityType: vendor.entityType,
     relationshipType: vendor.relationshipType,
     submissionMetadata: vendor.submissionMetadata,
+
+    // Propagate all new capability/identity fields
+    phone: vendor.phone,
+    npwpName: vendor.npwpName,
+    npwpAddress: vendor.npwpAddress,
+    bankAccountName: vendor.bankAccountName,
+    picName: vendor.picName,
+    picRole: vendor.picRole,
+    picPhone: vendor.picPhone,
+    picEmail: vendor.picEmail,
+    notes: vendor.notes,
+    status: vendor.status,
+    supplyCategory: vendor.supplyCategory,
+    talentSpecialty: vendor.talentSpecialty,
+    crewLeadRole: vendor.crewLeadRole,
+    crewSpecialty: vendor.crewSpecialty,
   };
 }
 
@@ -852,6 +869,22 @@ function buildVendorDetail(
     services: vendor.services,
     subServices: vendor.subServices,
     operatingCities: vendor.operatingCities,
+
+    // New granular details
+    phone: vendor.phone,
+    npwpName: vendor.npwpName,
+    npwpAddress: vendor.npwpAddress,
+    bankAccountName: vendor.bankAccountName,
+    picName: vendor.picName,
+    picRole: vendor.picRole,
+    picPhone: vendor.picPhone,
+    picEmail: vendor.picEmail,
+    notes: vendor.notes,
+    status: vendor.status,
+    supplyCategory: vendor.supplyCategory,
+    talentSpecialty: vendor.talentSpecialty,
+    crewLeadRole: vendor.crewLeadRole,
+    crewSpecialty: vendor.crewSpecialty,
   };
 }
 
@@ -1145,28 +1178,57 @@ export async function updateVendorReview(vendorId: string, status: ReviewStatus,
   return buildVendorDetail(state, state.vendors.find((vendor) => vendor.id === vendorId)!, opsState);
 }
 
+const ALLOWED_VENDOR_FIELDS = [
+  // Identity
+  "name",
+  "email",
+  "phone",
+  "businessAddress",
+  "websiteUrl",
+  "documentsFolderUrl",
+  "operatingCities",
+
+  // Legal & Tax
+  "legalStatus",
+  "entityType",
+  "taxStatus",
+  "npwpNumber",
+  "npwpName",
+  "npwpAddress",
+
+  // Banking
+  "bankName",
+  "bankAccountNumber",
+  "bankAccountName",
+
+  // Classification
+  "classification",
+  "relationshipType",
+
+  // Capability
+  "rentalSubcategories",
+  "services",
+  "subServices",
+  "crewLeadRole",
+  "talentSpecialty",
+  "crewSpecialty",
+  "creativeSpecialty",
+  "supplyCategory",
+
+  // PIC Info
+  "picName",
+  "picRole",
+  "picPhone",
+  "picEmail",
+
+  // Internal Notes
+  "notes",
+  "status"
+];
+
 export async function updateVendorIdentity(
   vendorId: string,
-  updates: {
-    name?: string;
-    email?: string;
-    classification?: VendorClassification;
-    legalStatus?: LegalStatus;
-    taxStatus?: TaxStatus;
-    entityType?: EntityType;
-    relationshipType?: RelationshipType;
-    businessAddress?: string;
-    websiteUrl?: string;
-    bankName?: string;
-    bankAccountNumber?: string;
-    bankAccountHolder?: string;
-    npwpNumber?: string;
-    serviceNames?: string[];
-    documentsFolderUrl?: string;
-    nikNumber?: string;
-    personalNpwpNumber?: string;
-    nibNumber?: string;
-  },
+  updates: Record<string, any>,
 ) {
   const state = await ensureSeededState();
   const vendor = state.vendors.find((item) => item.id === vendorId);
@@ -1175,44 +1237,79 @@ export async function updateVendorIdentity(
   }
 
   const timestamp = nowIso();
+  const changedFields: string[] = [];
+  const rejectedFields: string[] = [];
 
-  if (updates.name !== undefined) vendor.name = updates.name;
-  if (updates.email !== undefined) vendor.email = updates.email;
-  if (updates.classification !== undefined) vendor.classification = updates.classification;
-  if (updates.legalStatus !== undefined) vendor.legalStatus = updates.legalStatus;
-  if (updates.taxStatus !== undefined) vendor.taxStatus = updates.taxStatus;
-  if (updates.entityType !== undefined) vendor.entityType = updates.entityType;
-  if (updates.relationshipType !== undefined) vendor.relationshipType = updates.relationshipType;
-  if (updates.businessAddress !== undefined) vendor.businessAddress = updates.businessAddress;
-  if (updates.websiteUrl !== undefined) vendor.websiteUrl = updates.websiteUrl;
-  if (updates.bankName !== undefined) vendor.bankName = updates.bankName;
-  if (updates.bankAccountNumber !== undefined) vendor.bankAccountNumber = updates.bankAccountNumber;
-  if (updates.bankAccountHolder !== undefined) vendor.bankAccountHolder = updates.bankAccountHolder;
-  if (updates.npwpNumber !== undefined) vendor.npwpNumber = updates.npwpNumber;
-  if (updates.nikNumber !== undefined) vendor.nikNumber = updates.nikNumber;
-  if (updates.personalNpwpNumber !== undefined) vendor.personalNpwpNumber = updates.personalNpwpNumber;
-  if (updates.nibNumber !== undefined) vendor.nibNumber = updates.nibNumber;
-  if (updates.documentsFolderUrl !== undefined) vendor.documentsFolderUrl = updates.documentsFolderUrl;
+  Object.entries(updates).forEach(([key, value]) => {
+    // 1. Whitelist Check
+    if (!ALLOWED_VENDOR_FIELDS.includes(key)) {
+      rejectedFields.push(key);
+      return;
+    }
 
-  if (updates.serviceNames !== undefined) {
-    // Replace services
+    // 2. Type Validation
+    const isArrayField = [
+      "operatingCities",
+      "rentalSubcategories",
+      "services",
+      "subServices",
+    ].includes(key);
+
+    if (isArrayField && !Array.isArray(value)) {
+      console.warn(`[updateVendorIdentity] Field ${key} expected array, got ${typeof value}. Skipping.`);
+      rejectedFields.push(`${key} (type mismatch)`);
+      return;
+    }
+
+    if (!isArrayField && value !== null && typeof value !== "string" && typeof value !== "boolean") {
+       // Allow boolean for teamResponsibilityAccepted if we ever add it to whitelist
+       // For now mostly strings
+       console.warn(`[updateVendorIdentity] Field ${key} expected string/null, got ${typeof value}. Skipping.`);
+       rejectedFields.push(`${key} (type mismatch)`);
+       return;
+    }
+
+    // 3. Apply Update (Shallow Merge)
+    // Special handling for legacy/derived fields if needed
+    if (key === "bankAccountName") {
+      vendor.bankAccountHolder = value; // Sync with legacy field
+    }
+
+    (vendor as any)[key] = value;
+    changedFields.push(key);
+  });
+
+  // Special handling for serviceNames (derived field in state)
+  if (updates.services !== undefined && Array.isArray(updates.services)) {
+    // Replace services in vendorServices list to maintain consistency
     state.vendorServices = state.vendorServices.filter((item) => item.vendorId !== vendorId);
     state.vendorServices.push(
-      ...updates.serviceNames.map((serviceName) => ({
+      ...updates.services.map((serviceName) => ({
         id: randomUUID(),
         vendorId,
         name: normalizeServiceName(serviceName),
       })),
     );
     // Update displayType summary
-    vendor.displayType = updates.serviceNames.join(", ");
+    vendor.displayType = updates.services.join(", ");
   }
 
   vendor.updatedAt = timestamp;
+
+  // Logging
+  console.log(`[${timestamp}] Vendor Update: id=${vendorId}`, {
+    changedFields,
+    rejectedFields: rejectedFields.length > 0 ? rejectedFields : undefined
+  });
+
+  if (rejectedFields.length > 0) {
+    console.warn(`[updateVendorIdentity] Security Warning: Attempted to update forbidden or invalid fields: ${rejectedFields.join(", ")}`);
+  }
+
   await writeState(state);
   
   const opsState = await ensureVendorOpsState(state.vendors);
-  await appendVendorAuditEntry(vendorId, "identity_updated", "Vendor identity manually adjusted by admin.");
+  await appendVendorAuditEntry(vendorId, "identity_updated", "Vendor identity updated via dashboard edit.");
   
   return buildVendorDetail(state, vendor, opsState);
 }
@@ -1264,7 +1361,7 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     documentsFolderUrl: payload.documentsFolderUrl,
     sourceTimestamp: timestamp,
     sourceRowHash: rowHash,
-    rawSource,
+    // rawSource intentionally replaced below
     rawSource: {
       ...payload,
       is_eo: payload.is_eo || false,

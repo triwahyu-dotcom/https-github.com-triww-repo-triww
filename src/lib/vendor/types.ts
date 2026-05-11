@@ -113,6 +113,7 @@ export interface Vendor {
   // For vendor_supply
   minimumOrderQty?: string;
   leadTime?: string;
+  supplyCategory?: string;
   
   // For talent
   performerType?: string;
@@ -120,8 +121,10 @@ export interface Vendor {
   experienceCount?: string;
   languages?: string;
   riderNotes?: string;
+  talentSpecialty?: string;
   
   // For crew_lead
+  crewLeadRole?: string;
   teamComposition?: string;
   teamSize?: string;
   teamExperience?: string;
@@ -130,6 +133,7 @@ export interface Vendor {
   
   // For crew_individual
   crewRole?: string;
+  crewSpecialty?: string;
   dayRate?: string;
   certifications?: string;
   
@@ -147,6 +151,18 @@ export interface Vendor {
   // Common: operating cities (replaces cities field but optional)
   operatingCities?: string[];
   
+  // Additional Identity / Contact Fields
+  phone?: string;
+  npwpName?: string;
+  npwpAddress?: string;
+  bankAccountName?: string;
+  picName?: string;
+  picRole?: string;
+  picPhone?: string;
+  picEmail?: string;
+  notes?: string;
+  status?: string;
+
   // Submission metadata for spam detection
   submissionMetadata?: {
     formVersion: string;       // "v2.0" for new form
@@ -384,6 +400,22 @@ export interface VendorSummary {
     client: string;
     stageLabel: string;
   }[];
+
+  // New fields for summary/filtering
+  phone?: string;
+  npwpName?: string;
+  npwpAddress?: string;
+  bankAccountName?: string;
+  picName?: string;
+  picRole?: string;
+  picPhone?: string;
+  picEmail?: string;
+  notes?: string;
+  status?: string;
+  supplyCategory?: string;
+  talentSpecialty?: string;
+  crewLeadRole?: string;
+  crewSpecialty?: string;
 }
 
 export interface VendorDetail extends VendorSummary {
@@ -438,6 +470,22 @@ export interface VendorDetail extends VendorSummary {
   services?: string[];
   subServices?: string[];
   operatingCities?: string[];
+  
+  // New granular details
+  phone?: string;
+  npwpName?: string;
+  npwpAddress?: string;
+  bankAccountName?: string;
+  picName?: string;
+  picRole?: string;
+  picPhone?: string;
+  picEmail?: string;
+  notes?: string;
+  status?: string;
+  supplyCategory?: string;
+  talentSpecialty?: string;
+  crewLeadRole?: string;
+  crewSpecialty?: string;
 }
 
 export interface DashboardData {

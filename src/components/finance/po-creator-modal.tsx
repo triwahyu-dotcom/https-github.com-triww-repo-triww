@@ -280,11 +280,11 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.9)", zIndex: 1000, display: "grid", placeItems: "center", backdropFilter: "blur(12px)" }}>
-      <div style={{ width: "min(960px, 95vw)", height: "min(820px, 92vh)", background: "#1f1f23", borderRadius: "24px", display: "flex", flexDirection: "column", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.1)" }}>
+      <div style={{ width: "min(960px, 95vw)", height: "min(820px, 92vh)", background: "#1f1f23", borderRadius: "20px", display: "flex", flexDirection: "column", overflow: "hidden", border: "0.5px solid rgba(255,255,255,0.1)" }}>
         
         {/* Header & Steps */}
-        <div style={{ padding: "32px 40px", background: "#111113", borderBottom: "0.5px solid rgba(255,255,255,0.06)" }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <div style={{ padding: "20px 32px", background: "#111113", borderBottom: "0.5px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
               <h2 style={{ fontSize: "20px", color: "#f4f4f5", margin: 0 }}>{editDoc ? 'Edit' : 'Create'} Procurement Document</h2>
               <p style={{ fontSize: "12px", color: "#71717a", marginTop: "4px" }}>Generate PO, SPK, or Contract for project: <strong>{selectedProject?.projectName || 'Select Project'}</strong></p>
@@ -311,16 +311,16 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         </div>
 
         {/* Content Area */}
-        <div style={{ flex: 1, overflowY: "auto", padding: "40px" }}>
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
           
           {step === 1 && (
             <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Select Project</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "12px", marginBottom: '40px', maxHeight: '240px', overflowY: 'auto', padding: '4px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Select Project</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px", marginBottom: '24px', maxHeight: '200px', overflowY: 'auto', padding: '4px' }}>
                 {activeProjects.map(p => (
                   <div key={p.id} onClick={() => setSelectedProject(p)} style={{ 
-                    padding: "16px", background: selectedProject?.id === p.id ? "rgba(55,138,221,0.1)" : "#18181b",
-                    borderRadius: "12px", border: selectedProject?.id === p.id ? "1.5px solid #378ADD" : "0.5px solid rgba(255,255,255,0.06)",
+                    padding: "10px 14px", background: selectedProject?.id === p.id ? "rgba(55,138,221,0.1)" : "#18181b",
+                    borderRadius: "10px", border: selectedProject?.id === p.id ? "1.5px solid #378ADD" : "0.5px solid rgba(255,255,255,0.06)",
                     cursor: "pointer", transition: "all 0.2s"
                   }}>
                     <div style={{ fontSize: '14px', fontWeight: 600, color: selectedProject?.id === p.id ? '#378ADD' : '#e4e4e7' }}>{p.projectName}</div>
@@ -329,12 +329,12 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                 ))}
               </div>
 
-              <div style={{ fontSize: '12px', fontWeight: 600, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px' }}>Document Type</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+              <div style={{ fontSize: '11px', fontWeight: 600, color: '#52525b', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>Document Type</div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px" }}>
                 {(["PO", "SPK", "KONTRAK"] as DocType[]).map(t => (
                   <div key={t} onClick={() => setDocType(t)} style={{ 
-                    padding: "20px", background: docType === t ? "rgba(55,138,221,0.1)" : "#18181b",
-                    borderRadius: "16px", border: docType === t ? "1.5px solid #378ADD" : "0.5px solid rgba(255,255,255,0.06)",
+                    padding: "12px", background: docType === t ? "rgba(55,138,221,0.1)" : "#18181b",
+                    borderRadius: "12px", border: docType === t ? "1.5px solid #378ADD" : "0.5px solid rgba(255,255,255,0.06)",
                     cursor: "pointer", textAlign: 'center'
                   }}>
                     <div style={{ color: docType === t ? '#378ADD' : '#52525b', marginBottom: '8px' }}>{t === 'PO' ? <ShoppingBag size={24} /> : t === 'SPK' ? <Scroll size={24} /> : <FileSignature size={24} />}</div>
@@ -622,7 +622,7 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
         </div>
 
         {/* Footer */}
-        <div style={{ padding: "24px 40px", background: "#111113", borderTop: "0.5px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between" }}>
+        <div style={{ padding: "16px 32px", background: "#111113", borderTop: "0.5px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between" }}>
           <button onClick={() => step > 1 && setStep((step - 1) as any)} style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer', opacity: step === 1 ? 0 : 1 }}>Back</button>
           <div style={{ display: 'flex', gap: '12px' }}>
              <button onClick={onClose} style={{ background: 'transparent', border: 'none', color: '#71717a', padding: '0 20px', cursor: 'pointer' }}>Cancel</button>

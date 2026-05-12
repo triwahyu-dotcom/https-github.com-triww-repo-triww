@@ -36,12 +36,26 @@ import {
   FileText, 
   Menu
 } from "lucide-react";
-import { DashboardData, VendorSummary, ReviewStatus, VendorClassification, Vendor } from "@/lib/vendor/types";
+import { DashboardData, VendorSummary, ReviewStatus, VendorClassification, Vendor, VendorDetail } from "@/lib/vendor/types";
 import { VendorTypeChip } from "./VendorTypeChip";
 import { isV2Vendor, getCapabilityDisplay, getTaxTreatment, getVendorTypeLabel } from "@/lib/vendor/v2-helpers";
 import { ShieldCheck } from "lucide-react";
 
 type ViewMode = "all" | "status" | "type" | "directory";
+
+/**
+ * Enhanced Vendor type with UI-specific derived fields
+ */
+type DashboardVendor = VendorDetail & {
+  category: string;
+  score: number | null;
+  location: string;
+  docs: { done: number; total: number };
+  complianceStatus: string;
+  registered: string;
+  registeredTimestamp: number;
+  formattedRegistered: string;
+}
 
 export function VendorDashboard({ initialData }: { initialData: DashboardData }) {
   const [viewMode, setViewMode] = useState<ViewMode>("all");
@@ -69,25 +83,28 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<any>(null);
 
-  const [vendors, setVendors] = useState<any[]>([]);
+  const [vendors, setVendors] = useState<DashboardVendor[]>([]);
 
   useEffect(() => {
     // Rely ONLY on real production data from initialData
     const processed = initialData.vendorDetails.map((v) => {
-      const registeredDate = v.sourceTimestamp ? new Date(v.sourceTimestamp) : new Date();
+      const registeredDate = v.sourceTimestamp ? new Date(v.sourceTimestamp) : new Date(0);
+      const isGoods = v.relationshipType 
+        ? v.relationshipType === "vendor_supply" 
+        : (v.classification === "Penyedia Barang" || v.type === "goods");
+        
       return {
         ...v,
-        category: v.classification === "Penyedia Barang" ? "PENYEDIA BARANG" : "PENYEDIA JASA",
-        type: v.serviceNames?.[0] || "Others",
-        classification: v.classification === "Penyedia Barang" ? "Goods / Equipment" : "Services / Specialist",
-        status: v.reviewStatus === "approved" ? "Disetujui" : (v.reviewStatus === "in_review" ? "Sedang direview" : "Baru"),
+        category: isGoods ? "PENYEDIA BARANG" : "PENYEDIA JASA",
         score: v.performance?.average || null,
         location: v.businessAddress || "–",
         docs: { done: v.documentCompletion?.complete || 0, total: v.documentCompletion?.required || 3 },
-        compliance: v.compliance?.status === "ok" ? "OK" : "Pending",
+        complianceStatus: v.compliance?.status === "ok" ? "OK" : "Pending",
         registered: registeredDate.toISOString().split('T')[0],
         registeredTimestamp: registeredDate.getTime(),
-        formattedRegistered: registeredDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+        formattedRegistered: registeredDate.getTime() === 0 
+          ? "N/A" 
+          : registeredDate.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
       };
     });
     setVendors(processed);
@@ -100,13 +117,9 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
 
 
-  const [classificationFilter, setClassificationFilter] = useState<string>("all");
-  const [servicesFilter, setServicesFilter] = useState<string>("all");
   const [relationshipTypeFilter, setRelationshipTypeFilter] = useState<string>("all");
   const [entityTypeFilter, setEntityTypeFilter] = useState<string>("all");
 
-  const [showClassDropdown, setShowClassDropdown] = useState(false);
-  const [showServiceDropdown, setShowServiceDropdown] = useState(false);
   const [showRelTypeDropdown, setShowRelTypeDropdown] = useState(false);
   const [showEntityTypeDropdown, setShowEntityTypeDropdown] = useState(false);
 
@@ -141,14 +154,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   const filteredVendors = useMemo(() => {
     return vendors.filter(v => {
-      const matchClass = 
-        classificationFilter === 'all' ? true :
-        v.classification === classificationFilter;
-      
-      const matchService = 
-        servicesFilter === 'all' ? true :
-        v.type === servicesFilter;
-
       const matchRelType = 
         relationshipTypeFilter === 'all' ? true :
         v.relationshipType === relationshipTypeFilter;
@@ -157,35 +162,47 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         entityTypeFilter === 'all' ? true :
         v.entityType === entityTypeFilter;
       
-      const matchSearch = searchQuery === '' ? true :
-        v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        v.category.toLowerCase().includes(searchQuery.toLowerCase());
+      const q = searchQuery.toLowerCase();
+      const matchSearch = q === '' ? true :
+        [
+          v.name,
+          v.category,
+          v.relationshipType ? RELATIONSHIP_LABELS[v.relationshipType] : null,
+          v.entityType ? ENTITY_LABELS[v.entityType] : null,
+        ].filter(Boolean).some(f => String(f).toLowerCase().includes(q));
       
-      return matchClass && matchService && matchRelType && matchEntityType && matchSearch;
+      return matchRelType && matchEntityType && matchSearch;
     }).sort((a, b) => {
       const order = sortOrder === "asc" ? 1 : -1;
       if (sortKey === "registered") {
         return (a.registeredTimestamp - b.registeredTimestamp) * order;
       }
+      if (sortKey === "score") {
+        return ((a.score ?? 0) - (b.score ?? 0)) * order;
+      }
+      if (sortKey === "name") {
+        return a.name.localeCompare(b.name) * order;
+      }
       return 0;
     });
-  }, [vendors, searchQuery, sortKey, sortOrder, classificationFilter, servicesFilter, relationshipTypeFilter, entityTypeFilter]);
+  }, [vendors, searchQuery, sortKey, sortOrder, relationshipTypeFilter, entityTypeFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Disetujui": return { bg: "rgba(99,153,34,0.15)", text: "#97C459", label: "Disetujui" };
-      case "Sedang direview": return { bg: "rgba(239,159,39,0.15)", text: "#EF9F27", label: "Sedang direview" };
-      case "Baru": return { bg: "rgba(55,138,221,0.15)", text: "#85B7EB", label: "Baru" };
-      case "Ditolak": return { bg: "rgba(226,75,74,0.15)", text: "#F09595", label: "Ditolak" };
+      case "approved": return { bg: "rgba(99,153,34,0.15)", text: "#97C459", label: "Disetujui" };
+      case "in_review": return { bg: "rgba(239,159,39,0.15)", text: "#EF9F27", label: "Sedang direview" };
+      case "new": return { bg: "rgba(55,138,221,0.15)", text: "#85B7EB", label: "Baru" };
+      case "rejected": return { bg: "rgba(226,75,74,0.15)", text: "#F09595", label: "Ditolak" };
+      case "needs_revision": return { bg: "rgba(239,159,39,0.15)", text: "#EF9F27", label: "Perlu Revisi" };
       default: return { bg: "rgba(255,255,255,0.05)", text: "#71717a", label: status };
     }
   };
 
   const getClassificationColor = (classification: string) => {
-    if (classification === "Goods / Equipment" || classification === "Equipment") {
-      return { bg: "rgba(15,110,86,0.15)", text: "#5DCAA5" };
+    if (classification === "Penyedia Barang") {
+      return { bg: "rgba(15,110,86,0.15)", text: "#5DCAA5", label: "Goods / Equipment" };
     }
-    return { bg: "rgba(83,74,183,0.15)", text: "#AFA9EC" };
+    return { bg: "rgba(55,138,221,0.15)", text: "#85B7EB", label: "Services / Specialist" };
   };
 
   const getScoreColor = (score: number | null) => {
@@ -215,7 +232,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     );
   };
 
-  const openVendor = (id: number) => {
+  const openVendor = (id: string) => {
     setSelectedVendorId(id.toString());
     setIsDetailOpen(true);
     setIsEditing(false);
@@ -358,7 +375,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
               { label: "Total Vendors", value: vendors.length, sub: "Registered suppliers", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <Users size={16} /> },
               { label: "Penyedia Jasa", value: vendors.filter(v => v.category === "PENYEDIA JASA").length, sub: "Service providers", trend: "↑ 2 dari bulan lalu", trendType: 'up', icon: <User size={16} /> },
               { label: "Penyedia Barang", value: vendors.filter(v => v.category === "PENYEDIA BARANG").length, sub: "Equipment/Goods", trend: "sama", trendType: 'neutral', icon: <Package size={16} /> },
-              { label: "Approved", value: vendors.filter(v => v.status === "Disetujui").length, sub: "Verified and ready", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <CheckCircle size={16} /> },
+              { label: "Approved", value: vendors.filter(v => v.reviewStatus === "approved").length, sub: "Verified and ready", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <CheckCircle size={16} /> },
             ].map((s, idx) => (
               <div key={idx} className="section-card-premium" style={{ padding: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -407,61 +424,14 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <button 
-                    className="mini-input" 
-                    style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: classificationFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
-                    onClick={() => { setShowClassDropdown(!showClassDropdown); setShowServiceDropdown(false); }}
-                  >
-                    {classificationFilter === 'all' ? 'Classification' : classificationFilter} <ChevronDown size={14} />
-                  </button>
-                  {showClassDropdown && (
-                    <div className="dropdown-panel-premium">
-                      {['all', 'Services / Specialist', 'Goods / Equipment'].map(opt => (
-                        <div 
-                          key={opt} 
-                          className={`dropdown-item-premium ${classificationFilter === opt ? 'active' : ''}`}
-                          onClick={() => { setClassificationFilter(opt); setShowClassDropdown(false); }}
-                        >
-                          {opt === 'all' ? 'All Classifications' : opt}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <button 
-                    className="mini-input" 
-                    style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: servicesFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
-                    onClick={() => { setShowServiceDropdown(!showServiceDropdown); setShowClassDropdown(false); setShowRelTypeDropdown(false); setShowEntityTypeDropdown(false); }}
-                  >
-                    {servicesFilter === 'all' ? 'Services' : servicesFilter} <ChevronDown size={14} />
-                  </button>
-                  {showServiceDropdown && (
-                    <div className="dropdown-panel-premium" style={{ width: '240px' }}>
-                      {['all', ...allServiceTypes, 'Others'].map(opt => (
-                        <div 
-                          key={opt} 
-                          className={`dropdown-item-premium ${servicesFilter === opt ? 'active' : ''}`}
-                          onClick={() => { setServicesFilter(opt); setShowServiceDropdown(false); }}
-                        >
-                          <span style={{ flex: 1 }}>{opt === 'all' ? 'All Services' : opt}</span>
-                          <span style={{ fontSize: '10px', opacity: 0.5 }}>
-                            {opt === 'all' ? vendors.length : vendors.filter(v => v.type === opt).length}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
                 {/* V2: Tipe Mitra Filter */}
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <button 
                     className="mini-input" 
                     style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: relationshipTypeFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
-                    onClick={() => { setShowRelTypeDropdown(!showRelTypeDropdown); setShowClassDropdown(false); setShowServiceDropdown(false); setShowEntityTypeDropdown(false); }}
+                    onClick={() => { setShowRelTypeDropdown(!showRelTypeDropdown); setShowEntityTypeDropdown(false); }}
                   >
                     {relationshipTypeFilter === 'all' ? 'Tipe Mitra' : (RELATIONSHIP_LABELS[relationshipTypeFilter] || relationshipTypeFilter)} <ChevronDown size={14} />
                   </button>
@@ -488,7 +458,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   <button 
                     className="mini-input" 
                     style={{ background: '#111113', height: '32px', display: 'flex', alignItems: 'center', gap: '8px', border: entityTypeFilter !== 'all' ? '1px solid #378ADD' : '0.5px solid rgba(255,255,255,0.08)' }}
-                    onClick={() => { setShowEntityTypeDropdown(!showEntityTypeDropdown); setShowClassDropdown(false); setShowServiceDropdown(false); setShowRelTypeDropdown(false); }}
+                    onClick={() => { setShowEntityTypeDropdown(!showEntityTypeDropdown); setShowRelTypeDropdown(false); }}
                   >
                     {entityTypeFilter === 'all' ? 'Bentuk Entitas' : (ENTITY_LABELS[entityTypeFilter] || entityTypeFilter)} <ChevronDown size={14} />
                   </button>
@@ -530,7 +500,15 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
               <div className="tab-content-fade">
                 <div className="vendor-table-header" style={{ gridTemplateColumns: '32px 1fr 120px 120px 80px', gap: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center' }}><input type="checkbox" /></div>
-                  <div>NAMA VENDOR</div>
+                  <div 
+                    style={{ cursor: 'pointer', color: sortKey === 'name' ? '#378ADD' : '#f4f4f5' }}
+                    onClick={() => {
+                      if (sortKey === 'name') setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+                      else { setSortKey('name'); setSortOrder('asc'); }
+                    }}
+                  >
+                    NAMA VENDOR {sortKey === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                  </div>
                   <div>STATUS</div>
                   <div 
                     style={{ textAlign: 'center', cursor: 'pointer', color: sortKey === 'registered' ? '#378ADD' : '#52525b' }}
@@ -541,10 +519,18 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   >
                     TANGGAL DAFTAR {sortKey === 'registered' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
                   </div>
-                  <div style={{ textAlign: 'right' }}>SCORE</div>
+                  <div 
+                    style={{ textAlign: 'right', cursor: 'pointer', color: sortKey === 'score' ? '#378ADD' : '#52525b' }}
+                    onClick={() => {
+                      if (sortKey === 'score') setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+                      else { setSortKey('score'); setSortOrder('desc'); }
+                    }}
+                  >
+                    SCORE {sortKey === 'score' ? (sortOrder === 'asc' ? '↑' : '↓') : ''}
+                  </div>
                 </div>
                 {filteredVendors.map(v => {
-                  const status = getStatusColor(v.status);
+                  const status = getStatusColor(v.reviewStatus);
                   const classification = getClassificationColor(v.classification);
                   const scoreColor = getScoreColor(v.score);
                   return (
@@ -598,12 +584,9 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                                 caps.push(v.creativeSpecialty);
                               } 
                               
-                              // 2. Fallback ke Data V1 / Umum jika V2 kosong
                               if (caps.length === 0) {
                                 if (v.serviceNames && v.serviceNames.length > 0) {
                                   caps.push(...v.serviceNames);
-                                } else if (v.type && v.type !== 'Others') {
-                                  caps.push(v.type);
                                 } else {
                                   caps.push(v.classification);
                                 }
@@ -627,7 +610,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                               ));
                             })()}
                             
-                            {v.status === 'Disetujui' && (
+                            {v.reviewStatus === 'approved' && (
                               <div title="Verified Partner" style={{ color: '#378ADD', display: 'flex', alignItems: 'center' }}>
                                 <ShieldCheck size={12} />
                               </div>

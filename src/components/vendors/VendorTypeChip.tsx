@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import type { Vendor } from "@/lib/vendor/types";
+import type { Vendor, VendorSummary } from "@/lib/vendor/types";
 import { getVendorTypeLabel, isV2Vendor } from "@/lib/vendor/v2-helpers";
 
 interface Props {
-  vendor: Vendor;
+  vendor: VendorSummary | Vendor;
   size?: "sm" | "md";
 }
 

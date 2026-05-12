@@ -1,4 +1,4 @@
-import type { Vendor, RelationshipType, EntityType } from "./types";
+import type { Vendor, RelationshipType, EntityType, VendorSummary } from "./types";
 
 /**
  * Detects if a vendor is registered via the V2 form based on schema fields
@@ -31,7 +31,7 @@ export const ENTITY_LABELS: Record<EntityType, string> = {
 /**
  * Returns a human-readable type label, falling back to legacy classification
  */
-export function getVendorTypeLabel(vendor: Vendor): string {
+export function getVendorTypeLabel(vendor: Vendor | VendorSummary): string {
   if (vendor.relationshipType) {
     return RELATIONSHIP_LABELS[vendor.relationshipType];
   }
@@ -41,7 +41,7 @@ export function getVendorTypeLabel(vendor: Vendor): string {
 /**
  * Derives default tax treatment based on entity type
  */
-export function getTaxTreatment(vendor: Vendor): string {
+export function getTaxTreatment(vendor: Vendor | VendorSummary): string {
   if (vendor.entityType === "business") return "PPh 23 (2%)";
   if (vendor.entityType === "individual") return "PPh 21";
   return "Belum jelas";

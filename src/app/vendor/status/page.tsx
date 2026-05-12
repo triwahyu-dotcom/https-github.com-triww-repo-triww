@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 
 type StatusPayload = {
   registrationCode: string;
@@ -44,6 +44,13 @@ export default function VendorStatusPage() {
   const [magicLinkError, setMagicLinkError] = useState("");
   const [magicLinkPending, startMagicLinkTransition] = useTransition();
   const [pending, startTransition] = useTransition();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -92,121 +99,135 @@ export default function VendorStatusPage() {
   }
 
   return (
-    <div className="notion-shell vendor-form-shell" style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
-      <header className="vendor-form-header" style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <em className="eyebrow" style={{ color: 'var(--blue)', fontSize: '0.8rem', letterSpacing: '0.1em' }}>VENDOR PORTAL</em>
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, margin: '12px 0 16px', letterSpacing: '-0.02em' }}>Track your verification</h1>
-        <p className="text-muted" style={{ fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto 24px', lineHeight: 1.6 }}>
-          Enter your registration code to check your progress, document status, and review notes.
+    <div className="v2-status-shell" style={{ background: '#FAF9F7', minHeight: '100vh', padding: '60px 20px', color: '#0A0A0A', fontFamily: 'var(--font-sans), system-ui, sans-serif' }}>
+      <header style={{ maxWidth: '600px', margin: '0 auto 48px', textAlign: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '24px' }}>
+          <span style={{ fontWeight: 700, fontSize: '18px', letterSpacing: '-0.02em' }}>JUARA</span>
+          <span style={{ fontWeight: 600, fontSize: '11px', letterSpacing: '0.08em', textTransform: 'uppercase', color: '#8A8A8A' }}>STATUS PORTAL</span>
+        </div>
+        <h1 style={{ fontSize: '32px', fontWeight: 700, margin: '0 0 12px', letterSpacing: '-0.03em', lineHeight: 1.1 }}>Pantau Status Pendaftaran</h1>
+        <p style={{ fontSize: '15px', color: '#525252', lineHeight: 1.6, margin: 0 }}>
+          Masukkan kode registrasi Anda untuk melihat progres verifikasi, status dokumen, dan catatan dari tim procurement.
         </p>
       </header>
 
-      <form className="project-card" onSubmit={handleSubmit} style={{ padding: '32px', background: 'var(--panel)', border: '1px solid var(--line)', borderRadius: '24px', marginBottom: '32px' }}>
-        <section className="vendor-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '24px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Registration Code
-            <input required value={form.registrationCode} onChange={(event) => setForm((current) => ({ ...current, registrationCode: event.target.value }))} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            Business Email (Optional)
-            <input value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-        </section>
-
-        {error ? (
-          <div className="form-message error" style={{ padding: '16px', borderRadius: '12px', background: 'rgba(255, 107, 107, 0.1)', border: '1px solid rgba(255, 107, 107, 0.2)', color: '#ff6b6b', marginBottom: '24px', fontSize: '0.9rem' }}>
-            {error}
+      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <form onSubmit={handleSubmit} style={{ background: '#FFFFFF', border: '1px solid #ECEAE5', borderRadius: '16px', padding: '32px', boxShadow: '0 1px 2px rgba(10, 10, 10, 0.04), 0 4px 12px rgba(10, 10, 10, 0.04)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: '#525252' }}>ID Pendaftaran (Registration Code)</label>
+              <input 
+                required 
+                placeholder="JU-2026-XXXXX"
+                value={form.registrationCode} 
+                onChange={(event) => setForm((current) => ({ ...current, registrationCode: event.target.value }))} 
+                style={{ padding: '12px 14px', borderRadius: '8px', border: '1px solid #DCD9D2', background: '#FFFFFF', color: '#0A0A0A', fontSize: '14px', outline: 'none' }} 
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 600, color: '#525252' }}>Email Bisnis (Opsional)</label>
+              <input 
+                placeholder="email@perusahaan.com"
+                value={form.email} 
+                onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} 
+                style={{ padding: '12px 14px', borderRadius: '8px', border: '1px solid #DCD9D2', background: '#FFFFFF', color: '#0A0A0A', fontSize: '14px', outline: 'none' }} 
+              />
+            </div>
           </div>
-        ) : null}
 
-        <div className="vendor-form-actions" style={{ display: 'flex', gap: '12px' }}>
-          <button className="primary-button" type="submit" disabled={pending} style={{ padding: '12px 24px', borderRadius: '999px', background: 'var(--blue)', color: 'white', border: 'none', fontWeight: 700, cursor: 'pointer' }}>
-            {pending ? "Checking..." : "Check Status"}
-          </button>
-          <button className="ghost-button" onClick={handleMagicLinkRequest} type="button" disabled={magicLinkPending} style={{ padding: '12px 24px', borderRadius: '999px', border: '1px solid var(--line)', background: 'transparent', color: 'var(--text)', fontWeight: 600, cursor: 'pointer' }}>
-            {magicLinkPending ? "Generating..." : "Generate Magic Link"}
-          </button>
-        </div>
-        
-        {magicLink ? (
-          <div className="form-message success" style={{ marginTop: '20px', padding: '12px', borderRadius: '12px', background: 'rgba(52, 199, 89, 0.1)', border: '1px solid rgba(52, 199, 89, 0.2)', color: '#34c759' }}>
-            Magic Link created: <a href={magicLink} style={{ color: 'inherit', fontWeight: 700, textDecoration: 'underline' }}>Click here to access</a>
+          {error && (
+            <div style={{ padding: '12px 16px', borderRadius: '8px', background: '#FFEBEB', border: '1px solid #C5303020', color: '#C53030', marginBottom: '24px', fontSize: '13px', fontWeight: 500 }}>
+              {error}
+            </div>
+          )}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button 
+              type="submit" 
+              disabled={pending} 
+              style={{ padding: '14px', borderRadius: '8px', background: '#0A0A0A', color: '#FAF9F7', border: 'none', fontWeight: 600, fontSize: '14px', cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              {pending ? "Mengecek..." : "Cek Status Sekarang"}
+            </button>
+            
+            <div style={{ position: 'relative', textAlign: 'center', margin: '8px 0' }}>
+              <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: '1px', background: '#ECEAE5', zIndex: 0 }}></div>
+              <span style={{ position: 'relative', background: '#FFFFFF', padding: '0 12px', fontSize: '12px', color: '#8A8A8A', zIndex: 1 }}>atau</span>
+            </div>
+
+            <button 
+              onClick={handleMagicLinkRequest} 
+              type="button" 
+              disabled={magicLinkPending} 
+              style={{ padding: '12px', borderRadius: '8px', border: '1px solid #DCD9D2', background: 'transparent', color: '#525252', fontWeight: 600, fontSize: '13px', cursor: 'pointer' }}
+            >
+              {magicLinkPending ? "Sedang Membuat..." : "Gunakan Magic Link (Akses Cepat)"}
+            </button>
           </div>
-        ) : null}
-        {magicLinkError ? <p className="form-message error">{magicLinkError}</p> : null}
+          
+          {magicLink && (
+            <div style={{ marginTop: '20px', padding: '12px', borderRadius: '8px', background: '#E8F5EC', border: '1px solid #2D7A3F20', color: '#2D7A3F', fontSize: '13px' }}>
+              Magic Link berhasil dibuat: <a href={magicLink} style={{ color: 'inherit', fontWeight: 700, textDecoration: 'underline' }}>Klik di sini untuk masuk otomatis</a>
+            </div>
+          )}
+        </form>
 
-        {result ? (
-          <div className="status-results" style={{ marginTop: '40px', borderTop: '1px solid var(--line)', paddingTop: '40px' }}>
-            <header style={{ marginBottom: '24px' }}>
-              <em className="mini-meta" style={{ color: 'var(--blue)' }}>VERIFICATION RESULT</em>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: '8px 0 0' }}>{result.vendor.name}</h2>
+        {result && (
+          <div style={{ marginTop: '40px', animation: 'fadeIn 0.5s ease-out' }}>
+            <header style={{ marginBottom: '24px', paddingBottom: '16px', borderBottom: '1px solid #ECEAE5' }}>
+              <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.08em', color: '#8A8A8A', textTransform: 'uppercase' }}>HASIL VERIFIKASI</span>
+              <h2 style={{ fontSize: '20px', fontWeight: 700, margin: '4px 0 0', letterSpacing: '-0.02em' }}>{result.vendor.name}</h2>
             </header>
 
-            <div className="status-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-              <div style={{ padding: '16px', background: 'var(--panel-soft)', borderRadius: '16px', border: '1px solid var(--line)' }}>
-                <span className="mini-meta">REGISTRATION</span>
-                <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '4px' }}>{result.vendor.registrationCode}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '32px' }}>
+              <div style={{ padding: '16px', background: '#FFFFFF', borderRadius: '12px', border: '1px solid #ECEAE5' }}>
+                <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A8A8A' }}>STATUS UTAMA</span>
+                <div style={{ fontWeight: 700, fontSize: '15px', marginTop: '4px', color: '#D84315' }}>{result.vendor.lifecycleStatus.toUpperCase()}</div>
               </div>
-              <div style={{ padding: '16px', background: 'var(--panel-soft)', borderRadius: '16px', border: '1px solid var(--line)' }}>
-                <span className="mini-meta">LIFECYCLE</span>
-                <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '4px', color: 'var(--blue)' }}>{result.vendor.lifecycleStatus}</div>
-              </div>
-              <div style={{ padding: '16px', background: 'var(--panel-soft)', borderRadius: '16px', border: '1px solid var(--line)' }}>
-                <span className="mini-meta">REVIEW</span>
-                <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '4px' }}>{result.vendor.reviewStatus}</div>
-              </div>
-              <div style={{ padding: '16px', background: 'var(--panel-soft)', borderRadius: '16px', border: '1px solid var(--line)' }}>
-                <span className="mini-meta">DOCS</span>
-                <div style={{ fontWeight: 700, fontSize: '1.1rem', marginTop: '4px' }}>{result.vendor.documentCompletion.complete}/{result.vendor.documentCompletion.required}</div>
+              <div style={{ padding: '16px', background: '#FFFFFF', borderRadius: '12px', border: '1px solid #ECEAE5' }}>
+                <span style={{ fontSize: '10px', fontWeight: 600, color: '#8A8A8A' }}>KELENGKAPAN DOKUMEN</span>
+                <div style={{ fontWeight: 700, fontSize: '15px', marginTop: '4px' }}>{result.vendor.documentCompletion.complete} / {result.vendor.documentCompletion.required}</div>
               </div>
             </div>
-            {result.vendor.latestReviewNote ? (
-              <div className="alert-box" style={{ padding: '20px', borderRadius: '16px', background: 'var(--panel-soft)', border: '1px solid var(--line)', marginBottom: '32px' }}>
-                <span className="mini-meta" style={{ display: 'block', marginBottom: '8px' }}>LATEST REVIEW NOTE</span>
-                <p style={{ margin: 0, lineHeight: 1.5, color: 'var(--text)' }}>{result.vendor.latestReviewNote}</p>
-              </div>
-            ) : null}
 
-            {result.vendor.activeRevisionRequest ? (
-              <div className="revision-block" style={{ padding: '24px', borderRadius: '20px', border: '1px solid var(--blue)', background: 'rgba(91, 140, 255, 0.05)', marginBottom: '32px' }}>
-                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                  <h3 style={{ margin: 0, color: 'var(--blue)', fontSize: '1.1rem' }}>Revision Required</h3>
-                  <a href={`/vendor/revise/${result.vendor.activeRevisionRequest.editToken}`} className="primary-button" style={{ padding: '8px 20px', borderRadius: '999px', background: 'var(--blue)', color: 'white', fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none' }}>
-                    Open Revision Portal
+            {result.vendor.activeRevisionRequest && (
+              <div style={{ padding: '24px', borderRadius: '16px', border: '1px solid #D84315', background: '#FFF1ED', marginBottom: '32px' }}>
+                <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, color: '#D84315', fontSize: '16px', fontWeight: 700 }}>Perlu Revisi Data</h3>
+                  <a href={`/vendor/revise/${result.vendor.activeRevisionRequest.editToken}`} style={{ padding: '8px 16px', borderRadius: '6px', background: '#D84315', color: '#FFFFFF', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
+                    Buka Portal Revisi
                   </a>
                 </header>
-                {result.vendor.activeRevisionRequest.generalNote && (
-                   <p style={{ fontSize: '0.9rem', marginBottom: '16px', opacity: 0.8 }}>{result.vendor.activeRevisionRequest.generalNote}</p>
-                )}
-                <div className="revision-items" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <p style={{ fontSize: '14px', lineHeight: 1.5, color: '#0A0A0A', margin: '0 0 16px' }}>{result.vendor.activeRevisionRequest.generalNote || "Terdapat beberapa data yang perlu diperbaiki sesuai catatan di bawah ini."}</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {result.vendor.activeRevisionRequest.items.map((item) => (
-                    <div key={item.id} style={{ padding: '12px', background: 'var(--panel)', borderRadius: '12px', border: '1px solid var(--line)' }}>
-                      <span className="mini-meta" style={{ color: 'var(--blue)' }}>{item.label}</span>
-                      <p style={{ margin: '4px 0 0', fontSize: '0.9rem' }}>{item.note}</p>
+                    <div key={item.id} style={{ padding: '10px 14px', background: '#FFFFFF', borderRadius: '8px', border: '1px solid rgba(216, 67, 21, 0.2)' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#D84315' }}>{item.label}</span>
+                      <p style={{ margin: '2px 0 0', fontSize: '13px', color: '#525252' }}>{item.note}</p>
                     </div>
                   ))}
                 </div>
               </div>
-            ) : null}
+            )}
 
-            <div className="timeline-block">
-              <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '16px' }}>Verification Timeline</h3>
-              <div className="timeline-stack" style={{ borderLeft: '1px solid var(--line)', paddingLeft: '24px', marginLeft: '8px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ background: '#FFFFFF', border: '1px solid #ECEAE5', borderRadius: '16px', padding: '24px' }}>
+              <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '20px', color: '#0A0A0A' }}>Timeline Verifikasi</h3>
+              <div style={{ borderLeft: '1px solid #ECEAE5', paddingLeft: '24px', marginLeft: '8px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
                 {result.vendor.reviews.slice(0, 6).map((item) => (
                   <div key={item.id} style={{ position: 'relative' }}>
-                    <div style={{ position: 'absolute', left: '-29px', top: '4px', width: '9px', height: '9px', borderRadius: '50%', background: 'var(--line)', border: '2px solid var(--panel)' }}></div>
+                    <div style={{ position: 'absolute', left: '-29px', top: '4px', width: '9px', height: '9px', borderRadius: '50%', background: '#DCD9D2', border: '2px solid #FFFFFF' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                      <span className="eyebrow" style={{ fontSize: '0.75rem', color: 'var(--blue)' }}>{item.status.toUpperCase()}</span>
-                      <span className="mini-meta" style={{ fontSize: '0.7rem' }}>{new Date(item.updatedAt).toLocaleDateString("id-ID")}</span>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#0A0A0A' }}>{item.status.toUpperCase()}</span>
+                      <span style={{ fontSize: '11px', color: '#8A8A8A' }}>{new Date(item.updatedAt).toLocaleDateString("id-ID")}</span>
                     </div>
-                    <p style={{ margin: 0, fontSize: '0.9rem', opacity: 0.8 }}>{item.note || "No comments provided"}</p>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#525252', lineHeight: 1.5 }}>{item.note || "Sedang dalam tahap peninjauan."}</p>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-        ) : null}
-      </form>
+        )}
+      </div>
     </div>
   );
 }

@@ -57,11 +57,12 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
   };
 
   const fillDevData = () => {
+    const randomId = Math.floor(1000 + Math.random() * 9000);
     const dummyData: Partial<VendorIntakeV2Payload> = {
       entityType: "business",
       relationshipType: "vendor_rental",
-      name: "PT Jasa Juara Perkasa",
-      email: "test@juaraevent.id",
+      name: `PT Juara Test ${randomId}`,
+      email: `vendor-${randomId}@test.com`,
       establishedYear: "2020",
       nibNumber: "1234567890123",
       npwpNumber: "123456789012345",

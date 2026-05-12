@@ -56,6 +56,45 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
     }
   };
 
+  const fillDevData = () => {
+    const dummyData: Partial<VendorIntakeV2Payload> = {
+      entityType: "business",
+      relationshipType: "vendor_rental",
+      name: "PT Jasa Juara Perkasa",
+      email: "test@juaraevent.id",
+      establishedYear: "2020",
+      nibNumber: "1234567890123",
+      npwpNumber: "123456789012345",
+      taxStatus: "PKP",
+      businessAddress: "Jl. Event No. 88, Jakarta Selatan",
+      officePhone: "+62215551234",
+      picName: "Budi Juara",
+      picTitle: "Operations Manager",
+      picPhone: "+6281234567890",
+      picEmail: "budi@juaraevent.id",
+      bankName: "BCA",
+      bankAccountNumber: "8001234567",
+      bankAccountHolder: "PT Jasa Juara Perkasa",
+      documentsFolderUrl: "https://drive.google.com/drive/folders/test-folder-juara",
+      declaredDocuments: ["Akta Pendirian", "NPWP Badan", "NIB", "Company Profile", "Pricelist Sewa"],
+      rentalCategories: ["sound_system", "lighting"],
+      capacityNotes: "Tersedia 4 set sound system 5000W dan LED Wall 20sqm.",
+      pricingModel: "bundled"
+    };
+    setFormData(dummyData);
+    setStep(6); // Jump to Review
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.shiftKey && e.key === "F") {
+        fillDevData();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const validateStep3 = () => {
     // TEMPORARILY DISABLED VALIDATION
     return true;
@@ -138,15 +177,17 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
 
   if (submitResult) {
     return (
-      <SuccessScreen 
-        registrationCode={submitResult.registrationCode}
-        vendorName={formData.name || ""}
-        onReset={() => {
-          setFormData({ entityType: undefined, relationshipType: undefined, declaredDocuments: [] });
-          setStep(0);
-          setSubmitResult(null);
-        }}
-      />
+      <div className={styles.container}>
+        <SuccessScreen 
+          registrationCode={submitResult.registrationCode}
+          vendorName={formData.name || ""}
+          onReset={() => {
+            setFormData({ entityType: undefined, relationshipType: undefined, declaredDocuments: [] });
+            setStep(0);
+            setSubmitResult(null);
+          }}
+        />
+      </div>
     );
   }
 
@@ -156,6 +197,21 @@ export function PartnerIntakeFormV2({ serviceOptions }: PartnerIntakeFormV2Props
         <div className={styles.brandLogoRow}>
           <span className={styles.brandName}>JUARA</span>
           <span className={styles.brandLabel}>PARTNER</span>
+          <button 
+            onClick={fillDevData}
+            style={{ 
+              marginLeft: 'auto', 
+              fontSize: '10px', 
+              padding: '4px 8px', 
+              borderRadius: '4px', 
+              background: '#f1f5f9', 
+              border: '1px solid #e2e8f0',
+              color: '#64748b',
+              cursor: 'pointer'
+            }}
+          >
+            [Test Fill]
+          </button>
         </div>
         <p className={styles.brandTagline}>Membangun jaringan mitra event terkurasi</p>
       </header>

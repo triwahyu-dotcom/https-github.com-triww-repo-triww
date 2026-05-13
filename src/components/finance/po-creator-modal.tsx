@@ -531,26 +531,57 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                   )}
                 </div>
                 <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 160px 180px 40px', gap: '12px', padding: '12px 16px', background: '#18181b', fontSize: '10px', color: '#52525b', fontWeight: 600 }}>
+                    <span>LABEL / DESKRIPSI</span>
+                    <span style={{ textAlign: 'center' }}>%</span>
+                    <span>NILAI (RP)</span>
+                    <span>TANGGAL (EST)</span>
+                    <span></span>
+                  </div>
                   {paymentSchedule.map((ev, idx) => (
-                    <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 180px 40px', gap: '12px', padding: '12px 16px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
+                    <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 160px 180px 40px', gap: '12px', padding: '12px 16px', borderBottom: '0.5px solid rgba(255,255,255,0.04)', alignItems: 'center' }}>
                       <input className="cell-input" value={ev.label} onChange={e => {
                         const next = [...paymentSchedule];
                         next[idx].label = e.target.value;
                         setPaymentSchedule(next);
                       }} placeholder="Label (e.g. DP 50%)" />
+                      
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <input className="cell-input text-center" type="number" value={ev.percentage} onChange={e => {
+                        <input className="cell-input text-center" type="number" step="0.01" value={ev.percentage} onChange={e => {
                           const next = [...paymentSchedule];
-                          next[idx].percentage = Number(e.target.value);
+                          const pct = Number(e.target.value);
+                          next[idx].percentage = pct;
+                          next[idx].amount = (grandTotal * pct) / 100;
                           setPaymentSchedule(next);
                         }} />
                         <span style={{ color: '#52525b', fontSize: '12px' }}>%</span>
                       </div>
+
+                      <div style={{ position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: 0, top: '50%', transform: 'translateY(-50%)', fontSize: '11px', color: '#52525b' }}>Rp</span>
+                        <input 
+                          className="cell-input" 
+                          style={{ paddingLeft: '20px', color: '#378ADD', fontWeight: 600 }} 
+                          type="text"
+                          value={(ev.amount || (grandTotal * (ev.percentage || 0) / 100)).toLocaleString('id-ID')} 
+                          onChange={e => {
+                            const next = [...paymentSchedule];
+                            // Remove non-digits to get raw number
+                            const rawValue = e.target.value.replace(/[^0-9]/g, '');
+                            const amt = Number(rawValue);
+                            next[idx].amount = amt;
+                            next[idx].percentage = grandTotal > 0 ? (amt / grandTotal) * 100 : 0;
+                            setPaymentSchedule(next);
+                          }} 
+                        />
+                      </div>
+
                       <input className="p-input" type="date" value={ev.date} onChange={e => {
                         const next = [...paymentSchedule];
                         next[idx].date = e.target.value;
                         setPaymentSchedule(next);
                       }} style={{ padding: '6px 10px', fontSize: '12px' }} />
+                      
                       <button onClick={() => setPaymentSchedule(prev => prev.filter((_, i) => i !== idx))} style={{ color: '#ef4444', background: 'none', border: 'none', opacity: paymentSchedule.length > 1 ? 1 : 0, pointerEvents: paymentSchedule.length > 1 ? 'auto' : 'none' }}><Trash2 size={14} /></button>
                     </div>
                   ))}

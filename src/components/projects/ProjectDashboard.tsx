@@ -228,8 +228,26 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
   const formatDate = (dateStr: string) => {
     if (!isMounted) return "...";
-    if (!dateStr || dateStr === "-") return "-";
-    const d = new Date(dateStr);
+    if (!dateStr || dateStr === "-" || dateStr === "TBD") return dateStr || "-";
+    
+    // If it contains letters (e.g., "August 2026" or "30 July"), keep it as is
+    if (/[a-zA-Z]/.test(dateStr) && !dateStr.includes('T')) return dateStr;
+
+    let d = new Date(dateStr);
+    
+    // Special handling for DD/MM/YYYY or DD-MM-YYYY
+    if (isNaN(d.getTime())) {
+      const parts = dateStr.split(/[\/\-]/);
+      if (parts.length === 3) {
+        // Assume Indonesian format: [0] Day, [1] Month, [2] Year
+        const day = parts[0].trim().padStart(2, '0');
+        const month = parts[1].trim().padStart(2, '0');
+        let year = parts[2].trim();
+        if (year.length === 2) year = '20' + year;
+        d = new Date(`${year}-${month}-${day}`);
+      }
+    }
+
     if (isNaN(d.getTime())) return dateStr;
     return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
   };
@@ -284,8 +302,33 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       aVal = Number(aVal) || 0;
       bVal = Number(bVal) || 0;
     } else if (key === 'eventDate') {
-      aVal = aVal ? new Date(aVal).getTime() : 0;
-      bVal = bVal ? new Date(bVal).getTime() : 0;
+      const getSortableDate = (str: string) => {
+        if (!str || str === "TBD" || str === "-") return 0;
+        
+        // Take the first part if it's a range (e.g. "14 - 16 July 2026" -> "14 July 2026")
+        let datePart = str.split(/[\-\u2013\u2014]/)[0].trim();
+        
+        // If the first part is just a day number (e.g. "14"), try to append month/year from the rest of string
+        if (datePart.length <= 2 && str.match(/[a-zA-Z]/)) {
+           const monthYearMatch = str.match(/[a-zA-Z].*$/);
+           if (monthYearMatch) datePart += " " + monthYearMatch[0];
+        }
+
+        let d = new Date(datePart);
+        if (isNaN(d.getTime())) {
+          const parts = datePart.split(/[\/\-]/);
+          if (parts.length === 3) {
+            const day = parts[0].trim().padStart(2, '0');
+            const month = parts[1].trim().padStart(2, '0');
+            let year = parts[2].trim();
+            if (year.length === 2) year = '20' + year;
+            d = new Date(`${year}-${month}-${day}`);
+          }
+        }
+        return isNaN(d.getTime()) ? 0 : d.getTime();
+      };
+      aVal = getSortableDate(aVal);
+      bVal = getSortableDate(bVal);
     } else if (key === 'currentStage') {
       aVal = STAGE_ORDER[aVal as string] ?? 99;
       bVal = STAGE_ORDER[bVal as string] ?? 99;
@@ -818,7 +861,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                           <div style={{ fontSize: '14px', fontWeight: 500, color: '#e4e4e7', marginBottom: '2px' }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
                           <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '12px' }}>{p.client}</div>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '12px', color: '#52525b' }}>{p.eventDate || "TBD"}</span>
+                            <span style={{ fontSize: '12px', color: '#52525b' }}>{formatDate(p.eventDate)}</span>
                             <span style={{ fontSize: '12px', color: '#a1a1aa' }}>
                               {isMounted && p.projectValue > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(p.projectValue) : (p.projectValue > 0 ? "..." : "-")}
                             </span>
@@ -1053,7 +1096,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                                 <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7', marginTop: '4px' }}>{p.projectName || (p as any).name || "Untitled Project"}</div>
                                 <div style={{ fontSize: '12px', color: '#71717a', marginBottom: '8px' }}>{p.client}</div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '8px' }}>
-                                  <span style={{ color: '#52525b' }}>{p.eventDate || "-"}</span>
+                                  <span style={{ color: '#52525b' }}>{formatDate(p.eventDate)}</span>
                                   <span style={{ color: '#a1a1aa' }}>
                                     {isMounted && p.projectValue > 0 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(p.projectValue) : (p.projectValue > 0 ? "..." : "-")}
                                   </span>
@@ -1836,21 +1879,12 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                               <span style={{ color: '#71717a', fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>{member.role.toUpperCase()}</span>
                             </label>
                           ))}
-                          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#e4e4e7' }}>
-                              <input 
-                                type="checkbox" 
-                                checked={newProjectOwners.includes("Sindy")}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setNewProjectOwners([...newProjectOwners, "Sindy"]);
-                                  } else {
-                                    setNewProjectOwners(newProjectOwners.filter(n => n !== "Sindy"));
-                                  }
-                                }}
-                              />
-                              <span style={{ flex: 1 }}>Sindy</span>
-                              <span style={{ color: '#71717a', fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px' }}>LEGACY</span>
-                          </label>
+                          {(!(initialData as any).teamMembers || (initialData as any).teamMembers.length === 0) && (
+                            <div style={{ fontSize: '12px', color: '#71717a', textAlign: 'center', padding: '10px' }}>
+                              No team members found in database. 
+                              <br/>Please add team members to the database to see them here.
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1957,7 +1991,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                     <td style={{ padding: '12px', fontSize: '12px', fontWeight: 'bold' }}>{p.projectName || (p as any).name}</td>
                     <td style={{ padding: '12px', fontSize: '12px' }}>{p.client}</td>
                     <td style={{ padding: '12px', fontSize: '11px', textTransform: 'uppercase' }}>{p.currentStage}</td>
-                    <td style={{ padding: '12px', fontSize: '12px' }}>{p.eventDate}</td>
+                    <td style={{ padding: '12px', fontSize: '12px' }}>{formatDate(p.eventDate)}</td>
                     <td style={{ padding: '12px', fontSize: '12px', textAlign: 'right' }}>{p.projectValue?.toLocaleString('id-ID')}</td>
                   </tr>
                 ))}

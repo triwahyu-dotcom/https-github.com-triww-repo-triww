@@ -642,9 +642,29 @@ export function POCreatorModal({ activeProjects, availableVendors = [], availabl
                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#e4e4e7' }}>{docTypeLabels[docType]} — {selectedProject?.projectName}</div>
                    <div style={{ fontSize: '12px', color: '#71717a', marginTop: '2px' }}>Vendor: {vendorName} • {lineItems.length} items</div>
                  </div>
-                 <div style={{ textAlign: 'right' }}>
-                   <div style={{ fontSize: '11px', color: '#71717a' }}>Total Nilai</div>
-                   <div style={{ fontSize: '24px', fontWeight: 800, color: '#e4e4e7' }}>{formatCurrencyIDR(grandTotal)}</div>
+                 <div style={{ textAlign: 'right', display: 'flex', gap: '32px', alignItems: 'center' }}>
+                   <div style={{ display: 'flex', gap: '20px' }}>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '10px', color: '#71717a' }}>Subtotal</div>
+                        <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{formatCurrencyIDR(subtotalItems)}</div>
+                      </div>
+                      {discount > 0 && (
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '10px', color: '#f87171' }}>Discount</div>
+                          <div style={{ fontSize: '13px', color: '#f87171' }}>-{formatCurrencyIDR(discount)}</div>
+                        </div>
+                      )}
+                      {(pphAmount > 0 || ppnAmount > 0) && (
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '10px', color: '#71717a' }}>Pajak (PPh/PPN)</div>
+                          <div style={{ fontSize: '13px', color: '#a1a1aa' }}>+{formatCurrencyIDR(pphAmount + ppnAmount)}</div>
+                        </div>
+                      )}
+                   </div>
+                   <div style={{ textAlign: 'right', borderLeft: '1px solid rgba(55,138,221,0.2)', paddingLeft: '32px' }}>
+                     <div style={{ fontSize: '11px', color: '#378ADD', fontWeight: 700 }}>Total Akhir</div>
+                     <div style={{ fontSize: '24px', fontWeight: 800, color: '#e4e4e7' }}>{formatCurrencyIDR(grandTotal)}</div>
+                   </div>
                  </div>
               </div>
             </div>

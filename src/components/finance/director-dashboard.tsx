@@ -40,9 +40,12 @@ const docTypeLabel: Record<string, string> = {
 };
 
 const getDocDisplayAmount = (doc: ExpenseDocument) => {
-  const subtotal = (doc.lineItems && doc.lineItems.length > 0) 
+  const lineItemsSum = (doc.lineItems && doc.lineItems.length > 0) 
     ? doc.lineItems.reduce((acc, item) => acc + (Number(item.amount) || 0), 0)
     : doc.amount;
+  
+  const discountVal = doc.discount || 0;
+  const subtotal = Math.max(0, lineItemsSum - discountVal);
   
   const scheduleTotal = doc.paymentSchedule?.reduce((sum, ev) => sum + (ev.amount || 0), 0) || 0;
   const pphRate = doc.pphType === "PPH21" ? 0.025 : doc.pphType === "PPH23" ? 0.02 : 0.02;

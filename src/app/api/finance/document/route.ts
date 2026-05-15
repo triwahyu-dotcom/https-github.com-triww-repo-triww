@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       usePPh21, pph21Mode, grossAmount, taxAmount, netAmount,
       pphType, usePPN, ppnAmount, totalPO,
       projectInitial,
+      discount,
     } = body;
 
     if (!projectId || !documentType) {
@@ -46,11 +47,12 @@ export async function POST(request: Request) {
     }
 
     const subtotalItems = lineItems?.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0) ?? 0;
+    const taxBase = Math.max(0, subtotalItems - (discount || 0));
     
     const pphRate = pphType === "PPH21" ? 0.025 : pphType === "PPH23" ? 0.02 : 0;
     const isGrossUp = pph21Mode === "grossup";
-    const calculatedTaxAmount = isGrossUp ? (subtotalItems / (1 - pphRate)) - subtotalItems : (Number(taxAmount) || 0);
-    const subtotalWithTax = subtotalItems + calculatedTaxAmount;
+    const calculatedTaxAmount = isGrossUp ? (taxBase / (1 - pphRate)) - taxBase : (Number(taxAmount) || 0);
+    const subtotalWithTax = taxBase + calculatedTaxAmount;
 
     const ppnAmountValue = usePPN ? subtotalWithTax * 0.11 : 0;
     const totalPOValue = subtotalWithTax + ppnAmountValue;
@@ -79,6 +81,7 @@ export async function POST(request: Request) {
       ppnAmount: ppnAmountValue, 
       netAmount: subtotalWithTax, 
       totalPO: totalPOValue,
+      discount: discount || 0,
     };
 
     try {
@@ -116,9 +119,11 @@ export async function PATCH(request: Request) {
     let calculatedPPN = doc.ppnAmount;
     let updatedTotalPO = doc.totalPO;
 
-    if (updates.lineItems || updates.usePPN !== undefined || updates.pphType || updates.pph21Mode) {
+    if (updates.lineItems || updates.usePPN !== undefined || updates.pphType || updates.pph21Mode || updates.discount !== undefined) {
       const items = updates.lineItems || doc.lineItems || [];
+      const discountVal = updates.discount !== undefined ? updates.discount : doc.discount || 0;
       const subtotal = items.reduce((sum: number, item: any) => sum + (Number(item.amount) || 0), 0);
+      const taxBase = Math.max(0, subtotal - discountVal);
       const activeUsePPN = updates.usePPN !== undefined ? updates.usePPN : doc.usePPN;
       const activePphType = updates.pphType || doc.pphType;
       const activePphMode = updates.pph21Mode || doc.pph21Mode;
@@ -126,8 +131,8 @@ export async function PATCH(request: Request) {
       const pphRate = activePphType === "PPH21" ? 0.025 : activePphType === "PPH23" ? 0.02 : 0;
       const isGrossUp = activePphMode === "grossup";
       
-      calculatedTax = isGrossUp ? (subtotal / (1 - pphRate)) - subtotal : (updates.taxAmount !== undefined ? updates.taxAmount : doc.taxAmount || 0);
-      calculatedGross = subtotal + calculatedTax;
+      calculatedTax = isGrossUp ? (taxBase / (1 - pphRate)) - taxBase : (updates.taxAmount !== undefined ? updates.taxAmount : doc.taxAmount || 0);
+      calculatedGross = taxBase + calculatedTax;
       calculatedPPN = activeUsePPN ? calculatedGross * 0.11 : 0;
       updatedTotalPO = calculatedGross + calculatedPPN;
     }

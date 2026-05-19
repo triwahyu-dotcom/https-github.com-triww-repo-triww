@@ -25,6 +25,10 @@ export async function PATCH(req: NextRequest) {
         rejectionReason: rejectionReason || (status === "approved" ? "" : doc.rejectionReason)
       };
 
+      if (status === "draft") {
+        delete updatedDoc.approvedBy;
+      }
+
       if (status === "approved" && digitalSignature) {
         // TODO: Replace hardcoded name with session auth user (Tech Debt)
         updatedDoc.approvedBy = { name: "Eka Marutha Yuswardana", date: today, digitalSignature };

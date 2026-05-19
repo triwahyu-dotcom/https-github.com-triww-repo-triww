@@ -27,7 +27,8 @@ import {
   Plus,
   Printer,
   Edit,
-  Trash2
+  Trash2,
+  X
 } from "lucide-react";
 
 interface Props {
@@ -91,6 +92,14 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
   const [editDocData, setEditDocData] = useState<ExpenseDocument | null>(null);
   const [editRfpData, setEditRfpData] = useState<RequestForPayment | null>(null);
   const [selectedRfpForSettlement, setSelectedRfpForSettlement] = useState<RequestForPayment | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => Promise<void> | void;
+    confirmText?: string;
+    isDanger?: boolean;
+  } | null>(null);
 
   const reload = () => window.location.reload();
 
@@ -339,10 +348,17 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         <Edit size={10} /> Edit
                       </button>
                       <button 
-                        onClick={async () => { 
-                          if(confirm(`Hapus dokumen ${doc.id}? Tindakan ini permanen.`)) { 
-                            await deleteExpenseDocument(doc.id); 
-                          } 
+                        onClick={() => { 
+                          setConfirmModal({
+                            isOpen: true,
+                            title: "Hapus Dokumen",
+                            message: `Apakah Anda yakin ingin menghapus dokumen ${doc.id}? Tindakan ini bersifat permanen dan tidak dapat dibatalkan.`,
+                            confirmText: "Hapus Permanen",
+                            isDanger: true,
+                            onConfirm: async () => {
+                              await deleteExpenseDocument(doc.id);
+                            }
+                          });
                         }} 
                         style={{ background: 'rgba(226,75,74,0.1)', color: '#F09595', border: '0.5px solid rgba(226,75,74,0.2)', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                       >
@@ -350,8 +366,26 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                       </button>
                     </>
                   )}
-                  {(doc.status === "pending_finance" || doc.status === "pending_c_level") && (
-                    <button onClick={async () => { if(confirm("Tarik dokumen?")) { await updateDocStatus(doc.id, "draft"); reload(); } }} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                  {(doc.status === "pending_finance" || doc.status === "pending_c_level" || doc.status === "approved") && (
+                    <button 
+                      onClick={() => { 
+                        const confirmMsg = doc.status === "approved" 
+                          ? "Apakah Anda yakin ingin menarik dokumen ini? Ini akan membatalkan persetujuan C-Level dan menghapus tanda tangan digital resmi pada dokumen." 
+                          : "Apakah Anda yakin ingin menarik kembali dokumen ini ke status Draf?";
+                        setConfirmModal({
+                          isOpen: true,
+                          title: "Tarik Dokumen",
+                          message: confirmMsg,
+                          confirmText: "Tarik Ke Draf",
+                          isDanger: doc.status === "approved",
+                          onConfirm: async () => {
+                            await updateDocStatus(doc.id, "draft");
+                            reload();
+                          }
+                        });
+                      }} 
+                      style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}
+                    >
                       Tarik
                     </button>
                   )}
@@ -437,10 +471,17 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                         <Edit size={10} /> Edit
                       </button>
                       <button 
-                        onClick={async () => { 
-                          if(confirm(`Hapus RFP #${rfp.id.substring(0,8)}? Tindakan ini permanen.`)) { 
-                            await deleteRFP(rfp.id); 
-                          } 
+                        onClick={() => { 
+                          setConfirmModal({
+                            isOpen: true,
+                            title: "Hapus RFP",
+                            message: `Apakah Anda yakin ingin menghapus RFP #${rfp.id.substring(0,8)}? Tindakan ini bersifat permanen.`,
+                            confirmText: "Hapus Permanen",
+                            isDanger: true,
+                            onConfirm: async () => {
+                              await deleteRFP(rfp.id);
+                            }
+                          });
                         }} 
                         style={{ background: 'rgba(226,75,74,0.1)', color: '#F09595', border: '0.5px solid rgba(226,75,74,0.2)', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
                       >
@@ -449,7 +490,22 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
                     </>
                   )}
                   {(rfp.status === "pending_finance" || rfp.status === "pending_c_level") && (
-                    <button onClick={async () => { if(confirm("Tarik RFP?")) { await updateRFPStatus(rfp.id, "draft"); reload(); } }} style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}>
+                    <button 
+                      onClick={() => { 
+                        setConfirmModal({
+                          isOpen: true,
+                          title: "Tarik RFP",
+                          message: "Apakah Anda yakin ingin menarik kembali RFP ini ke status Draf?",
+                          confirmText: "Tarik Ke Draf",
+                          isDanger: false,
+                          onConfirm: async () => {
+                            await updateRFPStatus(rfp.id, "draft");
+                            reload();
+                          }
+                        });
+                      }} 
+                      style={{ background: 'transparent', border: '0.5px solid rgba(255,255,255,0.12)', color: '#71717a', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', cursor: 'pointer' }}
+                    >
                       Tarik
                     </button>
                   )}
@@ -517,6 +573,45 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
           <div style={{ position: "relative", maxWidth: "90vw", maxHeight: "90vh" }}>
             <button style={{ position: "absolute", top: "-40px", right: "0", background: "none", border: "none", color: "white", fontSize: "24px", cursor: "pointer" }}>&times; Tutup</button>
             <img src={viewProofUrl} alt="Bukti Transfer" style={{ maxWidth: "100%", maxHeight: "90vh", borderRadius: "8px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }} />
+          </div>
+        </div>
+      )}
+
+      {confirmModal && confirmModal.isOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", zIndex: 3000, display: "grid", placeItems: "center", padding: "20px" }}>
+          <div style={{ background: "#1f1f23", borderRadius: "24px", width: "100%", maxWidth: "440px", border: "0.5px solid rgba(255,255,255,0.1)", boxShadow: "0 25px 60px rgba(0,0,0,0.6)", overflow: 'hidden' }}>
+            <div style={{ padding: '24px 32px', background: '#111113', borderBottom: '0.5px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: confirmModal.isDanger ? 'rgba(239,68,68,0.1)' : 'rgba(55,138,221,0.1)', color: confirmModal.isDanger ? '#f87171' : '#85B7EB', display: 'grid', placeItems: 'center' }}>
+                  <AlertTriangle size={18} />
+                </div>
+                <h3 style={{ margin: 0, fontSize: "15px", fontWeight: 700, color: "#f4f4f5" }}>{confirmModal.title}</h3>
+              </div>
+              <button onClick={() => setConfirmModal(null)} style={{ background: 'transparent', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', alignItems: 'center' }}><X size={20} /></button>
+            </div>
+
+            <div style={{ padding: '32px' }}>
+              <p style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: 1.6, margin: 0 }}>
+                {confirmModal.message}
+              </p>
+              
+              <div style={{ display: "flex", gap: "12px", marginTop: '24px' }}>
+                <button onClick={() => setConfirmModal(null)} style={{ flex: 1, padding: "12px", background: "transparent", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "10px", color: "#a1a1aa", fontSize: '13px', fontWeight: 600, cursor: "pointer" }}>Batal</button>
+                <button 
+                  onClick={async () => {
+                    await confirmModal.onConfirm();
+                    setConfirmModal(null);
+                  }} 
+                  style={{ 
+                    flex: 2, padding: "12px", background: confirmModal.isDanger ? "#f87171" : "#378ADD", border: "none", borderRadius: "10px", 
+                    color: "#fff", fontSize: '13px', fontWeight: 700, cursor: "pointer", 
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  {confirmModal.confirmText || "Konfirmasi"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

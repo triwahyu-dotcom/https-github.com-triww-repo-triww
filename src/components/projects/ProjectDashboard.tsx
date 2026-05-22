@@ -228,6 +228,24 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const projId = params.get("projectId");
+      const tab = params.get("tab");
+      if (projId) {
+        const found = projects.find((p: ProjectRecord) => p.id === projId);
+        if (found) {
+          setSelectedId(projId);
+          setDetailOpen(true);
+          if (tab && ["overview", "tasks", "docs", "vendors", "execution", "manpower", "billing", "activity"].includes(tab)) {
+            setActiveDetailTab(tab as any);
+          }
+        }
+      }
+    }
+  }, [projects]);
+
   const formatDate = (dateStr: string) => {
     if (!isMounted) return "...";
     if (!dateStr || dateStr === "-" || dateStr === "TBD") return dateStr || "-";

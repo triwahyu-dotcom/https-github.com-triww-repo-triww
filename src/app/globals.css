@@ -5499,3 +5499,435 @@ strong.tone-critical {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* ================================================================
+   EMBEDDED TASK TRACKER (ETT) — dark ClickUp-style UI
+   All classes prefixed with .ett-
+   ================================================================ */
+
+/* Wrap */
+.ett-wrap {
+  font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+  background: #0B0B11;
+  color: #E9E9EE;
+  min-height: 400px;
+  padding: 20px 22px;
+  border-radius: 14px;
+}
+
+/* Enter animation */
+.ett-in {
+  animation: ettSlideIn .26s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes ettSlideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Header row */
+.ett-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+/* Ring label overlay */
+.ett-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 800;
+  color: #E9E9EE;
+}
+
+/* Toolbar (filter + view toggle) */
+.ett-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+/* Filter buttons */
+.ett-filter-btn {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  color: #9A9AA6;
+  transition: all .15s ease;
+}
+.ett-filter-btn:hover,
+.ett-filter-btn.active {
+  border-color: #4C8DFF88;
+  background: #4C8DFF1f;
+  color: #4C8DFF;
+}
+
+/* View toggle */
+.ett-view-toggle {
+  display: flex;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 9px;
+  overflow: hidden;
+}
+.ett-view-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  background: transparent;
+  color: #9A9AA6;
+  transition: all .15s ease;
+}
+.ett-view-btn.active {
+  background: #4C8DFF1f;
+  color: #4C8DFF;
+}
+
+/* Back button */
+.ett-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  color: #9A9AA6;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 18px;
+  transition: color .15s ease;
+}
+.ett-back-btn:hover { color: #E9E9EE; }
+
+/* Stage badge (in detail view) */
+.ett-stage-badge {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: #62626E;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.ett-optional-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #9A9AA6;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px;
+  padding: 1px 7px;
+}
+
+/* Title input in detail view */
+.ett-title-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #E9E9EE;
+  font-size: 20px;
+  font-weight: 700;
+  outline: none;
+  line-height: 1.3;
+  font-family: inherit;
+  width: 100%;
+}
+.ett-title-input:disabled { color: #9A9AA6; }
+
+/* Overdue banner */
+.ett-overdue-banner {
+  font-size: 12px;
+  color: #F2555A;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 34px;
+  margin-bottom: 6px;
+}
+
+/* Fields grid */
+.ett-fields-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+/* Section label */
+.ett-section-label {
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #62626E;
+  font-weight: 700;
+}
+
+/* Generic input */
+.ett-input {
+  background: #0F0F15;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 8px;
+  padding: 8px 11px;
+  color: #E9E9EE;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  transition: border-color .15s ease;
+}
+.ett-input:focus { border-color: rgba(76,141,255,0.45); }
+.ett-input:disabled { color: #9A9AA6; cursor: default; }
+
+/* Select */
+.ett-select {
+  background: #0F0F15;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 8px;
+  padding: 8px 11px;
+  color: #E9E9EE;
+  font-size: 13px;
+  outline: none;
+  font-family: inherit;
+  width: 100%;
+  cursor: pointer;
+  appearance: none;
+  transition: border-color .15s ease;
+}
+.ett-select:focus { border-color: rgba(76,141,255,0.45); }
+
+/* Two-col grid in detail view */
+.ett-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 26px;
+}
+
+/* Buttons */
+.ett-btn-primary {
+  background: #4C8DFF;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 36px;
+  font-family: inherit;
+  transition: background .15s ease;
+}
+.ett-btn-primary:hover { background: #3a7de8; }
+
+.ett-btn-ghost {
+  background: transparent;
+  color: #9A9AA6;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+  transition: border-color .15s ease;
+}
+.ett-btn-ghost:hover { border-color: rgba(255,255,255,0.18); }
+
+.ett-btn-icon {
+  background: #4C8DFF22;
+  color: #4C8DFF;
+  border: 1px solid #4C8DFF55;
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  font-family: inherit;
+}
+
+/* ── Stage group (list view) ─────────────────────────────────── */
+.ett-stage-group {
+  background: #131319;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 13px;
+  overflow: hidden;
+  transition: border-color .15s ease;
+}
+
+.ett-stage-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #E9E9EE;
+  text-align: left;
+}
+
+.ett-stage-bar {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 99px;
+  overflow: hidden;
+  max-width: 200px;
+  margin-left: 4px;
+}
+
+/* Task row (list view) */
+.ett-row {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 11px;
+  background: #181820;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  margin-top: 7px;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+.ett-row:hover {
+  background: #1E1E28;
+  border-color: rgba(255,255,255,0.13);
+}
+
+/* Add task button */
+.ett-add-btn {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  background: transparent;
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 9px;
+  padding: 9px 12px;
+  color: #9A9AA6;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color .15s ease, border-color .15s ease;
+}
+.ett-add-btn:hover {
+  color: #E9E9EE;
+  border-color: rgba(255,255,255,0.2);
+}
+
+.ett-add-input {
+  flex: 1;
+  border-color: rgba(76,141,255,0.4) !important;
+}
+
+/* ── Board view ──────────────────────────────────────────────── */
+.ett-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.ett-board-col {
+  background: #131319;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 13px;
+  padding: 10px;
+  min-height: 140px;
+  transition: border-color .15s ease, background .15s ease;
+}
+.ett-board-col.over {
+  background: #1E1E28;
+}
+
+.ett-board-col-header {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px 10px;
+}
+
+/* Board card */
+.ett-card {
+  background: #181820;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 10px;
+  padding: 10px 11px;
+  margin-bottom: 8px;
+  cursor: grab;
+  transition: border-color .15s ease, transform .1s ease;
+}
+.ett-card:hover {
+  border-color: rgba(255,255,255,0.14);
+  transform: translateY(-1px);
+}
+.ett-card:active { cursor: grabbing; }
+
+.ett-card-stage {
+  font-size: 9.5px;
+  letter-spacing: .05em;
+  color: #62626E;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ett-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  margin-bottom: 9px;
+}
+
+/* Status toggle hover effect */
+.ett-status-toggle {
+  transition: transform .1s ease, box-shadow .15s ease;
+}
+.ett-status-toggle:hover:not(:disabled) {
+  transform: scale(1.12);
+}
+
+/* Field label in detail view */
+.ett-field-label {
+  font-size: 10.5px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: #62626E;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+/* Responsive: on narrow drawers stack board */
+@media (max-width: 640px) {
+  .ett-board { grid-template-columns: 1fr; }
+  .ett-fields-grid { grid-template-columns: 1fr; }
+  .ett-two-col { grid-template-columns: 1fr; }
+}
+
+/* Inline expansion animation */
+.ett-exp {
+  animation: ettExp 0.2s ease both;
+}
+@keyframes ettExp {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+

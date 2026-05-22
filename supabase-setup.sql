@@ -47,8 +47,7 @@ values
   ('admin@juara.local', 'juaraadmin', 'Super Admin'),
   ('widya@juaraevent.id', 'jbbs8899', 'widya'),
   ('leony@juaraevent.id', 'jbbs8899', 'leony'),
-  ('ubaid@juaraevent.id', 'jbbs8899', 'ubaid'),
-  ('sindy@juaraevent.id', 'jbbs8899', 'sindy')
+  ('ubaid@juaraevent.id', 'jbbs8899', 'ubaid')
 on conflict (email) do nothing;
 
 -- Finance Documents table (PO, SPK, CA, dll)

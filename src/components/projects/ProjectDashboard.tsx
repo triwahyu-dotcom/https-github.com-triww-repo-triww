@@ -58,6 +58,8 @@ import {
   Menu
 } from "lucide-react";
 import { PresenceIndicator } from "@/components/PresenceIndicator";
+import EmbeddedTaskTracker from "@/components/projects/EmbeddedTaskTracker";
+import { seedTasksForProject } from "@/lib/project/defaultTasks";
 
 type ViewMode = "overview" | "table" | "board";
 
@@ -613,6 +615,11 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       projectData.documents = [
         { id: `doc_${Date.now()}`, title: 'Proposal / Deck', url: newProjectProposalLink, status: 'available', stage: 'pitching' }
       ];
+    }
+
+    // Seed default SOP tasks for new projects only
+    if (!editingProjectId) {
+      projectData.tasks = seedTasksForProject();
     }
 
     try {
@@ -1251,50 +1258,23 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                   )}
 
                   {activeDetailTab === "tasks" && (
-                    <div className="tab-content-fade">
-                      {/* Overall Checklist Progress */}
-                      <div className="overall-completion-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '12px', color: '#71717a' }}>Overall checklist</span>
-                          <span style={{ fontSize: '12px', fontWeight: 600 }}>{Math.round((selectedProject.tasks.filter((t: ProjectTask) => t.status === 'done').length / selectedProject.tasks.length) * 100)}%</span>
-                        </div>
-                        <div style={{ height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', background: '#378ADD', width: `${(selectedProject.tasks.filter((t: ProjectTask) => t.status === 'done').length / selectedProject.tasks.length) * 100}%` }} />
-                        </div>
-                      </div>
+                    <div className="tab-content-fade" style={{ padding: '0' }}>
+                      <EmbeddedTaskTracker
+                        project={selectedProject}
+                        teamMembers={(initialData as any).teamMembers ?? []}
+                        onUpdateProject={async (updated) => { persistUpdate(updated); }}
+                        isReadOnly={false}
+                      />
 
-                      <div className="section-card-premium" style={{ marginBottom: '20px' }}>
-                        <div className="section-header-premium" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '13px', fontWeight: 500 }}>Stage Checklist</span>
-                          <span style={{ fontSize: '12px', color: '#71717a' }}>{selectedProject.tasks.filter((t: ProjectTask) => t.status === 'done').length} / {selectedProject.tasks.length} completed</span>
-                        </div>
-                        <div className="task-stack" style={{ padding: '0 16px 16px' }}>
-                          {selectedProject.tasks.map((t: ProjectTask) => (
-                            <div key={t.id} className="item-row-premium" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '0.5px solid rgba(255,255,255,0.05)' }}>
-                              <div 
-                                className={`custom-checkbox-premium ${t.status === 'done' ? 'checked' : ''}`}
-                                onClick={() => toggleTask(selectedProject.id, t.id)}
-                                style={{ cursor: 'pointer' }}
-                              >
-                                {t.status === 'done' && <Check size={10} color="white" />}
-                              </div>
-                              <span style={{ fontSize: '13px', color: t.status === 'done' ? '#52525b' : '#e4e4e7' }}>{t.title}</span>
-                              <div style={{ marginLeft: 'auto', display: 'flex', gap: '8px' }}>
-                                 <span className="urgency-badge-premium" style={{ fontSize: '10px', background: 'rgba(151,196,89,0.1)', color: '#97C459' }}>On track</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="section-card-premium">
+                      {/* Milestones — kept below the tracker */}
+                      <div className="section-card-premium" style={{ margin: '16px 0 0 0' }}>
                         <div className="section-header-premium" style={{ padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '13px', fontWeight: 500 }}>Milestones</span>
                           <div style={{ display: 'flex', gap: '8px' }}>
-                            <input 
+                            <input
                               id="new-milestone-input"
-                              className="mini-input" 
-                              placeholder="+ Add milestone" 
+                              className="mini-input"
+                              placeholder="+ Add milestone"
                               style={{ height: '26px', fontSize: '11px', width: '120px' }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
@@ -1308,19 +1288,19 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                         <div style={{ padding: '0 16px 16px' }}>
                           {(selectedProject.milestones || []).map((m: ProjectMilestone) => (
                             <div key={m.id} className="item-row-premium" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 0', borderBottom: '0.5px solid rgba(255,255,255,0.05)' }}>
-                              <div 
-                                style={{ width: '10px', height: '10px', borderRadius: '50%', background: m.done ? '#97C459' : '#3f3f46', cursor: 'pointer', border: m.done ? 'none' : '1px solid #52525b' }} 
+                              <div
+                                style={{ width: '10px', height: '10px', borderRadius: '50%', background: m.done ? '#97C459' : '#3f3f46', cursor: 'pointer', border: m.done ? 'none' : '1px solid #52525b' }}
                                 onClick={() => toggleMilestone(selectedProject.id, m.id)}
                               />
                               <span style={{ fontSize: '13px', flex: 1 }}>{m.label}</span>
-                              <input 
+                              <input
                                 className="mini-input"
                                 value={m.value}
                                 placeholder="TBD"
                                 onChange={(e) => updateMilestone(selectedProject.id, m.id, e.target.value)}
                                 style={{ width: '100px', height: '24px', fontSize: '11px', textAlign: 'right', border: 'none', background: 'transparent', padding: 0 }}
                               />
-                              <button 
+                              <button
                                 onClick={() => removeMilestone(selectedProject.id, m.id)}
                                 style={{ background: 'none', border: 'none', color: '#3f3f46', cursor: 'pointer', padding: '0 4px' }}
                               >

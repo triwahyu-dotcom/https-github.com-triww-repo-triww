@@ -19,6 +19,21 @@ export type ProjectPhaseKey =
   | "finance";
 
 export type TaskStatus = "done" | "pending";
+export type TaskDetailedStatus = "pending" | "in_progress" | "done";
+export type TaskPriority = "low" | "medium" | "high" | "urgent";
+
+export interface SubTask {
+  id: string;
+  title: string;
+  done: boolean;
+}
+
+export interface TaskComment {
+  id: string;
+  userId: string;  // team member name
+  text: string;
+  timestamp: string; // ISO string
+}
 export type DocumentStatus = "available" | "reference" | "missing";
 
 export interface ProjectPhaseItem {
@@ -38,10 +53,19 @@ export interface ProjectTask {
   id: string;
   title: string;
   stage: WorkflowStage;
-  status: TaskStatus;
+  /** Extended 3-state status; old "done"|"pending" values remain valid */
+  status: TaskDetailedStatus;
   required: boolean;
   dueDate?: string;
+  /** @deprecated use assignees instead */
   assignee?: string;
+  assignees?: string[];        // array of team member names
+  priority?: TaskPriority;
+  tags?: string[];
+  docLink?: string;
+  description?: string;
+  subtasks?: SubTask[];
+  comments?: TaskComment[];
 }
 
 export interface ProjectDocument {

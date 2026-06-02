@@ -1093,9 +1093,16 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                           onDragOver={(e) => e.preventDefault()}
                           onDrop={() => {
                             if (!draggedProjectId) return;
-                            setProjects((prev: ProjectRecord[]) => prev.map((p: ProjectRecord) => 
-                              p.id === draggedProjectId ? { ...p, currentStage: col.key } : p
-                            ));
+                            const targetProj = projects.find((p: ProjectRecord) => p.id === draggedProjectId);
+                            if (targetProj) {
+                              // Optimistic local state update for instant UI responsiveness
+                              setProjects((prev: ProjectRecord[]) => prev.map((p: ProjectRecord) => 
+                                p.id === draggedProjectId ? { ...p, currentStage: col.key } : p
+                              ));
+                              // Save to database with automatic history logging
+                              const updated = handleAddLog(targetProj, `Stage changed from ${targetProj.currentStage} to ${col.key}`);
+                              persistUpdate({ ...updated, currentStage: col.key });
+                            }
                             setDraggedProjectId(null);
                           }}
                         >

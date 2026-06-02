@@ -182,7 +182,10 @@ export function WorkspaceShell({
                   procurement: "procurement@juaraevent.id",
                   pm: "ubaid@juaraevent.id",
                   hcga: "hcga@juaraevent.id",
-                  member: "member@juaraevent.id"
+                  member: "member@juaraevent.id",
+                  creative_head: "creativehead@juaraevent.id",
+                  creative_jr: "creativejr@juaraevent.id",
+                  designer: "designer@juaraevent.id"
                 };
                 document.cookie = `juara_user_email=${roleEmailMap[e.target.value] || "member@juaraevent.id"}; path=/`;
                 window.location.reload();
@@ -195,6 +198,9 @@ export function WorkspaceShell({
               <option value="pm">Project Manager</option>
               <option value="finance">Finance Admin</option>
               <option value="director">Director (C-Level)</option>
+              <option value="creative_head">Head of Creative</option>
+              <option value="creative_jr">Junior Creative</option>
+              <option value="designer">Designer</option>
               <option value="member">General Member</option>
             </select>
           )}

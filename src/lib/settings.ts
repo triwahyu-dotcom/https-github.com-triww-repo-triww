@@ -92,6 +92,30 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, UserPermissionMatrix> = {
     docs: { view: true, edit: false },
     finance: { view: false, create: false, approve: false, delete: false, role: "pm" },
   },
+  creative_head: {
+    projects: { view: true, create: true, edit: true, delete: false },
+    crm: { view: true, edit: false },
+    vendors: { view: true, edit: false },
+    manpower: { view: true, edit: true },
+    docs: { view: true, edit: true },
+    finance: { view: true, create: false, approve: false, delete: false, role: "pm" },
+  },
+  creative_jr: {
+    projects: { view: true, create: false, edit: false, delete: false },
+    crm: { view: false, edit: false },
+    vendors: { view: false, edit: false },
+    manpower: { view: true, edit: false },
+    docs: { view: true, edit: false },
+    finance: { view: false, create: false, approve: false, delete: false, role: "pm" },
+  },
+  designer: {
+    projects: { view: true, create: false, edit: false, delete: false },
+    crm: { view: false, edit: false },
+    vendors: { view: false, edit: false },
+    manpower: { view: false, edit: false },
+    docs: { view: true, edit: false },
+    finance: { view: false, create: false, approve: false, delete: false, role: "pm" },
+  },
 };
 
 export async function readWorkspaceSettings(): Promise<WorkspaceSettings> {

@@ -244,7 +244,10 @@ export default function SettingsClient() {
     pm: "Project Manager",
     ae: "Account Executive",
     hcga: "HCGA (HR/GA)",
-    member: "General Member"
+    member: "General Member",
+    creative_head: "Head of Creative",
+    creative_jr: "Junior Creative",
+    designer: "Designer"
   };
 
   return (
@@ -534,6 +537,9 @@ export default function SettingsClient() {
                         <option value="pm">Project Manager</option>
                         <option value="ae">Account Executive</option>
                         <option value="hcga">HCGA (HR/GA)</option>
+                        <option value="creative_head">Head of Creative</option>
+                        <option value="creative_jr">Junior Creative</option>
+                        <option value="designer">Designer</option>
                         <option value="member">General Member</option>
                       </select>
                     </label>

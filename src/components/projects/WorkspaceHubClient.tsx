@@ -206,6 +206,17 @@ export default function WorkspaceHubClient({
   const router = useRouter();
   const [showRecap, setShowRecap] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [userRole, setUserRole] = useState<string>("member");
+
+  React.useEffect(() => {
+    const cookies = document.cookie.split(';');
+    const roleCookie = cookies.find(c => c.trim().startsWith('juara_user_role='));
+    if (roleCookie) {
+      setUserRole(roleCookie.split('=')[1].toLowerCase().trim());
+    } else {
+      setUserRole((localStorage.getItem("pm-role") || "member").toLowerCase().trim());
+    }
+  }, []);
 
   const recapText = showRecap ? generateWhatsAppText(projects) : "";
 
@@ -331,6 +342,21 @@ export default function WorkspaceHubClient({
             <strong>Document Center</strong>
             <p>Extract data from Budget (Excel), Invoices, and RFP automatically.</p>
           </Link>
+          {(userRole === "admin" || userRole === "director") && (
+            <Link 
+              className="hub-card" 
+              href="/settings" 
+              style={{ 
+                border: "1px solid rgba(55, 138, 221, 0.25)", 
+                background: "rgba(55, 138, 221, 0.03)",
+                boxShadow: "0 4px 20px rgba(55, 138, 221, 0.05)"
+              }}
+            >
+              <span style={{ color: "#378ADD" }}>Admin Only</span>
+              <strong>System Settings</strong>
+              <p>Manage team members, plain-text passwords, and custom permissions matrix.</p>
+            </Link>
+          )}
           <Link className="hub-card" href="/vendor/register">
             <span>Portal</span>
             <strong>Vendor Self Registration</strong>

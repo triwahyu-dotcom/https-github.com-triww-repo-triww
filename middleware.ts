@@ -61,6 +61,12 @@ export function middleware(request: NextRequest) {
 
     // Jika sudah login, bebaskan akses
     if (authenticated) {
+      if (pathname === "/settings" || pathname.startsWith("/settings/")) {
+        const userRole = (request.cookies.get("juara_user_role")?.value || "").toLowerCase();
+        if (userRole !== "admin" && userRole !== "director") {
+          return NextResponse.redirect(new URL("/projects", request.url));
+        }
+      }
       return NextResponse.next();
     }
 

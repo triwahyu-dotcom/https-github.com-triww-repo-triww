@@ -159,6 +159,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const handleLogout = () => {
     document.cookie = "juara_user_role=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
     document.cookie = "juara_user_name=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
+    document.cookie = "juara_user_email=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT";
     window.location.href = "/";
   };
 

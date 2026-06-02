@@ -16,7 +16,8 @@ import {
   Home,
   Menu,
   X,
-  Grid
+  Grid,
+  Settings
 } from "lucide-react";
 
 interface WorkspaceShellProps {
@@ -62,17 +63,49 @@ export function WorkspaceShell({
     }
   }, []);
 
+  const [permissions, setPermissions] = useState<any>(null);
+
+  useEffect(() => {
+    // Fetch user permissions on mount
+    fetch("/api/settings/my-permissions")
+      .then(res => res.json())
+      .then(data => {
+        if (data.permissions) {
+          setPermissions(data.permissions);
+        }
+      })
+      .catch(err => console.error("Error fetching permissions:", err));
+  }, []);
+
   const navItems = [
-    { label: "Workspace Hub", href: "/", icon: <Home size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director", "member", "hcga"] },
-    { label: "Projects", href: "/projects", icon: <LayoutDashboard size={18} />, roles: ["admin", "pm", "ae", "procurement", "director"] },
-    { label: "CRM", href: "/crm", icon: <Users size={18} />, roles: ["admin", "pm", "ae", "director"] },
-    { label: "Vendors", href: "/vendors", icon: <Building2 size={18} />, roles: ["admin", "procurement", "director", "hcga"] },
-    { label: "Man Power", href: "/manpower/freelancer", icon: <HardHat size={18} />, roles: ["admin", "pm", "ae", "director", "hcga"] },
-    { label: "Finance & RFP", href: "/finance", icon: <Receipt size={18} />, roles: ["admin", "finance", "director"] },
-    { label: "Document Center", href: "/docs", icon: <FolderSearch size={18} />, roles: ["admin", "pm", "ae", "finance", "procurement", "director", "hcga"] },
+    { label: "Workspace Hub", href: "/", icon: <Home size={18} /> },
+    { label: "Projects", href: "/projects", icon: <LayoutDashboard size={18} /> },
+    { label: "CRM", href: "/crm", icon: <Users size={18} /> },
+    { label: "Vendors", href: "/vendors", icon: <Building2 size={18} /> },
+    { label: "Man Power", href: "/manpower/freelancer", icon: <HardHat size={18} /> },
+    { label: "Finance & RFP", href: "/finance", icon: <Receipt size={18} /> },
+    { label: "Document Center", href: "/docs", icon: <FolderSearch size={18} /> },
+    { label: "System Settings", href: "/settings", icon: <Settings size={18} /> },
   ];
 
-  const filteredNavItems = navItems; // RBAC Disabled: All items visible
+  const filteredNavItems = navItems.filter(item => {
+    if (!permissions) return true; // Show all until loaded
+    
+    if (item.href === "/") return true;
+    if (item.href === "/projects") return permissions.projects?.view !== false;
+    if (item.href === "/crm") return permissions.crm?.view !== false;
+    if (item.href === "/vendors") return permissions.vendors?.view !== false;
+    if (item.href === "/manpower/freelancer") return permissions.manpower?.view !== false;
+    if (item.href === "/finance") return permissions.finance?.view !== false;
+    if (item.href === "/docs") return permissions.docs?.view !== false;
+    
+    if (item.href === "/settings") {
+      const cleanRole = userRole.toLowerCase().trim();
+      return cleanRole === "admin" || cleanRole === "director";
+    }
+    
+    return true;
+  });
 
   return (
     <div className="pm-app">
@@ -131,9 +164,9 @@ export function WorkspaceShell({
 
         <div style={{ marginTop: "auto", padding: "16px 12px", borderTop: "1px solid var(--line)", display: (isCollapsed && !isMobile) ? "none" : "flex", gap: "8px", flexDirection: "column" }}>
           <p className="pm-sidebar-label" style={{ marginBottom: "4px" }}>Active Identity</p>
-          <div style={{ padding: '8px', background: 'rgba(93, 202, 165, 0.1)', border: '1px solid rgba(93, 202, 165, 0.2)', borderRadius: '6px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--green)', textTransform: 'capitalize' }}>{userRole}</div>
-            <div style={{ fontSize: '10px', color: 'var(--green)', marginTop: '2px', fontWeight: 700 }}>RBAC DISABLED</div>
+          <div style={{ padding: '8px', background: 'rgba(55, 138, 221, 0.1)', border: '1px solid rgba(55, 138, 221, 0.2)', borderRadius: '6px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 600, color: '#378ADD', textTransform: 'capitalize' }}>{userRole}</div>
+            <div style={{ fontSize: '10px', color: '#378ADD', marginTop: '2px', fontWeight: 700 }}>RBAC ACTIVE</div>
           </div>
 
           {userRole === "admin" && (
@@ -142,6 +175,16 @@ export function WorkspaceShell({
               style={{ width: '100%', background: 'var(--panel-soft)', color: 'var(--text)', border: '1px solid var(--line)', padding: '6px', fontSize: '10px', outline: 'none', marginTop: '8px' }}
               onChange={(e) => {
                 document.cookie = `juara_user_role=${e.target.value}; path=/`;
+                const roleEmailMap: Record<string, string> = {
+                  admin: "admin@juara.local",
+                  director: "ekamarutha@juaraevent.id",
+                  finance: "finance@juaraevent.id",
+                  procurement: "procurement@juaraevent.id",
+                  pm: "ubaid@juaraevent.id",
+                  hcga: "hcga@juaraevent.id",
+                  member: "member@juaraevent.id"
+                };
+                document.cookie = `juara_user_email=${roleEmailMap[e.target.value] || "member@juaraevent.id"}; path=/`;
                 window.location.reload();
               }}
               value={userRole}

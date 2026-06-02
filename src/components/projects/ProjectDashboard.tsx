@@ -119,8 +119,15 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selectedProject = projects.find((p: ProjectRecord) => p.id === selectedId) || null;
   const [detailOpen, setDetailOpen] = useState(false);
+  const [isDetailMaximized, setIsDetailMaximized] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "tasks" | "docs" | "vendors" | "execution" | "manpower" | "billing" | "activity">("overview");
   const [expandedPhase, setExpandedPhase] = useState<WorkflowStage | null>(null);
+
+  useEffect(() => {
+    if (!detailOpen) {
+      setIsDetailMaximized(false);
+    }
+  }, [detailOpen]);
 
   // Sorting
   const [sortConfig, setSortConfig] = useState<{ key: keyof ProjectRecord; direction: 'asc' | 'desc' } | null>(null);
@@ -1166,7 +1173,15 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               onClick={() => setDetailOpen(false)}
             >
               <div 
-                style={{ width: '600px', background: '#18181b', height: '100%', overflowY: 'auto', borderLeft: '0.5px solid rgba(255,255,255,0.08)', animation: 'slideIn 0.3s ease' }}
+                style={{ 
+                  width: isDetailMaximized ? '100%' : (isMobile ? '100%' : '750px'), 
+                  background: '#18181b', 
+                  height: '100%', 
+                  overflowY: 'auto', 
+                  borderLeft: '0.5px solid rgba(255,255,255,0.08)', 
+                  transition: 'width 0.3s cubic-bezier(0.4, 0, 0.2, 1)', 
+                  animation: 'slideIn 0.3s ease' 
+                }}
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="modal-header-premium" style={{ position: 'sticky', top: 0, zIndex: 10, background: '#18181b', padding: '24px 32px' }}>
@@ -1210,6 +1225,35 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                           <option key={opt.key} value={opt.key}>{opt.label}</option>
                         ))}
                       </select>
+                      <button 
+                        className="secondary-button-premium" 
+                        style={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '6px', 
+                          height: '32px',
+                          background: 'rgba(255,255,255,0.05)',
+                          color: '#e4e4e7',
+                          padding: '0 12px',
+                          borderRadius: '8px',
+                          border: '0.5px solid rgba(255,255,255,0.1)',
+                          fontWeight: 600,
+                          fontSize: '11px',
+                          cursor: 'pointer'
+                        }} 
+                        onClick={() => setIsDetailMaximized(!isDetailMaximized)}
+                        title={isDetailMaximized ? "Minimize View" : "Fullscreen View"}
+                      >
+                        {isDetailMaximized ? (
+                          <>
+                            <Minimize2 size={13} /> Minimize
+                          </>
+                        ) : (
+                          <>
+                            <Maximize2 size={13} /> Fullscreen
+                          </>
+                        )}
+                      </button>
                       <button 
                         className="ghost-button" 
                         onClick={() => setDetailOpen(false)}

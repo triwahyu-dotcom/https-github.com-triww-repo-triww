@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import "../styles/tokens.css";
 import "./globals.css";
 import { Inter, Cedarville_Cursive } from "next/font/google";
 

@@ -4,8 +4,9 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
-import { SummaryCard } from "../ui/summary-card";
+import { MetricCard } from "../ui/MetricCard";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
+import { ViewSwitcher } from "./portal-router";
 
 import { POCreatorModal } from "./po-creator-modal";
 import { CashAdvanceModal } from "./cash-advance-modal";
@@ -36,6 +37,8 @@ interface Props {
   activeProjects: ProjectRecord[];
   availableVendors?: any[];
   availableFreelancers?: any[];
+  viewMode?: "monitoring" | "operational";
+  onViewModeChange?: (mode: "monitoring" | "operational") => void;
 }
 
 const docTypeLabel: Record<string, string> = {
@@ -63,7 +66,14 @@ const docTypeStyles: Record<string, { bg: string, color: string }> = {
   CASH_ADVANCE: { bg: 'rgba(180,115,23,0.15)', color: '#EF9F27' },
 };
 
-export function ProcurementDashboard({ initialData, activeProjects, availableVendors = [], availableFreelancers = [] }: Props) {
+export function ProcurementDashboard({ 
+  initialData, 
+  activeProjects, 
+  availableVendors = [], 
+  availableFreelancers = [],
+  viewMode,
+  onViewModeChange
+}: Props) {
   const [activeTab, setActiveTab] = useState<"docs" | "rfps">(() => {
     if (typeof window !== "undefined") {
       return (localStorage.getItem("procurement-active-tab") as "docs" | "rfps") || "docs";
@@ -77,6 +87,16 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const openPO = localStorage.getItem("juara_finance_open_po_on_load");
+      if (openPO === "true") {
+        setShowPOModal(true);
+        localStorage.removeItem("juara_finance_open_po_on_load");
+      }
+    }
   }, []);
 
   const handleTabChange = (tab: "docs" | "rfps") => {
@@ -131,7 +151,10 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
   }, []);
 
   const headerActions = (
-    <div style={{ display: "flex", gap: "10px" }}>
+    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      {viewMode && onViewModeChange && (
+        <ViewSwitcher viewMode={viewMode} onViewModeChange={onViewModeChange} />
+      )}
       <button 
         onClick={() => setShowCAModal(true)} 
         style={{ 
@@ -180,74 +203,49 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
     >
       {/* Summary Cards */}
       <section className="procurement-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
-        <SummaryCard 
-          label="Total Dokumen" 
-          value={String(docs.length)} 
-          description={isMobile ? "All" : "PO, SPK, Kontrak, CA"} 
-          icon={<FileText size={18} />} 
-          trendType="up"
+        <MetricCard
+          label="Total Dokumen"
+          value={String(docs.length)}
+          subtitle={isMobile ? "All" : "PO, SPK, Kontrak, CA"}
+          icon={<FileText size={16} />}
         />
-        <SummaryCard 
-          label="Menunggu Approve" 
-          value={String(pendingApprovalDocs.length)} 
-          description={isMobile ? "Wait" : "Belum ditandatangani Director"} 
-          icon={<Clock size={18} />} 
-          trendType="up"
+        <MetricCard
+          label="Menunggu Approve"
+          value={String(pendingApprovalDocs.length)}
+          subtitle={isMobile ? "Wait" : "Belum ditandatangani Director"}
+          icon={<Clock size={16} />}
         />
-        <SummaryCard 
-          label="Siap Buat RFP" 
-          value={String(readyForRfpDocs.length)} 
-          description={isMobile ? "RFP" : "Submitted/Approved, belum ada RFP"} 
-          icon={<CheckCircle2 size={18} />} 
-          trendType="neutral"
+        <MetricCard
+          label="Siap Buat RFP"
+          value={String(readyForRfpDocs.length)}
+          subtitle={isMobile ? "RFP" : "Submitted/Approved, belum ada RFP"}
+          icon={<CheckCircle2 size={16} />}
         />
-        <SummaryCard 
-          label="Total Nilai" 
-          value={formatCurrencyIDR(totalDocValue)} 
-          description={isMobile ? "Total" : "Semua dokumen aktif"} 
-          icon={<Wallet size={18} />} 
-          trendType="up"
+        <MetricCard
+          label="Total Nilai"
+          value={formatCurrencyIDR(totalDocValue)}
+          subtitle={isMobile ? "Total" : "Semua dokumen aktif"}
+          icon={<Wallet size={16} />}
+          valueColor="#EF9F27"
         />
       </section>
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
-        <button 
-          onClick={() => handleTabChange("docs")} 
-          style={{ 
-            padding: "6px 14px", 
-            borderRadius: "8px", 
-            border: activeTab === "docs" ? "none" : "0.5px solid rgba(255,255,255,0.08)", 
-            cursor: "pointer", 
-            fontSize: "13px", 
-            background: activeTab === "docs" ? "#378ADD" : "transparent", 
-            color: activeTab === "docs" ? "#fff" : "#71717a", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "8px",
-            transition: 'all 0.2s'
-          }}
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-default)', marginBottom: '20px' }}>
+        <div
+          onClick={() => handleTabChange("docs")}
+          className={`tab-item ${activeTab === "docs" ? 'tab-active' : 'tab-inactive'}`}
+          style={{ padding: '12px 20px', fontSize: 13, cursor: 'pointer' }}
         >
-          Dokumen Pengadaan <span style={{ opacity: 0.7 }}>({docs.length})</span>
-        </button>
-        <button 
-          onClick={() => handleTabChange("rfps")} 
-          style={{ 
-            padding: "6px 14px", 
-            borderRadius: "8px", 
-            border: activeTab === "rfps" ? "none" : "0.5px solid rgba(255,255,255,0.08)", 
-            cursor: "pointer", 
-            fontSize: "13px", 
-            background: activeTab === "rfps" ? "#378ADD" : "transparent", 
-            color: activeTab === "rfps" ? "#fff" : "#71717a", 
-            display: "flex", 
-            alignItems: "center", 
-            gap: "8px",
-            transition: 'all 0.2s'
-          }}
+          Dokumen Pengadaan <span style={{ opacity: 0.6, fontSize: '11px' }}>({docs.length})</span>
+        </div>
+        <div
+          onClick={() => handleTabChange("rfps")}
+          className={`tab-item ${activeTab === "rfps" ? 'tab-active' : 'tab-inactive'}`}
+          style={{ padding: '12px 20px', fontSize: 13, cursor: 'pointer' }}
         >
-          RFP Tracking <span style={{ opacity: 0.7 }}>({rfps.length})</span>
-        </button>
+          RFP Tracking <span style={{ opacity: 0.6, fontSize: '11px' }}>({rfps.length})</span>
+        </div>
       </div>
 
       {/* Info Banner */}
@@ -419,7 +417,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
       {/* Tab: RFP Tracking */}
       {activeTab === "rfps" && (
         <div style={{ background: '#111113', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-          <div style={{ 
+          <div className="procurement-table-header" style={{ 
             display: 'grid', 
             gridTemplateColumns: '150px 1fr 1fr 130px 220px',
             background: '#111113',
@@ -438,7 +436,7 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
               Tidak ada RFP yang sesuai filter
             </div>
           ) : filteredRfps.map(rfp => (
-            <div key={rfp.id} className="list-row-premium" style={{ 
+            <div key={rfp.id} className="list-row-premium procurement-row" style={{ 
               display: 'grid', 
               gridTemplateColumns: '150px 1fr 1fr 130px 220px',
               alignItems: 'center',
@@ -622,10 +620,23 @@ export function ProcurementDashboard({ initialData, activeProjects, availableVen
             grid-template-columns: repeat(2, 1fr) !important;
           }
           .procurement-table-header {
-            grid-template-columns: 100px 60px 80px 1fr !important;
+            display: none !important;
           }
           .procurement-row {
-            grid-template-columns: 100px 60px 80px 1fr !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            padding: 14px 16px !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+          }
+          .procurement-row > div {
+            text-align: left !important;
+          }
+          .procurement-row > div:last-child {
+            justify-content: flex-start !important;
+            margin-top: 4px;
           }
           .hide-mobile {
             display: none !important;

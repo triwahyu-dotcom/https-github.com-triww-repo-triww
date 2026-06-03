@@ -17,13 +17,16 @@ import {
 import { FinanceDashboardData, ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
-import { SummaryCard } from "../ui/summary-card";
+import { MetricCard } from "../ui/MetricCard";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 import { FilterBar } from "./filter-bar";
+import { ViewSwitcher } from "./portal-router";
 
 interface Props {
   initialData: FinanceDashboardData;
   activeProjects: ProjectRecord[];
+  viewMode?: "monitoring" | "operational";
+  onViewModeChange?: (mode: "monitoring" | "operational") => void;
 }
 
 const docTypeLabel: Record<string, string> = {
@@ -43,7 +46,12 @@ const statusLabel: Record<string, { text: string; tone: string; icon?: React.Rea
   pending_finance: { text: "Pending Finance",  tone: "tone-amber" },
 };
 
-export function PMDashboard({ initialData, activeProjects }: Props) {
+export function PMDashboard({ 
+  initialData, 
+  activeProjects,
+  viewMode,
+  onViewModeChange
+}: Props) {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     activeProjects[0]?.id ?? null
   );
@@ -87,7 +95,10 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
   const combinedItems = useMemo(() => [...projectDocs, ...projectRfps], [projectDocs, projectRfps]);
 
   const headerActions = (
-    <div style={{ display: 'flex', gap: '10px' }}>
+    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+      {viewMode && onViewModeChange && (
+        <ViewSwitcher viewMode={viewMode} onViewModeChange={onViewModeChange} />
+      )}
       <button 
         style={{ 
           background: 'transparent',
@@ -115,10 +126,10 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
       actions={headerActions}
     >
       <section className="pm-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: "24px" }}>
-        <SummaryCard label="My Projects" value={String(activeProjects.length)} description={isMobile ? "Active" : "Active executions"} icon={<FolderOpen size={18} />} />
-        <SummaryCard label="Total Dokumen" value={String(docs.length)} description={isMobile ? "Files" : "PO, SPK, Kontrak, CA"} icon={<FileText size={18} />} />
-        <SummaryCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} description={isMobile ? "Unpaid" : "Belum terbayar"} icon={<Clock size={18} />} trendType="down" />
-        <SummaryCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} description={isMobile ? "Auth" : "Nilai terotorisasi"} icon={<CheckCircle2 size={18} />} trendType="up" />
+        <MetricCard label="My Projects" value={String(activeProjects.length)} subtitle={isMobile ? "Active" : "Active executions"} icon={<FolderOpen size={16} />} />
+        <MetricCard label="Total Dokumen" value={String(docs.length)} subtitle={isMobile ? "Files" : "PO, SPK, Kontrak, CA"} icon={<FileText size={16} />} />
+        <MetricCard label="Pending Nilai" value={formatCurrencyIDR(totalPending)} subtitle={isMobile ? "Unpaid" : "Belum terbayar"} icon={<Clock size={16} />} valueColor="var(--accent-danger)" />
+        <MetricCard label="Sudah Approved" value={formatCurrencyIDR(totalApproved)} subtitle={isMobile ? "Auth" : "Nilai terotorisasi"} icon={<CheckCircle2 size={16} />} valueColor="var(--accent-success)" />
       </section>
 
       <div className="pm-split-pane" style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: "1px", background: 'rgba(255,255,255,0.08)', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.08)', overflow: 'hidden' }}>
@@ -306,11 +317,24 @@ export function PMDashboard({ initialData, activeProjects }: Props) {
           .pm-right-panel {
             height: auto !important;
           }
-          .pm-table-header, .pm-row {
-            grid-template-columns: 1fr 100px 100px !important;
+          .pm-table-header, .pm-table-header-rfp {
+            display: none !important;
           }
-          .pm-table-header-rfp, .pm-row-rfp {
-            grid-template-columns: 1fr 100px 100px !important;
+          .pm-row, .pm-row-rfp {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            padding: 14px 16px !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+          }
+          .pm-row > div, .pm-row-rfp > div {
+            text-align: left !important;
+          }
+          .pm-row > div:last-child, .pm-row-rfp > div:last-child {
+            justify-content: flex-start !important;
+            margin-top: 4px;
           }
           .hide-mobile {
             display: none !important;

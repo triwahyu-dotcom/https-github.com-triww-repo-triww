@@ -23,14 +23,23 @@ import {
 import { FinanceDashboardData, ExpenseDocument, RequestForPayment, LineItem, PaymentEvent } from "@/lib/finance/types";
 import { ProjectRecord } from "@/lib/project/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
+import { MetricCard } from "../ui/MetricCard";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
+import { ViewSwitcher } from "./portal-router";
 
 interface Props {
   initialData: FinanceDashboardData;
   activeProjects: ProjectRecord[];
+  viewMode?: "monitoring" | "operational";
+  onViewModeChange?: (mode: "monitoring" | "operational") => void;
 }
 
-export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) {
+export function FinanceMonitoringCenter({ 
+  initialData, 
+  activeProjects,
+  viewMode,
+  onViewModeChange
+}: Props) {
   const [activeTab, setActiveTab] = useState<"project" | "outstanding" | "approval" | "summary" | "settlement">("project");
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(activeProjects[0]?.id || null);
   const [isMobile, setIsMobile] = useState(false);
@@ -138,53 +147,62 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
     document.body.removeChild(link);
   };
 
-  return (
-    <WorkspaceShell title="Finance Monitoring Center" eyebrow="FINANCE & RFP — MONITORING">
-      
-      {/* Top Header Actions */}
-      <div className="finance-header-actions" style={{ position: 'absolute', top: '24px', right: isMobile ? '16px' : '40px', display: 'flex', gap: '12px' }}>
-        <button 
+  const headerActions = (
+    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+      {viewMode && onViewModeChange && (
+        <ViewSwitcher viewMode={viewMode} onViewModeChange={onViewModeChange} />
+      )}
+      {!isMobile && (
+        <button
           onClick={handleExport}
-          className="desktop-only-btn"
-          style={{ background: 'rgba(255,255,255,0.05)', border: '0.5px solid rgba(255,255,255,0.1)', borderRadius: '10px', padding: '10px 20px', color: '#e4e4e7', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: '8px' }}
+          style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px', padding: '8px 16px', color: '#e4e4e7', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px' }}
         >
-          <Download size={16} /> Export
+          <Download size={14} /> Export
         </button>
-        <button style={{ background: '#378ADD', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Plus size={16} /> {isMobile ? 'New' : '+ New PO / SPK'}
-        </button>
-      </div>
+      )}
+      <button 
+        onClick={() => {
+          localStorage.setItem("juara_finance_view_mode", "operational");
+          localStorage.setItem("juara_finance_admin_role", "procurement");
+          localStorage.setItem("juara_finance_open_po_on_load", "true");
+          window.location.reload();
+        }}
+        style={{ background: '#378ADD', border: 'none', borderRadius: '8px', padding: '8px 16px', color: '#fff', fontSize: '12px', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '7px' }}
+      >
+        <Plus size={14} /> {isMobile ? 'New' : '+ New PO / SPK'}
+      </button>
+    </div>
+  );
+
+  return (
+    <WorkspaceShell title="Finance Monitoring Center" eyebrow="FINANCE & RFP — MONITORING" actions={headerActions}>
 
       {/* Primary Navigation Tabs */}
-      <div className="finance-nav-tabs" style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '6px', borderRadius: '12px', border: '0.5px solid rgba(255,255,255,0.06)', width: isMobile ? '100%' : 'fit-content', marginBottom: '32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
+      <div className="finance-nav-tabs" style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-default)', marginBottom: '32px', overflowX: 'auto', whiteSpace: 'nowrap' }}>
         {[
-          { id: 'project', label: isMobile ? 'Project' : 'Project Finance Dashboard', icon: <BarChart3 size={16} /> },
-          { id: 'outstanding', label: isMobile ? 'Out.' : 'Outstanding Payment', icon: <Clock size={16} /> },
-          { id: 'approval', label: isMobile ? 'Appr.' : 'Approval Pipeline', icon: <CheckCircle2 size={16} /> },
-          { id: 'settlement', label: isMobile ? 'Sett.' : 'CA Settlement Tracker', icon: <Receipt size={16} /> },
-          { id: 'summary', label: isMobile ? 'Sum.' : 'Multi-Project Summary', icon: <Briefcase size={16} /> }
+          { id: 'project', label: isMobile ? 'Project' : 'Project Finance Dashboard' },
+          { id: 'outstanding', label: isMobile ? 'Out.' : 'Outstanding Payment' },
+          { id: 'approval', label: isMobile ? 'Appr.' : 'Approval Pipeline' },
+          { id: 'settlement', label: isMobile ? 'Sett.' : 'CA Settlement Tracker' },
+          { id: 'summary', label: isMobile ? 'Sum.' : 'Multi-Project Summary' }
         ].map(tab => (
-          <button 
-            key={tab.id} 
+          <div
+            key={tab.id}
             onClick={() => setActiveTab(tab.id as any)}
-            style={{ 
-              padding: '10px 20px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', border: 'none',
-              display: 'flex', alignItems: 'center', gap: '10px', transition: 'all 0.2s', flexShrink: 0,
-              background: activeTab === tab.id ? '#378ADD' : 'transparent',
-              color: activeTab === tab.id ? '#fff' : '#71717a'
-            }}
+            className={`tab-item ${activeTab === tab.id ? 'tab-active' : 'tab-inactive'}`}
+            style={{ padding: '12px 20px', fontSize: 13, cursor: 'pointer', flexShrink: 0 }}
           >
-            {tab.icon} {tab.label}
-          </button>
+            {tab.label}
+          </div>
         ))}
       </div>
 
       {/* Global Stat Cards */}
       <div className="finance-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '40px' }}>
-        <StatCard label="Total Budget Aktif" value={formatCurrencyIDR(globalStats.totalBudget)} trend="+ Rp 0M dari bulan lalu" trendType="neutral" icon={<TrendingUp size={20} />} />
-        <StatCard label="Outstanding" value={formatCurrencyIDR(globalStats.totalOutstanding)} trend="Total committed unpaid" trendType="down" icon={<AlertCircle size={20} />} color="#EF9F27" />
-        <StatCard label="Pending Approval" value={String(globalStats.pendingApproval)} trend="Queue awaiting action" trendType="down" icon={<Clock size={20} />} color="#378ADD" />
-        <StatCard label="Sudah Dibayar" value={formatCurrencyIDR(globalStats.totalPaid)} trend="Total realization" trendType="up" icon={<CheckCircle2 size={20} />} color="#5DCAA5" />
+        <MetricCard label="Total Budget Aktif" value={formatCurrencyIDR(globalStats.totalBudget)} icon={<TrendingUp size={16} />} />
+        <MetricCard label="Outstanding" value={formatCurrencyIDR(globalStats.totalOutstanding)} subtitle="Total committed unpaid" icon={<AlertCircle size={16} />} valueColor="#EF9F27" />
+        <MetricCard label="Pending Approval" value={String(globalStats.pendingApproval)} subtitle="Queue awaiting action" icon={<Clock size={16} />} valueColor="#378ADD" />
+        <MetricCard label="Sudah Dibayar" value={formatCurrencyIDR(globalStats.totalPaid)} subtitle="Total realization" icon={<CheckCircle2 size={16} />} valueColor="#5DCAA5" />
       </div>
 
       {activeTab === 'project' && (
@@ -333,7 +351,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {(initialData.expenseDocuments || [])
-                  .filter(d => d.status !== "paid" && d.status !== "settled")
+                  .filter(d => (d.status as string) !== "paid" && (d.status as string) !== "settled")
                   .map(d => {
                     const days = Math.floor((new Date().getTime() - new Date(d.issueDate).getTime()) / (1000 * 60 * 60 * 24));
                     if (days < 3) return null;
@@ -369,7 +387,7 @@ export function FinanceMonitoringCenter({ initialData, activeProjects }: Props) 
 
            <div style={{ display: 'flex', flexDirection: 'column' }}>
              {(initialData.expenseDocuments || [])
-               .filter(d => d.documentType === "CASH_ADVANCE" && d.status !== "settled")
+               .filter(d => d.documentType === "CASH_ADVANCE" && (d.status as string) !== "settled")
                .map(d => {
                  const days = Math.floor((new Date().getTime() - new Date(d.issueDate).getTime()) / (1000 * 60 * 60 * 24));
                  return (

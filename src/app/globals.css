@@ -1533,21 +1533,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 
 .pm-sidebar-item.active {
-  border-color: rgba(99, 102, 241, 0.4);
-  background: rgba(99, 102, 241, 0.12); /* Slightly darker */
-  color: #ffffff;
+  border-left: 2px solid var(--accent-primary) !important;
+  background: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
   position: relative;
 }
 
 .pm-sidebar-item.active::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 8px;
-  bottom: 8px;
-  width: 3px;
-  background: var(--blue);
-  border-radius: 0 4px 4px 0;
+  display: none !important;
 }
 
 .pm-mini-stat {

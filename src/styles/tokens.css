@@ -1,0 +1,74 @@
+@import url("https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css");
+
+:root {
+  /* Background layers */
+  --bg-app: #0D1117;
+  --bg-surface: #161B22;
+  --bg-elevated: #1C2333;
+  --bg-card: #21262D;
+
+  /* Accent */
+  --accent-primary: #E6863C;   /* orange — JUARA brand */
+  --accent-info: #58A6FF;
+  --accent-success: #3FB950;
+  --accent-warning: #D29922;
+  --accent-danger: #F85149;
+
+  /* Text */
+  --text-primary: #C9D1D9;
+  --text-muted: #8B949E;
+  --text-hint: #484F58;
+
+  /* Border */
+  --border-default: #30363D;
+  --border-subtle: #21262D;
+
+  /* Radius */
+  --radius-sm: 4px;    /* badge, chip */
+  --radius-md: 8px;    /* button, input, metric card */
+  --radius-lg: 12px;   /* panel, modal, main card */
+
+  /* Spacing */
+  --padding-card: 16px 20px;
+  --padding-row: 12px 16px;
+  --gap-section: 24px;
+  --gap-cards: 12px;
+  --sidebar-width: 200px;
+}
+
+/* Active tab */
+.tab-active {
+  color: var(--text-primary) !important;
+  border-bottom: 2px solid var(--accent-primary) !important;
+  font-weight: 500 !important;
+}
+
+/* Inactive tab */
+.tab-inactive {
+  color: var(--text-muted) !important;
+  border-bottom: 2px solid transparent !important;
+}
+
+/* Tab bar container */
+.tab-bar {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-default);
+  margin-bottom: var(--gap-section);
+}
+
+.tab-item {
+  padding: 10px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s;
+}
+
+.action-btn-edit-unified:hover {
+  color: var(--text-primary) !important;
+}
+
+.action-btn-delete-unified:hover {
+  color: var(--accent-danger) !important;
+}

@@ -1265,10 +1265,6 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     sourceTimestamp: timestamp,
     sourceRowHash: rowHash,
     rawSource,
-    rawSource: {
-      ...payload,
-      is_eo: payload.is_eo || false,
-    },
     createdAt: timestamp,
     updatedAt: timestamp,
   };

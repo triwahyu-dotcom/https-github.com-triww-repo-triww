@@ -60,6 +60,10 @@ import {
 import { PresenceIndicator } from "@/components/PresenceIndicator";
 import EmbeddedTaskTracker from "@/components/projects/EmbeddedTaskTracker";
 import { seedTasksForProject } from "@/lib/project/defaultTasks";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 type ViewMode = "overview" | "table" | "board";
 
@@ -710,171 +714,122 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   };
 
   return (
-    <div className="app-layout-premium" style={{ flexDirection: isMobile ? 'column' : 'row' }}>
-      {/* Sidebar Navigation */}
-      <aside 
-        className={`sidebar-premium ${isSidebarOpen ? 'mobile-open' : ''}`}
-        style={{ display: isMobile && !isSidebarOpen ? 'none' : 'flex' }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 4px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>J</div>
-            <span style={{ fontSize: '11px', fontWeight: 500, color: '#a1a1aa', letterSpacing: '0.06em' }}>JUARA WORKSPACE</span>
-          </div>
-          <button className="mobile-only-close" onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: '#71717a' }}>
-            <X size={20} />
-          </button>
+    <WorkspaceShell title="" eyebrow="">
+      <div style={{ flex: 1 }}>
+        <PageHeader 
+          breadcrumb={['Projects', 'Dashboard']}
+          title="JUARA's Projects 2026"
+          statusBadge="Database Ready"
+          actions={
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <PresenceIndicator 
+                currentActivity={
+                  detailOpen 
+                    ? (activeDetailTab === 'billing' ? `Finance: ${selectedProject?.projectName}` : `Project: ${selectedProject?.projectName}`)
+                    : isAddingProject ? "Creating New Project" : "Dashboard Overview"
+                } 
+              />
+              <button 
+                className="primary-button" 
+                style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '12px', padding: '10px 16px', background: 'var(--accent-primary)', border: 'none', color: 'white' }} 
+                onClick={() => setIsAddingProject(true)}
+              >
+                <i className="ti ti-plus" style={{ fontSize: 16 }} />
+                Add Project
+              </button>
+            </div>
+          }
+        />
+
+        {/* Stat Cards Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
+          <MetricCard 
+            label="Leads & Pitching" 
+            value={`Rp ${leadsValue.toLocaleString('id-ID')}`} 
+            subtitle="Potential opportunities" 
+            icon="target" 
+            valueColor="#a78bfa"
+          />
+          <MetricCard 
+            label="On Going Projects" 
+            value={`Rp ${ongoingValue.toLocaleString('id-ID')}`} 
+            subtitle="Active & Finance stage" 
+            icon="zap" 
+            valueColor="#378ADD"
+          />
+          <MetricCard 
+            label="Billed / Completed" 
+            value={`Rp ${billedValue.toLocaleString('id-ID')}`} 
+            subtitle="Success projects" 
+            icon="circle-check" 
+            valueColor="#5DCAA5"
+          />
+          <MetricCard 
+            label="Grand Total Value" 
+            value={`Rp ${totalValue.toLocaleString('id-ID')}`} 
+            subtitle="All historical value" 
+            icon="coins" 
+            valueColor="#EF9F27"
+          />
         </div>
 
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-          <Link href="/" className="sidebar-item-premium"><Home size={18} /> Workspace Hub</Link>
-          <Link href="/projects" className="sidebar-item-premium active"><Grid size={18} /> Projects</Link>
-          <Link href="/crm" className="sidebar-item-premium"><User size={18} /> CRM</Link>
-          <Link href="/vendors" className="sidebar-item-premium"><Building2 size={18} /> Vendors</Link>
-          <Link href="/manpower/freelancer" className="sidebar-item-premium"><Users size={18} /> Man Power</Link>
-          <Link href="/finance" className="sidebar-item-premium"><FileText size={18} /> Finance & RFP</Link>
-          <Link href="/docs" className="sidebar-item-premium"><FolderOpen size={18} /> Document Center</Link>
-          <Link href="/docs/manual" className="sidebar-item-premium" style={{ color: '#85B7EB' }}><Book size={18} /> User Manual</Link>
+        {/* Workload Activity Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "16px", marginBottom: "24px" }}>
+          {workloadStats.map((s, idx) => {
+            const iconName = idx === 0 ? "plus" : idx === 1 ? "palette" : idx === 2 ? "file-bar-chart" : "calendar";
+            return (
+              <MetricCard 
+                key={idx}
+                label={s.label}
+                value={s.value}
+                icon={iconName}
+                valueColor={s.color}
+              />
+            );
+          })}
+        </div>
 
-          <div style={{ marginTop: '32px', marginBottom: '8px', padding: '0 12px' }}>
-            <span style={{ fontSize: '10px', color: '#3f3f46', letterSpacing: '0.08em' }}>ACTIVE IDENTITY</span>
+        {/* AR Monitoring Section */}
+        <div style={{ marginBottom: "var(--gap-section)" }}>
+          <h3 style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '12px' }}>AR Monitoring (Account Receivable)</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "16px" }}>
+            <MetricCard 
+              label="Total Outstanding AR" 
+              value={mounted ? `Rp ${totalAR.toLocaleString('id-ID')}` : '---'} 
+              icon="trending-up"
+              valueColor="var(--accent-info)"
+            />
+            <MetricCard 
+              label="Overdue (Menunggak)" 
+              value={mounted ? `Rp ${overdueAR.toLocaleString('id-ID')}` : '---'} 
+              icon="alert-circle"
+              valueColor="var(--accent-danger)"
+            />
           </div>
-          <div style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', color: '#a1a1aa', display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 4px' }}>
-            Project Manager (Viewer) <ChevronDown size={14} />
-          </div>
-        </nav>
-      </aside>
+        </div>
 
-      {/* Main Content Area */}
-      <main className="main-premium" style={{ marginLeft: 0, width: '100%' }}>
-        {/* Fixed Top Header */}
-        <header className="top-header-premium">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button 
-                className="mobile-menu-toggle" 
-                onClick={() => setIsSidebarOpen(true)}
-                style={{ background: 'transparent', border: 'none', color: 'white', padding: '4px', display: isMobile ? 'block' : 'none' }}
+        {/* Tab & Info Toolbar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-default)', marginBottom: 'var(--gap-section)' }}>
+          <div style={{ display: 'flex', gap: 0 }}>
+            {VIEW_OPTIONS.map(opt => (
+              <div
+                key={opt.id}
+                onClick={() => setViewMode(opt.id)}
+                className={`tab-item ${viewMode === opt.id ? 'tab-active' : 'tab-inactive'}`}
+                style={{ padding: '12px 20px', fontSize: 13, cursor: 'pointer' }}
               >
-                <Menu size={24} />
-              </button>
-              <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(99,153,34,0.1)', color: '#639922', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>DATABASE READY</div>
-                <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>JUARA'S PROJECTS 2026</h1>
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-              <div className="desktop-only-presence">
-                <PresenceIndicator 
-                  currentActivity={
-                    detailOpen 
-                      ? (activeDetailTab === 'billing' ? `Finance: ${selectedProject?.projectName}` : `Project: ${selectedProject?.projectName}`)
-                      : isAddingProject ? "Creating New Project" : "Dashboard Overview"
-                  } 
-                />
-              </div>
-              {isMounted && (
-                <>
-                  <button className="primary-button" style={{ fontSize: '12px', padding: '6px 14px', background: '#378ADD' }} onClick={() => setIsAddingProject(true)}>+ Add Project</button>
-                  <div className="desktop-only-logout">
-                    <button className="ghost-button" style={{ fontSize: '12px', color: '#71717a' }} onClick={handleLogout}>Logout</button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </header>
-
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {/* Stat Cards Row */}
-          <div className="stat-grid-premium responsive-grid-4" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
-            gap: '16px', 
-            padding: '0 24px' 
-          }}>
-            {stats.map((s, idx) => (
-              <div key={idx} className="section-card-premium stat-card-mobile-fix" style={{ padding: '20px', borderLeft: `4px solid ${s.color}`, background: 'rgba(255,255,255,0.01)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <span style={{ fontSize: '11px', color: '#71717a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</span>
-                  <div style={{ color: s.color, opacity: 0.8 }}>{s.icon}</div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                   <span style={{ fontSize: '14px', fontWeight: 700, color: s.color, opacity: 0.9 }}>Rp</span>
-                   <div style={{ fontSize: '20px', fontWeight: 600, color: '#f4f4f5', letterSpacing: '-0.01em' }}>
-                     {mounted ? s.numericValue : "---"}
-                   </div>
-                </div>
-                <div style={{ fontSize: '11px', color: '#52525b', marginTop: '8px', fontWeight: 500 }}>{s.sub}</div>
+                {opt.label}
               </div>
             ))}
           </div>
-
-          {/* Workload Activity Row */}
-          <div className="responsive-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', padding: '0 24px', marginBottom: '32px' }}>
-            {workloadStats.map((s, idx) => (
-              <div key={idx} style={{ background: '#111113', borderRadius: '12px', padding: '12px 16px', border: '0.5px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: `${s.color}15`, color: s.color, display: 'grid', placeItems: 'center' }}>{s.icon}</div>
-                <div>
-                  <div style={{ fontSize: '10px', color: '#52525b', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
-                  <div style={{ fontSize: '15px', fontWeight: 600, color: '#f4f4f5' }}>{s.value}</div>
-                </div>
-              </div>
-            ))}
+          <div style={{ display: 'flex', gap: '16px', paddingRight: 8 }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{projects.length} projects</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Rp {totalValue.toLocaleString('id-ID')}</span>
           </div>
+        </div>
 
-          <div style={{ padding: '0 24px', marginBottom: '32px' }}>
-            <h3 style={{ fontSize: '11px', color: '#52525b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '16px' }}>AR Monitoring (Account Receivable)</h3>
-            <div className="stat-grid-premium responsive-grid-2" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-              {arStats.map((s, idx) => (
-                <div key={idx} className="section-card-premium" style={{ padding: '20px', borderLeft: `4px solid ${s.color}`, background: 'rgba(255,255,255,0.01)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                    <span style={{ fontSize: '11px', color: '#71717a', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{s.label}</span>
-                    <div style={{ color: s.color, opacity: 0.8 }}>{s.icon}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-                     <span style={{ fontSize: '14px', fontWeight: 700, color: s.color, opacity: 0.9 }}>Rp</span>
-                     <div style={{ fontSize: '20px', fontWeight: 600, color: '#f4f4f5', letterSpacing: '-0.01em' }}>
-                       {mounted ? s.value.toLocaleString('id-ID') : "---"}
-                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Sticky Toolbar */}
-          <div className="view-toolbar-premium">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-              <div style={{ display: 'flex', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '10px', gap: '4px' }}>
-                {VIEW_OPTIONS.map(opt => (
-                  <button 
-                    key={opt.id}
-                    onClick={() => setViewMode(opt.id)}
-                    style={{ 
-                      padding: '6px 16px', 
-                      fontSize: '13px', 
-                      borderRadius: '8px',
-                      background: viewMode === opt.id ? '#378ADD' : 'transparent',
-                      color: viewMode === opt.id ? 'white' : '#71717a',
-                      transition: 'all 0.2s',
-                      border: 'none',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: '16px' }}>
-                <span style={{ fontSize: '12px', color: '#52525b' }}>{projects.length} projects</span>
-                <span style={{ fontSize: '12px', color: '#52525b' }}>Rp {totalValue.toLocaleString('id-ID')}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* View Renderers */}
-          <div style={{ padding: isMobile ? '0 16px 40px 16px' : '0 24px 40px 24px' }}>
+        {/* View Renderers */}
+        <div style={{ padding: isMobile ? '0' : '0' }}>
             {viewMode === "overview" && (
               <div className="tab-content-fade">
                 <div className="overview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '24px' }}>
@@ -1028,9 +983,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                           </td>
                           <td>{p.client}</td>
                           <td>
-                            <span className="stage-pill-premium" style={{ background: `${getStageColor(p.currentStage)}15`, color: getStageColor(p.currentStage) }}>
-                              {p.currentStage.toUpperCase()}
-                            </span>
+                            <StatusBadge variant={p.currentStage} />
                           </td>
                           <td>{p.eventDate ? formatDate(p.eventDate) : "-"}</td>
                           <td style={{ padding: '16px 12px', fontSize: '13px', color: '#f4f4f5', fontWeight: 500, whiteSpace: 'nowrap', textAlign: 'right' }}>
@@ -1125,7 +1078,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                                 onDragEnd={() => setDraggedProjectId(null)}
                               >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                  <div className="stage-pill-premium" style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', color: getStageColor(p.currentStage) }}>{p.currentStage.toUpperCase()}</div>
+                                  <StatusBadge variant={p.currentStage} />
                                   <div style={{ display: 'flex', alignItems: 'center' }}>
                                     {p.health === 'critical' && <div className="pulse-dot" />}
                                     <div className="urgency-badge-premium" style={{ fontSize: '10px', background: p.health === 'critical' ? 'rgba(226,75,74,0.1)' : 'rgba(99,153,34,0.1)', color: p.health === 'critical' ? '#F09595' : '#97C459' }}>
@@ -1195,7 +1148,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                 <div className="modal-header-premium" style={{ position: 'sticky', top: 0, zIndex: 10, background: '#18181b', padding: '24px 32px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
-                      <div className="stage-pill-premium" style={{ background: 'rgba(55,138,221,0.1)', color: '#378ADD', marginBottom: '8px' }}>{selectedProject.currentStage.toUpperCase()}</div>
+                      <div style={{ marginBottom: '8px' }}><StatusBadge variant={selectedProject.currentStage} /></div>
                       <h2 style={{ fontSize: '20px', fontWeight: 500, margin: 0 }}>{selectedProject.projectName}</h2>
                       <div style={{ color: '#71717a', fontSize: '13px' }}>{selectedProject.client}</div>
                     </div>
@@ -2056,222 +2009,6 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
             </div>
           </div>
         </div>
-      </main>
-
-      {/* Mobile Sidebar Overlay/Scrim */}
-      {isMobile && isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 190,
-            animation: 'fadeIn 0.2s ease-out'
-          }}
-        />
-      )}
-
-      {/* Mobile Bottom Navigation */}
-      <div className="mobile-bottom-nav" style={{ display: isMobile ? 'flex' : 'none' }}>
-        <Link href="/projects" className="nav-item active">
-          <Grid size={20} />
-          <span>Projects</span>
-        </Link>
-        <Link href="/crm" className="nav-item">
-          <Users size={20} />
-          <span>CRM</span>
-        </Link>
-        <Link href="/finance" className="nav-item">
-          <FileText size={20} />
-          <span>Finance</span>
-        </Link>
-        <Link href="/docs/manual" className="nav-item">
-          <Book size={20} />
-          <span>Manual</span>
-        </Link>
-      </div>
-
-      <style jsx global>{`
-        .mobile-only-close { display: none; }
-        .mobile-bottom-nav { display: none; }
-        .mobile-menu-toggle { display: none; }
-        
-        /* Premium Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
-
-        .app-layout-premium {
-          display: flex;
-          min-height: 100vh;
-          background: #09090b;
-          color: #f4f4f5;
-          font-family: 'Inter', sans-serif;
-        }
-
-        .sidebar-premium {
-          width: 280px;
-          background: #09090b;
-          border-right: 0.5px solid rgba(255,255,255,0.06);
-          display: flex;
-          flex-direction: column;
-          padding: 24px 16px;
-          flex-shrink: 0;
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @media (max-width: 1024px) {
-          .app-layout-premium {
-            flex-direction: column;
-          }
-
-          .mobile-menu-toggle { display: flex !important; }
-          .desktop-only-presence, .desktop-only-logout { display: none !important; }
-          
-          .sidebar-premium {
-            display: flex;
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 280px !important;
-            z-index: 200;
-            box-shadow: 20px 0 50px rgba(0,0,0,0.5);
-            background: #09090b !important;
-            transform: translateX(-100%);
-          }
-
-          .sidebar-premium.mobile-open {
-            transform: translateX(0);
-          }
-          
-          .mobile-only-close {
-            display: block;
-          }
-          
-          .mobile-bottom-nav {
-            display: flex;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 64px;
-            background: #09090b;
-            border-top: 0.5px solid rgba(255,255,255,0.08);
-            z-index: 150;
-            justify-content: space-around;
-            align-items: center;
-            padding-bottom: env(safe-area-inset-bottom);
-          }
-          
-          .mobile-bottom-nav .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            color: #71717a;
-            text-decoration: none;
-            font-size: 10px;
-            font-weight: 500;
-            flex: 1;
-          }
-          
-          .mobile-bottom-nav .nav-item.active {
-            color: #378ADD;
-          }
-          
-          .main-premium {
-            padding-bottom: 80px !important;
-            width: 100% !important;
-            margin-left: 0 !important;
-          }
-
-          .responsive-grid-4 {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
-
-          .responsive-grid-2 {
-            grid-template-columns: 1fr !important;
-          }
-
-          .overview-grid {
-            grid-template-columns: 1fr !important;
-          }
-
-          .table-premium th:nth-child(4), 
-          .table-premium td:nth-child(4) {
-            display: none !important;
-          }
-
-          .search-container-premium {
-            min-width: 100% !important;
-          }
-
-          .toolbar-actions {
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 8px;
-            -webkit-overflow-scrolling: touch;
-          }
-        }
-
-        @media (max-width: 640px) {
-          .responsive-grid-4 {
-            grid-template-columns: 1fr !important;
-          }
-          
-          .stat-grid-premium {
-            grid-template-columns: 1fr !important;
-          }
-
-          .table-premium th:nth-child(2), 
-          .table-premium td:nth-child(2),
-          .table-premium th:nth-child(6), 
-          .table-premium td:nth-child(6) {
-            display: none !important;
-          }
-        }
-        
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-
-        .print-only-report {
-          display: none;
-        }
-        @media print {
-          body * {
-            visibility: hidden;
-          }
-          .print-only-report, .print-only-report * {
-            visibility: visible;
-          }
-          .print-only-report {
-            display: block !important;
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            padding: 20px;
-            background: white !important;
-            color: black !important;
-          }
-          .sidebar-premium, .top-header-premium, .view-toolbar-premium, .stat-grid-premium, .tab-content-fade, .app-layout-premium aside, .app-layout-premium header {
-            display: none !important;
-          }
-          @page {
-            size: A4 landscape;
-            margin: 10mm;
-          }
-        }
-      `}</style>
-    </div>
+    </WorkspaceShell>
   );
 }

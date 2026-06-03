@@ -22,14 +22,17 @@ import {
 } from "lucide-react";
 import { FinanceDashboardData, RequestForPayment, ExpenseDocument } from "@/lib/finance/types";
 import { WorkspaceShell } from "../layout/workspace-shell";
-import { SummaryCard } from "../ui/summary-card";
+import { MetricCard } from "../ui/MetricCard";
 import { formatCurrencyIDR, formatDateFullID } from "@/lib/utils/format";
 import { updateRFPStatus, updateDocStatus } from "@/lib/finance/actions";
+import { ViewSwitcher } from "./portal-router";
 import { FilterBar } from "./filter-bar";
 import { RejectionModal } from "./rejection-modal";
 
 interface Props {
   initialData: FinanceDashboardData;
+  viewMode?: "monitoring" | "operational";
+  onViewModeChange?: (mode: "monitoring" | "operational") => void;
 }
 
 const docTypeLabel: Record<string, string> = {
@@ -57,10 +60,22 @@ const getDocDisplayAmount = (doc: ExpenseDocument) => {
   return Math.max(doc.totalPO || 0, doc.amount || 0, scheduleTotal, subtotal + tax + ppn);
 };
 
-export function DirectorApprovals({ initialData }: Props) {
+export function DirectorApprovals({ 
+  initialData,
+  viewMode,
+  onViewModeChange
+}: Props) {
   const [activeTab, setActiveTab] = useState<"docs" | "rfps" | "history">("docs");
   const [viewProofUrl, setViewProofUrl] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const headerActions = (
+    <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+      {viewMode && onViewModeChange && (
+        <ViewSwitcher viewMode={viewMode} onViewModeChange={onViewModeChange} />
+      )}
+    </div>
+  );
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
@@ -175,41 +190,27 @@ export function DirectorApprovals({ initialData }: Props) {
   );
 
   return (
-    <WorkspaceShell title="Management Authorization" eyebrow="C-LEVEL WORKSPACE">
+    <WorkspaceShell title="Management Authorization" eyebrow="C-LEVEL WORKSPACE" actions={headerActions}>
       <section className="director-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '24px' }}>
-        <SummaryCard label="Pending Docs" value={String(pendingDocs.length)} description={isMobile ? "PO/SPK" : "PO/SPK/Kontrak/CA"} icon={<FileText size={20} />} trendType="up" />
-        <SummaryCard label="Pending RFP" value={String(pendingRfps.length)} description={isMobile ? "Payment" : "Payment authorization"} icon={<CreditCard size={20} />} trendType="up" />
-        <SummaryCard label="Auth History" value={String(historyDocs.length + historyRfps.length)} description={isMobile ? "Released" : "Released commitments"} icon={<ShieldCheck size={20} />} trendType="neutral" />
+        <MetricCard label="Pending Docs" value={String(pendingDocs.length)} subtitle={isMobile ? "PO/SPK" : "PO/SPK/Kontrak/CA"} icon={<FileText size={16} />} />
+        <MetricCard label="Pending RFP" value={String(pendingRfps.length)} subtitle={isMobile ? "Payment" : "Payment authorization"} icon={<CreditCard size={16} />} />
+        <MetricCard label="Auth History" value={String(historyDocs.length + historyRfps.length)} subtitle={isMobile ? "Released" : "Released commitments"} icon={<ShieldCheck size={16} />} valueColor="var(--accent-success)" />
       </section>
 
-      <div className="director-tabs" style={{ display: "flex", gap: "10px", marginBottom: "20px", overflowX: 'auto', paddingBottom: '4px' }}>
+      <div className="director-tabs" style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border-default)', marginBottom: '24px', overflowX: 'auto' }}>
         {[
           { id: 'docs', label: isMobile ? 'Docs' : 'Approve Dokumen', count: pendingDocs.length, icon: <FileText size={14} /> },
           { id: 'rfps', label: isMobile ? 'RFP' : 'Otorisasi RFP', count: pendingRfps.length, icon: <CreditCard size={14} /> },
           { id: 'history', label: isMobile ? 'Hist.' : 'History Otorisasi', count: null, icon: <History size={14} /> },
         ].map(t => (
-          <button 
+          <div
             key={t.id}
-            onClick={() => setActiveTab(t.id as any)} 
-            style={{ 
-              padding: "8px 18px", 
-              borderRadius: "10px", 
-              border: activeTab === t.id ? "none" : "0.5px solid rgba(255,255,255,0.08)", 
-              cursor: "pointer", 
-              fontSize: "13px", 
-              background: activeTab === t.id ? "#378ADD" : "transparent", 
-              color: activeTab === t.id ? "#fff" : "#71717a", 
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              transition: 'all 0.2s',
-              flexShrink: 0,
-              whiteSpace: 'nowrap'
-            }}
+            onClick={() => setActiveTab(t.id as any)}
+            className={`tab-item ${activeTab === t.id ? 'tab-active' : 'tab-inactive'}`}
+            style={{ padding: '12px 20px', fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, whiteSpace: 'nowrap', flexShrink: 0 }}
           >
-            {t.icon} {t.label} {t.count !== null && <span style={{ opacity: 0.8, fontSize: '11px', background: activeTab === t.id ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: '4px' }}>{t.count}</span>}
-          </button>
+            {t.icon} {t.label} {t.count !== null && <span style={{ opacity: 0.7, fontSize: '11px', background: activeTab === t.id ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.05)', padding: '1px 6px', borderRadius: '4px' }}>{t.count}</span>}
+          </div>
         ))}
       </div>
 
@@ -433,10 +434,23 @@ export function DirectorApprovals({ initialData }: Props) {
             grid-template-columns: repeat(2, 1fr) !important;
           }
           .director-table-header {
-            grid-template-columns: 1fr 100px 80px !important;
+            display: none !important;
           }
           .director-row {
-            grid-template-columns: 1fr 100px 80px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            padding: 14px 16px !important;
+            background: rgba(255, 255, 255, 0.02) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+          }
+          .director-row > div {
+            text-align: left !important;
+          }
+          .director-row > div:last-child {
+            justify-content: flex-start !important;
+            margin-top: 4px;
           }
           .hide-mobile {
             display: none !important;

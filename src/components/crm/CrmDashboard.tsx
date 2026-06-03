@@ -18,6 +18,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TypeBadge } from "@/components/ui/TypeBadge";
 
 // --- Types ---
 interface ClientContact {
@@ -41,6 +45,8 @@ interface Client {
   id: string;
   name: string;
   category: "Brand" | "Government" | "Co. Partner" | "NGO" | "Media";
+  leadSource?: string;
+  accountExecutive?: string;
   contacts: ClientContact[];
   projects: number;
   recentProjects: ClientProject[];
@@ -146,22 +152,22 @@ export function CRMDashboard({ initialData }: Props) {
     });
   }, [initialData]);
 
-  const selectedClient = useMemo(() => clients.find(c => c.id === selectedClientId) || null, [selectedClientId, clients]);
+  const selectedClient = useMemo(() => clients.find((c: Client) => c.id === selectedClientId) || null, [selectedClientId, clients]);
 
   const filteredClients = useMemo(() => {
-    return clients.filter(c => {
+    return clients.filter((c: Client) => {
       const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesStatus = statusFilter === "all" || c.status.toLowerCase() === statusFilter.toLowerCase();
       const matchesCategory = categoryFilter === "All" || c.category === categoryFilter;
       return matchesSearch && matchesStatus && matchesCategory;
-    }).sort((a, b) => {
-      const valA = a[sortKey];
-      const valB = b[sortKey];
+    }).sort((a: Client, b: Client) => {
+      const valA = a[sortKey as keyof Client];
+      const valB = b[sortKey as keyof Client];
       if (typeof valA === "string" && typeof valB === "string") {
         return sortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
       }
       if (typeof valA === "number" && typeof valB === "number") {
-        return sortOrder === "asc" ? valA - valB : valB - valA;
+        return sortOrder === "asc" ? (valA as number) - (valB as number) : (valB as number) - (valA as number);
       }
       return 0;
     });
@@ -320,57 +326,62 @@ export function CRMDashboard({ initialData }: Props) {
   );
 
   return (
-    <WorkspaceShell
-      title="Manage your client ecosystem"
-      eyebrow="CUSTOMER RELATIONSHIP MANAGEMENT"
-      actions={headerActions}
-    >
+    <WorkspaceShell title="" eyebrow="">
       <div className="crm-container" style={{ padding: '0px' }}>
+        <PageHeader 
+          breadcrumb={['CRM', 'Dashboard']}
+          title="Customer Relationship Management"
+          actions={
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{filteredClients.length} Clients found</span>
+              <button 
+                className="primary-button" 
+                style={{ display: "flex", alignItems: "center", gap: "6px", fontSize: "12px", padding: "10px 16px", background: "var(--accent-primary)", border: "none", color: "white" }} 
+                onClick={() => setIsAddingClient(true)}
+              >
+                <i className="ti ti-plus" style={{ fontSize: 16 }} />
+                Add New Client
+              </button>
+            </div>
+          }
+        />
         
         {/* Stat Cards Row */}
-        <div className="crm-stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px', marginBottom: '24px' }}>
-          {[
-            { label: "Total Accounts", value: clients.length.toString(), sub: "Active and prospects combined", trend: "Real-time", trendType: 'neutral', icon: <Users size={16} /> },
-            { label: "Active Clients", value: initialData.summary.activeClients.toString(), sub: "Working on projects", trend: "Real-time", trendType: 'neutral', icon: <CheckCircle size={16} /> },
-            { label: "Relationship Value", value: initialData.summary.totalPortfolioValueLabel, sub: "Lifetime project value", trend: "Real-time", trendType: 'neutral', icon: <Diamond size={16} />, valueSize: '16px' },
-            { label: "Potential Clients", value: initialData.summary.totalLeads.toString(), sub: "In pipeline stage", trend: "Real-time", trendType: 'neutral', icon: <TrendingUp size={16} /> },
-            { 
-              label: "Engagement", 
-              value: "High", 
-              sub: "Based on activity", 
-              trend: "↑ dari bulan lalu", 
-              trendType: 'up', 
-              icon: <Flame size={16} />,
-              customContent: (
-                <div style={{ display: 'flex', gap: '3px', marginTop: '12px' }}>
-                  <div style={{ height: '4px', width: '20px', background: '#97C459', borderRadius: '2px' }} />
-                  <div style={{ height: '4px', width: '20px', background: '#EF9F27', borderRadius: '2px' }} />
-                  <div style={{ height: '4px', width: '20px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }} />
-                </div>
-              )
-            },
-          ].map((s, idx) => (
-            <div key={idx} style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '16px', display: 'flex', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span style={{ fontSize: '12px', color: '#71717a' }}>{s.label}</span>
-                <div style={{ color: '#52525b' }}>{s.icon}</div>
-              </div>
-              <div style={{ fontSize: s.valueSize || '24px', fontWeight: 500, color: '#f4f4f5' }}>{s.value}</div>
-              <div style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>{s.sub}</div>
-              {s.customContent}
-              <div style={{ marginTop: '12px' }}>
-                <span style={{ 
-                  fontSize: '11px', 
-                  padding: '2px 8px', 
-                  borderRadius: '20px',
-                  background: s.trendType === 'up' ? 'rgba(99,153,34,0.1)' : (s.trendType === 'down' ? 'rgba(226,75,74,0.1)' : 'transparent'),
-                  color: s.trendType === 'up' ? '#97C459' : (s.trendType === 'down' ? '#F09595' : '#71717a')
-                }}>
-                  {s.trend}
-                </span>
-              </div>
-            </div>
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', marginBottom: '24px' }}>
+          <MetricCard 
+            label="Total Accounts"
+            value={clients.length}
+            subtitle="Active & prospects"
+            icon="users"
+          />
+          <MetricCard 
+            label="Active Clients"
+            value={initialData.summary.activeClients}
+            subtitle="Working on projects"
+            icon="circle-check"
+            valueColor="var(--accent-success)"
+          />
+          <MetricCard 
+            label="Relationship Value"
+            value={initialData.summary.totalPortfolioValueLabel}
+            subtitle="Lifetime project value"
+            icon="diamond"
+            valueColor="var(--accent-info)"
+          />
+          <MetricCard 
+            label="Potential Clients"
+            value={initialData.summary.totalLeads}
+            subtitle="In pipeline stage"
+            icon="trending-up"
+            valueColor="var(--accent-warning)"
+          />
+          <MetricCard 
+            label="Engagement"
+            value="High"
+            subtitle="Based on activity"
+            icon="flame"
+            valueColor="var(--accent-danger)"
+          />
         </div>
 
         {/* Search + Filter Toolbar */}
@@ -424,7 +435,6 @@ export function CRMDashboard({ initialData }: Props) {
                   padding: '4px 12px',
                   fontSize: '12px',
                   borderRadius: '20px',
-                  border: 'none',
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                   background: categoryFilter === chip ? 'rgba(55,138,221,0.12)' : 'rgba(255,255,255,0.05)',
@@ -492,7 +502,7 @@ export function CRMDashboard({ initialData }: Props) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
-                {filteredClients.map(client => {
+                {filteredClients.map((client: Client) => {
                   const catStyles = getCategoryStyles(client.category);
                   const statusStyles = getStatusStyles(client.status);
                   const isSelected = selectedClientId === client.id;
@@ -521,9 +531,7 @@ export function CRMDashboard({ initialData }: Props) {
                         <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{client.leadSource || "–"}</div>
                       </div>
                       <div style={{ padding: '0 12px' }}>
-                        <span style={{ background: catStyles.bg, color: catStyles.color, borderRadius: '20px', padding: '2px 8px', fontSize: '11px', fontWeight: 500 }}>
-                          {client.category}
-                        </span>
+                        <TypeBadge variant={client.category} />
                       </div>
                       <div style={{ padding: '0 12px' }}>
                         {client.contacts.length === 0 ? (
@@ -531,7 +539,7 @@ export function CRMDashboard({ initialData }: Props) {
                         ) : (
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ display: 'flex' }}>
-                              {client.contacts.slice(0, 3).map((contact, i) => (
+                              {client.contacts.slice(0, 3).map((contact: ClientContact, i: number) => (
                                 <div 
                                   key={i} 
                                   style={{ 
@@ -566,9 +574,7 @@ export function CRMDashboard({ initialData }: Props) {
                       </div>
                       <div style={{ padding: '0 12px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ background: statusStyles.bg, color: statusStyles.color, borderRadius: '20px', padding: '2px 10px', fontSize: '11px', fontWeight: 500 }}>
-                            {client.status.toUpperCase()}
-                          </span>
+                          <StatusBadge variant={client.status} />
                           <button 
                             onClick={(e) => { e.stopPropagation(); setSelectedClientId(client.id); openEditModal(); }}
                             style={{ background: 'none', border: 'none', color: '#52525b', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px' }}
@@ -607,16 +613,7 @@ export function CRMDashboard({ initialData }: Props) {
                 <div style={{ padding: '24px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ 
-                        background: getCategoryStyles(selectedClient.category).bg, 
-                        color: getCategoryStyles(selectedClient.category).color, 
-                        borderRadius: '20px', 
-                        padding: '2px 8px', 
-                        fontSize: '11px', 
-                        fontWeight: 500 
-                      }}>
-                        {selectedClient.category.toUpperCase()}
-                      </span>
+                      <TypeBadge variant={selectedClient.category} />
                     </div>
                     <button onClick={() => setSelectedClientId(null)} style={{ background: 'transparent', border: 'none', color: '#71717a', cursor: 'pointer' }}>
                       <X size={16} />
@@ -646,7 +643,7 @@ export function CRMDashboard({ initialData }: Props) {
                     <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '16px' }}>KEY CONTACTS</div>
                     {selectedClient.contacts.length > 0 ? (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        {selectedClient.contacts.map((c, i) => (
+                        {selectedClient.contacts.map((c: ClientContact, i: number) => (
                           <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                               <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: 'bold', color: 'white' }}>{c.initials}</div>
@@ -672,7 +669,7 @@ export function CRMDashboard({ initialData }: Props) {
                     <div style={{ fontSize: '11px', color: '#52525b', letterSpacing: '0.06em', fontWeight: 600, marginBottom: '16px' }}>RECENT PROJECTS</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                       {selectedClient.recentProjects.length > 0 ? (
-                        selectedClient.recentProjects.map(p => (
+                        selectedClient.recentProjects.map((p: ClientProject) => (
                           <div key={p.id} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '10px 12px' }}>
                             <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7', marginBottom: '6px' }}>{p.name}</div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

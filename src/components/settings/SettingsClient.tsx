@@ -20,6 +20,8 @@ import {
   DollarSign
 } from "lucide-react";
 import { UserPermissionMatrix, DEFAULT_ROLE_PERMISSIONS } from "@/lib/settings";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { MetricCard } from "@/components/ui/MetricCard";
 
 interface TeamMember {
   id: string;
@@ -252,41 +254,39 @@ export default function SettingsClient() {
 
   return (
     <div style={{ padding: "8px 0" }}>
+      <PageHeader 
+        title="System Settings" 
+        actions={
+          <button 
+            className="primary-button" 
+            onClick={handleOpenAddModal}
+            style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", padding: "10px 16px", background: "var(--accent-primary)", border: "none", color: "white" }}
+          >
+            <UserPlus size={16} />
+            Tambah Anggota
+          </button>
+        }
+      />
+
       {/* Hero Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "16px", marginBottom: "24px" }}>
-        <div className="panel" style={{ padding: "20px", display: "flex", alignItems: "center", gap: "16px", background: "var(--panel)" }}>
-          <div style={{ background: "rgba(55,138,221,0.1)", border: "1px solid rgba(55,138,221,0.2)", borderRadius: "10px", width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center", color: "#378ADD" }}>
-            <Users size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: "24px", fontWeight: 700, color: "var(--text)" }}>{members.length}</div>
-            <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Total Anggota Tim</div>
-          </div>
-        </div>
-
-        <div className="panel" style={{ padding: "20px", display: "flex", alignItems: "center", gap: "16px", background: "var(--panel)" }}>
-          <div style={{ background: "rgba(93,202,165,0.1)", border: "1px solid rgba(93,202,165,0.2)", borderRadius: "10px", width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--green)" }}>
-            <Unlock size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: "24px", fontWeight: 700, color: "var(--green)" }}>
-              {members.filter(m => m.is_active).length}
-            </div>
-            <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Akun Aktif</div>
-          </div>
-        </div>
-
-        <div className="panel" style={{ padding: "20px", display: "flex", alignItems: "center", gap: "16px", background: "var(--panel)" }}>
-          <div style={{ background: "rgba(235,94,40,0.1)", border: "1px solid rgba(235,94,40,0.2)", borderRadius: "10px", width: "48px", height: "48px", display: "flex", alignItems: "center", justifyContent: "center", color: "#eb5e28" }}>
-            <Lock size={24} />
-          </div>
-          <div>
-            <div style={{ fontSize: "24px", fontWeight: 700, color: "#eb5e28" }}>
-              {members.filter(m => !m.is_active).length}
-            </div>
-            <div style={{ fontSize: "12px", color: "var(--text-dim)" }}>Akun Dinonaktifkan</div>
-          </div>
-        </div>
+        <MetricCard 
+          label="Total Anggota Tim" 
+          value={members.length} 
+          icon={<Users size={16} />} 
+        />
+        <MetricCard 
+          label="Akun Aktif" 
+          value={members.filter(m => m.is_active).length} 
+          icon={<Unlock size={16} />} 
+          valueColor="var(--accent-success)"
+        />
+        <MetricCard 
+          label="Akun Dinonaktifkan" 
+          value={members.filter(m => !m.is_active).length} 
+          icon={<Lock size={16} />} 
+          valueColor="var(--accent-danger)"
+        />
       </div>
 
       {/* Main Panel */}
@@ -302,14 +302,6 @@ export default function SettingsClient() {
               Kelola kredensial dan hak akses modular tim internal.
             </p>
           </div>
-          <button 
-            className="primary-button" 
-            onClick={handleOpenAddModal}
-            style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", padding: "10px 16px" }}
-          >
-            <UserPlus size={16} />
-            Tambah Anggota
-          </button>
         </div>
 
         {/* Loading / Error Callouts */}
@@ -431,20 +423,43 @@ export default function SettingsClient() {
                           <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
                             <button
                               onClick={() => handleOpenEditModal(member)}
-                              style={{ padding: "6px", background: "none", border: "none", color: "var(--text-dim)", cursor: "pointer", borderRadius: "4px" }}
-                              className="action-btn-hover"
+                              style={{ 
+                                padding: "6px", 
+                                background: "none", 
+                                border: "none", 
+                                color: "var(--text-muted)", 
+                                cursor: "pointer", 
+                                borderRadius: "var(--radius-sm)",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "color 0.15s"
+                              }}
+                              className="action-btn-edit-unified"
                               title="Edit Detail &amp; Hak Akses"
                             >
-                              <Edit3 size={16} />
+                              <i className="ti ti-edit" style={{ fontSize: "15px" }} />
                             </button>
                             <button
                               onClick={() => handleDelete(member)}
                               disabled={isSelf}
-                              style={{ padding: "6px", background: "none", border: "none", color: isSelf ? "rgba(255,255,255,0.1)" : "#eb5e28", cursor: isSelf ? "not-allowed" : "pointer", borderRadius: "4px" }}
-                              className="action-btn-hover-delete"
+                              style={{ 
+                                padding: "6px", 
+                                background: "none", 
+                                border: "none", 
+                                color: "var(--text-muted)", 
+                                cursor: isSelf ? "not-allowed" : "pointer", 
+                                opacity: isSelf ? 0.35 : 1,
+                                borderRadius: "var(--radius-sm)",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                transition: "color 0.15s"
+                              }}
+                              className="action-btn-delete-unified"
                               title={isSelf ? "Tidak bisa menghapus diri sendiri" : "Hapus Anggota"}
                             >
-                              <Trash2 size={16} />
+                              <i className="ti ti-trash" style={{ fontSize: "15px" }} />
                             </button>
                           </div>
                         </td>

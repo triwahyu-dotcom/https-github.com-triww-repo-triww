@@ -1,28 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, useMemo } from "react";
 import { 
   Users, 
   Package, 
   CheckCircle, 
   Search, 
-  Plus, 
   Trash2, 
   Edit, 
   ChevronDown, 
   ChevronRight,
   Filter,
-  LogOut,
   ArrowRight,
   Building2,
-  Home,
   Grid,
   User,
-  Layout,
-  Briefcase,
-  FileBarChart,
-  FolderOpen,
   ArrowUpDown,
   Mail,
   MapPin, 
@@ -33,13 +25,18 @@ import {
   X, 
   PlusCircle, 
   TrendingUp, 
-  FileText, 
-  Menu
+  FileText,
+  FolderOpen
 } from "lucide-react";
 import { DashboardData, VendorSummary, ReviewStatus, VendorClassification, Vendor, VendorDetail } from "@/lib/vendor/types";
 import { VendorTypeChip } from "./VendorTypeChip";
 import { isV2Vendor, getCapabilityDisplay, getTaxTreatment, getVendorTypeLabel } from "@/lib/vendor/v2-helpers";
 import { ShieldCheck } from "lucide-react";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { MetricCard } from "@/components/ui/MetricCard";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { TypeBadge } from "@/components/ui/TypeBadge";
+import { WorkspaceShell } from "@/components/layout/workspace-shell";
 
 type ViewMode = "all" | "status" | "type" | "directory";
 
@@ -55,6 +52,8 @@ type DashboardVendor = VendorDetail & {
   registered: string;
   registeredTimestamp: number;
   formattedRegistered: string;
+  status: string;
+  type: string;
 }
 
 export function VendorDashboard({ initialData }: { initialData: DashboardData }) {
@@ -64,15 +63,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeDetailTab, setActiveDetailTab] = useState<"overview" | "docs" | "projects" | "history" | "profile" | "finance" | "ops" | "audit">("overview");
   const [selectedVendorIds, setSelectedVendorIds] = useState<string[]>([]);
-  const [isMobile, setIsMobile] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  const handleLogout = () => {
+    document.cookie = 'juara_user_role=; path=/; max-age=0';
+    document.cookie = 'juara_user_email=; path=/; max-age=0';
+    window.location.href = '/login';
+  };
   
   // Collapsible sections for "Type" view
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
@@ -91,10 +87,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
       const registeredDate = v.sourceTimestamp ? new Date(v.sourceTimestamp) : new Date(0);
       const isGoods = v.relationshipType 
         ? v.relationshipType === "vendor_supply" 
-        : (v.classification === "Penyedia Barang" || v.type === "goods");
+        : (v.classification === "Penyedia Barang" || (v as any).type === "goods");
         
       return {
         ...v,
+        status: v.reviewStatus || "new",
+        type: v.relationshipType || v.classification || "Unknown",
         category: isGoods ? "PENYEDIA BARANG" : "PENYEDIA JASA",
         score: v.performance?.average || null,
         location: v.businessAddress || "–",
@@ -109,11 +107,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
     });
     setVendors(processed);
   }, [initialData.vendorDetails]);
-
-
-  const handleLogout = () => {
-    window.location.href = "/login";
-  };
 
 
 
@@ -287,133 +280,65 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
   const selectedVendorDetail = vendors.find(v => v.id.toString() === selectedVendorId);
 
+  const headerActions = (
+    <button
+      className="primary-button"
+      style={{ height: '32px', background: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', padding: '0 16px' }}
+      onClick={() => alert("Form pendaftaran vendor baru akan segera dibuka.")}
+    >
+      + New Vendor
+    </button>
+  );
+
   return (
-    <div className="app-layout-premium">
-      {/* Mobile Sidebar Overlay/Scrim */}
-      {isMobile && isSidebarOpen && (
-        <div 
-          onClick={() => setIsSidebarOpen(false)}
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.6)',
-            backdropFilter: 'blur(4px)',
-            zIndex: 190,
-            animation: 'fadeIn 0.2s ease-out'
-          }}
-        />
-      )}
+    <WorkspaceShell title="Supplier/Vendor Management" actions={headerActions}>
+      <div>
 
-      {/* Sidebar Navigation */}
-      <aside className={`sidebar-premium ${isSidebarOpen ? 'mobile-open' : ''}`}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '0 4px' }}>
-            <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#b45309', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontWeight: 'bold', fontSize: '14px' }}>J</div>
-            <span style={{ fontSize: '11px', fontWeight: 500, color: '#a1a1aa', letterSpacing: '0.06em' }}>JUARA WORKSPACE</span>
-          </div>
-          <button className="mobile-only-close" onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: '#71717a' }}>
-            <X size={20} />
-          </button>
-        </div>
-
-        <nav style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-          <Link href="/" className="sidebar-item-premium"><Home size={18} /> Workspace Hub</Link>
-          <Link href="/projects" className="sidebar-item-premium"><Grid size={18} /> Projects</Link>
-          <Link href="/crm" className="sidebar-item-premium"><User size={18} /> CRM</Link>
-          <Link href="/vendors" className="sidebar-item-premium active"><Building2 size={18} /> Vendors</Link>
-          <Link href="/manpower/freelancer" className="sidebar-item-premium"><Users size={18} /> Man Power</Link>
-          <Link href="/finance" className="sidebar-item-premium"><FileText size={18} /> Finance & RFP</Link>
-          <Link href="/docs" className="sidebar-item-premium"><FolderOpen size={18} /> Document Center</Link>
-
-          <div style={{ marginTop: '32px', marginBottom: '8px', padding: '0 12px' }}>
-            <span style={{ fontSize: '10px', color: '#3f3f46', letterSpacing: '0.08em' }}>ACTIVE IDENTITY</span>
-          </div>
-          <div style={{ background: '#1f1f23', border: '0.5px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '6px 10px', fontSize: '12px', color: '#a1a1aa', display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 4px' }}>
-            Vendor Manager (Full Access) <ChevronDown size={14} />
-          </div>
-        </nav>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="main-premium">
-        {/* Fixed Top Header */}
-        <header className="top-header-premium">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <button 
-                className="mobile-menu-toggle" 
-                onClick={() => setIsSidebarOpen(true)}
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)', 
-                  border: '0.5px solid rgba(255,255,255,0.1)', 
-                  borderRadius: '8px', 
-                  width: '36px', 
-                  height: '36px', 
-                  display: 'none', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  color: '#a1a1aa'
-                }}
-              >
-                <Menu size={20} />
-              </button>
-              <div>
-                <div style={{ display: 'inline-flex', alignItems: 'center', background: 'rgba(99,153,34,0.1)', color: '#639922', padding: '2px 8px', borderRadius: '20px', fontSize: '10px', fontWeight: 600, marginBottom: '6px' }}>DATABASE READY</div>
-                <h1 style={{ fontSize: '22px', fontWeight: 500, color: '#f4f4f5', margin: 0 }}>Supplier/Vendor Management</h1>
-              </div>
-            </div>
-            <div className="desktop-only-presence" style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <button className="ghost-button" style={{ fontSize: '12px', color: '#71717a' }} onClick={handleLogout}>Logout</button>
-            </div>
-          </div>
-        </header>
-
-        <div style={{ flex: 1, overflowY: 'auto' }}>
           {/* Stat Cards Row */}
-          <div className="vendor-grid-premium responsive-grid-4" style={{ padding: isMobile ? '0 16px' : '0 24px', gridTemplateColumns: 'repeat(4, 1fr)' }}>
-            {[
-              { label: "Total Vendors", value: vendors.length, sub: "Registered suppliers", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <Users size={16} /> },
-              { label: "Penyedia Jasa", value: vendors.filter(v => v.category === "PENYEDIA JASA").length, sub: "Service providers", trend: "↑ 2 dari bulan lalu", trendType: 'up', icon: <User size={16} /> },
-              { label: "Penyedia Barang", value: vendors.filter(v => v.category === "PENYEDIA BARANG").length, sub: "Equipment/Goods", trend: "sama", trendType: 'neutral', icon: <Package size={16} /> },
-              { label: "Approved", value: vendors.filter(v => v.reviewStatus === "approved").length, sub: "Verified and ready", trend: "↑ 5 dari bulan lalu", trendType: 'up', icon: <CheckCircle size={16} /> },
-            ].map((s, idx) => (
-              <div key={idx} className="section-card-premium" style={{ padding: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <span style={{ fontSize: '12px', color: '#71717a' }}>{s.label}</span>
-                  <div style={{ color: '#52525b' }}>{s.icon}</div>
-                </div>
-                <div style={{ fontSize: '24px', fontWeight: 500, color: '#f4f4f5' }}>{s.value}</div>
-                <div style={{ fontSize: '12px', color: '#52525b', marginTop: '4px' }}>{s.sub}</div>
-                <div className={`trend-pill trend-neutral`}>
-                  Real-time
-                </div>
-              </div>
-            ))}
+          <div className="vendor-grid-premium responsive-grid-4" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+            <MetricCard 
+              label="Total Vendors" 
+              value={vendors.length} 
+              subtitle="Registered suppliers" 
+              icon={<Users size={16} />} 
+            />
+            <MetricCard 
+              label="Penyedia Jasa" 
+              value={vendors.filter(v => v.category === "PENYEDIA JASA").length} 
+              subtitle="Service providers" 
+              icon={<User size={16} />} 
+            />
+            <MetricCard 
+              label="Penyedia Barang" 
+              value={vendors.filter(v => v.category === "PENYEDIA BARANG").length} 
+              subtitle="Equipment/Goods" 
+              icon={<Package size={16} />} 
+            />
+            <MetricCard 
+              label="Approved" 
+              value={vendors.filter(v => v.reviewStatus === "approved").length} 
+              subtitle="Verified and ready" 
+              icon={<CheckCircle size={16} />} 
+              valueColor="var(--accent-success)"
+            />
           </div>
 
           {/* Sticky Toolbar */}
-          <div className="view-toolbar-premium">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0' }}>
-              <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="view-toolbar-premium" style={{ borderBottom: 'none', background: 'transparent' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', flexWrap: 'wrap', gap: '16px' }}>
+              <div className="tab-bar" style={{ marginBottom: 0 }}>
                 {(["all", "status", "type", "directory"] as const).map(m => (
                   <button 
                     key={m}
                     onClick={() => setViewMode(m)}
-                    style={{ 
-                      padding: '6px 14px', 
-                      fontSize: '13px', 
-                      borderRadius: '8px',
-                      background: viewMode === m ? '#378ADD' : 'transparent',
-                      color: viewMode === m ? 'white' : '#71717a',
-                      border: viewMode === m ? 'none' : '0.5px solid rgba(255,255,255,0.08)',
-                      cursor: 'pointer'
-                    }}
+                    className={`tab-item ${viewMode === m ? 'tab-active' : 'tab-inactive'}`}
+                    style={{ background: 'transparent', border: 'none' }}
                   >
                     {m === "all" ? "All Vendors" : m.charAt(0).toUpperCase() + m.slice(1)}
                   </button>
                 ))}
               </div>
-              <div className="toolbar-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <div className="toolbar-actions" style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <Search size={14} style={{ position: 'absolute', left: '10px', top: '9px', color: '#52525b' }} />
                   <input 
@@ -482,20 +407,14 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
 
                 <button className="ghost-button" style={{ padding: '4px', flexShrink: 0 }} onClick={() => alert("Opsi lanjutan.")}><MoreVertical size={16} /></button>
                 <div style={{ background: 'rgba(255,255,255,0.05)', color: '#52525b', fontSize: '11px', padding: '3px 10px', borderRadius: '20px', flexShrink: 0 }}>{filteredVendors.length} ITEMS</div>
-                <div style={{ background: '#378ADD', color: 'white', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>Baru</div>
-                <button 
-                  className="primary-button" 
-                  style={{ height: '32px', background: '#378ADD', borderRadius: '8px', flexShrink: 0 }}
-                  onClick={() => alert("Form pendaftaran vendor baru akan segera dibuka.")}
-                >
-                  + New
-                </button>
+                <StatusBadge variant="new" />
               </div>
             </div>
           </div>
 
+
           {/* View Renderers */}
-          <div style={{ padding: isMobile ? '0 16px 80px 16px' : '0 24px 80px 24px' }}>
+          <div style={{ padding: '0 0 80px 0' }}>
             {viewMode === "all" && (
               <div className="tab-content-fade">
                 <div className="vendor-table-header" style={{ gridTemplateColumns: '32px 1fr 120px 120px 80px', gap: '16px' }}>
@@ -560,7 +479,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                           )}
                         </div>
                         <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '6px', flexWrap: 'wrap' }}>
-                          <VendorTypeChip vendor={v} size="sm" />
+                          <TypeBadge variant={v.relationshipType || v.type} />
                           
                           {/* Location Badge */}
                           <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#71717a', fontSize: '11px' }}>
@@ -619,7 +538,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                         </div>
                       </div>
                       <div>
-                        <span className="stage-pill-premium" style={{ background: status.bg, color: status.text }}>{status.label}</span>
+                        <StatusBadge variant={v.reviewStatus} />
                       </div>
                       <div style={{ fontSize: '12px', color: '#71717a', textAlign: 'center' }}>
                         {v.formattedRegistered}
@@ -677,8 +596,8 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                                 <div style={{ fontSize: '12px', color: '#52525b', marginBottom: '12px' }}><MapPin size={10} style={{ marginRight: '4px' }} /> {v.location}</div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '0.5px solid rgba(255,255,255,0.05)' }}>
                                   <div style={{ fontSize: '11px', background: 'rgba(255,255,255,0.06)', color: '#a1a1aa', padding: '2px 8px', borderRadius: '4px' }}>Docs {v.docs.done}/{v.docs.total}</div>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: v.compliance === 'OK' ? '#97C459' : '#EF9F27' }}>
-                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: v.compliance === 'OK' ? '#97C459' : '#EF9F27' }} /> {v.compliance === 'OK' ? 'Compliant' : 'Pending'}
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', color: v.complianceStatus === 'OK' ? '#97C459' : '#EF9F27' }}>
+                                    <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: v.complianceStatus === 'OK' ? '#97C459' : '#EF9F27' }} /> {v.complianceStatus === 'OK' ? 'Compliant' : 'Pending'}
                                   </div>
                                 </div>
                               </div>
@@ -784,8 +703,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
               </div>
             )}
           </div>
-        </div>
-      </main>
+
 
       {/* Bulk Action Bar */}
       {selectedVendorIds.length > 0 && (
@@ -966,7 +884,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                   </div>
 
                   {/* V2: Adaptive Capability Sections */}
-                  {isV2Vendor(selectedVendorDetail) && getCapabilityDisplay(selectedVendorDetail).map((section) => (
+                  {isV2Vendor(selectedVendorDetail) && getCapabilityDisplay(selectedVendorDetail as any).map((section) => (
                     <div key={section.section} style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                       <div style={{ padding: '16px 24px', background: 'rgba(55,138,221,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <CheckCircle size={16} color="#378ADD" />
@@ -1121,7 +1039,7 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                       <span style={{ fontSize: '11px', fontWeight: 600, color: '#a1a1aa', letterSpacing: '0.05em' }}>ACTIVE PROJECTS</span>
                     </div>
                     <div style={{ padding: '0 24px' }}>
-                      {selectedVendorDetail.linkedProjects?.length > 0 ? selectedVendorDetail.linkedProjects.map((p: any, idx: number, arr: any[]) => (
+                      {(selectedVendorDetail.linkedProjects?.length ?? 0) > 0 ? selectedVendorDetail.linkedProjects?.map((p: any, idx: number, arr: any[]) => (
                         <div key={p.linkId} style={{ display: 'flex', justifyContent: 'space-between', padding: '16px 0', borderBottom: idx === arr.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)', fontSize: '13px' }}>
                           <div>
                             <div style={{ color: '#f4f4f5', fontWeight: 500 }}>{p.projectName}</div>
@@ -1201,25 +1119,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         </div>
       )}
 
-      {/* Mobile Bottom Navigation */}
-      <div className="mobile-bottom-nav" style={{ display: isMobile ? 'flex' : 'none' }}>
-        <Link href="/projects" className="nav-item">
-          <Grid size={20} />
-          <span>Projects</span>
-        </Link>
-        <Link href="/crm" className="nav-item">
-          <User size={20} />
-          <span>CRM</span>
-        </Link>
-        <Link href="/vendors" className="nav-item active">
-          <Building2 size={20} />
-          <span>Vendors</span>
-        </Link>
-        <Link href="/finance" className="nav-item">
-          <FileText size={20} />
-          <span>Finance</span>
-        </Link>
-      </div>
 
       <style jsx global>{`
         .mobile-only-close { display: none; }
@@ -1368,5 +1267,6 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
         }
       `}</style>
     </div>
+    </WorkspaceShell>
   );
 }

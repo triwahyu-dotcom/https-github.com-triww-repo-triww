@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ProjectRecord, ProjectTask } from "@/lib/project/types";
 import { TeamMember } from "@/lib/project/monitoring";
 import MonitoringDashboard from "./MonitoringDashboard";
+import PersonalDashboard from "./PersonalDashboard";
 
 interface WorkspaceHubClientProps {
   projects: ProjectRecord[];
@@ -286,6 +287,11 @@ export default function WorkspaceHubClient({
           <span style={{ fontSize: 20 }}>📋</span>
           Generate Rekap WhatsApp
         </button>
+      </section>
+
+      {/* Personal Dashboard Section */}
+      <section>
+        <PersonalDashboard projects={projects} />
       </section>
 
       {/* Monitoring Dashboard Section */}

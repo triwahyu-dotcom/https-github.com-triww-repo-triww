@@ -16,7 +16,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <WorkspaceShell title="System Settings" eyebrow="JUARA Workspace">
+    <WorkspaceShell title="" eyebrow="">
       <SettingsClient />
     </WorkspaceShell>
   );

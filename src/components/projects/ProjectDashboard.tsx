@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition, useCallback } from "react";
+import { useEffect, useState, useTransition, useCallback, useRef } from "react";
 
 import {
   ProjectDashboardData,
@@ -240,7 +240,13 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     }
   }, []);
 
+  // Ref to ensure URL-param initialisation only happens once (on mount).
+  // Previously this effect used [projects] as a dep, causing it to re-run on
+  // every task-save and overwrite selectedId with the URL's projectId — making
+  // the panel "jump" to a different project mid-edit.
+  const hasInitFromUrl = useRef(false);
   useEffect(() => {
+    if (hasInitFromUrl.current) return;
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       const projId = params.get("projectId");
@@ -248,6 +254,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       if (projId) {
         const found = projects.find((p: ProjectRecord) => p.id === projId);
         if (found) {
+          hasInitFromUrl.current = true;
           setSelectedId(projId);
           setDetailOpen(true);
           if (tab && ["overview", "tasks", "docs", "vendors", "execution", "manpower", "billing", "activity"].includes(tab)) {
@@ -256,7 +263,8 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
         }
       }
     }
-  }, [projects]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatDate = (dateStr: string) => {
     if (!isMounted) return "...";

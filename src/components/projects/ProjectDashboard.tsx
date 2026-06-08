@@ -103,6 +103,12 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const [manpowerToAssign, setManpowerToAssign] = useState<string>("");
   const [selectedPositionToAssign, setSelectedPositionToAssign] = useState<string>("");
   const [customPosition, setCustomPosition] = useState<string>("");
+  // Reactive clients list — seeded from server data but updated instantly on add
+  const [clients, setClients] = useState<CRMClient[]>(initialData.clients ?? []);
+  const [isAddingClient, setIsAddingClient] = useState(false);
+  const [newClientName, setNewClientName] = useState("");
+  const [isSavingClient, setIsSavingClient] = useState(false);
+
   const [isAddingProject, setIsAddingProject] = useState(false);
   const [newProjectName, setNewProjectName] = useState("");
   const [newProjectClient, setNewProjectClient] = useState("");
@@ -168,22 +174,51 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   };
 
   const handleAddClient = async () => {
-    const name = prompt("Enter new client name:");
+    const name = newClientName.trim();
     if (!name) return;
-    
+    setIsSavingClient(true);
     try {
+      const payload: CRMClient = {
+        id: `cli_${Date.now().toString(36)}`,
+        name,
+        aliases: [],
+        type: "brand",
+        category: "-",
+        industry: "",
+        address: "",
+        website: "",
+        relation: "-",
+        totalProjectValue: 0,
+        totalProjectValueLabel: "Rp 0",
+        projectCount: 0,
+        activeProjectCount: 0,
+        contacts: [],
+        projects: [],
+        health: "on_track",
+        status: "lead",
+      };
       const res = await fetch("/api/clients", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name })
+        body: JSON.stringify(payload)
       });
       if (res.ok) {
         const result = await res.json();
-        setNewProjectClient(result.client.name);
-        alert("Client added successfully! Please refresh to see it in the dropdown if it doesn't appear.");
+        const saved: CRMClient = result.client;
+        // Update reactive state — dropdown updates instantly, no refresh needed
+        setClients((prev) => [saved, ...prev]);
+        setNewProjectClient(saved.name);
+        setNewClientName("");
+        setIsAddingClient(false);
+      } else {
+        const err = await res.json();
+        alert(`Gagal menyimpan klien: ${err.error || "Unknown error"}`);
       }
     } catch (e) {
       console.error(e);
+      alert("Network error saat menyimpan klien.");
+    } finally {
+      setIsSavingClient(false);
     }
   };
 
@@ -1789,7 +1824,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', alignItems: 'end', marginBottom: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '8px', alignItems: 'end', marginBottom: isAddingClient ? '6px' : '12px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <label style={{ fontSize: '12px', color: '#a1a1aa', marginBottom: '5px', display: 'block' }}>Client Name</label>
                         <select 
@@ -1798,15 +1833,54 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
                           onChange={e => setNewProjectClient(e.target.value)}
                         >
                           <option value="">Select Client</option>
-                          {initialData.clients?.map((c: any, idx: number) => (
+                          {clients.map((c: CRMClient, idx: number) => (
                             <option key={`${c.id}-${idx}`} value={c.name}>{c.name}</option>
                           ))}
                         </select>
                       </div>
-                      <button className="btn-add-client-premium" onClick={handleAddClient}>
-                        + Add New Client
+                      <button
+                        className="btn-add-client-premium"
+                        onClick={() => { setIsAddingClient(v => !v); setNewClientName(""); }}
+                        title={isAddingClient ? "Cancel" : "Add new client to CRM"}
+                      >
+                        {isAddingClient ? "✕ Cancel" : "+ Add New Client"}
                       </button>
                     </div>
+
+                    {/* Inline mini-form — shown only when isAddingClient is true */}
+                    {isAddingClient && (
+                      <div style={{
+                        display: 'flex', gap: '8px', alignItems: 'center',
+                        marginBottom: '12px', padding: '10px 12px',
+                        background: 'rgba(76,141,255,0.06)',
+                        border: '1px solid rgba(76,141,255,0.2)',
+                        borderRadius: '8px',
+                      }}>
+                        <input
+                          className="modal-input-premium"
+                          placeholder="Client name (e.g. PT Sinar Mas)"
+                          value={newClientName}
+                          onChange={e => setNewClientName(e.target.value)}
+                          onKeyDown={e => e.key === 'Enter' && !isSavingClient && handleAddClient()}
+                          autoFocus
+                          style={{ flex: 1, margin: 0 }}
+                        />
+                        <button
+                          onClick={handleAddClient}
+                          disabled={isSavingClient || !newClientName.trim()}
+                          style={{
+                            padding: '8px 14px', borderRadius: '7px', border: 'none',
+                            background: isSavingClient || !newClientName.trim() ? '#2a2a38' : 'linear-gradient(135deg,#1e3a8a,#4c8dff)',
+                            color: isSavingClient || !newClientName.trim() ? '#62626e' : '#fff',
+                            fontSize: '12px', fontWeight: 600, cursor: isSavingClient || !newClientName.trim() ? 'not-allowed' : 'pointer',
+                            whiteSpace: 'nowrap', flexShrink: 0, transition: 'all .15s',
+                          }}
+                        >
+                          {isSavingClient ? 'Saving…' : 'Save Client'}
+                        </button>
+                      </div>
+                    )}
+
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
                       <div style={{ display: 'flex', flexDirection: 'column' }}>

@@ -178,19 +178,30 @@ export function CRMDashboard({ initialData }: Props) {
   };
 
   const handleAddClient = async () => {
-    if (!formName) return;
+    if (!formName.trim()) return;
 
     const newClientData = {
-      name: formName,
+      id: `cli_${Date.now().toString(36)}`,
+      name: formName.trim(),
+      aliases: [] as string[],
+      type: (formCategory === "Brand" ? "brand" :
+             formCategory === "Government" ? "government" :
+             formCategory === "Co. Partner" ? "partner" : "brand") as any,
       category: formCategory,
-      relation: formRemark, // We use formRemark as PIC name for now, or add a new field
-      industry: formIndustry,
-      website: formWebsite,
-      status: "lead",
-      remark: "",
-      contacts: formContactName ? [
-        { name: formContactName, role: "Main Contact", phone: formContactPhone }
-      ] : []
+      industry: formIndustry || "",
+      address: "",
+      website: formWebsite || "",
+      relation: formRemark || "-",
+      totalProjectValue: 0,
+      totalProjectValueLabel: "Rp 0",
+      projectCount: 0,
+      activeProjectCount: 0,
+      contacts: formContactName.trim() ? [
+        { name: formContactName.trim(), role: "Main Contact", phone: formContactPhone || "", projects: [] as string[] }
+      ] : [] as any[],
+      projects: [] as any[],
+      health: "on_track" as const,
+      status: "lead" as const,
     };
 
     try {
@@ -203,10 +214,10 @@ export function CRMDashboard({ initialData }: Props) {
       if (response.ok) {
         setIsAddingClient(false);
         resetForm();
-        alert("Client baru berhasil ditambahkan!");
         window.location.reload();
       } else {
-        alert("Gagal menambahkan client baru.");
+        const err = await response.json();
+        alert(`Gagal menambahkan client: ${err.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error adding client:", err);
@@ -215,19 +226,30 @@ export function CRMDashboard({ initialData }: Props) {
   };
 
   const handleUpdateClient = async () => {
-    if (!selectedClientId || !formName) return;
+    if (!selectedClientId || !formName.trim()) return;
 
     const updatedData = {
       id: selectedClientId,
-      name: formName,
+      name: formName.trim(),
+      aliases: [] as string[],
+      type: (formCategory === "Brand" ? "brand" :
+             formCategory === "Government" ? "government" :
+             formCategory === "Co. Partner" ? "partner" : "brand") as any,
       category: formCategory,
-      relation: formRemark || selectedClient?.leadSource || "", // Use remark field as PIC for simplicity in this UI
-      industry: formIndustry,
-      website: formWebsite,
-      remark: "", // Clear remark as it was used for PIC
-      contacts: formContactName ? [
-        { name: formContactName, role: "Main Contact", phone: formContactPhone }
-      ] : (selectedClient?.contacts || [])
+      industry: formIndustry || "",
+      address: "",
+      website: formWebsite || "",
+      relation: formRemark || selectedClient?.leadSource || "-",
+      totalProjectValue: selectedClient?.value || 0,
+      totalProjectValueLabel: formatCurrency(selectedClient?.value || 0),
+      projectCount: selectedClient?.projects || 0,
+      activeProjectCount: 0,
+      contacts: formContactName.trim() ? [
+        { name: formContactName.trim(), role: "Main Contact", phone: formContactPhone || "", projects: [] as string[] }
+      ] : (selectedClient?.contacts?.map((c: any) => ({ ...c, projects: c.projects || [] })) || [] as any[]),
+      projects: [] as any[],
+      health: "on_track" as const,
+      status: "active" as const,
     };
 
     try {
@@ -239,10 +261,11 @@ export function CRMDashboard({ initialData }: Props) {
 
       if (response.ok) {
         setIsEditingClient(false);
-        alert("Data klien berhasil diperbarui!");
+        resetForm();
         window.location.reload();
       } else {
-        alert("Gagal memperbarui data klien.");
+        const err = await response.json();
+        alert(`Gagal memperbarui klien: ${err.error || 'Unknown error'}`);
       }
     } catch (err) {
       console.error("Error updating client:", err);

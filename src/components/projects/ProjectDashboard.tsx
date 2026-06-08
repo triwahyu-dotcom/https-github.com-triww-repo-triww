@@ -289,7 +289,6 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
       if (projId) {
         const found = projects.find((p: ProjectRecord) => p.id === projId);
         if (found) {
-          hasInitFromUrl.current = true;
           setSelectedId(projId);
           setDetailOpen(true);
           if (tab && ["overview", "tasks", "docs", "vendors", "execution", "manpower", "billing", "activity"].includes(tab)) {
@@ -297,9 +296,43 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
           }
         }
       }
+      hasInitFromUrl.current = true;
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Sync the URL query parameters with selectedId and activeDetailTab
+  useEffect(() => {
+    if (!hasInitFromUrl.current) return;
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      let changed = false;
+      
+      const currentProjId = url.searchParams.get("projectId");
+      if (detailOpen && selectedId) {
+        if (currentProjId !== selectedId) {
+          url.searchParams.set("projectId", selectedId);
+          changed = true;
+        }
+        
+        const currentTab = url.searchParams.get("tab");
+        if (currentTab !== activeDetailTab) {
+          url.searchParams.set("tab", activeDetailTab);
+          changed = true;
+        }
+      } else {
+        if (url.searchParams.has("projectId") || url.searchParams.has("tab")) {
+          url.searchParams.delete("projectId");
+          url.searchParams.delete("tab");
+          changed = true;
+        }
+      }
+      
+      if (changed) {
+        window.history.replaceState(null, "", url.pathname + url.search);
+      }
+    }
+  }, [detailOpen, selectedId, activeDetailTab]);
 
   const formatDate = (dateStr: string) => {
     if (!isMounted) return "...";
@@ -426,7 +459,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   const leadsValue = projects.filter((p: ProjectRecord) => ["lead", "pitching"].includes(p.currentStage)).reduce((sum: number, p: ProjectRecord) => sum + getVal(p), 0);
   const ongoingValue = projects.filter((p: ProjectRecord) => ["negotiation", "execution", "reporting", "finance"].includes(p.currentStage)).reduce((sum: number, p: ProjectRecord) => sum + getVal(p), 0);
   const billedValue = projects.filter((p: ProjectRecord) => p.currentStage === "completed").reduce((sum: number, p: ProjectRecord) => sum + getVal(p), 0);
-  const totalValue = projects.reduce((sum: number, p: ProjectRecord) => sum + getVal(p), 0);
+  const totalValue = leadsValue + ongoingValue + billedValue;
 
   const stats = [
     { label: "Leads & Pitching", numericValue: leadsValue.toLocaleString('id-ID'), sub: "Potential opportunities", color: "#a78bfa", icon: <Target size={16} /> },
@@ -534,50 +567,94 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
     persistUpdate(updated);
   };
 
-  const handleAssignVendor = (projectId: string) => {
+  const handleAssignVendor = async (projectId: string) => {
     if (!vendorToAssign) return;
     const vendor = initialData.availableVendors.find((v: any) => v.id === vendorToAssign);
     const project = projects.find((p: ProjectRecord) => p.id === projectId);
     if (!vendor || !project) return;
 
-    const newAssignment = {
-      vendorId: vendor.id,
-      vendorName: vendor.name,
-      vendorType: (vendor as any).serviceNames?.[0] || "General",
-      businessAddress: (vendor as any).businessAddress || "",
-      whatsappPhone: (vendor as any).whatsappPhone || "",
-      averageScore: (vendor as any).averageScore || 0,
-      linkId: `lnk_${Date.now()}`,
-      quotedPrice: 0,
-    };
-    
-    const updated = {
-      ...project,
-      assignedVendors: [...(project.assignedVendors || []), newAssignment]
-    };
-    persistUpdate(updated);
+    try {
+      const response = await fetch('/api/project-vendor-links', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId, vendorId: vendor.id })
+      });
+      if (response.ok) {
+        const { link } = await response.json();
+        
+        const newAssignment = {
+          linkId: link.id,
+          vendorId: vendor.id,
+          vendorName: vendor.name,
+          vendorType: (vendor as any).serviceNames?.[0] || "General",
+          businessAddress: (vendor as any).businessAddress || "",
+          whatsappPhone: (vendor as any).whatsappPhone || "",
+          averageScore: (vendor as any).averageScore || 0,
+          quotedPrice: 0,
+        };
+
+        setProjects((prev) => prev.map((p) => {
+          if (p.id === projectId) {
+            return {
+              ...p,
+              assignedVendors: [...(p.assignedVendors || []), newAssignment]
+            };
+          }
+          return p;
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to assign vendor:", err);
+    }
+
     setIsAssignVendorOpen(false);
     setVendorToAssign("");
   };
 
-  const handleRemoveVendor = (projectId: string, linkId: string) => {
-    const project = projects.find((p: ProjectRecord) => p.id === projectId);
-    if (!project) return;
-    const updated = {
-      ...project,
-      assignedVendors: (project.assignedVendors || []).filter((v: any) => v.linkId !== linkId)
-    };
-    persistUpdate(updated);
+  const handleRemoveVendor = async (projectId: string, linkId: string) => {
+    try {
+      const response = await fetch('/api/project-vendor-links', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ linkId })
+      });
+      if (response.ok) {
+        setProjects((prev) => prev.map((p) => {
+          if (p.id === projectId) {
+            return {
+              ...p,
+              assignedVendors: (p.assignedVendors || []).filter((v: any) => v.linkId !== linkId)
+            };
+          }
+          return p;
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to remove vendor:", err);
+    }
   };
 
-  const handleRemoveShortlist = (projectId: string, linkId: string) => {
-    const project = projects.find((p: ProjectRecord) => p.id === projectId);
-    if (!project) return;
-    const updated = {
-      ...project,
-      vendorShortlist: (project.vendorShortlist || []).filter((v: any) => v.linkId !== linkId)
-    };
-    persistUpdate(updated);
+  const handleRemoveShortlist = async (projectId: string, linkId: string) => {
+    try {
+      const response = await fetch('/api/project-vendor-shortlists', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shortlistId: linkId })
+      });
+      if (response.ok) {
+        setProjects((prev) => prev.map((p) => {
+          if (p.id === projectId) {
+            return {
+              ...p,
+              vendorShortlist: (p.vendorShortlist || []).filter((v: any) => v.linkId !== linkId)
+            };
+          }
+          return p;
+        }));
+      }
+    } catch (err) {
+      console.error("Failed to remove shortlist:", err);
+    }
   };
 
   const handleAssignManpower = (projectId: string) => {

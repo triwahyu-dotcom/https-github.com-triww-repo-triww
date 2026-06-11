@@ -16,8 +16,10 @@ export default async function FinancePage() {
   
   const { projects } = projectData;
   
-  // Only pass active projects that are in execution or finance to create RFPs against
-  const activeProjects = projects.filter(p => !["failed", "leads"].includes(p.section));
+  // Pass all projects that are in an active/billable stage — so PO/RFP can be created
+  const activeProjects = projects.filter(p =>
+    !["lost", "cancelled", "completed"].includes(p.currentStage)
+  );
 
   return (
     <FinancePortalRouter 

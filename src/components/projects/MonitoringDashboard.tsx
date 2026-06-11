@@ -113,7 +113,7 @@ export default function MonitoringDashboard({
   teamMembers,
   onOpenProject
 }: MonitoringDashboardProps) {
-  const [stageFilter, setStageFilter] = useState("all");
+  const [stageFilter, setStageFilter] = useState("execution");
   const [attnOnly, setAttnOnly] = useState(false);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState<string | null>(null);

@@ -1,10 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
-  <!-- Large 4-point star (top-right, bigger) -->
-  <path d="M72 8 C72 8 70 30 60 38 C70 46 72 68 72 68 C72 68 74 46 84 38 C74 30 72 8 72 8Z" fill="white"/>
-  <!-- Small 4-point star (bottom-left, smaller) -->
-  <path d="M32 42 C32 42 30.5 56 24 61 C30.5 66 32 80 32 80 C32 80 33.5 66 40 61 C33.5 56 32 42 32 42Z" fill="white"/>
-  <!-- Horizontal lines through large star -->
-  <rect x="45" y="36.5" width="54" height="3" rx="1.5" fill="white"/>
-  <!-- Horizontal lines through small star -->
-  <rect x="8" y="59.5" width="48" height="3" rx="1.5" fill="white"/>
+  <!-- Top-right star (larger, with long left tail) -->
+  <path d="M 68,10 Q 68,34 86,34 Q 68,34 68,58 Q 68,34 22,34 Q 68,34 68,10 Z" fill="white" />
+  <!-- Bottom-left star (smaller, with longer left tail) -->
+  <path d="M 48,36 Q 48,56 62,56 Q 48,56 48,76 Q 48,56 6,56 Q 48,56 48,36 Z" fill="white" />
 </svg>

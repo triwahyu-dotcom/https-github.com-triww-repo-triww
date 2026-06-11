@@ -122,9 +122,9 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         @media print {
           @page { size: A4 portrait; margin: 10mm; }
-          body { background: white; margin: 0; padding: 0; }
+          body { background: white !important; color: black !important; color-scheme: light !important; margin: 0; padding: 0; }
           .no-print { display: none !important; }
-          .print-page { padding: 0 !important; position: relative; box-sizing: border-box; page-break-inside: avoid; }
+          .print-page { padding: 0 !important; position: relative; box-sizing: border-box; page-break-inside: avoid; background: white !important; color: black !important; }
           .page-break { page-break-after: always; }
           .footer-bar { position: relative !important; margin-top: 30px; }
         }

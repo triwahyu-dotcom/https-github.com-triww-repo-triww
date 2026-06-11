@@ -81,7 +81,8 @@ const STAGE_OPTIONS: { key: WorkflowStage; label: string }[] = [
   { key: "reporting", label: "Reporting" },
   { key: "finance", label: "Finance / Billing" },
   { key: "completed", label: "Completed" },
-  { key: "lost", label: "Cancelled" },
+  { key: "lost", label: "Lost" },
+  { key: "cancelled", label: "Cancelled" },
 ];
 
 export function ProjectDashboard({ initialData }: { initialData: ProjectDashboardData & { clients?: CRMClient[] } }) {
@@ -396,7 +397,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
   };
 
   const STAGE_ORDER: Record<string, number> = {
-    lead: 0, pitching: 1, negotiation: 2, execution: 3, reporting: 4, finance: 5, completed: 6, lost: 7
+    lead: 0, pitching: 1, negotiation: 2, execution: 3, reporting: 4, finance: 5, completed: 6, lost: 7, cancelled: 8
   };
 
   const sortedProjects = [...filteredProjects].sort((a, b) => {
@@ -514,7 +515,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
   const aeStats = Array.from(new Set(projects.flatMap((p: ProjectRecord) => (p.owners || []).map((o: string) => normalizeName(o))))) .map(ae => {
     const aeProjects = projects.filter((p: ProjectRecord) => (p.owners || []).some((o: string) => normalizeName(o) === ae));
-    const activeProjects = aeProjects.filter((p: ProjectRecord) => !['completed', 'lost'].includes(p.currentStage));
+    const activeProjects = aeProjects.filter((p: ProjectRecord) => !['completed', 'lost', 'cancelled'].includes(p.currentStage));
     const val = activeProjects.reduce((sum: number, p: ProjectRecord) => sum + getVal(p), 0);
     return {
       name: ae,
@@ -562,7 +563,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
 
     const updated = {
       ...project,
-      tasks: project.tasks.map((t: ProjectTask) => t.id === taskId ? { ...t, status: (t.status === "done" ? "pending" : "done") as any } : t)
+      tasks: project.tasks.map((t: ProjectTask) => t.id === taskId ? { ...t, status: (t.status === "done" ? "pending" : "done") as any, updatedAt: new Date().toISOString() } : t)
     };
     persistUpdate(updated);
   };
@@ -2129,7 +2130,7 @@ export function ProjectDashboard({ initialData }: { initialData: ProjectDashboar
               </div>
               <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
                 <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Active Projects</div>
-                <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sortedProjects.filter(p => !['completed', 'lost'].includes(p.currentStage)).length}</div>
+                <div style={{ fontSize: '20px', fontWeight: 'bold' }}>{sortedProjects.filter(p => !['completed', 'lost', 'cancelled'].includes(p.currentStage)).length}</div>
               </div>
               <div style={{ border: '1px solid #ddd', padding: '15px', borderRadius: '8px' }}>
                 <div style={{ fontSize: '11px', color: '#888', textTransform: 'uppercase', marginBottom: '5px' }}>Current Filter</div>

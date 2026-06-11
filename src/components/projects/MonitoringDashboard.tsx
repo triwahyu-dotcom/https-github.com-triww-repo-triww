@@ -28,7 +28,8 @@ const STAGE_LABELS: Record<string, string> = {
   reporting: "Reporting",
   finance: "Finance / Billing",
   completed: "Completed",
-  lost: "Cancelled",
+  lost: "Lost",
+  cancelled: "Cancelled",
 };
 
 const HEALTH_META = {

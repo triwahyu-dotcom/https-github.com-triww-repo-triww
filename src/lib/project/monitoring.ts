@@ -124,7 +124,7 @@ export function summarizeProject(project: ProjectRecord, now: Date): ProjectSumm
 
 export function summarizePortfolio(projects: ProjectRecord[], now: Date, teamMembers: TeamMember[]): PortfolioSummary {
   // Active: not completed and not lost
-  const activeProjects = projects.filter(p => p.currentStage !== "completed" && p.currentStage !== "lost");
+  const activeProjects = projects.filter(p => p.currentStage !== "completed" && p.currentStage !== "lost" && p.currentStage !== "cancelled");
   const activeCount = activeProjects.length;
   
   const activeProjectsWithTasks = activeProjects.map(p => summarizeProject(p, now)).filter(s => s.total > 0);

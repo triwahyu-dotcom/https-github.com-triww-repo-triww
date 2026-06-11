@@ -2,7 +2,7 @@ import React from 'react';
 
 export type StatusBadgeVariant = 
   | 'new' | 'approved' | 'monitoring' | 'overdue' | 'locked' | 'negotiation' | 'pitching' | 'submitted' | 'done'
-  | 'lead' | 'execution' | 'reporting' | 'finance' | 'completed' | 'lost'
+  | 'lead' | 'execution' | 'reporting' | 'finance' | 'completed' | 'lost' | 'cancelled'
   | 'active' | 'inactive';
 
 const STATUS_CONFIG: Record<StatusBadgeVariant, { label: string; color: string }> = {
@@ -22,7 +22,8 @@ const STATUS_CONFIG: Record<StatusBadgeVariant, { label: string; color: string }
   reporting:   { label: 'Reporting',        color: '#EF9F27' },
   finance:     { label: 'Finance / Billing',color: '#EF9F27' },
   completed:   { label: 'Completed',        color: '#5DCAA5' },
-  lost:        { label: 'Cancelled / Lost', color: '#F85149' },
+  lost:        { label: 'Lost',             color: '#F85149' },
+  cancelled:   { label: 'Cancelled',        color: '#8B949E' },
 
   // CRM client statuses
   active:      { label: 'Active',           color: '#3FB950' },
@@ -47,7 +48,8 @@ export function StatusBadge({ variant }: { variant: StatusBadgeVariant | string 
   else if (norm === 'reporting') key = 'reporting';
   else if (norm === 'finance') key = 'finance';
   else if (norm === 'completed') key = 'completed';
-  else if (norm === 'lost' || norm === 'cancelled') key = 'lost';
+  else if (norm === 'lost') key = 'lost';
+  else if (norm === 'cancelled') key = 'cancelled';
   else if (norm === 'active' || norm === 'active_client') key = 'active';
   else if (norm === 'inactive') key = 'inactive';
   else if (norm in STATUS_CONFIG) {

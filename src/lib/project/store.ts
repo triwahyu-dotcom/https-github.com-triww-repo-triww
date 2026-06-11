@@ -12,7 +12,7 @@ import {
 
 // --- CONSTANTS (Restored from original) ---
 
-const STAGE_ORDER: WorkflowStage[] = ["lead", "pitching", "negotiation", "execution", "reporting", "finance", "completed", "lost"];
+const STAGE_ORDER: WorkflowStage[] = ["lead", "pitching", "negotiation", "execution", "reporting", "finance", "completed", "lost", "cancelled"];
 const STAGE_LABELS: Record<WorkflowStage, string> = {
   lead: "Lead / Prospect",
   pitching: "Pitching / Preparation",
@@ -21,14 +21,16 @@ const STAGE_LABELS: Record<WorkflowStage, string> = {
   reporting: "Reporting",
   finance: "Finance / Billing",
   completed: "Completed",
-  lost: "Cancelled",
+  lost: "Lost",
+  cancelled: "Cancelled",
 };
 
 const SECTION_LABELS: Record<ProjectSection, string> = {
   leads: "Leads & Prospects",
   ongoing: "Active Projects",
   billed: "Billed / Done",
-  failed: "Lost / Cancelled",
+  failed: "Lost",
+  cancelled: "Cancelled",
   uncategorized: "Other / Uncategorized",
 };
 
@@ -207,7 +209,7 @@ export async function getProjectDashboardData(): Promise<ProjectDashboardData> {
 
   const totalPipelineValue = projects.reduce((sum, project) => sum + (project.projectValue || 0), 0);
   const allDocuments = projects.flatMap((project) => project.documents || []);
-  const sectionOrder: ProjectSection[] = ["leads", "ongoing", "billed", "failed"];
+  const sectionOrder: ProjectSection[] = ["leads", "ongoing", "billed", "failed", "cancelled"];
 
   return {
     projects,

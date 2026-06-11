@@ -1,4 +1,4 @@
-export type ProjectSection = "leads" | "ongoing" | "billed" | "failed" | "uncategorized";
+export type ProjectSection = "leads" | "ongoing" | "billed" | "failed" | "cancelled" | "uncategorized";
 
 export type WorkflowStage =
   | "lead"
@@ -8,7 +8,8 @@ export type WorkflowStage =
   | "reporting"
   | "finance"
   | "completed"
-  | "lost";
+  | "lost"
+  | "cancelled";
 
 export type ProjectPhaseKey =
   | "brief"
@@ -66,6 +67,7 @@ export interface ProjectTask {
   description?: string;
   subtasks?: SubTask[];
   comments?: TaskComment[];
+  updatedAt?: string;
 }
 
 export interface ProjectDocument {

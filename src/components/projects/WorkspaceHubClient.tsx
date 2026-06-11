@@ -58,14 +58,30 @@ function formatDueDate(dueDate?: string): string {
   }
 }
 
-function generateWhatsAppText(projects: ProjectRecord[]): string {
+function generateWhatsAppText(projects: ProjectRecord[], filterMode: "today" | "all" = "today"): string {
   // Collect all tasks (active = todo/in_progress, done = done)
   const activeTasks: TaskWithContext[] = [];
   const doneTasks: TaskWithContext[] = [];
 
+  const todayDateString = new Date().toDateString();
+
   for (const proj of projects) {
     if (!proj.tasks || proj.tasks.length === 0) continue;
-    for (const task of proj.tasks) {
+    
+    let tasksToProcess = proj.tasks;
+    if (filterMode === "today") {
+      tasksToProcess = proj.tasks.filter(task => {
+        if (!task.updatedAt) return false;
+        try {
+          return new Date(task.updatedAt).toDateString() === todayDateString;
+        } catch {
+          return false;
+        }
+      });
+      if (tasksToProcess.length === 0) continue;
+    }
+
+    for (const task of tasksToProcess) {
       const ctx: TaskWithContext = {
         ...task,
         projectName: proj.projectName || proj.client || "Tanpa Nama",
@@ -125,14 +141,20 @@ function generateWhatsAppText(projects: ProjectRecord[]): string {
   lines.push(`🟡 *REKAP KOORDINASI TUGAS — JUARA EVENT SERVICES* 🟡`);
   lines.push(`_📅 ${today}_`);
   lines.push(``);
-  lines.push(`Halo Tim! Berikut rekap tugas aktif yang perlu difokuskan:`);
+  if (filterMode === "today") {
+    lines.push(`Halo Tim! Berikut rekap update & aktivitas tugas hari ini:`);
+  } else {
+    lines.push(`Halo Tim! Berikut rekap tugas aktif yang perlu difokuskan:`);
+  }
   lines.push(``);
 
   // ── Per-person active tasks ──
   const sortedNames = Object.keys(byPerson).sort();
 
   if (sortedNames.length === 0 && unassigned.length === 0) {
-    lines.push(`✅ Tidak ada tugas aktif saat ini. Semua beres!`);
+    lines.push(filterMode === "today" 
+      ? `✅ Tidak ada update atau perubahan tugas aktif hari ini.`
+      : `✅ Tidak ada tugas aktif saat ini. Semua beres!`);
   } else {
     for (const name of sortedNames) {
       lines.push(`------------------------------------------`);
@@ -183,7 +205,9 @@ function generateWhatsAppText(projects: ProjectRecord[]): string {
   const doneNames = Object.keys(doneByPerson).sort();
   if (doneNames.length > 0) {
     lines.push(`------------------------------------------`);
-    lines.push(`✅ *PENCAPAIAN TIM (SUDAH SELESAI)* 🎉`);
+    lines.push(filterMode === "today"
+      ? `✅ *SELESAI HARI INI* 🎉`
+      : `✅ *PENCAPAIAN TIM (SUDAH SELESAI)* 🎉`);
     for (const name of doneNames) {
       for (const t of doneByPerson[name]) {
         lines.push(`  👏 *${name}*: _${t.title}_ (${t.projectName})`);
@@ -208,6 +232,7 @@ export default function WorkspaceHubClient({
   const [showRecap, setShowRecap] = useState(false);
   const [copied, setCopied] = useState(false);
   const [userRole, setUserRole] = useState<string>("member");
+  const [recapMode, setRecapMode] = useState<"today" | "all">("today");
 
   React.useEffect(() => {
     const cookies = document.cookie.split(';');
@@ -219,7 +244,7 @@ export default function WorkspaceHubClient({
     }
   }, []);
 
-  const recapText = showRecap ? generateWhatsAppText(projects) : "";
+  const recapText = showRecap ? generateWhatsAppText(projects, recapMode) : "";
 
   const handleCopy = useCallback(async () => {
     try {
@@ -452,6 +477,52 @@ export default function WorkspaceHubClient({
               </button>
             </div>
 
+            {/* Filter Segmented Control */}
+            <div style={{ padding: "16px 24px 0", display: "flex", gap: 10, flexShrink: 0 }}>
+              <button
+                onClick={() => { setCopied(false); setRecapMode("today"); }}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: recapMode === "today" ? "rgba(37, 211, 102, 0.12)" : "transparent",
+                  border: recapMode === "today" ? "1px solid #25D366" : "1px solid rgba(255,255,255,0.08)",
+                  color: recapMode === "today" ? "#25D366" : "#a1a1aa",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span>📅</span> Hari Ini Saja
+              </button>
+              <button
+                onClick={() => { setCopied(false); setRecapMode("all"); }}
+                style={{
+                  flex: 1,
+                  padding: "10px 14px",
+                  borderRadius: 10,
+                  background: recapMode === "all" ? "rgba(76, 141, 255, 0.12)" : "transparent",
+                  border: recapMode === "all" ? "1px solid #4C8DFF" : "1px solid rgba(255,255,255,0.08)",
+                  color: recapMode === "all" ? "#4C8DFF" : "#a1a1aa",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <span>📋</span> Semua Tugas Aktif
+              </button>
+            </div>
+
             {/* Recap Text Area */}
             <div style={{ padding: "16px 24px", flex: 1, overflow: "auto" }}>
               <textarea
@@ -460,7 +531,7 @@ export default function WorkspaceHubClient({
                 value={recapText}
                 style={{
                   width: "100%",
-                  height: 380,
+                  height: 330,
                   background: "#0a0a0b",
                   border: "0.5px solid rgba(255,255,255,0.08)",
                   borderRadius: 12,

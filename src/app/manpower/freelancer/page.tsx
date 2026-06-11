@@ -146,7 +146,7 @@ export default function FreelancerDatabasePage() {
       try {
         const res = await fetch('/api/projects');
         const data = await res.json();
-        setProjects(data.filter((p: ProjectRecord) => p.currentStage !== 'completed' && p.currentStage !== 'lost'));
+        setProjects(data.filter((p: ProjectRecord) => p.currentStage !== 'completed' && p.currentStage !== 'lost' && p.currentStage !== 'cancelled'));
       } catch (err) {
         console.error("Failed to load projects:", err);
       }

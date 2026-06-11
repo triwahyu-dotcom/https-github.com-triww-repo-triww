@@ -380,7 +380,7 @@ export default function EmbeddedTaskTracker({
     id: string, patch: Partial<ProjectTask>, immediate = false
   ) => {
     setLocalTasks((prev) => {
-      const next = prev.map((t) => t.id === id ? { ...t, ...patch } : t);
+      const next = prev.map((t) => t.id === id ? { ...t, ...patch, updatedAt: new Date().toISOString() } : t);
       if (immediate) persist(next);
       else persistDebounced(next);
       return next;
@@ -416,6 +416,7 @@ export default function EmbeddedTaskTracker({
       id, title: newTitle.trim(), stage: stage as any,
       status: "pending", required: false, priority: "medium",
       assignees: [], tags: [], subtasks: [], comments: [],
+      updatedAt: new Date().toISOString(),
     };
     setLocalTasks((prev) => {
       const next = [...prev, newTask];

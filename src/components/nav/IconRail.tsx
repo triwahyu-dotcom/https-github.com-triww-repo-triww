@@ -325,26 +325,25 @@ export function IconRail({
         zIndex: 100,
       }}
     >
-      {/* Logo */}
+      {/* Logo — JUARA Icon */}
       <div
         style={{
-          width: 32,
-          height: 32,
-          background: "linear-gradient(135deg, #E6863C 0%, #C4682A 100%)",
-          borderRadius: 9,
+          width: 36,
+          height: 36,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          fontSize: 15,
-          fontWeight: 800,
-          color: "white",
           marginBottom: 14,
           flexShrink: 0,
-          boxShadow: "0 2px 8px rgba(230,134,60,0.4)",
-          letterSpacing: "-0.5px",
         }}
       >
-        J
+        <img
+          src="/juara-icon.svg"
+          alt="JUARA"
+          width={32}
+          height={32}
+          style={{ display: "block", filter: "drop-shadow(0 0 4px rgba(255,255,255,0.25))" }}
+        />
       </div>
 
       {/* Divider */}

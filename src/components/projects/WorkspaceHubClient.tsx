@@ -7,10 +7,13 @@ import { ProjectRecord, ProjectTask } from "@/lib/project/types";
 import { TeamMember } from "@/lib/project/monitoring";
 import MonitoringDashboard from "./MonitoringDashboard";
 import PersonalDashboard from "./PersonalDashboard";
+import { ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
 
 interface WorkspaceHubClientProps {
   projects: ProjectRecord[];
   teamMembers: TeamMember[];
+  expenseDocuments?: ExpenseDocument[];
+  rfps?: RequestForPayment[];
 }
 
 // ─── WhatsApp Recap Logic ────────────────────────────────────────────────────
@@ -227,6 +230,8 @@ function generateWhatsAppText(projects: ProjectRecord[], filterMode: "today" | "
 export default function WorkspaceHubClient({
   projects,
   teamMembers,
+  expenseDocuments = [],
+  rfps = [],
 }: WorkspaceHubClientProps) {
   const router = useRouter();
   const [showRecap, setShowRecap] = useState(false);
@@ -316,7 +321,11 @@ export default function WorkspaceHubClient({
 
       {/* Personal Dashboard Section */}
       <section>
-        <PersonalDashboard projects={projects} />
+        <PersonalDashboard
+          projects={projects}
+          expenseDocuments={expenseDocuments}
+          rfps={rfps}
+        />
       </section>
 
       {/* Monitoring Dashboard Section */}

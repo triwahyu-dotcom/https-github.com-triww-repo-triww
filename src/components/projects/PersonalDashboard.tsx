@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { ProjectRecord, ProjectTask, TaskPriority, TaskDetailedStatus } from "@/lib/project/types";
+import { ShieldAlert, ArrowRight } from "lucide-react";
+import { ExpenseDocument, RequestForPayment } from "@/lib/finance/types";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -82,16 +84,33 @@ const STATUS_CONFIG: Record<TaskDetailedStatus | string, { label: string; bg: st
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export default function PersonalDashboard({ projects }: { projects: ProjectRecord[] }) {
+export default function PersonalDashboard({
+  projects,
+  expenseDocuments = [],
+  rfps = [],
+}: {
+  projects: ProjectRecord[];
+  expenseDocuments?: ExpenseDocument[];
+  rfps?: RequestForPayment[];
+}) {
   const router = useRouter();
   const [userName, setUserName] = useState("");
   const [, setUserEmail] = useState("");
   const [filter, setFilter] = useState<"all" | "pending" | "in_progress" | "done">("all");
   const [collapsed, setCollapsed] = useState(false);
+  const [userRole, setUserRole] = useState<string>("member");
 
   useEffect(() => {
     setUserName(getUserName());
     setUserEmail(getUserEmail());
+
+    const cookies = document.cookie.split(';');
+    const roleCookie = cookies.find(c => c.trim().startsWith('juara_user_role='));
+    if (roleCookie) {
+      setUserRole(roleCookie.split('=')[1].toLowerCase().trim());
+    } else {
+      setUserRole((localStorage.getItem("pm-role") || "member").toLowerCase().trim());
+    }
   }, []);
 
   // ── Derive data ──────────────────────────────────────────────────────────
@@ -169,6 +188,34 @@ export default function PersonalDashboard({ projects }: { projects: ProjectRecor
     };
   }, [userName, projects]);
 
+  const pendingApprovals = useMemo(() => {
+    if (!userRole) return { docsCount: 0, rfpsCount: 0, total: 0 };
+    
+    let docs: ExpenseDocument[] = [];
+    let rfpList: RequestForPayment[] = [];
+    
+    const isDirector = userRole === "director";
+    const isFinance = userRole === "finance";
+    const isAdmin = userRole === "admin";
+    
+    if (isDirector) {
+      docs = expenseDocuments.filter(d => d.status === "pending_c_level");
+      rfpList = rfps.filter(r => r.status === "pending_c_level");
+    } else if (isFinance) {
+      docs = expenseDocuments.filter(d => d.status === "pending_finance");
+      rfpList = rfps.filter(r => r.status === "pending_finance");
+    } else if (isAdmin) {
+      docs = expenseDocuments.filter(d => d.status === "pending_c_level" || d.status === "pending_finance");
+      rfpList = rfps.filter(r => r.status === "pending_c_level" || r.status === "pending_finance");
+    }
+    
+    return {
+      docsCount: docs.length,
+      rfpsCount: rfpList.length,
+      total: docs.length + rfpList.length
+    };
+  }, [userRole, expenseDocuments, rfps]);
+
   const filteredTasks = useMemo(() => {
     if (filter === "all") return myTasks;
     if (filter === "pending") return myTasks.filter((t) => t.task.status === "pending" || t.task.status === undefined);
@@ -243,6 +290,99 @@ export default function PersonalDashboard({ projects }: { projects: ProjectRecor
 
       {!collapsed && (
         <>
+          {/* Notification Banner (Opsi A) */}
+          {pendingApprovals.total > 0 && (
+            <div style={{
+              background: "linear-gradient(90deg, rgba(230,134,60,0.1) 0%, rgba(251,191,36,0.06) 100%)",
+              border: "1px solid rgba(230,134,60,0.25)",
+              boxShadow: "0 4px 20px rgba(230,134,60,0.08), inset 0 1px 0 rgba(255,255,255,0.05)",
+              borderRadius: 14,
+              padding: "14px 20px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 16,
+              marginBottom: 20,
+              flexWrap: "wrap",
+              animation: "pulseGlow 2s infinite alternate",
+            }}>
+              <style dangerouslySetInnerHTML={{__html: `
+                @keyframes pulseGlow {
+                  from { box-shadow: 0 4px 20px rgba(230,134,60,0.05); border-color: rgba(230,134,60,0.2); }
+                  to { box-shadow: 0 4px 25px rgba(230,134,60,0.15); border-color: rgba(230,134,60,0.35); }
+                }
+                .btn-approve-sh:hover {
+                  background: #e6863c !important;
+                  box-shadow: 0 4px 14px rgba(230,134,60,0.4) !important;
+                  transform: translateY(-1px);
+                }
+                .btn-approve-sh:active {
+                  transform: translateY(0);
+                }
+              `}} />
+              
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: 10,
+                  background: "rgba(230,134,60,0.15)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#e6863c",
+                  flexShrink: 0
+                }}>
+                  <ShieldAlert size={20} />
+                </div>
+                <div>
+                  <h4 style={{ fontSize: 13.5, fontWeight: 700, color: "#f4f4f5", margin: 0 }}>
+                    Menunggu Persetujuan Anda
+                  </h4>
+                  <p style={{ fontSize: 12.5, color: "#a1a1aa", margin: "3px 0 0 0", lineHeight: 1.4 }}>
+                    {userRole === "director" && (
+                      <>
+                        Terdapat <strong>{pendingApprovals.docsCount} Dokumen (PO/SPK)</strong> dan <strong>{pendingApprovals.rfpsCount} RFP</strong> yang memerlukan otorisasi C-Level Anda.
+                      </>
+                    )}
+                    {userRole === "finance" && (
+                      <>
+                        Terdapat <strong>{pendingApprovals.docsCount} Dokumen (PO/SPK)</strong> dan <strong>{pendingApprovals.rfpsCount} RFP</strong> yang memerlukan verifikasi Finance Anda.
+                      </>
+                    )}
+                    {userRole === "admin" && (
+                      <>
+                        Terdapat total <strong>{pendingApprovals.total} Dokumen/RFP</strong> (C-Level/Finance) yang berstatus pending approval.
+                      </>
+                    )}
+                  </p>
+                </div>
+              </div>
+              
+              <button
+                className="btn-approve-sh"
+                onClick={() => router.push("/finance")}
+                style={{
+                  background: "linear-gradient(135deg, #e6863c 0%, #c4682a 100%)",
+                  border: "none",
+                  borderRadius: 10,
+                  color: "#fff",
+                  padding: "9px 18px",
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 4px 12px rgba(230,134,60,0.25)",
+                }}
+              >
+                Proses Persetujuan <ArrowRight size={14} />
+              </button>
+            </div>
+          )}
+
           {/* Stats Row */}
           <div style={{
             display: "grid",

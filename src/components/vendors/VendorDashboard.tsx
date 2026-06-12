@@ -251,6 +251,9 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
           bankName: editFormData.bankName,
           bankAccountNumber: editFormData.bankAccountNumber,
           bankAccountHolder: editFormData.bankAccountHolder,
+          bankName2: editFormData.bankName2,
+          bankAccountNumber2: editFormData.bankAccountNumber2,
+          bankAccountHolder2: editFormData.bankAccountHolder2,
           npwpNumber: editFormData.npwpNumber,
           taxStatus: editFormData.taxStatus,
           legalStatus: editFormData.legalStatus,
@@ -915,9 +918,12 @@ export function VendorDashboard({ initialData }: { initialData: DashboardData })
                     </div>
                     <div style={{ padding: '0 24px' }}>
                       {[
-                        { key: 'bankName', label: 'Nama Bank', value: (isEditing ? editFormData?.bankName : null) || selectedVendorDetail.bankName || '–' },
-                        { key: 'bankAccountNumber', label: 'Nomor Rekening', value: (isEditing ? editFormData?.bankAccountNumber : null) || selectedVendorDetail.bankAccountNumber || '–', color: '#378ADD' },
-                        { key: 'bankAccountHolder', label: 'Atas Nama', value: (isEditing ? editFormData?.bankAccountHolder : null) || selectedVendorDetail.bankAccountHolder || '–' },
+                        { key: 'bankName', label: 'Nama Bank 1', value: (isEditing ? editFormData?.bankName : null) || selectedVendorDetail.bankName || '–' },
+                        { key: 'bankAccountNumber', label: 'Nomor Rekening 1', value: (isEditing ? editFormData?.bankAccountNumber : null) || selectedVendorDetail.bankAccountNumber || '–', color: '#378ADD' },
+                        { key: 'bankAccountHolder', label: 'Atas Nama 1', value: (isEditing ? editFormData?.bankAccountHolder : null) || selectedVendorDetail.bankAccountHolder || '–' },
+                        { key: 'bankName2', label: 'Nama Bank 2 (Opsional)', value: (isEditing ? editFormData?.bankName2 : null) || selectedVendorDetail.bankName2 || '–' },
+                        { key: 'bankAccountNumber2', label: 'Nomor Rekening 2 (Opsional)', value: (isEditing ? editFormData?.bankAccountNumber2 : null) || selectedVendorDetail.bankAccountNumber2 || '–', color: '#378ADD' },
+                        { key: 'bankAccountHolder2', label: 'Atas Nama 2 (Opsional)', value: (isEditing ? editFormData?.bankAccountHolder2 : null) || selectedVendorDetail.bankAccountHolder2 || '–' },
                         { key: 'npwpNumber', label: 'Nomor NPWP', value: (isEditing ? editFormData?.npwpNumber : null) || selectedVendorDetail.npwpNumber || '–' },
                         { key: 'taxStatus', label: 'Tax Status', value: (isEditing ? editFormData?.taxStatus : null) || selectedVendorDetail.taxStatus || 'Unknown' },
                         { key: 'legalStatus', label: 'Legal Status', value: (isEditing ? editFormData?.legalStatus : null) || selectedVendorDetail.legalStatus || 'Unknown' },

@@ -22,6 +22,9 @@ const INITIAL_FORM = {
   bankName: "",
   bankAccountNumber: "",
   bankAccountHolder: "",
+  bankName2: "",
+  bankAccountNumber2: "",
+  bankAccountHolder2: "",
   npwpNumber: "",
   websiteUrl: "",
   instagramUrl: "",
@@ -105,6 +108,9 @@ export function VendorIntakeForm({
     if (!form.services.trim()) errors.push(locale === "id" ? "Layanan wajib diisi." : "Services are required.");
     if (!form.picName.trim()) errors.push(locale === "id" ? "Nama PIC wajib diisi." : "PIC name is required.");
     if (!form.picPhone.trim()) errors.push(locale === "id" ? "No. WA PIC wajib diisi." : "PIC phone is required.");
+    if (!form.bankName.trim()) errors.push(locale === "id" ? "Nama Bank wajib diisi pada Rekening 1." : "Bank name is required for Account 1.");
+    if (!form.bankAccountNumber.trim()) errors.push(locale === "id" ? "Nomor Rekening wajib diisi pada Rekening 1." : "Account number is required for Account 1.");
+    if (!form.bankAccountHolder.trim()) errors.push(locale === "id" ? "Nama Pemilik Rekening wajib diisi pada Rekening 1." : "Account holder name is required for Account 1.");
     
     if (form.legalStatus === "Unknown") {
       errors.push(locale === "id" ? "Silakan pilih status legalitas perusahaan/bisnis Anda." : "Please select your business legal status.");
@@ -302,20 +308,40 @@ export function VendorIntakeForm({
           </label>
         </section>
 
-        <div className="form-section-title">{t(locale, "bankName")} & Tax</div>
+        <div className="form-section-title">{locale === "id" ? "Rekening Bank 1 (Wajib)" : "Bank Account 1 (Mandatory)"}</div>
+        <section className="form-grid-3" style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "bankName")} *
+            <input required value={form.bankName} onChange={(event) => updateField("bankName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "bankAccountNumber")} *
+            <input required value={form.bankAccountNumber} onChange={(event) => updateField("bankAccountNumber", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "bankAccountHolder")} *
+            <input required value={form.bankAccountHolder} onChange={(event) => updateField("bankAccountHolder", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+        </section>
+
+        <div className="form-section-title">{locale === "id" ? "Rekening Bank 2 (Opsional)" : "Bank Account 2 (Optional)"}</div>
+        <section className="form-grid-3" style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "bankName")} ({locale === "id" ? "Opsional" : "Optional"})
+            <input value={form.bankName2} onChange={(event) => updateField("bankName2", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "bankAccountNumber")} ({locale === "id" ? "Opsional" : "Optional"})
+            <input value={form.bankAccountNumber2} onChange={(event) => updateField("bankAccountNumber2", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
+            {t(locale, "bankAccountHolder")} ({locale === "id" ? "Opsional" : "Optional"})
+            <input value={form.bankAccountHolder2} onChange={(event) => updateField("bankAccountHolder2", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
+          </label>
+        </section>
+
+        <div className="form-section-title">Tax & NPWP</div>
         <section className="form-grid-2" style={{ marginBottom: '32px' }}>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            {t(locale, "bankName")}
-            <input value={form.bankName} onChange={(event) => updateField("bankName", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            {t(locale, "bankAccountNumber")}
-            <input value={form.bankAccountNumber} onChange={(event) => updateField("bankAccountNumber", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
-          <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            {t(locale, "bankAccountHolder")}
-            <input value={form.bankAccountHolder} onChange={(event) => updateField("bankAccountHolder", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />
-          </label>
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
             {t(locale, "npwpNumber")}
             <input value={form.npwpNumber} onChange={(event) => updateField("npwpNumber", event.target.value)} style={{ padding: '12px', borderRadius: '12px', border: '1px solid var(--line)', background: 'var(--panel-soft)', color: 'var(--text)' }} />

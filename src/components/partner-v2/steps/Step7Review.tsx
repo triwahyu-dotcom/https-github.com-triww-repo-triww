@@ -86,9 +86,12 @@ export function Step7Review({ formData, onEdit, onSubmit, isSubmitting, submitEr
         <ReviewSection title="Kontak & Perbankan" step={4}>
           <ReviewRow label="Email" value={formData.email} />
           <ReviewRow label="WhatsApp" value={formData.picPhone} mono />
-          <ReviewRow label="Bank" value={formData.bankName} />
-          <ReviewRow label="No. Rekening" value={formData.bankAccountNumber} mono />
-          <ReviewRow label="Atas Nama" value={formData.bankAccountHolder} />
+          <ReviewRow label="Bank 1" value={formData.bankName} />
+          <ReviewRow label="No. Rekening 1" value={formData.bankAccountNumber} mono />
+          <ReviewRow label="Atas Nama 1" value={formData.bankAccountHolder} />
+          {formData.bankName2 && <ReviewRow label="Bank 2" value={formData.bankName2} />}
+          {formData.bankAccountNumber2 && <ReviewRow label="No. Rekening 2" value={formData.bankAccountNumber2} mono />}
+          {formData.bankAccountHolder2 && <ReviewRow label="Atas Nama 2" value={formData.bankAccountHolder2} />}
         </ReviewSection>
 
         <ReviewSection title="Dokumen & Portfolio" step={5}>

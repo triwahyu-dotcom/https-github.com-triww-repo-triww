@@ -5,7 +5,7 @@ import { logger } from "@/lib/logger";
 export async function PATCH(req: NextRequest) {
   try {
     const body = await req.json();
-    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl, verifiedBy } = body;
+    const { rfpId, docId, status, digitalSignature, rejectionReason, paymentProofUrl, sourceAccountNo, verifiedBy } = body;
     const today = new Date().toISOString();
 
     // ── PATH A: Handle Document (PO/SPK/Kontrak/CA) approval ──
@@ -82,6 +82,14 @@ export async function PATCH(req: NextRequest) {
         status: status as any,
         rejectionReason: rejectionReason || (status !== "draft" && status !== "pending_finance" ? "" : rfp.rejectionReason)
       };
+
+      // Persist payment-specific fields
+      if (status === "paid" && paymentProofUrl) {
+        (updatedRfp as any).paymentProofUrl = paymentProofUrl;
+      }
+      if (status === "paid" && sourceAccountNo) {
+        (updatedRfp as any).sourceAccountNo = sourceAccountNo;
+      }
 
       await updateRFP(updatedRfp);
       rfpUpdated = true;

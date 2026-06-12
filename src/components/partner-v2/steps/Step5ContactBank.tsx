@@ -115,13 +115,13 @@ export function Step5ContactBank({ entityType, relationshipType, formData, onCha
         </div>
       )}
 
-      <div className={styles.sectionHeader}>Rekening Pembayaran</div>
-      {renderField("bankName", "Bank", "select", true, INDONESIAN_BANKS)}
-      {renderField("bankAccountNumber", "Nomor Rekening", "text", true, [], "Hanya angka, tanpa spasi atau tanda baca")}
+      <div className={styles.sectionHeader}>Rekening Pembayaran Utama (Rekening 1)</div>
+      {renderField("bankName", "Bank 1", "select", true, INDONESIAN_BANKS)}
+      {renderField("bankAccountNumber", "Nomor Rekening 1", "text", true, [], "Hanya angka, tanpa spasi atau tanda baca")}
       
       <div className={styles.field}>
         <label className={styles.label}>
-          Atas Nama (sesuai buku tabungan) <span className={styles.requiredStar}>*</span>
+          Atas Nama Rekening 1 <span className={styles.requiredStar}>*</span>
         </label>
         <input 
           className={`${styles.input} ${errors.bankAccountHolder ? styles.inputError : ""}`}
@@ -145,6 +145,11 @@ export function Step5ContactBank({ entityType, relationshipType, formData, onCha
           </div>
         )}
       </div>
+
+      <div className={styles.sectionHeader}>Rekening Pembayaran Kedua (Rekening 2 - Opsional)</div>
+      {renderField("bankName2", "Bank 2 (Opsional)", "select", false, INDONESIAN_BANKS)}
+      {renderField("bankAccountNumber2", "Nomor Rekening 2 (Opsional)", "text", false, [], "Hanya angka, tanpa spasi atau tanda baca")}
+      {renderField("bankAccountHolder2", "Atas Nama Rekening 2 (Opsional)", "text", false)}
 
       <div className={styles.warningCallout}>
         Data rekening akan digunakan secara otomatis oleh sistem keuangan JUARA untuk transfer pembayaran. Pastikan nomor rekening dan nama pemilik sudah tepat.

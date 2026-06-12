@@ -97,6 +97,7 @@ export interface RequestForPayment {
     items: LineItem[];
   };
   paymentProofUrl?: string;
+  sourceAccountNo?: string; // Rekening sumber dana PT Juara yang digunakan untuk transfer (diisi Finance saat paid)
   vendorInvoiceUrl?: string;
   taxAmount?: number;
   ppnAmount?: number;

@@ -447,6 +447,11 @@ export function ProcurementDashboard({
               <div>
                 <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{rfp.payeeName}</div>
                 <div style={{ fontSize: '11px', color: '#52525b' }}>{rfp.paymentType}</div>
+                {rfp.sourceAccountNo && (
+                  <div style={{ fontSize: '10px', color: '#378ADD', marginTop: '2px', fontFamily: 'monospace' }}>
+                    ← BCA {rfp.sourceAccountNo}
+                  </div>
+                )}
               </div>
               <div style={{ fontSize: '13px', color: '#a1a1aa' }}>{rfp.projectName}</div>
               <div style={{ fontSize: '13px', color: '#e4e4e7', fontWeight: 500 }}>{formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</div>

@@ -73,6 +73,9 @@ export interface Vendor {
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
+  bankName2?: string;
+  bankAccountNumber2?: string;
+  bankAccountHolder2?: string;
   npwpNumber: string;
   websiteUrl: string;
   instagramUrl: string;
@@ -391,6 +394,9 @@ export interface VendorDetail extends VendorSummary {
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
+  bankName2?: string;
+  bankAccountNumber2?: string;
+  bankAccountHolder2?: string;
   npwpNumber: string;
   websiteUrl: string;
   instagramUrl: string;
@@ -529,6 +535,9 @@ export interface VendorIntakeV2Payload {
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
+  bankName2?: string;
+  bankAccountNumber2?: string;
+  bankAccountHolder2?: string;
   
   // Step 6: Documents
   documentsFolderUrl: string;

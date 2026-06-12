@@ -89,6 +89,9 @@ export type VendorIntakePayload = {
   bankName: string;
   bankAccountNumber: string;
   bankAccountHolder: string;
+  bankName2?: string;
+  bankAccountNumber2?: string;
+  bankAccountHolder2?: string;
   npwpNumber: string;
   websiteUrl: string;
   instagramUrl: string;
@@ -388,6 +391,9 @@ async function importSpreadsheetRows(): Promise<ImportedRow[]> {
         bankName: rawSource["Nama Bank"],
         bankAccountNumber: stringValue(rawSource["Nomor Rekening : "] || rawSource["Nomor Rekening :"] || rawSource["Nomor Rekening"]),
         bankAccountHolder: stringValue(rawSource["Nama Rekening :"] || rawSource["Nama Rekening : "]),
+        bankName2: rawSource["Nama Bank 2"] || "",
+        bankAccountNumber2: stringValue(rawSource["Nomor Rekening 2 : "] || rawSource["Nomor Rekening 2 :"] || rawSource["Nomor Rekening 2"] || ""),
+        bankAccountHolder2: stringValue(rawSource["Nama Rekening 2 :"] || rawSource["Nama Rekening 2 : "] || rawSource["Nama Rekening 2"] || ""),
         npwpNumber: stringValue(rawSource["Nomor Pokok Wajib Pajak (NPWP)"]),
         websiteUrl: rawSource["Website"],
         instagramUrl: rawSource["Instagram"],
@@ -572,6 +578,9 @@ export async function syncFromSource() {
       existingVendor.bankName = imported.vendor.bankName;
       existingVendor.bankAccountNumber = imported.vendor.bankAccountNumber;
       existingVendor.bankAccountHolder = imported.vendor.bankAccountHolder;
+      existingVendor.bankName2 = imported.vendor.bankName2 || "";
+      existingVendor.bankAccountNumber2 = imported.vendor.bankAccountNumber2 || "";
+      existingVendor.bankAccountHolder2 = imported.vendor.bankAccountHolder2 || "";
       existingVendor.npwpNumber = imported.vendor.npwpNumber;
       existingVendor.websiteUrl = imported.vendor.websiteUrl;
       existingVendor.instagramUrl = imported.vendor.instagramUrl;
@@ -802,6 +811,9 @@ function buildVendorDetail(
     bankName: vendor.bankName,
     bankAccountNumber: vendor.bankAccountNumber,
     bankAccountHolder: vendor.bankAccountHolder,
+    bankName2: vendor.bankName2 || "",
+    bankAccountNumber2: vendor.bankAccountNumber2 || "",
+    bankAccountHolder2: vendor.bankAccountHolder2 || "",
     npwpNumber: vendor.npwpNumber,
     websiteUrl: vendor.websiteUrl,
     instagramUrl: vendor.instagramUrl,
@@ -865,6 +877,9 @@ function buildRawSourceFromPayload(payload: VendorIntakePayload, timestamp: stri
     "Nama Bank": payload.bankName,
     "Nomor Rekening : ": payload.bankAccountNumber,
     "Nama Rekening :": payload.bankAccountHolder,
+    "Nama Bank 2": payload.bankName2 || "",
+    "Nomor Rekening 2": payload.bankAccountNumber2 || "",
+    "Nama Rekening 2": payload.bankAccountHolder2 || "",
     "Nomor Pokok Wajib Pajak (NPWP)": payload.npwpNumber,
     Website: payload.websiteUrl,
     Instagram: payload.instagramUrl,
@@ -1160,6 +1175,9 @@ export async function updateVendorIdentity(
     bankName?: string;
     bankAccountNumber?: string;
     bankAccountHolder?: string;
+    bankName2?: string;
+    bankAccountNumber2?: string;
+    bankAccountHolder2?: string;
     npwpNumber?: string;
     serviceNames?: string[];
     documentsFolderUrl?: string;
@@ -1188,6 +1206,9 @@ export async function updateVendorIdentity(
   if (updates.bankName !== undefined) vendor.bankName = updates.bankName;
   if (updates.bankAccountNumber !== undefined) vendor.bankAccountNumber = updates.bankAccountNumber;
   if (updates.bankAccountHolder !== undefined) vendor.bankAccountHolder = updates.bankAccountHolder;
+  if (updates.bankName2 !== undefined) vendor.bankName2 = updates.bankName2;
+  if (updates.bankAccountNumber2 !== undefined) vendor.bankAccountNumber2 = updates.bankAccountNumber2;
+  if (updates.bankAccountHolder2 !== undefined) vendor.bankAccountHolder2 = updates.bankAccountHolder2;
   if (updates.npwpNumber !== undefined) vendor.npwpNumber = updates.npwpNumber;
   if (updates.nikNumber !== undefined) vendor.nikNumber = updates.nikNumber;
   if (updates.personalNpwpNumber !== undefined) vendor.personalNpwpNumber = updates.personalNpwpNumber;
@@ -1256,6 +1277,9 @@ export async function submitVendorIntake(payload: VendorIntakePayload) {
     bankName: payload.bankName,
     bankAccountNumber: payload.bankAccountNumber,
     bankAccountHolder: payload.bankAccountHolder,
+    bankName2: payload.bankName2 || "",
+    bankAccountNumber2: payload.bankAccountNumber2 || "",
+    bankAccountHolder2: payload.bankAccountHolder2 || "",
     npwpNumber: payload.npwpNumber,
     websiteUrl: payload.websiteUrl,
     instagramUrl: payload.instagramUrl,
@@ -1422,6 +1446,9 @@ export async function resubmitVendorRevision(token: string, payload: VendorIntak
   vendor.bankName = payload.bankName;
   vendor.bankAccountNumber = payload.bankAccountNumber;
   vendor.bankAccountHolder = payload.bankAccountHolder;
+  vendor.bankName2 = payload.bankName2 || "";
+  vendor.bankAccountNumber2 = payload.bankAccountNumber2 || "";
+  vendor.bankAccountHolder2 = payload.bankAccountHolder2 || "";
   vendor.npwpNumber = payload.npwpNumber;
   vendor.websiteUrl = payload.websiteUrl;
   vendor.instagramUrl = payload.instagramUrl;
@@ -1592,6 +1619,9 @@ export async function submitVendorIntakeV2(
     bankName: payload.bankName,
     bankAccountNumber: payload.bankAccountNumber,
     bankAccountHolder: payload.bankAccountHolder,
+    bankName2: payload.bankName2 || "",
+    bankAccountNumber2: payload.bankAccountNumber2 || "",
+    bankAccountHolder2: payload.bankAccountHolder2 || "",
     
     // Social Media
     websiteUrl: payload.websiteUrl || "",

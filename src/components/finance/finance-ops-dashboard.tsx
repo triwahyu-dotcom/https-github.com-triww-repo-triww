@@ -31,20 +31,26 @@ import { FilterBar } from "./filter-bar";
 import { RejectionModal } from "./rejection-modal";
 import { SettlementModal } from "./settlement-modal";
 
+// Rekening sumber dana PT Juara Berhasil Berkah Sejahtera
+const JUARA_ACCOUNTS = [
+  { no: "0057678899", label: "Rek. 1 — BCA 0057678899 (Utama)", isDefault: true },
+  { no: "0050689573", label: "Rek. 2 — BCA 0050689573 (Alternatif)", isDefault: false },
+];
+
 interface PaymentProofModalProps {
   rfp: RequestForPayment;
   onClose: () => void;
-  onSuccess: (proofUrl: string) => void;
+  onSuccess: (proofUrl: string, sourceAccountNo: string) => void;
 }
 
 function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) {
   const [file, setFile] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<string>(JUARA_ACCOUNTS[0].no);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
-    
     setIsUploading(true);
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -55,34 +61,82 @@ function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) 
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ background: "var(--panel)", borderRadius: "16px", width: "100%", maxWidth: "480px", padding: "32px", border: "1px solid var(--line)" }}>
-        <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>Upload Bukti Transfer</h3>
-        <p className="mini-meta" style={{ marginBottom: "24px" }}>RFP #{rfp.id.substring(0,8)} — {formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</p>
-        
-        <div style={{ marginBottom: "24px" }}>
-          <label className="mini-meta">Pilih Gambar Bukti Transfer (Mandatory)</label>
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleFileChange} 
-            style={{ width: "100%", marginTop: "8px", padding: "12px", border: "2px dashed var(--line)", borderRadius: "10px", background: "var(--panel-soft)" }} 
-          />
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+      <div style={{ background: "#1a1a1f", borderRadius: "16px", width: "100%", maxWidth: "520px", padding: "32px", border: "0.5px solid rgba(255,255,255,0.1)" }}>
+        <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "#f4f4f5" }}>Konfirmasi Pembayaran</h3>
+        <p style={{ margin: "0 0 24px 0", fontSize: "12px", color: "#52525b" }}>RFP #{rfp.id.substring(0,8)} — {formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</p>
+
+        {/* Rekening Tujuan (Vendor) */}
+        <div style={{ marginBottom: "20px", padding: "14px 16px", borderRadius: "10px", background: "#111113", border: "0.5px solid rgba(255,255,255,0.06)" }}>
+          <div style={{ fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", marginBottom: "8px", textTransform: "uppercase" }}>Rekening Tujuan (Vendor)</div>
+          <div style={{ fontSize: "14px", color: "#e4e4e7", fontWeight: 600 }}>{rfp.bankAccount?.bankName || "-"}</div>
+          <div style={{ fontSize: "13px", color: "#a1a1aa", fontFamily: "monospace", marginTop: "2px" }}>{rfp.bankAccount?.accountNo || "-"}</div>
+          <div style={{ fontSize: "12px", color: "#71717a", marginTop: "2px" }}>a.n. {rfp.bankAccount?.accountName || "-"}</div>
         </div>
 
-        {file && (
-          <div style={{ marginBottom: "24px", textAlign: "center" }}>
-            <img src={file} alt="Preview" style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px", border: "1px solid var(--line)" }} />
+        {/* Rekening Sumber Dana (PT Juara) — diisi Finance */}
+        <div style={{ marginBottom: "20px" }}>
+          <label style={{ display: "block", fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
+            Rekening Sumber Dana <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {JUARA_ACCOUNTS.map(acc => (
+              <label
+                key={acc.no}
+                style={{
+                  display: "flex", alignItems: "center", gap: "12px",
+                  padding: "12px 16px", borderRadius: "10px", cursor: "pointer",
+                  border: selectedAccount === acc.no
+                    ? "1.5px solid #378ADD"
+                    : "0.5px solid rgba(255,255,255,0.08)",
+                  background: selectedAccount === acc.no ? "rgba(55,138,221,0.08)" : "#111113",
+                  transition: "all 0.15s"
+                }}
+              >
+                <input
+                  type="radio"
+                  name="sourceAccount"
+                  value={acc.no}
+                  checked={selectedAccount === acc.no}
+                  onChange={() => setSelectedAccount(acc.no)}
+                  style={{ accentColor: "#378ADD", width: "16px", height: "16px", flexShrink: 0 }}
+                />
+                <div>
+                  <div style={{ fontSize: "13px", color: "#e4e4e7", fontWeight: 500 }}>
+                    PT Juara Berhasil Berkah Sejahtera
+                    {acc.isDefault && <span style={{ marginLeft: "8px", fontSize: "10px", background: "rgba(55,138,221,0.15)", color: "#85B7EB", padding: "1px 6px", borderRadius: "4px" }}>Utama</span>}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "#71717a", fontFamily: "monospace", marginTop: "2px" }}>BCA • {acc.no}</div>
+                </div>
+              </label>
+            ))}
           </div>
-        )}
+        </div>
+
+        {/* Upload Bukti Transfer */}
+        <div style={{ marginBottom: "24px" }}>
+          <label style={{ display: "block", fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
+            Bukti Transfer <span style={{ color: "#ef4444" }}>*</span>
+          </label>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ width: "100%", padding: "12px", border: "2px dashed rgba(255,255,255,0.12)", borderRadius: "10px", background: "#111113", color: "#a1a1aa", boxSizing: "border-box" }}
+          />
+          {file && (
+            <div style={{ marginTop: "12px", textAlign: "center" }}>
+              <img src={file} alt="Preview" style={{ maxWidth: "100%", maxHeight: "180px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }} />
+            </div>
+          )}
+        </div>
 
         <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
-          <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "1px solid var(--line)", borderRadius: "8px", color: "var(--text)", cursor: "pointer" }}>Batal</button>
-          <button 
-            disabled={!file || isUploading} 
-            onClick={() => file && onSuccess(file)} 
-            className="primary-button" 
-            style={{ minWidth: "120px", background: "var(--green)" }}
+          <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "0.5px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "#71717a", cursor: "pointer" }}>Batal</button>
+          <button
+            disabled={!file || !selectedAccount || isUploading}
+            onClick={() => file && onSuccess(file, selectedAccount)}
+            style={{ padding: "10px 24px", background: file && selectedAccount ? "#5DCAA5" : "#27272a", color: file && selectedAccount ? "#fff" : "#52525b", borderRadius: "8px", border: "none", cursor: file && selectedAccount ? "pointer" : "not-allowed", fontWeight: 600, fontSize: "13px", transition: "all 0.15s" }}
           >
             Selesaikan Pembayaran
           </button>
@@ -343,6 +397,11 @@ export function FinanceOpsDashboard({
                   <div className="hide-mobile">
                      <div style={{ fontSize: '13px', color: '#e4e4e7' }}>{rfp.projectName}</div>
                      <div style={{ fontSize: '11px', color: '#52525b' }}>{rfp.payeeName}</div>
+                     {rfp.sourceAccountNo && (
+                       <div style={{ fontSize: '10px', color: '#378ADD', marginTop: '2px', fontFamily: 'monospace' }}>
+                         ← BCA {rfp.sourceAccountNo}
+                       </div>
+                     )}
                   </div>
                   <div style={{ fontSize: '13px', fontWeight: 500, color: '#e4e4e7' }}>{formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</div>
                   <div className="hide-mobile" style={{ fontSize: '12px', color: '#71717a' }}>{formatDateFullID(rfp.requestDate)}</div>
@@ -411,7 +470,14 @@ export function FinanceOpsDashboard({
       )}
 
       {selectedRfpForPayment && (
-        <PaymentProofModal rfp={selectedRfpForPayment} onClose={() => setSelectedRfpForPayment(null)} onSuccess={(url) => { handleUpdateStatus(selectedRfpForPayment.id, 'paid', { paymentProofUrl: url }); setSelectedRfpForPayment(null); }} />
+        <PaymentProofModal
+          rfp={selectedRfpForPayment}
+          onClose={() => setSelectedRfpForPayment(null)}
+          onSuccess={(url, sourceAccountNo) => {
+            handleUpdateStatus(selectedRfpForPayment.id, 'paid', { paymentProofUrl: url, sourceAccountNo });
+            setSelectedRfpForPayment(null);
+          }}
+        />
       )}
       {rejectionRfpId && <RejectionModal title="Kembalikan RFP" onClose={() => setRejectionRfpId(null)} onConfirm={confirmRejection} />}
       {rejectionDocId && <RejectionModal title="Kembalikan Dokumen" onClose={() => setRejectionDocId(null)} onConfirm={confirmDocRejection} />}

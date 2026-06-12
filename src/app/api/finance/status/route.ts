@@ -87,7 +87,8 @@ export async function PATCH(req: NextRequest) {
       if (status === "paid" && paymentProofUrl) {
         (updatedRfp as any).paymentProofUrl = paymentProofUrl;
       }
-      if (status === "paid" && sourceAccountNo) {
+      // Rekening sumber dana disimpan saat Finance melakukan Review & Sign (pending_c_level)
+      if (status === "pending_c_level" && sourceAccountNo) {
         (updatedRfp as any).sourceAccountNo = sourceAccountNo;
       }
 

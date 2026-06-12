@@ -40,13 +40,12 @@ const JUARA_ACCOUNTS = [
 interface PaymentProofModalProps {
   rfp: RequestForPayment;
   onClose: () => void;
-  onSuccess: (proofUrl: string, sourceAccountNo: string) => void;
+  onSuccess: (proofUrl: string) => void;
 }
 
 function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) {
   const [file, setFile] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<string>(JUARA_ACCOUNTS[0].no);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -62,58 +61,18 @@ function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) 
 
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", backdropFilter: "blur(6px)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
-      <div style={{ background: "#1a1a1f", borderRadius: "16px", width: "100%", maxWidth: "520px", padding: "32px", border: "0.5px solid rgba(255,255,255,0.1)" }}>
-        <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "#f4f4f5" }}>Konfirmasi Pembayaran</h3>
+      <div style={{ background: "#1a1a1f", borderRadius: "16px", width: "100%", maxWidth: "480px", padding: "32px", border: "0.5px solid rgba(255,255,255,0.1)" }}>
+        <h3 style={{ margin: "0 0 4px 0", fontSize: "18px", color: "#f4f4f5" }}>Upload Bukti Transfer</h3>
         <p style={{ margin: "0 0 24px 0", fontSize: "12px", color: "#52525b" }}>RFP #{rfp.id.substring(0,8)} — {formatCurrencyIDR(rfp.netAmount || rfp.totalAmount)}</p>
 
-        {/* Rekening Tujuan (Vendor) */}
-        <div style={{ marginBottom: "20px", padding: "14px 16px", borderRadius: "10px", background: "#111113", border: "0.5px solid rgba(255,255,255,0.06)" }}>
-          <div style={{ fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", marginBottom: "8px", textTransform: "uppercase" }}>Rekening Tujuan (Vendor)</div>
-          <div style={{ fontSize: "14px", color: "#e4e4e7", fontWeight: 600 }}>{rfp.bankAccount?.bankName || "-"}</div>
-          <div style={{ fontSize: "13px", color: "#a1a1aa", fontFamily: "monospace", marginTop: "2px" }}>{rfp.bankAccount?.accountNo || "-"}</div>
-          <div style={{ fontSize: "12px", color: "#71717a", marginTop: "2px" }}>a.n. {rfp.bankAccount?.accountName || "-"}</div>
-        </div>
-
-        {/* Rekening Sumber Dana (PT Juara) — diisi Finance */}
-        <div style={{ marginBottom: "20px" }}>
-          <label style={{ display: "block", fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
-            Rekening Sumber Dana <span style={{ color: "#ef4444" }}>*</span>
-          </label>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {JUARA_ACCOUNTS.map(acc => (
-              <label
-                key={acc.no}
-                style={{
-                  display: "flex", alignItems: "center", gap: "12px",
-                  padding: "12px 16px", borderRadius: "10px", cursor: "pointer",
-                  border: selectedAccount === acc.no
-                    ? "1.5px solid #378ADD"
-                    : "0.5px solid rgba(255,255,255,0.08)",
-                  background: selectedAccount === acc.no ? "rgba(55,138,221,0.08)" : "#111113",
-                  transition: "all 0.15s"
-                }}
-              >
-                <input
-                  type="radio"
-                  name="sourceAccount"
-                  value={acc.no}
-                  checked={selectedAccount === acc.no}
-                  onChange={() => setSelectedAccount(acc.no)}
-                  style={{ accentColor: "#378ADD", width: "16px", height: "16px", flexShrink: 0 }}
-                />
-                <div>
-                  <div style={{ fontSize: "13px", color: "#e4e4e7", fontWeight: 500 }}>
-                    PT Juara Berhasil Berkah Sejahtera
-                    {acc.isDefault && <span style={{ marginLeft: "8px", fontSize: "10px", background: "rgba(55,138,221,0.15)", color: "#85B7EB", padding: "1px 6px", borderRadius: "4px" }}>Utama</span>}
-                  </div>
-                  <div style={{ fontSize: "12px", color: "#71717a", fontFamily: "monospace", marginTop: "2px" }}>BCA • {acc.no}</div>
-                </div>
-              </label>
-            ))}
+        {/* Rekening Tujuan (Vendor) — info */}
+        {rfp.sourceAccountNo && (
+          <div style={{ marginBottom: "20px", padding: "12px 16px", borderRadius: "10px", background: "#111113", border: "0.5px solid rgba(55,138,221,0.2)" }}>
+            <div style={{ fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", marginBottom: "6px", textTransform: "uppercase" }}>Rekening Sumber Dana</div>
+            <div style={{ fontSize: "13px", color: "#85B7EB", fontFamily: "monospace" }}>PT Juara • BCA {rfp.sourceAccountNo}</div>
           </div>
-        </div>
+        )}
 
-        {/* Upload Bukti Transfer */}
         <div style={{ marginBottom: "24px" }}>
           <label style={{ display: "block", fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "8px" }}>
             Bukti Transfer <span style={{ color: "#ef4444" }}>*</span>
@@ -126,7 +85,7 @@ function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) 
           />
           {file && (
             <div style={{ marginTop: "12px", textAlign: "center" }}>
-              <img src={file} alt="Preview" style={{ maxWidth: "100%", maxHeight: "180px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }} />
+              <img src={file} alt="Preview" style={{ maxWidth: "100%", maxHeight: "200px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.1)" }} />
             </div>
           )}
         </div>
@@ -134,9 +93,9 @@ function PaymentProofModal({ rfp, onClose, onSuccess }: PaymentProofModalProps) 
         <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end" }}>
           <button onClick={onClose} style={{ padding: "10px 20px", background: "none", border: "0.5px solid rgba(255,255,255,0.12)", borderRadius: "8px", color: "#71717a", cursor: "pointer" }}>Batal</button>
           <button
-            disabled={!file || !selectedAccount || isUploading}
-            onClick={() => file && onSuccess(file, selectedAccount)}
-            style={{ padding: "10px 24px", background: file && selectedAccount ? "#5DCAA5" : "#27272a", color: file && selectedAccount ? "#fff" : "#52525b", borderRadius: "8px", border: "none", cursor: file && selectedAccount ? "pointer" : "not-allowed", fontWeight: 600, fontSize: "13px", transition: "all 0.15s" }}
+            disabled={!file || isUploading}
+            onClick={() => file && onSuccess(file)}
+            style={{ padding: "10px 24px", background: file ? "#5DCAA5" : "#27272a", color: file ? "#fff" : "#52525b", borderRadius: "8px", border: "none", cursor: file ? "pointer" : "not-allowed", fontWeight: 600, fontSize: "13px", transition: "all 0.15s" }}
           >
             Selesaikan Pembayaran
           </button>
@@ -205,8 +164,9 @@ export function FinanceOpsDashboard({
   const [rejectionDocId, setRejectionDocId] = useState<string | null>(null);
   const [selectedReviewRfp, setSelectedReviewRfp] = useState<RequestForPayment | null>(null);
   const [selectedReviewDoc, setSelectedReviewDoc] = useState<ExpenseDocument | null>(null);
+  const [reviewSourceAccount, setReviewSourceAccount] = useState<string>(JUARA_ACCOUNTS[0].no);
 
-  const handleSignAndForward = async (rfp: RequestForPayment) => {
+  const handleSignAndForward = async (rfp: RequestForPayment, sourceAccountNo: string) => {
     const signerName = "Serafina Nolani";
     const signature = `SIG-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
     await updateRFPStatus(rfp.id, "pending_c_level", {
@@ -214,7 +174,8 @@ export function FinanceOpsDashboard({
         name: signerName,
         date: new Date().toISOString(),
         signature: signature
-      }
+      },
+      sourceAccountNo
     });
     setSelectedReviewRfp(null);
     window.location.reload();
@@ -429,10 +390,11 @@ export function FinanceOpsDashboard({
       {selectedReviewRfp && (
         <div style={{ position: "fixed", inset: 0, backgroundColor: "rgba(0,0,0,0.85)", backdropFilter: "blur(8px)", zIndex: 1000, display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
           <div style={{ backgroundColor: "#1f1f23", borderRadius: "16px", width: "100%", maxWidth: "800px", border: "0.5px solid rgba(255,255,255,0.1)", padding: "32px" }}>
-             <h2 style={{ fontSize: '20px', color: '#f4f4f5', margin: '0 0 8px 0' }}>Review Audit RFP #{selectedReviewRfp.id.substring(0,8)}</h2>
+             <h2 style={{ fontSize: '20px', color: '#f4f4f5', margin: '0 0 4px 0' }}>Review Audit RFP #{selectedReviewRfp.id.substring(0,8)}</h2>
              <div style={{ fontSize: "13px", color: "#71717a", marginBottom: "24px" }}>Periksa dokumen dasar dan invoice vendor sebelum memberikan tanda tangan.</div>
-             
-             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "32px" }}>
+
+             {/* Dokumen Cards */}
+             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "24px" }}>
                  <div style={{ padding: "16px", borderRadius: "10px", background: "#111113", border: "0.5px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                       <FileText size={16} color="#378ADD" />
@@ -461,9 +423,48 @@ export function FinanceOpsDashboard({
                  </div>
              </div>
 
+             {/* Rekening Sumber Dana — diisi Finance sebelum forward ke Director */}
+             <div style={{ marginBottom: "28px" }}>
+               <div style={{ fontSize: "11px", color: "#52525b", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: "10px" }}>
+                 Rekening Sumber Dana <span style={{ color: "#ef4444" }}>*</span>
+               </div>
+               <div style={{ display: "flex", gap: "10px" }}>
+                 {JUARA_ACCOUNTS.map(acc => (
+                   <label
+                     key={acc.no}
+                     style={{
+                       flex: 1, display: "flex", alignItems: "center", gap: "10px",
+                       padding: "12px 16px", borderRadius: "10px", cursor: "pointer",
+                       border: reviewSourceAccount === acc.no
+                         ? "1.5px solid #378ADD"
+                         : "0.5px solid rgba(255,255,255,0.08)",
+                       background: reviewSourceAccount === acc.no ? "rgba(55,138,221,0.08)" : "#111113",
+                       transition: "all 0.15s"
+                     }}
+                   >
+                     <input
+                       type="radio"
+                       name="reviewSourceAccount"
+                       value={acc.no}
+                       checked={reviewSourceAccount === acc.no}
+                       onChange={() => setReviewSourceAccount(acc.no)}
+                       style={{ accentColor: "#378ADD", width: "15px", height: "15px", flexShrink: 0 }}
+                     />
+                     <div>
+                       <div style={{ fontSize: "12px", color: "#e4e4e7", fontWeight: 500 }}>
+                         PT Juara Berhasil Berkah Sejahtera
+                         {acc.isDefault && <span style={{ marginLeft: "6px", fontSize: "10px", background: "rgba(55,138,221,0.15)", color: "#85B7EB", padding: "1px 5px", borderRadius: "4px" }}>Utama</span>}
+                       </div>
+                       <div style={{ fontSize: "11px", color: "#71717a", fontFamily: "monospace", marginTop: "2px" }}>BCA • {acc.no}</div>
+                     </div>
+                   </label>
+                 ))}
+               </div>
+             </div>
+
              <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
                 <button onClick={() => setSelectedReviewRfp(null)} style={{ padding: '8px 16px', borderRadius: '8px', border: '0.5px solid rgba(255,255,255,0.1)', background: 'transparent', color: '#71717a', cursor: 'pointer' }}>Tutup</button>
-                <button onClick={() => handleSignAndForward(selectedReviewRfp)} style={{ padding: '8px 20px', borderRadius: '8px', background: '#378ADD', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Sign & Forward to Director</button>
+                <button onClick={() => handleSignAndForward(selectedReviewRfp, reviewSourceAccount)} style={{ padding: '8px 20px', borderRadius: '8px', background: '#378ADD', color: '#fff', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Sign & Forward to Director</button>
              </div>
           </div>
         </div>
@@ -473,8 +474,8 @@ export function FinanceOpsDashboard({
         <PaymentProofModal
           rfp={selectedRfpForPayment}
           onClose={() => setSelectedRfpForPayment(null)}
-          onSuccess={(url, sourceAccountNo) => {
-            handleUpdateStatus(selectedRfpForPayment.id, 'paid', { paymentProofUrl: url, sourceAccountNo });
+          onSuccess={(url) => {
+            handleUpdateStatus(selectedRfpForPayment.id, 'paid', { paymentProofUrl: url });
             setSelectedRfpForPayment(null);
           }}
         />

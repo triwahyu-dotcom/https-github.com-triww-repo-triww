@@ -185,7 +185,11 @@ export function PrintLayout({ rfp, doc, relatedRfps = [] }: Props) {
               </tr>
               <tr>
                 <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold" }}>From Bank</td>
-                <td colSpan={3} style={{ border: "1px solid #000", padding: "8px" }}>BCA 000689573</td>
+                <td colSpan={3} style={{ border: "1px solid #000", padding: "8px" }}>
+                  {rfp.paymentType === "Transfer" 
+                    ? (rfp.sourceAccountNo ? `BCA ${rfp.sourceAccountNo}` : "BCA 0057678899") 
+                    : "-"}
+                </td>
               </tr>
               <tr>
                 <td style={{ border: "1px solid #000", padding: "8px", fontWeight: "bold" }}>Pay To</td>

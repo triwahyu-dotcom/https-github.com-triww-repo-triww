@@ -144,11 +144,102 @@ export async function readProjects(): Promise<ProjectRecord[]> {
   return (data || []).map(row => row.data as ProjectRecord);
 }
 
+function getProjectSection(stage: WorkflowStage): ProjectSection {
+  switch (stage) {
+    case "lead":
+    case "pitching":
+      return "leads";
+    case "negotiation":
+    case "execution":
+    case "reporting":
+    case "finance":
+      return "ongoing";
+    case "completed":
+      return "billed";
+    case "lost":
+      return "failed";
+    case "cancelled":
+      return "cancelled";
+    default:
+      return "uncategorized";
+  }
+}
+
+function getProjectSectionLabel(section: ProjectSection): string {
+  return SECTION_LABELS[section] || "Other / Uncategorized";
+}
+
+function getStageLabel(stage: WorkflowStage): string {
+  return STAGE_LABELS[stage] || stage;
+}
+
 export async function createProject(newProject: ProjectRecord): Promise<ProjectRecord> {
   const client = await getAdminClient();
   const now = new Date().toISOString();
   
-  const payload = { ...newProject, createdAt: now, updatedAt: now };
+  const id = newProject.id || `proj_${Date.now().toString(36)}`;
+  const stage = newProject.currentStage || "lead";
+  const section = getProjectSection(stage);
+  
+  const defaults: ProjectRecord = {
+    id,
+    numberLabel: "",
+    client: "",
+    projectName: "",
+    contactPerson: "",
+    relation: "",
+    category: "-",
+    owners: [],
+    eventDate: "TBD",
+    projectValue: 0,
+    projectValueLabel: "Rp 0",
+    serviceLine: "",
+    status: "active",
+    progress: "0%",
+    credentials: "",
+    remark: "",
+    section,
+    sectionLabel: getProjectSectionLabel(section),
+    health: "on_track",
+    currentStage: stage,
+    currentStageLabel: getStageLabel(stage),
+    financeStatus: "pending",
+    resultLabel: "",
+    phaseLabel: "",
+    phases: [],
+    tasks: [],
+    documents: [],
+    milestones: [],
+    activity: [],
+    searchableText: "",
+    assignedVendors: [],
+    vendorShortlist: [],
+    vendorRequirements: [],
+    termOfPayment: [],
+    assignedFreelancers: [],
+    createdAt: now,
+    updatedAt: now
+  };
+
+  const payload: ProjectRecord = {
+    ...defaults,
+    ...newProject,
+    id,
+    currentStage: stage,
+    currentStageLabel: getStageLabel(stage),
+    section,
+    sectionLabel: getProjectSectionLabel(section),
+    projectValueLabel: formatCurrency(newProject.projectValue || 0),
+    createdAt: newProject.createdAt || now,
+    updatedAt: now
+  };
+
+  const searchParts = [
+    payload.projectName || "",
+    payload.client || "",
+    ...(payload.owners || [])
+  ].filter(Boolean).join(" ");
+  payload.searchableText = searchParts.toLowerCase();
 
   const { data, error } = await client
     .from('projects')
@@ -175,11 +266,27 @@ export async function updateProject(updates: Partial<ProjectRecord> & { id: stri
   const existing = allProjects.find(p => p.id === updates.id);
   if (!existing) throw new Error("Proyek tidak ditemukan.");
 
+  const stage = updates.currentStage || existing.currentStage || "lead";
+  const section = getProjectSection(stage);
+
   const updatedData: ProjectRecord = {
     ...existing,
     ...updates,
+    id: updates.id,
+    currentStage: stage,
+    currentStageLabel: getStageLabel(stage),
+    section,
+    sectionLabel: getProjectSectionLabel(section),
+    projectValueLabel: formatCurrency(updates.projectValue !== undefined ? updates.projectValue : existing.projectValue || 0),
     updatedAt: now
   };
+
+  const searchParts = [
+    updatedData.projectName || "",
+    updatedData.client || "",
+    ...(updatedData.owners || [])
+  ].filter(Boolean).join(" ");
+  updatedData.searchableText = searchParts.toLowerCase();
 
   const { error } = await client
     .from('projects')
